@@ -48,6 +48,17 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 .sk label.lock{opacity:.6}
 .sheet{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .sheet .full{grid-column:1/-1}
+.sheet-block{border:1px solid var(--line);border-radius:8px;padding:14px;background:var(--bg);cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.sheet-block:hover{border-color:var(--red);box-shadow:0 0 0 1px var(--red)}
+.sheet-block h3{margin:0 0 10px;display:flex;justify-content:space-between;align-items:center;font-size:1rem}
+.sheet-block h3 .edit-hint{font-size:.75rem;font-weight:400;color:var(--mute)}
+.sheet-block:hover h3 .edit-hint{color:var(--red)}
+.sheet-head{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.sheet-head .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--bg);cursor:pointer;font:inherit;color:var(--ink)}
+.sheet-head .chip:hover{border-color:var(--red);color:var(--red)}
+.sheet-name{font-family:"Roboto Condensed",system-ui,sans-serif;font-size:1.8rem;margin:0;cursor:pointer}
+.sheet-name:hover{color:var(--red)}
+.sheet-name input{font:inherit;font-size:1.8rem;width:100%;max-width:360px;border:1px solid var(--line);border-radius:6px;padding:4px 8px;background:var(--card);color:var(--ink)}
 .stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
 .stat div{border:1px solid var(--line);border-radius:8px;padding:8px;text-align:center;background:var(--bg)}
 .stat b{display:block;font-family:"Roboto Condensed",system-ui,sans-serif;font-size:1.5rem}
@@ -158,7 +169,59 @@ function vAtr(){const ass=S.method==='std'||S.method==='rnd';let h=`<h2>Valores 
 function bgSk(){return S.bg===null?[]:BG[S.bg].s}
 function vPer(){const c=CL[S.cls];let h=`<h2>Perícias de ${c.n}</h2><p>Escolha ${c.k}. Selecionadas: ${S.skills.length}/${c.k}. As perícias do antecedente já estão marcadas.</p><div class="sk">`;c.l.forEach(k=>{const lock=bgSk().includes(k),on=lock||S.skills.includes(k);h+=`<label class="${lock?'lock':''}"><input type="checkbox" ${on?'checked':''} ${lock||(!on&&S.skills.length>=c.k)?'disabled':''} onchange="togSkill('${k}')">${k} (${SK[k]})</label>`});return h+'</div>'}
 function vDet(){let h='<h2>Alinhamento</h2><p>D&amp;D assume personagens que não são malignos. Confirme com o Mestre antes de escolher um alinhamento Mau.</p><div class="grid">';ALN.forEach(a=>h+=`<button class="opt${S.align===a?' sel':''}" onclick="set('align','${a}')"><b>${a}</b></button>`);h+=`</div><h2 style="margin-top:18px">Idiomas</h2><p>Comum + 2 à escolha. Selecionados: ${S.lang.length}/2.</p><div class="sk">`;LANG.forEach(l=>{const on=S.lang.includes(l);h+=`<label><input type="checkbox" ${on?'checked':''} ${!on&&S.lang.length>=2?'disabled':''} onchange="const i=S.lang.indexOf('${l}');if(i>=0)S.lang.splice(i,1);else if(S.lang.length<2)S.lang.push('${l}');render()">${l}</label>`});return h+'</div>'}
-function vFicha(){const c=CL[S.cls],sp=SP[S.sp],b=BG[S.bg],pb=2;const prof=new Set([...S.skills,...b.s]);const hp=c.d+mod(score('CON')),per=mod(score('SAB'))+(prof.has('Percepção')?pb:0)+10;let h=`<h2>${S.name||'Personagem sem nome'}</h2><p>${sp.n} ${c.n} · antecedente ${b.n} · nível 1</p><div class="stat" style="margin:12px 0"><div><b>${hp}</b>Pontos de vida</div><div><b>10${fmt(mod(score('DES')))}</b>CA sem armadura</div><div><b>${fmt(mod(score('DES')))}</b>Iniciativa</div><div><b>${fmt(pb)}</b>Proficiência</div><div><b>${sp.mov||'9 m'}</b>Deslocamento</div><div><b>${per}</b>Percepção passiva</div></div><div class="sheet"><div><h3>Atributos e salvaguardas</h3><ul class="list">`;AB.forEach(a=>{const m=mod(score(a)),ps=c.s.includes(a);h+=`<li><span>${ABN[a]} ${score(a)} (${fmt(m)})</span><span><span class="dot${ps?' p':''}"></span>salvaguarda ${fmt(m+(ps?pb:0))}</span></li>`});h+='</ul></div><div><h3>Perícias</h3><ul class="list">';ALL.forEach(k=>{const p=prof.has(k);h+=`<li><span><span class="dot${p?' p':''}"></span>${k}</span><span>${fmt(mod(score(SK[k]))+(p?pb:0))}</span></li>`});h+=`</ul></div><div class="full"><h3>Características</h3><p><b>Espécie:</b> ${sp.n} (${sp.sz})</p><p><b>Talento de origem:</b> ${b.f}</p><p><b>Ferramenta:</b> ${b.i}</p><p><b>Dado de vida:</b> 1d${c.d}</p><p><b>Idiomas:</b> Comum, ${S.lang.join(', ')}</p><p><b>Alinhamento:</b> ${S.align}</p><p><b>Ataque corpo a corpo:</b> ${fmt(mod(score('FOR'))+pb)} · <b>à distância:</b> ${fmt(mod(score('DES'))+pb)}</p>${SC[c.n]?`<p><b>Conjuração (${ABN[SC[c.n]]}):</b> CD ${8+mod(score(SC[c.n]))+pb} · ataque ${fmt(mod(score(SC[c.n]))+pb)}</p>`:''}</div></div>`;return h}
+function vFicha(){
+ const c=CL[S.cls],sp=SP[S.sp],b=BG[S.bg],pb=2;
+ const prof=new Set([...S.skills,...b.s]);
+ const hp=c.d+mod(score('CON')),per=mod(score('SAB'))+(prof.has('Percepção')?pb:0)+10;
+ const ac=10+mod(score('DES'));
+ let h=`<div class="sheet-head">
+  <input class="sheet-name" value="${(S.name||'').replace(/"/g,'&quot;')}" placeholder="Nome do personagem" onchange="S.name=this.value">
+  <button class="chip" type="button" onclick="go(0)">${sp.n}</button>
+  <button class="chip" type="button" onclick="go(1)">${c.n}</button>
+  <button class="chip" type="button" onclick="go(2)">${b.n}</button>
+  <button class="chip" type="button" onclick="go(5)">${S.align||'Alinhamento'}</button>
+ </div>
+ <div class="stat" style="margin:12px 0">
+  <div><b>${hp}</b>Pontos de vida</div>
+  <div><b>${ac}</b>CA sem armadura</div>
+  <div><b>${fmt(mod(score('DES')))}</b>Iniciativa</div>
+  <div><b>${fmt(pb)}</b>Proficiência</div>
+  <div><b>${sp.mov||'9 m'}</b>Deslocamento</div>
+  <div><b>${per}</b>Percepção passiva</div>
+ </div>
+ <div class="sheet">
+  <div class="sheet-block" onclick="go(3)">
+   <h3>Atributos e salvaguardas <span class="edit-hint">editar</span></h3>
+   <ul class="list">`;
+ AB.forEach(a=>{const m=mod(score(a)),ps=c.s.includes(a);h+=`<li><span>${ABN[a]} ${score(a)} (${fmt(m)})</span><span><span class="dot${ps?' p':''}"></span>salvaguarda ${fmt(m+(ps?pb:0))}</span></li>`});
+ h+=`</ul></div>
+  <div class="sheet-block" onclick="go(4)">
+   <h3>Perícias <span class="edit-hint">editar</span></h3>
+   <ul class="list">`;
+ ALL.forEach(k=>{const p=prof.has(k);h+=`<li><span><span class="dot${p?' p':''}"></span>${k}</span><span>${fmt(mod(score(SK[k]))+(p?pb:0))}</span></li>`});
+ h+=`</ul></div>
+  <div class="sheet-block full" onclick="go(0)">
+   <h3>Espécie <span class="edit-hint">editar</span></h3>
+   <p><b>${sp.n}</b> · ${sp.sz} · Deslocamento ${sp.mov||'9 m'}</p>
+  </div>
+  <div class="sheet-block full" onclick="go(2)">
+   <h3>Antecedente <span class="edit-hint">editar</span></h3>
+   <p><b>${b.n}</b></p>
+   <p>Talento de origem: ${b.f}</p>
+   <p>Perícias: ${b.s.join(' e ')} · Ferramenta: ${b.i}</p>
+  </div>
+  <div class="sheet-block full" onclick="go(5)">
+   <h3>Detalhes <span class="edit-hint">editar</span></h3>
+   <p><b>Alinhamento:</b> ${S.align||'—'}</p>
+   <p><b>Idiomas:</b> Comum${S.lang.length?', '+S.lang.join(', '):''}</p>
+   <p><b>Dado de vida:</b> 1d${c.d}</p>
+   <p><b>Ataque corpo a corpo:</b> ${fmt(mod(score('FOR'))+pb)} · <b>à distância:</b> ${fmt(mod(score('DES'))+pb)}</p>`;
+ if(SC[c.n]) h+=`<p><b>Conjuração (${ABN[SC[c.n]]}):</b> CD ${8+mod(score(SC[c.n]))+pb} · ataque ${fmt(mod(score(SC[c.n]))+pb)}</p>`;
+ h+=`</div>
+ </div>`;
+ return h
+}
+
 function roll6(){const r=()=>{const d=[1,2,3,4].map(()=>1+Math.floor(Math.random()*6)).sort((x,y)=>x-y);return d[1]+d[2]+d[3]};S.rolled=[0,0,0,0,0,0].map(r).sort((x,y)=>y-x);S.std={};render()}
 function suggest(){const t=SUG[CL[S.cls].n];AB.forEach((a,i)=>S.std[a]=t[i]);render()}
 const pick=a=>a[Math.floor(Math.random()*a.length)];
