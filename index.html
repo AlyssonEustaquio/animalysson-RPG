@@ -134,7 +134,7 @@ input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:
 <body>
 <main>
 <h1>Criador de personagem</h1>
-<div class="steps" id="steps"></div>
+<div class="steps" id="steps" style="display:none"></div>
 <div id="app"></div>
 </main>
 <div id="modal-root"></div>
@@ -156,7 +156,9 @@ const ALL=Object.keys(SK);
 const SK_BY_AB={FOR:['Atletismo'],DES:['Acrobacia','Prestidigitação','Furtividade'],CON:[],INT:['Arcanismo','História','Investigação','Natureza','Religião'],SAB:['Adestrar Animais','Intuição','Medicina','Percepção','Sobrevivência'],CAR:['Atuação','Enganação','Intimidação','Persuasão']};
 CL.forEach(c=>{if(c.l===null)c.l=ALL});
 const STD=[15,14,13,12,10,8], COST={8:0,9:1,10:2,11:3,12:4,13:5,14:7,15:9};
-const S={step:0,name:'',cls:null,sp:null,bg:null,mode:'21',p2:'',p1:'',method:'std',raceQuery:'',std:{},pb:{FOR:8,DES:8,CON:8,INT:8,SAB:8,CAR:8},man:{FOR:10,DES:10,CON:10,INT:10,SAB:10,CAR:10},skills:[],rolled:[],lang:[],align:'',modal:null};
+const S={step:6,name:'',cls:0,sp:0,bg:0,mode:'21',p2:'FOR',p1:'CON',method:'std',raceQuery:'',std:{FOR:15,DES:14,CON:13,INT:12,SAB:10,CAR:8},pb:{FOR:8,DES:8,CON:8,INT:8,SAB:8,CAR:8},man:{FOR:10,DES:10,CON:10,INT:10,SAB:10,CAR:10},skills:[],rolled:[],lang:['Élfico','Dracônico'],align:'Neutro',modal:null};
+// completar perícias padrão da classe inicial
+(function(){const c=CL[S.cls];const locked=new Set(BG[S.bg].s);S.skills=c.l.filter(k=>!locked.has(k)).slice(0,c.k);})();
 const mod=s=>Math.floor((s-10)/2), fmt=n=>(n>=0?'+':'')+n;
 const spent=()=>AB.reduce((t,a)=>t+COST[S.pb[a]],0);
 function base(a){return (S.method==='std'||S.method==='rnd')?(S.std[a]||8):S.method==='pb'?S.pb[a]:S.man[a]}
@@ -393,15 +395,13 @@ function rBg(){S.bg=Math.floor(Math.random()*BG.length);S.mode=Math.random()<.5?
 function rAtr(){if(S.method==='std'){const v=shuf(STD);S.std={};AB.forEach((a,i)=>S.std[a]=v[i])}else if(S.method==='rnd'){S.rolled=[0,0,0,0,0,0].map(d4).sort((x,y)=>y-x);const v=shuf(S.rolled);S.std={};AB.forEach((a,i)=>S.std[a]=v[i])}else if(S.method==='pb'){AB.forEach(a=>S.pb[a]=8);let pts=27;for(let g=0;g<300;g++){const a=pick(AB),n=S.pb[a]+1;if(n<=15&&COST[n]-COST[S.pb[a]]<=pts){pts-=COST[n]-COST[S.pb[a]];S.pb[a]=n}}}else AB.forEach(a=>S.man[a]=d4())}
 function rPer(){const c=CL[S.cls];S.skills=shuf(c.l.filter(k=>!bgSk().includes(k))).slice(0,c.k)}
 function rDet(){S.align=pick(ALN.slice(0,6));S.lang=shuf(LANG).slice(0,2)}
-function rand(){const f=[rSp,rCls,rBg,rAtr,rPer,rDet];if(S.step<6)f[S.step]();else f.forEach(g=>g());render()}
+function rand(){const f=[rSp,rCls,rBg,rAtr,rPer,rDet];f.forEach(g=>g());render()}
 
 function render(){
- document.getElementById('steps').innerHTML=NAMES.map((n,i)=>`<button class="${i===S.step?'on':i<S.step?'done':''}" onclick="go(${i})">${n}</button>`).join('');
- const v=[vRaca,vClasse,vAntec,vAtr,vPer,vDet,vFicha];
+ document.getElementById('steps').innerHTML='';
  let h='<div class="panel">';
- if(S.step<6)h+=`<div class="nav"><button class="btn alt" onclick="go(${S.step-1})"${S.step?'':' disabled'}>Voltar</button><button class="btn alt" onclick="rand()">Aleatório</button><button class="btn" onclick="go(${S.step+1})"${valid(S.step)?'':' disabled'}>Próximo</button></div>`;
- else h+=`<div class="nav"><button class="btn alt" onclick="rand()">Sortear tudo</button><button class="btn alt" onclick="window.print()">Imprimir</button></div>`;
- h+=v[S.step]();
+ h+=`<div class="nav"><button class="btn alt" onclick="rand()">Sortear tudo</button><button class="btn alt" onclick="window.print()">Imprimir</button></div>`;
+ h+=vFicha();
  document.getElementById('app').innerHTML=h+'</div>';
  renderModal();
 }
