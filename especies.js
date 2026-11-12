@@ -93,6 +93,230 @@ window.SPECIES = [
     "regra": "2024"
   },
   {
+    "n": "Aarakocra",
+    "sz": "Médio ou Pequeno",
+    "mov": "9 m (voo)",
+    "t": "Povo aviário com voo natural, garras e ligação elemental com o ar.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Bugbear",
+    "sz": "Médio ou Pequeno",
+    "mov": "9 m",
+    "t": "Goblinoide de braços longos, força física e talento para furtividade e ataques surpresa.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Centauro",
+    "sz": "Médio",
+    "mov": "12 m",
+    "t": "Criatura feérica equina, com investida, cascos e constituição adaptada à corrida.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Gnomo das Profundezas",
+    "sz": "Pequeno",
+    "mov": "9 m",
+    "t": "Gnomo subterrâneo com visão no escuro, magia gnômica e camuflagem nas profundezas.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Duergar",
+    "sz": "Médio ou Pequeno",
+    "mov": "9 m",
+    "t": "Anão das profundezas com resistência psíquica e magia para aumentar de tamanho e ficar invisível.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Eladrin",
+    "sz": "Médio ou Pequeno",
+    "mov": "9 m",
+    "t": "Elfo feérico capaz de se teleportar, com manifestações ligadas às estações do ano.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Fada",
+    "sz": "Pequeno",
+    "mov": "9 m (voo)",
+    "t": "Criatura feérica com voo e magia inata associada ao mundo das fadas.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Firbolg",
+    "sz": "Médio ou Pequeno",
+    "mov": "9 m",
+    "t": "Povo ligado à natureza, com magia discreta, passo oculto e comunicação com animais e plantas.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Genasi do Ar",
+    "sz": "Médio ou Pequeno",
+    "mov": "9 m",
+    "t": "Herança elemental do ar, fôlego ilimitado, resistência elétrica e magia de vento.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Genasi da Terra",
+    "sz": "Médio ou Pequeno",
+    "mov": "9 m",
+    "t": "Herança elemental da terra, deslocamento por terrenos rochosos e fusão com pedra.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Genasi do Fogo",
+    "sz": "Médio ou Pequeno",
+    "mov": "9 m",
+    "t": "Herança elemental do fogo, visão no escuro, resistência a fogo e magia ígnea.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Githyanki",
+    "sz": "Médio ou Pequeno",
+    "mov": "9 m",
+    "t": "Guerreiros astrais com conhecimento versátil, poderes psíquicos e resistência mental.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Githzerai",
+    "sz": "Médio ou Pequeno",
+    "mov": "9 m",
+    "t": "Místicos de Limbo com disciplina mental, poderes psíquicos e defesa telecinética.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Goblin",
+    "sz": "Pequeno",
+    "mov": "9 m",
+    "t": "Goblinoide ágil, com fuga rápida, visão no escuro e talento para aproveitar inimigos vulneráveis.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Harengon",
+    "sz": "Médio ou Pequeno",
+    "mov": "9 m",
+    "t": "Povo leporino com sentidos aguçados, reflexos rápidos, saltos e sorte para escapar do perigo.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Hobgoblin",
+    "sz": "Médio ou Pequeno",
+    "mov": "9 m",
+    "t": "Goblinoide disciplinado, com dádivas feéricas e capacidade de apoiar aliados.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Kenku",
+    "sz": "Médio ou Pequeno",
+    "mov": "9 m",
+    "t": "Povo aviário com talento para imitação, memória e reprodução de habilidades.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Kobold",
+    "sz": "Pequeno",
+    "mov": "9 m",
+    "t": "Pequeno povo dracônico com visão no escuro, herança dracônica e grito de combate.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Povo-lagarto",
+    "sz": "Médio ou Pequeno",
+    "mov": "9 m (natação)",
+    "t": "Réptil resistente com mordida, natação, fôlego prolongado e armadura natural.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Minotauro",
+    "sz": "Médio ou Pequeno",
+    "mov": "9 m",
+    "t": "Povo taurino com chifres, investidas e um senso sobrenatural de direção.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Sátiro",
+    "sz": "Médio ou Pequeno",
+    "mov": "10,5 m",
+    "t": "Criatura feérica com chifres, saltos, talento social e resistência à magia.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Elfo-do-mar",
+    "sz": "Médio ou Pequeno",
+    "mov": "9 m (natação)",
+    "t": "Elfo aquático que respira na água, nada com facilidade e conversa com criaturas marinhas.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Shadar-kai",
+    "sz": "Médio ou Pequeno",
+    "mov": "9 m",
+    "t": "Elfo ligado à Agrestia das Sombras, com teleporte e resistência associada à energia necrótica.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Tabaxi",
+    "sz": "Médio ou Pequeno",
+    "mov": "9 m (escalada)",
+    "t": "Povo felino com garras, agilidade explosiva, sentidos aguçados e talento explorador.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Tortle",
+    "sz": "Médio ou Pequeno",
+    "mov": "9 m",
+    "t": "Povo quelônio com garras, carapaça protetora, fôlego prolongado e defesa recolhida.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Tritão",
+    "sz": "Médio ou Pequeno",
+    "mov": "9 m (natação)",
+    "t": "Povo marinho anfíbio com resistência ao frio, natação e magia ligada ao oceano.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Genasi da Água",
+    "sz": "Médio ou Pequeno",
+    "mov": "9 m (natação)",
+    "t": "Herança elemental da água, respiração anfíbia e resistência a ácido.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
+    "n": "Yuan-ti",
+    "sz": "Médio ou Pequeno",
+    "mov": "9 m",
+    "t": "Descendente de serpentes, com magia inata, resistência a venenos e defesa contra magia.",
+    "fonte": "Mordenkainen Apresenta: Monstros do Multiverso",
+    "regra": "Suplemento 5e"
+  },
+  {
     "n": "Kender",
     "sz": "Pequeno",
     "mov": "9 m",
