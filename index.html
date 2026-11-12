@@ -409,7 +409,7 @@ function rand(){const f=[rSp,rCls,rBg,rAtr,rPer,rDet];f.forEach(g=>g());render()
 function render(){
  document.getElementById('steps').innerHTML='';
  let h='<div class="panel">';
- h+=`<div class="nav"><button class="btn alt" onclick="rand()">Sortear tudo</button><button class="btn alt" onclick="window.print()">Imprimir</button></div>`;
+ h+=`<div class="nav"><button class="btn alt" onclick="rand()">Sortear tudo</button></div>`;
  h+=vFicha();
  document.getElementById('app').innerHTML=h+'</div>';
  renderModal();
