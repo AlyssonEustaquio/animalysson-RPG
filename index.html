@@ -62,9 +62,12 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 .item.sel{border-color:var(--red);background:var(--card);box-shadow:inset 4px 0 0 var(--red)}
 .detail{border:1px solid var(--line);border-radius:8px;padding:18px;background:var(--bg)}
 .detail .stat{margin:14px 0}
+.race-search{width:100%;margin:8px 0 12px}
+.race-meta{display:block;color:var(--mute);font-size:.78rem;margin-top:4px}
+.race-count{color:var(--mute);font-size:.9rem;margin:0 0 8px}
 @media (max-width:640px){.split{grid-template-columns:1fr}.side{max-height:none;flex-direction:row;flex-wrap:wrap}.item{flex:1 1 140px}}
 @media (max-width:640px){.sheet{grid-template-columns:1fr}}
-@media print{.steps,.nav{display:none}body{background:#fff;color:#000}.panel{border:none}}
+@media print{.steps,.nav,.race-search{display:none}body{background:#fff;color:#000}.panel{border:none}}
 </style>
 </head>
 <body>
@@ -73,7 +76,10 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 <div class="steps" id="steps"></div>
 <div id="app"></div>
 </main>
+<script src="especies.js"></script>
 <script>
+const SP=window.SPECIES;
+if(!Array.isArray(SP)||!SP.length)throw new Error('Não foi possível carregar especies.js');
 const AB=['FOR','DES','CON','INT','SAB','CAR'];
 const ABN={FOR:'Força',DES:'Destreza',CON:'Constituição',INT:'Inteligência',SAB:'Sabedoria',CAR:'Carisma'};
 const SK={'Acrobacia':'DES','Adestrar Animais':'SAB','Arcanismo':'INT','Atletismo':'FOR','Atuação':'CAR','Enganação':'CAR','Furtividade':'DES','História':'INT','Intimidação':'CAR','Intuição':'SAB','Investigação':'INT','Medicina':'SAB','Natureza':'INT','Percepção':'SAB','Persuasão':'CAR','Prestidigitação':'DES','Religião':'INT','Sobrevivência':'SAB'};
@@ -91,18 +97,6 @@ const CL=[
 {n:'Mago',d:6,p:'Inteligência',s:['INT','SAB'],k:2,l:['Arcanismo','História','Intuição','Investigação','Medicina','Natureza','Religião']},
 {n:'Monge',d:8,p:'Destreza e Sabedoria',s:['FOR','DES'],k:2,l:['Acrobacia','Atletismo','Furtividade','História','Intuição','Religião']},
 {n:'Paladino',d:10,p:'Força e Carisma',s:['SAB','CAR'],k:2,l:['Atletismo','Intimidação','Intuição','Medicina','Persuasão','Religião']}
-];
-const SP=[
-{n:'Aasimar',sz:'Médio',t:'Visão no Escuro, Resistência Necrótica e Radiante, Mãos Curativas, Portador da Luz'},
-{n:'Anão',sz:'Médio',t:'Visão no Escuro (36 m), Resistência a Veneno, Robustez Anã, Perícia em Pedra'},
-{n:'Draconato',sz:'Médio',t:'Herança Dracônica, Sopro de Dragão, Resistência a Dano, Visão no Escuro'},
-{n:'Elfo',sz:'Médio',t:'Visão no Escuro, Sentidos Aguçados, Ancestralidade Feérica, Transe, Linhagem Élfica'},
-{n:'Gnomo',sz:'Pequeno',t:'Visão no Escuro, Astúcia Gnômica, Linhagem Gnômica'},
-{n:'Golias',sz:'Médio',t:'Ancestralidade Gigante, Constituição Poderosa, Forma Grande (nível 5)'},
-{n:'Halfling',sz:'Pequeno',t:'Sortudo, Coragem, Agilidade Halfling, Furtividade Natural'},
-{n:'Humano',sz:'Médio ou Pequeno',t:'Engenhoso, Habilidoso, Versátil'},
-{n:'Orc',sz:'Médio',t:'Visão no Escuro, Surto de Adrenalina, Resistência Implacável'},
-{n:'Tiefling',sz:'Médio ou Pequeno',t:'Visão no Escuro, Legado Ínfero, Presença Ultramundana'}
 ];
 const BG=[
 {n:'Acólito',a:['INT','SAB','CAR'],f:'Iniciado em Magia (Clérigo)',s:['Intuição','Religião'],i:'Suprimentos de caligrafia'},
@@ -123,60 +117,37 @@ const BG=[
 {n:'Andarilho',a:['DES','SAB','CAR'],f:'Sortudo',s:['Intuição','Furtividade'],i:'Ferramentas de ladrão'}
 ];
 const STD=[15,14,13,12,10,8], COST={8:0,9:1,10:2,11:3,12:4,13:5,14:7,15:9};
-const S={step:0,name:'',cls:null,sp:null,bg:null,mode:'21',p2:'',p1:'',method:'std',
- std:{},pb:{FOR:8,DES:8,CON:8,INT:8,SAB:8,CAR:8},man:{FOR:10,DES:10,CON:10,INT:10,SAB:10,CAR:10},skills:[],rolled:[],lang:[],align:''};
+const S={step:0,name:'',cls:null,sp:null,bg:null,mode:'21',p2:'',p1:'',method:'std',raceQuery:'',std:{},pb:{FOR:8,DES:8,CON:8,INT:8,SAB:8,CAR:8},man:{FOR:10,DES:10,CON:10,INT:10,SAB:10,CAR:10},skills:[],rolled:[],lang:[],align:''};
 const mod=s=>Math.floor((s-10)/2), fmt=n=>(n>=0?'+':'')+n;
 const spent=()=>AB.reduce((t,a)=>t+COST[S.pb[a]],0);
 function base(a){return (S.method==='std'||S.method==='rnd')?(S.std[a]||8):S.method==='pb'?S.pb[a]:S.man[a]}
-function bonus(a){
- if(!S.bg)return 0;const b=BG[S.bg];if(!b.a.includes(a))return 0;
- return S.mode==='111'?1:(a===S.p2?2:a===S.p1?1:0)}
+function bonus(a){if(!S.bg)return 0;const b=BG[S.bg];if(!b.a.includes(a))return 0;return S.mode==='111'?1:(a===S.p2?2:a===S.p1?1:0)}
 const score=a=>Math.min(20,base(a)+bonus(a));
 function pool(){return S.method==='std'?STD:S.rolled}
 function stdOk(){const p=pool().slice().sort().join(),v=AB.map(a=>S.std[a]);return v.every(Boolean)&&v.slice().sort().join()===p}
 function manOk(){return AB.every(a=>S.man[a]>=3&&S.man[a]<=18)}
-function valid(i){
- if(i===0)return S.sp!==null;
- if(i===1)return S.cls!==null;
- if(i===2)return S.bg!==null&&(S.mode==='111'||(S.p2&&S.p1&&S.p2!==S.p1));
- if(i===3)return (S.method==='std'||S.method==='rnd')?stdOk():S.method==='man'?manOk():spent()<=27;
- if(i===4)return S.cls!==null&&S.skills.length===CL[S.cls].k;
- if(i===5)return S.lang.length===2&&S.align!=='';
- return true}
-const NAMES=['Raça','Classe','Antecedente','Atributos','Perícias','Detalhes','Ficha'];
+function valid(i){if(i===0)return S.sp!==null;if(i===1)return S.cls!==null;if(i===2)return S.bg!==null&&(S.mode==='111'||(S.p2&&S.p1&&S.p2!==S.p1));if(i===3)return (S.method==='std'||S.method==='rnd')?stdOk():S.method==='man'?manOk():spent()<=27;if(i===4)return S.cls!==null&&S.skills.length===CL[S.cls].k;if(i===5)return S.lang.length===2&&S.align!=='';return true}
+const NAMES=['Espécie','Classe','Antecedente','Atributos','Perícias','Detalhes','Ficha'];
 function go(i){if(i<0)return;for(let j=0;j<i;j++)if(!valid(j))return;S.step=i;render()}
 function set(k,v){S[k]=v;if(k==='method')S.std={};if(k==='cls')S.skills=[];if(k==='bg'){S.p2='';S.p1=''}render()}
 function mapset(m,a,v){S[m][a]=+v;render()}
 function pm(a,d){const n=S.pb[a]+d;if(n<8||n>15)return;S.pb[a]=n;render()}
 function togSkill(k){const i=S.skills.indexOf(k);if(i>=0)S.skills.splice(i,1);else if(S.skills.length<CL[S.cls].k)S.skills.push(k);render()}
-function sel(id,opts,cur,fn,ph){return `<select id="${id}" onchange="${fn}">`+`<option value="">${ph}</option>`+opts.map(o=>`<option value="${o[0]}"${String(o[0])===String(cur)?' selected':''}>${o[1]}</option>`).join('')+`</select>`}
-
+function sel(id,opts,cur,fn,ph){return `<select id="${id}" onchange="${fn}">`+`<option value="">${ph}</option>`+opts.map(o=>`<option value="${o[0]}"${String(o[0])===String(cur)?' selected':''}>${o[1]}</option>`).join('')+'</select>'}
 const CLD={'Bárbaro':'Guerreiro movido pela fúria, resistente e devastador no corpo a corpo.','Bardo':'Artista inspirador que usa música e palavras para moldar a magia.','Bruxo':'Conjurador que obteve poder por meio de um pacto com uma entidade poderosa.','Clérigo':'Canal do poder divino, capaz de curar aliados e punir inimigos.','Druida':'Guardião da natureza que conjura magia primal e assume formas selvagens.','Feiticeiro':'Conjurador cujo poder mágico vem de uma herança ou força inata.','Guardião':'Rastreador e caçador que combina combate, exploração e magia da natureza.','Guerreiro':'Mestre das armas e armaduras, versátil e confiável em qualquer combate.','Ladino':'Especialista em furtividade, precisão e perícias, ataca onde o inimigo é mais fraco.','Mago':'Estudioso das artes arcanas com o maior repertório de magias.','Monge':'Lutador disciplinado que canaliza o próprio corpo em golpes rápidos e precisos.','Paladino':'Guerreiro sagrado movido por um juramento, une combate e magia divina.'};
-function vClasse(){
- let h=`<h2>Escolha uma classe</h2><div class="split"><div class="side">`;
- CL.forEach((c,i)=>h+=`<button class="item${S.cls===i?' sel':''}" onclick="set('cls',${i})"><span>${c.n}</span></button>`);
- h+='</div><div class="detail">';
- if(S.cls===null)h+='<p>Selecione uma classe na lista para ver os detalhes.</p>';
- else{const c=CL[S.cls];h+=`<h2>${c.n}</h2><p>${CLD[c.n]}</p><div class="stat"><div><b>d${c.d}</b>Dado de vida</div><div><b>${c.s.join(' / ')}</b>Salvaguardas</div><div><b>${c.k}</b>Perícias</div></div><p>Atributo principal: ${c.p}</p><button class="btn" onclick="go(2)">Escolher ${c.n}</button>`}
- return h+'</div></div>'}
+function vClasse(){let h='<h2>Escolha uma classe</h2><div class="split"><div class="side">';CL.forEach((c,i)=>h+=`<button class="item${S.cls===i?' sel':''}" onclick="set('cls',${i})"><span>${c.n}</span></button>`);h+='</div><div class="detail">';if(S.cls===null)h+='<p>Selecione uma classe na lista para ver os detalhes.</p>';else{const c=CL[S.cls];h+=`<h2>${c.n}</h2><p>${CLD[c.n]}</p><div class="stat"><div><b>d${c.d}</b>Dado de vida</div><div><b>${c.s.join(' / ')}</b>Salvaguardas</div><div><b>${c.k}</b>Perícias</div></div><p>Atributo principal: ${c.p}</p><button class="btn" onclick="go(2)">Escolher ${c.n}</button>`}return h+'</div></div>'}
+function norm(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
 function vRaca(){
  let h=`<label>Nome do personagem<br><input value="${S.name.replace(/"/g,'&quot;')}" oninput="S.name=this.value" placeholder="Ex.: Thorin"></label>
- <h2 style="margin-top:18px">Escolha uma raça</h2><div class="grid">`;
- SP.forEach((s,i)=>h+=`<button class="opt${S.sp===i?' sel':''}" onclick="set('sp',${i})"><b>${s.n}</b><small>${s.sz} · 9 m</small></button>`);
+ <h2 style="margin-top:18px">Escolha uma espécie</h2>
+ <input class="race-search" type="search" value="${S.raceQuery.replace(/"/g,'&quot;')}" placeholder="Pesquisar espécie, livro ou característica..." oninput="S.raceQuery=this.value;render()">
+ <p class="race-count">${SP.filter(s=>norm([s.n,s.fonte,s.t,s.regra].join(' ')).includes(norm(S.raceQuery))).length} opções no catálogo · ${SP.length} cadastradas</p><div class="grid">`;
+ let count=0;SP.forEach((s,i)=>{if(!norm([s.n,s.fonte,s.t,s.regra].join(' ')).includes(norm(S.raceQuery)))return;count++;h+=`<button class="opt${S.sp===i?' sel':''}" onclick="set('sp',${i})"><b>${s.n}</b><small>${s.sz} · ${s.mov||'9 m'}</small><span class="race-meta">${s.fonte}</span></button>`});
+ if(!count)h+='<p>Nenhuma espécie encontrada. Tente outro termo.</p>';
  h+='</div>';
- if(S.sp!==null)h+=`<div class="info"><p>${SP[S.sp].t}</p></div>`;
+ if(S.sp!==null){const sp=SP[S.sp];h+=`<div class="info"><p><b>${sp.n}</b> — ${sp.t}</p><p><b>Tamanho:</b> ${sp.sz} · <b>Deslocamento:</b> ${sp.mov||'9 m'}</p><p><b>Fonte:</b> ${sp.fonte}</p><p><b>Conjunto de regras:</b> ${sp.regra}</p></div>`}
  return h}
-function vAntec(){
- let h=`<h2>Escolha um antecedente</h2><div class="grid">`;
- BG.forEach((b,i)=>h+=`<button class="opt${S.bg===i?' sel':''}" onclick="set('bg',${i})"><b>${b.n}</b><small>${b.f}</small></button>`);
- h+='</div>';
- if(S.bg!==null){const b=BG[S.bg],o=b.a.map(a=>[a,ABN[a]]);
-  h+=`<div class="info"><p>Talento de origem: ${b.f}</p><p>Perícias: ${b.s.join(' e ')}</p><p>Ferramenta: ${b.i}</p></div>
-  <div class="row"><label>Como distribuir os bônus de atributo?<select onchange="set('mode',this.value)"><option value="21"${S.mode==='21'?' selected':''}>+2 em um e +1 em outro</option><option value="111"${S.mode==='111'?' selected':''}>+1 nos três</option></select></label>`;
-  if(S.mode==='21')h+=`<label>Atributo com +2${sel('p2',o,S.p2,"set('p2',this.value)",'Escolha')}</label><label>Atributo com +1${sel('p1',o,S.p1,"set('p1',this.value)",'Escolha')}</label>`;
-  h+='</div>';
-  if(S.mode==='21'&&S.p2&&S.p2===S.p1)h+='<p class="warn">Escolha atributos diferentes para +2 e +1.</p>'}
- return h}
+function vAntec(){let h='<h2>Escolha um antecedente</h2><div class="grid">';BG.forEach((b,i)=>h+=`<button class="opt${S.bg===i?' sel':''}" onclick="set('bg',${i})"><b>${b.n}</b><small>${b.f}</small></button>`);h+='</div>';if(S.bg!==null){const b=BG[S.bg],o=b.a.map(a=>[a,ABN[a]]);h+=`<div class="info"><p>Talento de origem: ${b.f}</p><p>Perícias: ${b.s.join(' e ')}</p><p>Ferramenta: ${b.i}</p></div><div class="row"><label>Como distribuir os bônus de atributo?<select onchange="set('mode',this.value)"><option value="21"${S.mode==='21'?' selected':''}>+2 em um e +1 em outro</option><option value="111"${S.mode==='111'?' selected':''}>+1 nos três</option></select></label>`;if(S.mode==='21')h+=`<label>Atributo com +2${sel('p2',o,S.p2,"set('p2',this.value)",'Escolha')}</label><label>Atributo com +1${sel('p1',o,S.p1,"set('p1',this.value)",'Escolha')}</label>`;h+='</div>';if(S.mode==='21'&&S.p2&&S.p2===S.p1)h+='<p class="warn">Escolha atributos diferentes para +2 e +1.</p>'}return h}
 const SUG={'Bárbaro':[15,13,14,10,12,8],'Bardo':[8,14,12,13,10,15],'Clérigo':[14,8,13,10,15,12],'Druida':[8,12,14,13,15,10],'Guerreiro':[15,14,13,8,10,12],'Monge':[12,15,13,10,14,8],'Paladino':[15,10,13,8,12,14],'Guardião':[12,15,13,8,14,10],'Ladino':[12,15,13,14,10,8],'Feiticeiro':[10,13,14,8,12,15],'Bruxo':[8,14,13,12,10,15],'Mago':[8,12,13,15,14,10]};
 const SC={'Bardo':'CAR','Bruxo':'CAR','Clérigo':'SAB','Druida':'SAB','Feiticeiro':'CAR','Guardião':'SAB','Mago':'INT','Paladino':'CAR'};
 const ALN=['Leal e Bom','Neutro e Bom','Caótico e Bom','Leal e Neutro','Neutro','Caótico e Neutro','Leal e Mau','Neutro e Mau','Caótico e Mau'];
@@ -184,75 +155,22 @@ const LANG=['Língua de Sinais Comum','Dracônico','Anão','Élfico','Gigante','
 function roll6(){const r=()=>{const d=[1,2,3,4].map(()=>1+Math.floor(Math.random()*6)).sort((x,y)=>x-y);return d[1]+d[2]+d[3]};S.rolled=[0,0,0,0,0,0].map(r).sort((x,y)=>y-x);S.std={};render()}
 function suggest(){const t=SUG[CL[S.cls].n];AB.forEach((a,i)=>S.std[a]=t[i]);render()}
 function togLang(l){const i=S.lang.indexOf(l);if(i>=0)S.lang.splice(i,1);else if(S.lang.length<2)S.lang.push(l);render()}
-function vAtr(){
- const ass=S.method==='std'||S.method==='rnd';
- let h=`<h2>Valores de atributo</h2><div class="row"><label>Método<select onchange="set('method',this.value)">
- <option value="std"${S.method==='std'?' selected':''}>Conjunto padrão (15, 14, 13, 12, 10, 8)</option>
- <option value="rnd"${S.method==='rnd'?' selected':''}>Geração aleatória (4d6, descarta o menor)</option>
- <option value="pb"${S.method==='pb'?' selected':''}>Compra de pontos (27 pontos)</option>
- <option value="man"${S.method==='man'?' selected':''}>Manual</option></select></label></div>`;
- if(S.method==='pb')h+=`<p>Pontos restantes: <b>${27-spent()}</b></p>`;
- if(S.method==='std')h+=`<p><button class="btn alt" onclick="suggest()">Usar a sugestão para ${CL[S.cls].n}</button></p>`;
- if(S.method==='rnd')h+=`<p><button class="btn alt" onclick="roll6()">${S.rolled.length?'Rolar de novo':'Rolar atributos'}</button> ${S.rolled.length?'Resultado: '+S.rolled.join(', '):''}</p>`;
- if(ass&&S.method==='rnd'&&!S.rolled.length)h+='<p class="warn">Role os atributos para distribuir os valores.</p>';
- if(ass&&S.rolled.length+(S.method==='std')>0&&!stdOk()&&AB.some(a=>S.std[a]))h+='<p class="warn">Use cada valor do conjunto exatamente uma vez.</p>';
- h+='<div class="ab">';
- AB.forEach(a=>{
-  const t=score(a),b=bonus(a);let c='';
-  if(ass)c=sel('s'+a,[...new Set(pool())].map(v=>[v,v]),S.std[a],`mapset('std','${a}',this.value)`,'–');
-  else if(S.method==='pb')c=`<button class="pm" aria-label="Diminuir ${ABN[a]}" onclick="pm('${a}',-1)"${S.pb[a]<=8?' disabled':''}>−</button><b>${S.pb[a]}</b><button class="pm" aria-label="Aumentar ${ABN[a]}" onclick="pm('${a}',1)"${S.pb[a]>=15||spent()+(COST[S.pb[a]+1]-COST[S.pb[a]])>27?' disabled':''}>+</button>`;
-  else c=`<input type="number" min="3" max="18" value="${S.man[a]}" aria-label="${ABN[a]}" onchange="mapset('man','${a}',this.value)">`;
-  h+=`<div class="abc"><div>${ABN[a]}</div><div class="v">${t}</div><div class="m">mod ${fmt(mod(t))}${b?` · origem +${b}`:''}</div><div class="ctl">${c}</div></div>`});
- return h+'</div>'}
+function vAtr(){const ass=S.method==='std'||S.method==='rnd';let h=`<h2>Valores de atributo</h2><div class="row"><label>Método<select onchange="set('method',this.value)"><option value="std"${S.method==='std'?' selected':''}>Conjunto padrão (15, 14, 13, 12, 10, 8)</option><option value="rnd"${S.method==='rnd'?' selected':''}>Geração aleatória (4d6, descarta o menor)</option><option value="pb"${S.method==='pb'?' selected':''}>Compra de pontos (27 pontos)</option><option value="man"${S.method==='man'?' selected':''}>Manual</option></select></label></div>`;if(S.method==='pb')h+=`<p>Pontos restantes: <b>${27-spent()}</b></p>`;if(S.method==='std')h+=`<p><button class="btn alt" onclick="suggest()">Usar a sugestão para ${CL[S.cls].n}</button></p>`;if(S.method==='rnd')h+=`<p><button class="btn alt" onclick="roll6()">${S.rolled.length?'Rolar de novo':'Rolar atributos'}</button> ${S.rolled.length?'Resultado: '+S.rolled.join(', '):''}</p>`;if(ass&&S.method==='rnd'&&!S.rolled.length)h+='<p class="warn">Role os atributos para distribuir os valores.</p>';if(ass&&S.rolled.length+(S.method==='std')>0&&!stdOk()&&AB.some(a=>S.std[a]))h+='<p class="warn">Use cada valor do conjunto exatamente uma vez.</p>';h+='<div class="ab">';AB.forEach(a=>{const t=score(a),b=bonus(a);let c='';if(ass)c=sel('s'+a,[...new Set(pool())].map(v=>[v,v]),S.std[a],`mapset('std','${a}',this.value)`,'–');else if(S.method==='pb')c=`<button class="pm" aria-label="Diminuir ${ABN[a]}" onclick="pm('${a}',-1)"${S.pb[a]<=8?' disabled':''}>−</button><b>${S.pb[a]}</b><button class="pm" aria-label="Aumentar ${ABN[a]}" onclick="pm('${a}',1)"${S.pb[a]>=15||spent()+(COST[S.pb[a]+1]-COST[S.pb[a]])>27?' disabled':''}>+</button>`;else c=`<input type="number" min="3" max="18" value="${S.man[a]}" aria-label="${ABN[a]}" onchange="mapset('man','${a}',this.value)">`;h+=`<div class="abc"><div>${ABN[a]}</div><div class="v">${t}</div><div class="m">mod ${fmt(mod(t))}${b?` · origem +${b}`:''}</div><div class="ctl">${c}</div></div>`});return h+'</div>'}
 function bgSk(){return S.bg===null?[]:BG[S.bg].s}
-function vPer(){
- const c=CL[S.cls];
- let h=`<h2>Perícias de ${c.n}</h2><p>Escolha ${c.k}. Selecionadas: ${S.skills.length}/${c.k}. As perícias do antecedente já estão marcadas.</p><div class="sk">`;
- c.l.forEach(k=>{const lock=bgSk().includes(k),on=lock||S.skills.includes(k);
-  h+=`<label class="${lock?'lock':''}"><input type="checkbox" ${on?'checked':''} ${lock||(!on&&S.skills.length>=c.k)?'disabled':''} onchange="togSkill('${k}')">${k} (${SK[k]})</label>`});
- return h+'</div>'}
-function vDet(){
- let h=`<h2>Alinhamento</h2><p>D&amp;D assume personagens que não são malignos. Confirme com o Mestre antes de escolher um alinhamento Mau.</p><div class="grid">`;
- ALN.forEach(a=>h+=`<button class="opt${S.align===a?' sel':''}" onclick="set('align','${a}')"><b>${a}</b></button>`);
- h+=`</div><h2 style="margin-top:20px">Idiomas</h2><p>Todo personagem conhece Comum. Escolha mais 2 (${S.lang.length}/2).</p><div class="sk">`;
- LANG.forEach(l=>{const on=S.lang.includes(l);h+=`<label><input type="checkbox" ${on?'checked':''} ${!on&&S.lang.length>=2?'disabled':''} onchange="togLang('${l}')">${l}</label>`});
- return h+'</div>'}
-function vFicha(){
- const c=CL[S.cls],sp=SP[S.sp],b=BG[S.bg],pb=2;
- const prof=new Set([...S.skills,...b.s]);
- const hp=c.d+mod(score('CON')),per=mod(score('SAB'))+(prof.has('Percepção')?pb:0)+10;
- let h=`<h2>${S.name||'Personagem sem nome'}</h2><p>${sp.n} ${c.n} · antecedente ${b.n} · nível 1</p>
- <div class="stat" style="margin:12px 0"><div><b>${hp}</b>Pontos de vida</div><div><b>10${fmt(mod(score('DES')))}</b>CA sem armadura</div><div><b>${fmt(mod(score('DES')))}</b>Iniciativa</div><div><b>${fmt(pb)}</b>Proficiência</div><div><b>9 m</b>Deslocamento</div><div><b>${per}</b>Percepção passiva</div></div>
- <div class="sheet"><div><h3>Atributos e salvaguardas</h3><ul class="list">`;
- AB.forEach(a=>{const m=mod(score(a)),ps=c.s.includes(a);h+=`<li><span>${ABN[a]} ${score(a)} (${fmt(m)})</span><span><span class="dot${ps?' p':''}"></span>salvaguarda ${fmt(m+(ps?pb:0))}</span></li>`});
- h+=`</ul></div><div><h3>Perícias</h3><ul class="list">`;
- ALL.forEach(k=>{const p=prof.has(k);h+=`<li><span><span class="dot${p?' p':''}"></span>${k}</span><span>${fmt(mod(score(SK[k]))+(p?pb:0))}</span></li>`});
- h+=`</ul></div><div class="full"><h3>Características</h3><p><b>Espécie (${sp.sz}):</b> ${sp.t}</p><p><b>Talento de origem:</b> ${b.f}</p><p><b>Ferramenta:</b> ${b.i}</p><p><b>Dado de vida:</b> 1d${c.d}</p><p><b>Idiomas:</b> Comum, ${S.lang.join(', ')}</p><p><b>Alinhamento:</b> ${S.align}</p><p><b>Ataque corpo a corpo:</b> ${fmt(mod(score('FOR'))+pb)} · <b>à distância:</b> ${fmt(mod(score('DES'))+pb)}</p>${SC[c.n]?`<p><b>Conjuração (${ABN[SC[c.n]]}):</b> CD ${8+mod(score(SC[c.n]))+pb} · ataque ${fmt(mod(score(SC[c.n]))+pb)}</p>`:''}</div></div>
- <div class="nav"><button class="btn alt" onclick="window.print()">Imprimir ficha</button></div>`;
- return h}
-
+function vPer(){const c=CL[S.cls];let h=`<h2>Perícias de ${c.n}</h2><p>Escolha ${c.k}. Selecionadas: ${S.skills.length}/${c.k}. As perícias do antecedente já estão marcadas.</p><div class="sk">`;c.l.forEach(k=>{const lock=bgSk().includes(k),on=lock||S.skills.includes(k);h+=`<label class="${lock?'lock':''}"><input type="checkbox" ${on?'checked':''} ${lock||(!on&&S.skills.length>=c.k)?'disabled':''} onchange="togSkill('${k}')">${k} (${SK[k]})</label>`});return h+'</div>'}
+function vDet(){let h='<h2>Alinhamento</h2><p>D&amp;D assume personagens que não são malignos. Confirme com o Mestre antes de escolher um alinhamento Mau.</p><div class="grid">';ALN.forEach(a=>h+=`<button class="opt${S.align===a?' sel':''}" onclick="set('align','${a}')"><b>${a}</b></button>`);h+=`</div><h2 style="margin-top:20px">Idiomas</h2><p>Todo personagem conhece Comum. Escolha mais 2 (${S.lang.length}/2).</p><div class="sk">`;LANG.forEach(l=>{const on=S.lang.includes(l);h+=`<label><input type="checkbox" ${on?'checked':''} ${!on&&S.lang.length>=2?'disabled':''} onchange="togLang('${l}')">${l}</label>`});return h+'</div>'}
+function vFicha(){const c=CL[S.cls],sp=SP[S.sp],b=BG[S.bg],pb=2;const prof=new Set([...S.skills,...b.s]);const hp=c.d+mod(score('CON')),per=mod(score('SAB'))+(prof.has('Percepção')?pb:0)+10;let h=`<h2>${S.name||'Personagem sem nome'}</h2><p>${sp.n} ${c.n} · antecedente ${b.n} · nível 1</p><div class="stat" style="margin:12px 0"><div><b>${hp}</b>Pontos de vida</div><div><b>10${fmt(mod(score('DES')))}</b>CA sem armadura</div><div><b>${fmt(mod(score('DES')))}</b>Iniciativa</div><div><b>${fmt(pb)}</b>Proficiência</div><div><b>${sp.mov||'9 m'}</b>Deslocamento</div><div><b>${per}</b>Percepção passiva</div></div><div class="sheet"><div><h3>Atributos e salvaguardas</h3><ul class="list">`;AB.forEach(a=>{const m=mod(score(a)),ps=c.s.includes(a);h+=`<li><span>${ABN[a]} ${score(a)} (${fmt(m)})</span><span><span class="dot${ps?' p':''}"></span>salvaguarda ${fmt(m+(ps?pb:0))}</span></li>`});h+='</ul></div><div><h3>Perícias</h3><ul class="list">';ALL.forEach(k=>{const p=prof.has(k);h+=`<li><span><span class="dot${p?' p':''}"></span>${k}</span><span>${fmt(mod(score(SK[k]))+(p?pb:0))}</span></li>`});h+=`</ul></div><div class="full"><h3>Características</h3><p><b>Espécie (${sp.sz}):</b> ${sp.t}</p><p><b>Fonte da espécie:</b> ${sp.fonte} · ${sp.regra}</p><p><b>Talento de origem:</b> ${b.f}</p><p><b>Ferramenta:</b> ${b.i}</p><p><b>Dado de vida:</b> 1d${c.d}</p><p><b>Idiomas:</b> Comum, ${S.lang.join(', ')}</p><p><b>Alinhamento:</b> ${S.align}</p><p><b>Ataque corpo a corpo:</b> ${fmt(mod(score('FOR'))+pb)} · <b>à distância:</b> ${fmt(mod(score('DES'))+pb)}</p>${SC[c.n]?`<p><b>Conjuração (${ABN[SC[c.n]]}):</b> CD ${8+mod(score(SC[c.n]))+pb} · ataque ${fmt(mod(score(SC[c.n]))+pb)}</p>`:''}</div></div><div class="nav"><button class="btn alt" onclick="window.print()">Imprimir ficha</button></div>`;return h}
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const d4=()=>{const d=[1,2,3,4].map(()=>1+Math.floor(Math.random()*6)).sort((x,y)=>x-y);return d[1]+d[2]+d[3]};
 function rSp(){S.sp=Math.floor(Math.random()*SP.length)}
 function rCls(){S.cls=Math.floor(Math.random()*CL.length);S.skills=[]}
 function rBg(){S.bg=Math.floor(Math.random()*BG.length);S.mode=Math.random()<.5?'21':'111';const t=shuf(BG[S.bg].a);S.p2=t[0];S.p1=t[1]}
-function rAtr(){
- if(S.method==='std'){const v=shuf(STD);S.std={};AB.forEach((a,i)=>S.std[a]=v[i])}
- else if(S.method==='rnd'){S.rolled=[0,0,0,0,0,0].map(d4).sort((x,y)=>y-x);const v=shuf(S.rolled);S.std={};AB.forEach((a,i)=>S.std[a]=v[i])}
- else if(S.method==='pb'){AB.forEach(a=>S.pb[a]=8);let pts=27;for(let g=0;g<300;g++){const a=pick(AB),n=S.pb[a]+1;if(n<=15&&COST[n]-COST[S.pb[a]]<=pts){pts-=COST[n]-COST[S.pb[a]];S.pb[a]=n}}}
- else AB.forEach(a=>S.man[a]=d4())}
+function rAtr(){if(S.method==='std'){const v=shuf(STD);S.std={};AB.forEach((a,i)=>S.std[a]=v[i])}else if(S.method==='rnd'){S.rolled=[0,0,0,0,0,0].map(d4).sort((x,y)=>y-x);const v=shuf(S.rolled);S.std={};AB.forEach((a,i)=>S.std[a]=v[i])}else if(S.method==='pb'){AB.forEach(a=>S.pb[a]=8);let pts=27;for(let g=0;g<300;g++){const a=pick(AB),n=S.pb[a]+1;if(n<=15&&COST[n]-COST[S.pb[a]]<=pts){pts-=COST[n]-COST[S.pb[a]];S.pb[a]=n}}}else AB.forEach(a=>S.man[a]=d4())}
 function rPer(){const c=CL[S.cls];S.skills=shuf(c.l.filter(k=>!bgSk().includes(k))).slice(0,c.k)}
 function rDet(){S.align=pick(ALN.slice(0,6));S.lang=shuf(LANG).slice(0,2)}
 function rand(){const f=[rSp,rCls,rBg,rAtr,rPer,rDet];if(S.step<6)f[S.step]();else f.forEach(g=>g());render()}
-function render(){
- document.getElementById('steps').innerHTML=NAMES.map((n,i)=>`<button class="${i===S.step?'on':i<S.step?'done':''}" onclick="go(${i})">${n}</button>`).join('');
- const v=[vRaca,vClasse,vAntec,vAtr,vPer,vDet,vFicha];
- let h='<div class="panel">';
- h+=v[S.step]();
- if(S.step<6)h+=`<div class="nav"><button class="btn alt" onclick="go(${S.step-1})"${S.step?'':' disabled'}>Voltar</button><button class="btn alt" onclick="rand()">Aleatório</button><button class="btn" onclick="go(${S.step+1})"${valid(S.step)?'':' disabled'}>Próximo</button></div>`;
- else h+=`<div class="nav"><button class="btn alt" onclick="go(0)">Editar</button><button class="btn alt" onclick="rand()">Sortear tudo</button></div>`;
- document.getElementById('app').innerHTML=h+'</div>'}
+function render(){document.getElementById('steps').innerHTML=NAMES.map((n,i)=>`<button class="${i===S.step?'on':i<S.step?'done':''}" onclick="go(${i})">${n}</button>`).join('');const v=[vRaca,vClasse,vAntec,vAtr,vPer,vDet,vFicha];let h='<div class="panel">';h+=v[S.step]();if(S.step<6)h+=`<div class="nav"><button class="btn alt" onclick="go(${S.step-1})"${S.step?'':' disabled'}>Voltar</button><button class="btn alt" onclick="rand()">Aleatório</button><button class="btn" onclick="go(${S.step+1})"${valid(S.step)?'':' disabled'}>Próximo</button></div>`;else h+='<div class="nav"><button class="btn alt" onclick="go(0)">Editar</button><button class="btn alt" onclick="rand()">Sortear tudo</button></div>';document.getElementById('app').innerHTML=h+'</div>'}
 render();
 </script>
 </body>
