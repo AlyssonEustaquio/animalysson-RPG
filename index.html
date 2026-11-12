@@ -156,12 +156,30 @@ const ALL=Object.keys(SK);
 const SK_BY_AB={FOR:['Atletismo'],DES:['Acrobacia','Prestidigitação','Furtividade'],CON:[],INT:['Arcanismo','História','Investigação','Natureza','Religião'],SAB:['Adestrar Animais','Intuição','Medicina','Percepção','Sobrevivência'],CAR:['Atuação','Enganação','Intimidação','Persuasão']};
 CL.forEach(c=>{if(c.l===null)c.l=ALL});
 const STD=[15,14,13,12,10,8], COST={8:0,9:1,10:2,11:3,12:4,13:5,14:7,15:9};
-const S={step:6,name:'',cls:0,sp:0,bg:0,mode:'21',p2:'FOR',p1:'CON',method:'std',raceQuery:'',std:{FOR:15,DES:14,CON:13,INT:12,SAB:10,CAR:8},pb:{FOR:8,DES:8,CON:8,INT:8,SAB:8,CAR:8},man:{FOR:10,DES:10,CON:10,INT:10,SAB:10,CAR:10},skills:[],rolled:[],lang:['Élfico','Dracônico'],align:'Neutro',modal:null};
-// completar perícias padrão da classe inicial
-(function(){const c=CL[S.cls];const locked=new Set(BG[S.bg].s);S.skills=c.l.filter(k=>!locked.has(k)).slice(0,c.k);})();
+// ====== ESTADO INICIAL ZERADO ======
+const S={
+  step:0,
+  name:'',
+  cls:null,
+  sp:null,
+  bg:null,
+  mode:'21',
+  p2:'',
+  p1:'',
+  method:'std',
+  raceQuery:'',
+  std:{},
+  pb:{FOR:8,DES:8,CON:8,INT:8,SAB:8,CAR:8},
+  man:{FOR:10,DES:10,CON:10,INT:10,SAB:10,CAR:10},
+  skills:[],
+  rolled:[],
+  lang:[],
+  align:'',
+  modal:null
+};
 const mod=s=>Math.floor((s-10)/2), fmt=n=>(n>=0?'+':'')+n;
 const spent=()=>AB.reduce((t,a)=>t+COST[S.pb[a]],0);
-function base(a){return (S.method==='std'||S.method==='rnd')?(S.std[a]||8):S.method==='pb'?S.pb[a]:S.man[a]}
+function base(a){return (S.method==='std'||S.method==='rnd')?(S.std[a]??10):S.method==='pb'?S.pb[a]:S.man[a]}
 function bonus(a){if(S.bg===null)return 0;const b=BG[S.bg];if(!b.a.includes(a))return 0;return S.mode==='111'?1:(a===S.p2?2:a===S.p1?1:0)}
 const score=a=>Math.min(20,base(a)+bonus(a));
 function pool(){return S.method==='std'?STD:S.rolled}
@@ -173,7 +191,7 @@ function go(i){if(i<0)return;for(let j=0;j<i;j++)if(!valid(j))return;S.step=i;S.
 function set(k,v){S[k]=v;if(k==='method')S.std={};if(k==='cls')S.skills=[];if(k==='bg'){S.p2='';S.p1=''}render()}
 function mapset(m,a,v){S[m][a]=+v;render()}
 function pm(a,d){const n=S.pb[a]+d;if(n<8||n>15)return;S.pb[a]=n;render()}
-function togSkill(k){const i=S.skills.indexOf(k);if(i>=0)S.skills.splice(i,1);else if(S.skills.length<CL[S.cls].k)S.skills.push(k);render()}
+function togSkill(k){if(S.cls===null)return;const i=S.skills.indexOf(k);if(i>=0)S.skills.splice(i,1);else if(S.skills.length<CL[S.cls].k)S.skills.push(k);render()}
 function sel(id,opts,cur,fn,ph){return `<select id="${id}" onchange="${fn}">`+`<option value="">${ph}</option>`+opts.map(o=>`<option value="${o[0]}"${String(o[0])===String(cur)?' selected':''}>${o[1]}</option>`).join('')+'</select>'}
 function norm(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
 const SUG={'Bárbaro':[15,13,14,10,12,8],'Bardo':[8,14,12,13,10,15],'Clérigo':[14,8,13,10,15,12],'Druida':[8,12,14,13,15,10],'Guerreiro':[15,14,13,8,10,12],'Monge':[12,15,13,10,14,8],'Paladino':[15,10,13,8,12,14],'Guardião':[12,15,13,8,14,10],'Ladino':[12,15,13,14,10,8],'Feiticeiro':[10,13,14,8,12,15],'Bruxo':[8,14,13,12,10,15],'Mago':[8,12,13,15,14,10]};
@@ -220,19 +238,22 @@ function vAntec(){
  }
  return h+'</div></div>'}
 
-function vAtr(){const ass=S.method==='std'||S.method==='rnd';let h=`<h2>Valores de atributo</h2><div class="row"><label>Método<select onchange="set('method',this.value)"><option value="std"${S.method==='std'?' selected':''}>Conjunto padrão</option><option value="rnd"${S.method==='rnd'?' selected':''}>Aleatório (4d6)</option><option value="pb"${S.method==='pb'?' selected':''}>Compra de pontos</option><option value="man"${S.method==='man'?' selected':''}>Manual</option></select></label></div>`;if(S.method==='pb')h+=`<p>Pontos restantes: <b>${27-spent()}</b></p>`;if(S.method==='std')h+=`<p><button class="btn alt" onclick="suggest()">Sugestão para ${CL[S.cls].n}</button></p>`;if(S.method==='rnd')h+=`<p><button class="btn alt" onclick="roll6()">${S.rolled.length?'Rolar de novo':'Rolar atributos'}</button> ${S.rolled.length?'Resultado: '+S.rolled.join(', '):''}</p>`;if(ass&&S.method==='rnd'&&!S.rolled.length)h+='<p class="warn">Role os atributos.</p>';if(ass&&(S.rolled.length||S.method==='std')&&!stdOk()&&AB.some(a=>S.std[a]))h+='<p class="warn">Use cada valor uma vez.</p>';h+='<div class="ab">';AB.forEach(a=>{const t=score(a),b=bonus(a);let c='';if(ass)c=sel('s'+a,[...new Set(pool())].map(v=>[v,v]),S.std[a],`mapset('std','${a}',this.value)`,'–');else if(S.method==='pb')c=`<button class="pm" onclick="pm('${a}',-1)"${S.pb[a]<=8?' disabled':''}>−</button><b>${S.pb[a]}</b><button class="pm" onclick="pm('${a}',1)"${S.pb[a]>=15||spent()+(COST[S.pb[a]+1]-COST[S.pb[a]])>27?' disabled':''}>+</button>`;else c=`<input type="number" min="3" max="18" value="${S.man[a]}" onchange="mapset('man','${a}',this.value)">`;h+=`<div class="abc"><div>${ABN[a]}</div><div class="v">${t}</div><div class="m">mod ${fmt(mod(t))}${b?` · origem +${b}`:''}</div><div class="ctl">${c}</div></div>`});return h+'</div>'}
+function vAtr(){const ass=S.method==='std'||S.method==='rnd';let h=`<h2>Valores de atributo</h2><div class="row"><label>Método<select onchange="set('method',this.value)"><option value="std"${S.method==='std'?' selected':''}>Conjunto padrão</option><option value="rnd"${S.method==='rnd'?' selected':''}>Aleatório (4d6)</option><option value="pb"${S.method==='pb'?' selected':''}>Compra de pontos</option><option value="man"${S.method==='man'?' selected':''}>Manual</option></select></label></div>`;if(S.method==='pb')h+=`<p>Pontos restantes: <b>${27-spent()}</b></p>`;if(S.method==='std'&&S.cls!==null)h+=`<p><button class="btn alt" onclick="suggest()">Sugestão para ${CL[S.cls].n}</button></p>`;if(S.method==='rnd')h+=`<p><button class="btn alt" onclick="roll6()">${S.rolled.length?'Rolar de novo':'Rolar atributos'}</button> ${S.rolled.length?'Resultado: '+S.rolled.join(', '):''}</p>`;if(ass&&S.method==='rnd'&&!S.rolled.length)h+='<p class="warn">Role os atributos.</p>';if(ass&&(S.rolled.length||S.method==='std')&&!stdOk()&&AB.some(a=>S.std[a]))h+='<p class="warn">Use cada valor uma vez.</p>';h+='<div class="ab">';AB.forEach(a=>{const t=score(a),b=bonus(a);let c='';if(ass)c=sel('s'+a,[...new Set(pool())].map(v=>[v,v]),S.std[a],`mapset('std','${a}',this.value)`,'–');else if(S.method==='pb')c=`<button class="pm" onclick="pm('${a}',-1)"${S.pb[a]<=8?' disabled':''}>−</button><b>${S.pb[a]}</b><button class="pm" onclick="pm('${a}',1)"${S.pb[a]>=15||spent()+(COST[S.pb[a]+1]-COST[S.pb[a]])>27?' disabled':''}>+</button>`;else c=`<input type="number" min="3" max="18" value="${S.man[a]}" onchange="mapset('man','${a}',this.value)">`;h+=`<div class="abc"><div>${ABN[a]}</div><div class="v">${t}</div><div class="m">mod ${fmt(mod(t))}${b?` · origem +${b}`:''}</div><div class="ctl">${c}</div></div>`});return h+'</div>'}
 function bgSk(){return S.bg===null?[]:BG[S.bg].s}
 function vPer(){const c=CL[S.cls];let h=`<h2>Perícias de ${c.n}</h2><p>Escolha ${c.k}. Selecionadas: ${S.skills.length}/${c.k}.</p><div class="sk">`;c.l.forEach(k=>{const lock=bgSk().includes(k),on=lock||S.skills.includes(k);h+=`<label class="${lock?'lock':''}"><input type="checkbox" ${on?'checked':''} ${lock||(!on&&S.skills.length>=c.k)?'disabled':''} onchange="togSkill('${k}')">${k} (${SK[k]})</label>`});return h+'</div>'}
 function vDet(){let h='<h2>Alinhamento</h2><div class="grid">';ALN.forEach(a=>h+=`<button class="opt${S.align===a?' sel':''}" onclick="set('align','${a}')"><b>${a}</b></button>`);h+=`</div><h2 style="margin-top:16px">Idiomas</h2><p>Comum + 2. Selecionados: ${S.lang.length}/2.</p><div class="sk">`;LANG.forEach(l=>{const on=S.lang.includes(l);h+=`<label><input type="checkbox" ${on?'checked':''} ${!on&&S.lang.length>=2?'disabled':''} onchange="const i=S.lang.indexOf('${l}');if(i>=0)S.lang.splice(i,1);else if(S.lang.length<2)S.lang.push('${l}');render()">${l}</label>`});return h+'</div>'}
 
-/* Official-style interactive sheet */
+/* Official-style interactive sheet — protegida contra estado zerado */
 function vFicha(){
- const c=CL[S.cls],sp=SP[S.sp],b=BG[S.bg],pb=2;
- const prof=new Set([...S.skills,...b.s]);
- const hp=c.d+mod(score('CON'));
- const ac=10+mod(score('DES'));
- const per=10+mod(score('SAB'))+(prof.has('Percepção')?pb:0);
- const ini=fmt(mod(score('DES')));
+ const c = S.cls!==null ? CL[S.cls] : null;
+ const sp = S.sp!==null ? SP[S.sp] : null;
+ const b  = S.bg!==null ? BG[S.bg] : null;
+ const pb = c ? 2 : 0;
+ const prof = new Set([...S.skills,...(b?b.s:[])]);
+ const hp = c ? Math.max(1, c.d+mod(score('CON'))) : 0;
+ const ac = c ? 10+mod(score('DES')) : 0;
+ const per = 10+mod(score('SAB'))+(prof.has('Percepção')?pb:0);
+ const ini = fmt(mod(score('DES')));
 
  let h=`<div class="ficha">
   <div class="f-top">
@@ -240,12 +261,12 @@ function vFicha(){
     <span class="edit">editar</span>
     <div class="f-field"><span class="lbl">Nome do personagem</span><span class="val">${S.name||'—'}</span></div>
     <div class="row2">
-     <div class="f-field"><span class="lbl">Origem</span><span class="val">${b.n}</span></div>
-     <div class="f-field"><span class="lbl">Classe</span><span class="val">${c.n}</span></div>
+     <div class="f-field"><span class="lbl">Origem</span><span class="val">${b?b.n:'—'}</span></div>
+     <div class="f-field"><span class="lbl">Classe</span><span class="val">${c?c.n:'—'}</span></div>
     </div>
     <div class="row2">
-     <div class="f-field"><span class="lbl">Espécie</span><span class="val">${sp.n}</span></div>
-     <div class="f-field"><span class="lbl">Nível</span><span class="val">1</span></div>
+     <div class="f-field"><span class="lbl">Espécie</span><span class="val">${sp?sp.n:'—'}</span></div>
+     <div class="f-field"><span class="lbl">Nível</span><span class="val">${c?1:0}</span></div>
     </div>
    </div>
    <div class="box f-combat">
@@ -253,7 +274,7 @@ function vFicha(){
     <div class="f-hp">
      <div class="cell"><span class="lbl">PV atuais</span><div class="big">${hp}</div></div>
      <div class="cell"><span class="lbl">PV máx.</span><div class="big">${hp}</div></div>
-     <div class="cell" style="grid-column:1/-1"><span class="lbl">Dado de vida</span><div class="big">1d${c.d}</div></div>
+     <div class="cell" style="grid-column:1/-1"><span class="lbl">Dado de vida</span><div class="big">${c?'1d'+c.d:'0'}</div></div>
     </div>
     <div class="f-ac"><span class="lbl">Bônus prof.</span><div class="big">${fmt(pb)}</div></div>
    </div>
@@ -267,7 +288,7 @@ function vFicha(){
   <div class="f-mid">
    <div class="f-abilities">
     ${AB.map(a=>{
-      const sc=score(a),m=mod(sc),ps=c.s.includes(a);
+      const sc=score(a),m=mod(sc),ps=c?c.s.includes(a):false;
       return `<div class="box clickable ability" onclick="openModal('atr')">
         <span class="edit">editar</span>
         <div class="name">${ABN[a].toUpperCase()}</div>
@@ -280,8 +301,8 @@ function vFicha(){
    <div class="f-center">
     <div class="f-stats-row">
      <div class="box"><span class="lbl">Iniciativa</span><div class="big">${ini}</div></div>
-     <div class="box clickable" onclick="openModal('sp')"><span class="edit">editar</span><span class="lbl">Deslocamento</span><div class="big">${sp.mov||'9 m'}</div></div>
-     <div class="box clickable" onclick="openModal('sp')"><span class="edit">editar</span><span class="lbl">Tamanho</span><div class="big" style="font-size:.95rem">${sp.sz}</div></div>
+     <div class="box clickable" onclick="openModal('sp')"><span class="edit">editar</span><span class="lbl">Deslocamento</span><div class="big">${sp?(sp.mov||'9 m'):'—'}</div></div>
+     <div class="box clickable" onclick="openModal('sp')"><span class="edit">editar</span><span class="lbl">Tamanho</span><div class="big" style="font-size:.95rem">${sp?sp.sz:'—'}</div></div>
      <div class="box"><span class="lbl">Percepção passiva</span><div class="big">${per}</div></div>
     </div>
     <div class="box clickable f-skills" onclick="openModal('per')">
@@ -301,22 +322,18 @@ function vFicha(){
      <div class="box clickable f-features" onclick="openModal('sp')">
       <span class="edit">editar</span>
       <span class="lbl">Características raciais</span>
-      <p><b>${sp.n}</b> · ${sp.sz} · ${sp.mov||'9 m'}</p>
+      ${sp?`<p><b>${sp.n}</b> · ${sp.sz} · ${sp.mov||'9 m'}</p>`:'<p>—</p>'}
      </div>
      <div class="box clickable f-features" onclick="openModal('bg')">
       <span class="edit">editar</span>
       <span class="lbl">Talentos / Antecedente</span>
-      <p><b>${b.n}</b> — ${b.f}</p>
-      <p>Perícias: ${b.s.join(' e ')}</p>
-      <p>Ferramenta: ${b.i}</p>
+      ${b?`<p><b>${b.n}</b> — ${b.f}</p><p>Perícias: ${b.s.join(' e ')}</p><p>Ferramenta: ${b.i}</p>`:'<p>—</p>'}
      </div>
     </div>
     <div class="box clickable f-features" onclick="openModal('cls')">
      <span class="edit">editar</span>
      <span class="lbl">Características de classe</span>
-     <p><b>${c.n}</b> — ${CLD[c.n]}</p>
-     <p>Dado de vida d${c.d} · Salvaguardas ${c.s.map(a=>ABN[a]).join(', ')} · Atributo principal: ${c.p}</p>
-     ${SC[c.n]?`<p>Conjuração (${ABN[SC[c.n]]}): CD ${8+mod(score(SC[c.n]))+pb} · ataque ${fmt(mod(score(SC[c.n]))+pb)}</p>`:''}
+     ${c?`<p><b>${c.n}</b> — ${CLD[c.n]}</p><p>Dado de vida d${c.d} · Salvaguardas ${c.s.map(a=>ABN[a]).join(', ')} · Atributo principal: ${c.p}</p>${SC[c.n]?`<p>Conjuração (${ABN[SC[c.n]]}): CD ${8+mod(score(SC[c.n]))+pb} · ataque ${fmt(mod(score(SC[c.n]))+pb)}</p>`:''}`:'<p>—</p>'}
     </div>
     <div class="box">
      <span class="lbl">Ataques</span>
@@ -334,14 +351,6 @@ function modalIdent(){
   <label>Nome<br><input style="width:100%" value="${(S.name||'').replace(/"/g,'&quot;')}" oninput="S.name=this.value"></label>
   <p style="margin-top:12px;color:var(--mute)">Espécie, classe e origem têm seções próprias na ficha.</p>
   <div class="modal-actions"><button class="btn" onclick="closeModal()">Concluir</button></div>`;
-}
-function modalList(title, items, selected, onPick){
- let h=`<h2>${title}</h2><div class="side" style="max-height:50vh">`;
- items.forEach((it,i)=>{
-  h+=`<button class="item${selected===i?' sel':''}" onclick="${onPick}(${i})"><span>${it.n}</span></button>`;
- });
- h+=`</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Concluir</button></div>`;
- return h;
 }
 function modalSp(){
  let h=`<h2>Espécie</h2>
@@ -374,7 +383,10 @@ function modalBg(){
  return h;
 }
 function modalAtr(){return `<h2>Atributos</h2>${vAtr()}<div class="modal-actions"><button class="btn" onclick="closeModal()">Concluir</button></div>`}
-function modalPer(){return `<h2>Perícias</h2>${vPer()}<div class="modal-actions"><button class="btn" onclick="closeModal()">Concluir</button></div>`}
+function modalPer(){
+ if(S.cls===null)return `<h2>Perícias</h2><p>Escolha uma classe primeiro.</p><div class="modal-actions"><button class="btn" onclick="closeModal()">Fechar</button></div>`;
+ return `<h2>Perícias</h2>${vPer()}<div class="modal-actions"><button class="btn" onclick="closeModal()">Concluir</button></div>`;
+}
 function modalDet(){return `<h2>Detalhes</h2>${vDet()}<div class="modal-actions"><button class="btn" onclick="closeModal()">Concluir</button></div>`}
 
 function renderModal(){
@@ -385,7 +397,7 @@ function renderModal(){
 }
 
 function roll6(){const r=()=>{const d=[1,2,3,4].map(()=>1+Math.floor(Math.random()*6)).sort((x,y)=>x-y);return d[1]+d[2]+d[3]};S.rolled=[0,0,0,0,0,0].map(r).sort((x,y)=>y-x);S.std={};render()}
-function suggest(){const t=SUG[CL[S.cls].n];AB.forEach((a,i)=>S.std[a]=t[i]);render()}
+function suggest(){if(S.cls===null)return;const t=SUG[CL[S.cls].n];if(!t)return;AB.forEach((a,i)=>S.std[a]=t[i]);render()}
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const d4=()=>{const d=[1,2,3,4].map(()=>1+Math.floor(Math.random()*6)).sort((x,y)=>x-y);return d[1]+d[2]+d[3]};
@@ -393,7 +405,7 @@ function rSp(){S.sp=Math.floor(Math.random()*SP.length)}
 function rCls(){S.cls=Math.floor(Math.random()*CL.length);S.skills=[]}
 function rBg(){S.bg=Math.floor(Math.random()*BG.length);S.mode=Math.random()<.5?'21':'111';const t=shuf(BG[S.bg].a);S.p2=t[0];S.p1=t[1]}
 function rAtr(){if(S.method==='std'){const v=shuf(STD);S.std={};AB.forEach((a,i)=>S.std[a]=v[i])}else if(S.method==='rnd'){S.rolled=[0,0,0,0,0,0].map(d4).sort((x,y)=>y-x);const v=shuf(S.rolled);S.std={};AB.forEach((a,i)=>S.std[a]=v[i])}else if(S.method==='pb'){AB.forEach(a=>S.pb[a]=8);let pts=27;for(let g=0;g<300;g++){const a=pick(AB),n=S.pb[a]+1;if(n<=15&&COST[n]-COST[S.pb[a]]<=pts){pts-=COST[n]-COST[S.pb[a]];S.pb[a]=n}}}else AB.forEach(a=>S.man[a]=d4())}
-function rPer(){const c=CL[S.cls];S.skills=shuf(c.l.filter(k=>!bgSk().includes(k))).slice(0,c.k)}
+function rPer(){if(S.cls===null)return;const c=CL[S.cls];S.skills=shuf(c.l.filter(k=>!bgSk().includes(k))).slice(0,c.k)}
 function rDet(){S.align=pick(ALN.slice(0,6));S.lang=shuf(LANG).slice(0,2)}
 function rand(){const f=[rSp,rCls,rBg,rAtr,rPer,rDet];f.forEach(g=>g());render()}
 
