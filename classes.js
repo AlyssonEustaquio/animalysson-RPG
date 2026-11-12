@@ -1,9 +1,11 @@
 /*
- * Catálogo de classes oficiais de D&D (PHB 2024 e equivalentes).
+ * Catálogo de classes oficiais de D&D (regras 2024): as 12 classes do Livro do Jogador 2024
+ * + Artífice (Eberron: Forge of the Artificer, regras 2024).
  * Campos: n (nome), d (dado de vida), p (atributo principal),
  *         s (salvaguardas), k (nº de perícias), l (lista de perícias).
  */
 window.CLASSES = [
+  {n:'Artífice',d:8,p:'Inteligência',s:['CON','INT'],k:2,l:['Arcanismo','História','Investigação','Medicina','Natureza','Percepção','Prestidigitação']},
   {n:'Bárbaro',d:12,p:'Força',s:['FOR','CON'],k:2,l:['Adestrar Animais','Atletismo','Intimidação','Natureza','Percepção','Sobrevivência']},
   {n:'Bardo',d:8,p:'Carisma',s:['DES','CAR'],k:3,l:null},
   {n:'Bruxo',d:8,p:'Carisma',s:['SAB','CAR'],k:2,l:['Arcanismo','Enganação','História','Intimidação','Investigação','Natureza','Religião']},
@@ -19,6 +21,7 @@ window.CLASSES = [
 ];
 
 window.CLASS_DESC = {
+  'Artífice':'Inventor mágico que infunde itens e engenhocas com magia, usando ferramentas como foco de conjuração.',
   'Bárbaro':'Guerreiro movido pela fúria, resistente e devastador no corpo a corpo.',
   'Bardo':'Artista inspirador que usa música e palavras para moldar a magia.',
   'Bruxo':'Conjurador que obteve poder por meio de um pacto com uma entidade poderosa.',
