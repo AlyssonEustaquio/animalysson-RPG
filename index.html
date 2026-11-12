@@ -102,7 +102,7 @@ input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:
 .skill-row{display:flex;align-items:center;gap:6px;padding:2px 0;border-bottom:1px dotted var(--line)}
 .skill-row .nm{flex:1}
 .skill-row .bon{font-weight:700;min-width:2.2em;text-align:right}
-.f-bottom{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.f-bottom{display:grid;grid-template-columns:1fr;gap:8px}
 .f-features{min-height:80px}
 .f-features p{margin:.3em 0}
 .prof-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -321,11 +321,6 @@ function vFicha(){
      </div>
     </div>
     <div class="f-bottom">
-     <div class="box clickable f-features" onclick="openModal('sp')">
-      <span class="edit">editar</span>
-      <span class="lbl">Características raciais</span>
-      ${sp?`<p><b>${sp.n}</b> · ${sp.sz} · ${sp.mov||'9 m'}</p>`:'<p>—</p>'}
-     </div>
      <div class="box clickable f-features" onclick="openModal('bg')">
       <span class="edit">editar</span>
       <span class="lbl">Talentos / Antecedente</span>
