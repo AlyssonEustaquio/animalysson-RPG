@@ -7,77 +7,128 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-:root{color-scheme:dark;--bg:#121212;--card:#1e1e20;--ink:#f2f2f2;--mute:#a0a0a6;--line:#3a3a3f;--red:#c53131;--redink:#fff;--ok:#5bbf8f}
+:root{color-scheme:dark;--bg:#121212;--card:#1e1e20;--ink:#f2f2f2;--mute:#a0a0a6;--line:#3a3a3f;--red:#c53131;--redink:#fff;--ok:#5bbf8f;--paper:#1a1a1c;--box:#252528}
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font:17px/1.5 Roboto,system-ui,sans-serif;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+body{background:var(--bg);color:var(--ink);font:16px/1.45 Roboto,system-ui,sans-serif;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
 h1,h2,h3{font-family:"Roboto Condensed",system-ui,sans-serif;font-weight:700;margin:0 0 .4em;letter-spacing:.01em}
-h1{font-size:2rem}h2{font-size:1.4rem}h3{font-size:1.1rem}
-main{max-width:920px;margin:0 auto;padding:20px 16px 60px}
-.steps{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 20px}
-.steps button{flex:1;min-width:110px;padding:8px 10px;border:1px solid var(--line);background:var(--card);color:var(--mute);border-radius:6px;font:inherit;cursor:pointer}
+h1{font-size:1.8rem}h2{font-size:1.3rem}h3{font-size:1rem}
+main{max-width:1100px;margin:0 auto;padding:16px 12px 60px}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 16px}
+.steps button{flex:1;min-width:100px;padding:8px 8px;border:1px solid var(--line);background:var(--card);color:var(--mute);border-radius:6px;font:inherit;cursor:pointer;font-size:.9rem}
 .steps button.on{background:var(--red);border-color:var(--red);color:var(--redink);font-weight:700}
 .steps button.done{color:var(--ok);border-color:var(--ok)}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:18px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
 .opt{padding:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;text-align:left;font:inherit;cursor:pointer}
-.opt b{display:block;font-family:"Roboto Condensed",system-ui,sans-serif;font-size:1.05rem}
+.opt b{display:block;font-family:"Roboto Condensed",system-ui,sans-serif}
 .opt small{color:var(--mute)}
 .opt.sel{border:2px solid var(--red);padding:9px}
-input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;max-width:100%}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;max-width:100%}
 :focus-visible{outline:3px solid var(--red);outline-offset:2px}
 .row{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0}
-.row>label{flex:1;min-width:200px;display:flex;flex-direction:column;gap:4px}
-.info{margin-top:14px;padding:12px;border-left:4px solid var(--red);background:var(--bg);border-radius:0 6px 6px 0}
+.row>label{flex:1;min-width:180px;display:flex;flex-direction:column;gap:4px}
+.info{margin-top:12px;padding:12px;border-left:4px solid var(--red);background:var(--bg);border-radius:0 6px 6px 0}
 .info p{margin:.2em 0}
-.ab{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin:12px 0}
+.ab{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin:12px 0}
 .abc{border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center;background:var(--bg)}
-.abc .v{font-family:"Roboto Condensed",system-ui,sans-serif;font-size:1.9rem;line-height:1.1}
+.abc .v{font-family:"Roboto Condensed",system-ui,sans-serif;font-size:1.8rem;line-height:1.1}
 .abc .m{color:var(--mute)}
 .abc .ctl{display:flex;justify-content:center;gap:6px;margin-top:6px;align-items:center}
-.abc select,.abc input{width:76px;text-align:center}
-.pm{width:32px;height:32px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;cursor:pointer}
+.abc select,.abc input{width:72px;text-align:center}
+.pm{width:30px;height:30px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;cursor:pointer}
 .pm:disabled{opacity:.35;cursor:default}
-.nav{display:flex;justify-content:space-between;flex-wrap:wrap;margin-bottom:18px;gap:10px}
-.btn{padding:10px 20px;border-radius:6px;border:1px solid var(--red);background:var(--red);color:var(--redink);font:inherit;font-weight:700;cursor:pointer}
+.nav{display:flex;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px;gap:10px}
+.btn{padding:10px 18px;border-radius:6px;border:1px solid var(--red);background:var(--red);color:var(--redink);font:inherit;font-weight:700;cursor:pointer}
 .btn.alt{background:transparent;color:var(--red)}
 .btn:disabled{opacity:.4;cursor:default}
 .warn{color:var(--red);font-weight:500}
-.sk{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px}
+.sk{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px}
 .sk label{display:flex;gap:8px;align-items:center;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg)}
 .sk label.lock{opacity:.6}
-.sheet{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.sheet .full{grid-column:1/-1}
-.sheet-block{border:1px solid var(--line);border-radius:8px;padding:14px;background:var(--bg);cursor:pointer;transition:border-color .15s,box-shadow .15s}
-.sheet-block:hover{border-color:var(--red);box-shadow:0 0 0 1px var(--red)}
-.sheet-block h3{margin:0 0 10px;display:flex;justify-content:space-between;align-items:center;font-size:1rem}
-.sheet-block h3 .edit-hint{font-size:.75rem;font-weight:400;color:var(--mute)}
-.sheet-block:hover h3 .edit-hint{color:var(--red)}
-.sheet-head{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
-.sheet-head .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--bg);cursor:pointer;font:inherit;color:var(--ink)}
-.sheet-head .chip:hover{border-color:var(--red);color:var(--red)}
-.sheet-name{font-family:"Roboto Condensed",system-ui,sans-serif;font-size:1.8rem;margin:0;cursor:pointer}
-.sheet-name:hover{color:var(--red)}
-.sheet-name input{font:inherit;font-size:1.8rem;width:100%;max-width:360px;border:1px solid var(--line);border-radius:6px;padding:4px 8px;background:var(--card);color:var(--ink)}
-.stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
+.split{display:grid;grid-template-columns:240px 1fr;gap:14px;margin-top:12px}
+.side{display:flex;flex-direction:column;gap:4px;max-height:480px;overflow-y:auto}
+.item{display:flex;justify-content:space-between;align-items:center;padding:11px 12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;font:inherit;cursor:pointer;text-align:left}
+.item.sel{border-color:var(--red);background:var(--card);box-shadow:inset 4px 0 0 var(--red)}
+.detail{border:1px solid var(--line);border-radius:8px;padding:16px;background:var(--bg)}
+.detail .stat{margin:12px 0}
+.race-search{width:100%;margin:8px 0 10px}
+.race-count{color:var(--mute);font-size:.9rem;margin:0 0 8px}
+.stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px}
 .stat div{border:1px solid var(--line);border-radius:8px;padding:8px;text-align:center;background:var(--bg)}
-.stat b{display:block;font-family:"Roboto Condensed",system-ui,sans-serif;font-size:1.5rem}
+.stat b{display:block;font-family:"Roboto Condensed",system-ui,sans-serif;font-size:1.4rem}
 .list{margin:0;padding:0;list-style:none}
 .list li{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dotted var(--line)}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;border:1px solid var(--ink);margin-right:6px}
 .dot.p{background:var(--red);border-color:var(--red)}
-.split{display:grid;grid-template-columns:260px 1fr;gap:16px;margin-top:16px}
-.side{display:flex;flex-direction:column;gap:4px;max-height:520px;overflow-y:auto}
-.item{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;font:inherit;font-size:1.05rem;cursor:pointer;text-align:left}
-.item small{color:var(--mute)}
-.item.sel{border-color:var(--red);background:var(--card);box-shadow:inset 4px 0 0 var(--red)}
-.detail{border:1px solid var(--line);border-radius:8px;padding:18px;background:var(--bg)}
-.detail .stat{margin:14px 0}
-.race-search{width:100%;margin:8px 0 12px}
-.race-count{color:var(--mute);font-size:.9rem;margin:0 0 8px}
-@media (max-width:640px){.split{grid-template-columns:1fr}.side{max-height:none;flex-direction:row;flex-wrap:wrap}.item{flex:1 1 140px}}
-@media (max-width:640px){.sheet{grid-template-columns:1fr}}
-@media print{.steps,.nav,.race-search{display:none}body{background:#fff;color:#000}.panel{border:none}}
+
+/* Official-style sheet */
+.ficha{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:10px;display:grid;gap:8px}
+.ficha *{font-size:.82rem}
+.ficha .lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.04em;color:var(--mute);font-weight:700}
+.box{border:1px solid var(--line);border-radius:6px;background:var(--box);padding:6px 8px;position:relative}
+.box.clickable{cursor:pointer;transition:border-color .12s,box-shadow .12s}
+.box.clickable:hover{border-color:var(--red);box-shadow:0 0 0 1px var(--red)}
+.box .edit{position:absolute;top:4px;right:6px;font-size:.6rem;color:var(--mute);opacity:0;transition:opacity .12s}
+.box.clickable:hover .edit{opacity:1;color:var(--red)}
+.f-top{display:grid;grid-template-columns:1.4fr 1fr .9fr;gap:8px}
+.f-fields{display:grid;gap:6px}
+.f-fields .row2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.f-field{display:flex;flex-direction:column;gap:2px}
+.f-field .val{font-family:"Roboto Condensed",system-ui,sans-serif;font-size:1rem;font-weight:700;min-height:1.3em}
+.f-combat{display:grid;grid-template-columns:70px 1fr 70px;gap:6px;align-items:stretch}
+.f-ac{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.f-ac .big{font-family:"Roboto Condensed",system-ui,sans-serif;font-size:1.8rem;font-weight:700;line-height:1}
+.f-hp{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.f-hp .cell{text-align:center;padding:4px;border:1px solid var(--line);border-radius:4px}
+.f-hp .big{font-family:"Roboto Condensed",system-ui,sans-serif;font-size:1.3rem;font-weight:700}
+.f-mid{display:grid;grid-template-columns:90px 1fr;gap:8px}
+.f-abilities{display:flex;flex-direction:column;gap:6px}
+.ability{display:grid;grid-template-columns:1fr;gap:2px;text-align:center;padding:6px 4px}
+.ability .name{font-size:.7rem;font-weight:700;letter-spacing:.03em}
+.ability .score{font-family:"Roboto Condensed",system-ui,sans-serif;font-size:1.5rem;font-weight:700;line-height:1}
+.ability .mod{font-size:.95rem;color:var(--mute)}
+.ability .sv{font-size:.7rem;margin-top:2px}
+.f-center{display:grid;gap:8px}
+.f-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.f-stats-row .box{text-align:center;padding:8px 4px}
+.f-stats-row .big{font-family:"Roboto Condensed",system-ui,sans-serif;font-size:1.2rem;font-weight:700}
+.f-skills{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.skill-col{display:flex;flex-direction:column;gap:2px}
+.skill-row{display:flex;align-items:center;gap:6px;padding:2px 0;border-bottom:1px dotted var(--line)}
+.skill-row .nm{flex:1}
+.skill-row .bon{font-weight:700;min-width:2.2em;text-align:right}
+.f-bottom{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.f-features{min-height:80px}
+.f-features p{margin:.3em 0}
+.prof-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.prof-badge{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border:2px solid var(--line);border-radius:50%;font-family:"Roboto Condensed",system-ui,sans-serif;font-weight:700;font-size:1rem}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:flex-start;justify-content:center;padding:24px 12px;z-index:100;overflow-y:auto}
+.modal{background:var(--card);border:1px solid var(--line);border-radius:10px;width:100%;max-width:640px;padding:18px;margin:auto;box-shadow:0 12px 40px rgba(0,0,0,.45)}
+.modal h2{margin-bottom:12px}
+.modal .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;flex-wrap:wrap}
+.modal .close-x{float:right;background:none;border:none;color:var(--mute);font-size:1.4rem;cursor:pointer;line-height:1;padding:0 4px}
+.modal .close-x:hover{color:var(--ink)}
+
+@media (max-width:800px){
+  .f-top{grid-template-columns:1fr}
+  .f-mid{grid-template-columns:1fr}
+  .f-abilities{flex-direction:row;flex-wrap:wrap}
+  .ability{flex:1 1 90px}
+  .f-skills,.f-bottom{grid-template-columns:1fr}
+  .f-stats-row{grid-template-columns:repeat(2,1fr)}
+  .split{grid-template-columns:1fr}
+  .side{max-height:none;flex-direction:row;flex-wrap:wrap}
+  .item{flex:1 1 120px}
+}
+@media print{
+  .steps,.nav,.modal-bg{display:none!important}
+  body{background:#fff;color:#000}
+  .panel,.ficha,.box{border-color:#999;background:#fff}
+  main{max-width:none;padding:0}
+}
 </style>
 </head>
 <body>
@@ -86,6 +137,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 <div class="steps" id="steps"></div>
 <div id="app"></div>
 </main>
+<div id="modal-root"></div>
 <script src="especies.js"></script>
 <script src="classes.js"></script>
 <script src="antecedentes.js"></script>
@@ -101,9 +153,10 @@ const AB=['FOR','DES','CON','INT','SAB','CAR'];
 const ABN={FOR:'Força',DES:'Destreza',CON:'Constituição',INT:'Inteligência',SAB:'Sabedoria',CAR:'Carisma'};
 const SK={'Acrobacia':'DES','Adestrar Animais':'SAB','Arcanismo':'INT','Atletismo':'FOR','Atuação':'CAR','Enganação':'CAR','Furtividade':'DES','História':'INT','Intimidação':'CAR','Intuição':'SAB','Investigação':'INT','Medicina':'SAB','Natureza':'INT','Percepção':'SAB','Persuasão':'CAR','Prestidigitação':'DES','Religião':'INT','Sobrevivência':'SAB'};
 const ALL=Object.keys(SK);
+const SK_BY_AB={FOR:['Atletismo'],DES:['Acrobacia','Prestidigitação','Furtividade'],CON:[],INT:['Arcanismo','História','Investigação','Natureza','Religião'],SAB:['Adestrar Animais','Intuição','Medicina','Percepção','Sobrevivência'],CAR:['Atuação','Enganação','Intimidação','Persuasão']};
 CL.forEach(c=>{if(c.l===null)c.l=ALL});
 const STD=[15,14,13,12,10,8], COST={8:0,9:1,10:2,11:3,12:4,13:5,14:7,15:9};
-const S={step:0,name:'',cls:null,sp:null,bg:null,mode:'21',p2:'',p1:'',method:'std',raceQuery:'',std:{},pb:{FOR:8,DES:8,CON:8,INT:8,SAB:8,CAR:8},man:{FOR:10,DES:10,CON:10,INT:10,SAB:10,CAR:10},skills:[],rolled:[],lang:[],align:''};
+const S={step:0,name:'',cls:null,sp:null,bg:null,mode:'21',p2:'',p1:'',method:'std',raceQuery:'',std:{},pb:{FOR:8,DES:8,CON:8,INT:8,SAB:8,CAR:8},man:{FOR:10,DES:10,CON:10,INT:10,SAB:10,CAR:10},skills:[],rolled:[],lang:[],align:'',modal:null};
 const mod=s=>Math.floor((s-10)/2), fmt=n=>(n>=0?'+':'')+n;
 const spent=()=>AB.reduce((t,a)=>t+COST[S.pb[a]],0);
 function base(a){return (S.method==='std'||S.method==='rnd')?(S.std[a]||8):S.method==='pb'?S.pb[a]:S.man[a]}
@@ -114,7 +167,7 @@ function stdOk(){const p=pool().slice().sort().join(),v=AB.map(a=>S.std[a]);retu
 function manOk(){return AB.every(a=>S.man[a]>=3&&S.man[a]<=18)}
 function valid(i){if(i===0)return S.sp!==null;if(i===1)return S.cls!==null;if(i===2)return S.bg!==null&&(S.mode==='111'||(S.p2&&S.p1&&S.p2!==S.p1));if(i===3)return (S.method==='std'||S.method==='rnd')?stdOk():S.method==='man'?manOk():spent()<=27;if(i===4)return S.cls!==null&&S.skills.length===CL[S.cls].k;if(i===5)return S.lang.length===2&&S.align!=='';return true}
 const NAMES=['Espécie','Classe','Antecedente','Atributos','Perícias','Detalhes','Ficha'];
-function go(i){if(i<0)return;for(let j=0;j<i;j++)if(!valid(j))return;S.step=i;render()}
+function go(i){if(i<0)return;for(let j=0;j<i;j++)if(!valid(j))return;S.step=i;S.modal=null;render()}
 function set(k,v){S[k]=v;if(k==='method')S.std={};if(k==='cls')S.skills=[];if(k==='bg'){S.p2='';S.p1=''}render()}
 function mapset(m,a,v){S[m][a]=+v;render()}
 function pm(a,d){const n=S.pb[a]+d;if(n<8||n>15)return;S.pb[a]=n;render()}
@@ -126,15 +179,18 @@ const SC={'Bardo':'CAR','Bruxo':'CAR','Clérigo':'SAB','Druida':'SAB','Feiticeir
 const ALN=['Leal e Bom','Neutro e Bom','Caótico e Bom','Leal e Neutro','Neutro','Caótico e Neutro','Leal e Mau','Neutro e Mau','Caótico e Mau'];
 const LANG=['Língua de Sinais Comum','Dracônico','Anão','Élfico','Gigante','Gnômico','Goblin','Halfling','Orc'];
 
+function openModal(m){S.modal=m;render()}
+function closeModal(){S.modal=null;render()}
+
 function vRaca(){
  let h=`<label>Nome do personagem<br><input value="${S.name.replace(/"/g,'&quot;')}" oninput="S.name=this.value" placeholder="Ex.: Thorin"></label>
- <h2 style="margin-top:18px">Escolha uma espécie</h2>
+ <h2 style="margin-top:16px">Escolha uma espécie</h2>
  <input class="race-search" type="search" value="${S.raceQuery.replace(/"/g,'&quot;')}" placeholder="Pesquisar espécie..." oninput="S.raceQuery=this.value;render()">
- <p class="race-count">${SP.filter(s=>norm(s.n).includes(norm(S.raceQuery))).length} opções no catálogo · ${SP.length} cadastradas</p>
+ <p class="race-count">${SP.filter(s=>norm(s.n).includes(norm(S.raceQuery))).length} opções · ${SP.length} cadastradas</p>
  <div class="split"><div class="side">`;
  SP.forEach((s,i)=>{if(!norm(s.n).includes(norm(S.raceQuery)))return;h+=`<button class="item${S.sp===i?' sel':''}" onclick="set('sp',${i})"><span>${s.n}</span></button>`});
  h+='</div><div class="detail">';
- if(S.sp===null)h+='<p>Selecione uma espécie na lista para ver os detalhes.</p>';
+ if(S.sp===null)h+='<p>Selecione uma espécie na lista.</p>';
  else{const sp=SP[S.sp];h+=`<h2>${sp.n}</h2><div class="stat"><div><b>${sp.sz}</b>Tamanho</div><div><b>${sp.mov||'9 m'}</b>Deslocamento</div></div><button class="btn" onclick="go(1)">Escolher ${sp.n}</button>`}
  return h+'</div></div>'}
 
@@ -142,7 +198,7 @@ function vClasse(){
  let h='<h2>Escolha uma classe</h2><div class="split"><div class="side">';
  CL.forEach((c,i)=>h+=`<button class="item${S.cls===i?' sel':''}" onclick="set('cls',${i})"><span>${c.n}</span></button>`);
  h+='</div><div class="detail">';
- if(S.cls===null)h+='<p>Selecione uma classe na lista para ver os detalhes.</p>';
+ if(S.cls===null)h+='<p>Selecione uma classe na lista.</p>';
  else{const c=CL[S.cls];h+=`<h2>${c.n}</h2><p>${CLD[c.n]}</p><div class="stat"><div><b>d${c.d}</b>Dado de vida</div><div><b>${c.s.join(' / ')}</b>Salvaguardas</div><div><b>${c.k}</b>Perícias</div></div><p>Atributo principal: ${c.p}</p><button class="btn" onclick="go(2)">Escolher ${c.n}</button>`}
  return h+'</div></div>'}
 
@@ -150,76 +206,180 @@ function vAntec(){
  let h='<h2>Escolha um antecedente</h2><div class="split"><div class="side">';
  BG.forEach((b,i)=>h+=`<button class="item${S.bg===i?' sel':''}" onclick="set('bg',${i})"><span>${b.n}</span></button>`);
  h+='</div><div class="detail">';
- if(S.bg===null)h+='<p>Selecione um antecedente na lista para ver os detalhes.</p>';
+ if(S.bg===null)h+='<p>Selecione um antecedente na lista.</p>';
  else{
   const b=BG[S.bg],o=b.a.map(a=>[a,ABN[a]]);
-  h+=`<h2>${b.n}</h2>
-  <p><b>Talento de origem:</b> ${b.f}</p>
-  <p><b>Perícias:</b> ${b.s.join(' e ')}</p>
-  <p><b>Ferramenta:</b> ${b.i}</p>
-  <div class="row" style="margin-top:14px"><label>Como distribuir os bônus de atributo?<select onchange="set('mode',this.value)"><option value="21"${S.mode==='21'?' selected':''}>+2 em um e +1 em outro</option><option value="111"${S.mode==='111'?' selected':''}>+1 nos três</option></select></label>`;
-  if(S.mode==='21')h+=`<label>Atributo com +2${sel('p2',o,S.p2,"set('p2',this.value)",'Escolha')}</label><label>Atributo com +1${sel('p1',o,S.p1,"set('p1',this.value)",'Escolha')}</label>`;
+  h+=`<h2>${b.n}</h2><p><b>Talento:</b> ${b.f}</p><p><b>Perícias:</b> ${b.s.join(' e ')}</p><p><b>Ferramenta:</b> ${b.i}</p>
+  <div class="row" style="margin-top:12px"><label>Bônus de atributo<select onchange="set('mode',this.value)"><option value="21"${S.mode==='21'?' selected':''}>+2 e +1</option><option value="111"${S.mode==='111'?' selected':''}>+1 nos três</option></select></label>`;
+  if(S.mode==='21')h+=`<label>+2${sel('p2',o,S.p2,"set('p2',this.value)",'Escolha')}</label><label>+1${sel('p1',o,S.p1,"set('p1',this.value)",'Escolha')}</label>`;
   h+='</div>';
-  if(S.mode==='21'&&S.p2&&S.p2===S.p1)h+='<p class="warn">Escolha atributos diferentes para +2 e +1.</p>';
-  h+=`<button class="btn" style="margin-top:14px" onclick="go(3)">Escolher ${b.n}</button>`;
+  if(S.mode==='21'&&S.p2&&S.p2===S.p1)h+='<p class="warn">Escolha atributos diferentes.</p>';
+  h+=`<button class="btn" style="margin-top:12px" onclick="go(3)">Escolher ${b.n}</button>`;
  }
  return h+'</div></div>'}
 
-function vAtr(){const ass=S.method==='std'||S.method==='rnd';let h=`<h2>Valores de atributo</h2><div class="row"><label>Método<select onchange="set('method',this.value)"><option value="std"${S.method==='std'?' selected':''}>Conjunto padrão (15, 14, 13, 12, 10, 8)</option><option value="rnd"${S.method==='rnd'?' selected':''}>Geração aleatória (4d6, descarta o menor)</option><option value="pb"${S.method==='pb'?' selected':''}>Compra de pontos (27 pontos)</option><option value="man"${S.method==='man'?' selected':''}>Manual</option></select></label></div>`;if(S.method==='pb')h+=`<p>Pontos restantes: <b>${27-spent()}</b></p>`;if(S.method==='std')h+=`<p><button class="btn alt" onclick="suggest()">Usar a sugestão para ${CL[S.cls].n}</button></p>`;if(S.method==='rnd')h+=`<p><button class="btn alt" onclick="roll6()">${S.rolled.length?'Rolar de novo':'Rolar atributos'}</button> ${S.rolled.length?'Resultado: '+S.rolled.join(', '):''}</p>`;if(ass&&S.method==='rnd'&&!S.rolled.length)h+='<p class="warn">Role os atributos para distribuir os valores.</p>';if(ass&&S.rolled.length+(S.method==='std')>0&&!stdOk()&&AB.some(a=>S.std[a]))h+='<p class="warn">Use cada valor do conjunto exatamente uma vez.</p>';h+='<div class="ab">';AB.forEach(a=>{const t=score(a),b=bonus(a);let c='';if(ass)c=sel('s'+a,[...new Set(pool())].map(v=>[v,v]),S.std[a],`mapset('std','${a}',this.value)`,'–');else if(S.method==='pb')c=`<button class="pm" aria-label="Diminuir ${ABN[a]}" onclick="pm('${a}',-1)"${S.pb[a]<=8?' disabled':''}>−</button><b>${S.pb[a]}</b><button class="pm" aria-label="Aumentar ${ABN[a]}" onclick="pm('${a}',1)"${S.pb[a]>=15||spent()+(COST[S.pb[a]+1]-COST[S.pb[a]])>27?' disabled':''}>+</button>`;else c=`<input type="number" min="3" max="18" value="${S.man[a]}" aria-label="${ABN[a]}" onchange="mapset('man','${a}',this.value)">`;h+=`<div class="abc"><div>${ABN[a]}</div><div class="v">${t}</div><div class="m">mod ${fmt(mod(t))}${b?` · origem +${b}`:''}</div><div class="ctl">${c}</div></div>`});return h+'</div>'}
+function vAtr(){const ass=S.method==='std'||S.method==='rnd';let h=`<h2>Valores de atributo</h2><div class="row"><label>Método<select onchange="set('method',this.value)"><option value="std"${S.method==='std'?' selected':''}>Conjunto padrão</option><option value="rnd"${S.method==='rnd'?' selected':''}>Aleatório (4d6)</option><option value="pb"${S.method==='pb'?' selected':''}>Compra de pontos</option><option value="man"${S.method==='man'?' selected':''}>Manual</option></select></label></div>`;if(S.method==='pb')h+=`<p>Pontos restantes: <b>${27-spent()}</b></p>`;if(S.method==='std')h+=`<p><button class="btn alt" onclick="suggest()">Sugestão para ${CL[S.cls].n}</button></p>`;if(S.method==='rnd')h+=`<p><button class="btn alt" onclick="roll6()">${S.rolled.length?'Rolar de novo':'Rolar atributos'}</button> ${S.rolled.length?'Resultado: '+S.rolled.join(', '):''}</p>`;if(ass&&S.method==='rnd'&&!S.rolled.length)h+='<p class="warn">Role os atributos.</p>';if(ass&&(S.rolled.length||S.method==='std')&&!stdOk()&&AB.some(a=>S.std[a]))h+='<p class="warn">Use cada valor uma vez.</p>';h+='<div class="ab">';AB.forEach(a=>{const t=score(a),b=bonus(a);let c='';if(ass)c=sel('s'+a,[...new Set(pool())].map(v=>[v,v]),S.std[a],`mapset('std','${a}',this.value)`,'–');else if(S.method==='pb')c=`<button class="pm" onclick="pm('${a}',-1)"${S.pb[a]<=8?' disabled':''}>−</button><b>${S.pb[a]}</b><button class="pm" onclick="pm('${a}',1)"${S.pb[a]>=15||spent()+(COST[S.pb[a]+1]-COST[S.pb[a]])>27?' disabled':''}>+</button>`;else c=`<input type="number" min="3" max="18" value="${S.man[a]}" onchange="mapset('man','${a}',this.value)">`;h+=`<div class="abc"><div>${ABN[a]}</div><div class="v">${t}</div><div class="m">mod ${fmt(mod(t))}${b?` · origem +${b}`:''}</div><div class="ctl">${c}</div></div>`});return h+'</div>'}
 function bgSk(){return S.bg===null?[]:BG[S.bg].s}
-function vPer(){const c=CL[S.cls];let h=`<h2>Perícias de ${c.n}</h2><p>Escolha ${c.k}. Selecionadas: ${S.skills.length}/${c.k}. As perícias do antecedente já estão marcadas.</p><div class="sk">`;c.l.forEach(k=>{const lock=bgSk().includes(k),on=lock||S.skills.includes(k);h+=`<label class="${lock?'lock':''}"><input type="checkbox" ${on?'checked':''} ${lock||(!on&&S.skills.length>=c.k)?'disabled':''} onchange="togSkill('${k}')">${k} (${SK[k]})</label>`});return h+'</div>'}
-function vDet(){let h='<h2>Alinhamento</h2><p>D&amp;D assume personagens que não são malignos. Confirme com o Mestre antes de escolher um alinhamento Mau.</p><div class="grid">';ALN.forEach(a=>h+=`<button class="opt${S.align===a?' sel':''}" onclick="set('align','${a}')"><b>${a}</b></button>`);h+=`</div><h2 style="margin-top:18px">Idiomas</h2><p>Comum + 2 à escolha. Selecionados: ${S.lang.length}/2.</p><div class="sk">`;LANG.forEach(l=>{const on=S.lang.includes(l);h+=`<label><input type="checkbox" ${on?'checked':''} ${!on&&S.lang.length>=2?'disabled':''} onchange="const i=S.lang.indexOf('${l}');if(i>=0)S.lang.splice(i,1);else if(S.lang.length<2)S.lang.push('${l}');render()">${l}</label>`});return h+'</div>'}
+function vPer(){const c=CL[S.cls];let h=`<h2>Perícias de ${c.n}</h2><p>Escolha ${c.k}. Selecionadas: ${S.skills.length}/${c.k}.</p><div class="sk">`;c.l.forEach(k=>{const lock=bgSk().includes(k),on=lock||S.skills.includes(k);h+=`<label class="${lock?'lock':''}"><input type="checkbox" ${on?'checked':''} ${lock||(!on&&S.skills.length>=c.k)?'disabled':''} onchange="togSkill('${k}')">${k} (${SK[k]})</label>`});return h+'</div>'}
+function vDet(){let h='<h2>Alinhamento</h2><div class="grid">';ALN.forEach(a=>h+=`<button class="opt${S.align===a?' sel':''}" onclick="set('align','${a}')"><b>${a}</b></button>`);h+=`</div><h2 style="margin-top:16px">Idiomas</h2><p>Comum + 2. Selecionados: ${S.lang.length}/2.</p><div class="sk">`;LANG.forEach(l=>{const on=S.lang.includes(l);h+=`<label><input type="checkbox" ${on?'checked':''} ${!on&&S.lang.length>=2?'disabled':''} onchange="const i=S.lang.indexOf('${l}');if(i>=0)S.lang.splice(i,1);else if(S.lang.length<2)S.lang.push('${l}');render()">${l}</label>`});return h+'</div>'}
+
+/* Official-style interactive sheet */
 function vFicha(){
  const c=CL[S.cls],sp=SP[S.sp],b=BG[S.bg],pb=2;
  const prof=new Set([...S.skills,...b.s]);
- const hp=c.d+mod(score('CON')),per=mod(score('SAB'))+(prof.has('Percepção')?pb:0)+10;
+ const hp=c.d+mod(score('CON'));
  const ac=10+mod(score('DES'));
- let h=`<div class="sheet-head">
-  <input class="sheet-name" value="${(S.name||'').replace(/"/g,'&quot;')}" placeholder="Nome do personagem" onchange="S.name=this.value">
-  <button class="chip" type="button" onclick="go(0)">${sp.n}</button>
-  <button class="chip" type="button" onclick="go(1)">${c.n}</button>
-  <button class="chip" type="button" onclick="go(2)">${b.n}</button>
-  <button class="chip" type="button" onclick="go(5)">${S.align||'Alinhamento'}</button>
- </div>
- <div class="stat" style="margin:12px 0">
-  <div><b>${hp}</b>Pontos de vida</div>
-  <div><b>${ac}</b>CA sem armadura</div>
-  <div><b>${fmt(mod(score('DES')))}</b>Iniciativa</div>
-  <div><b>${fmt(pb)}</b>Proficiência</div>
-  <div><b>${sp.mov||'9 m'}</b>Deslocamento</div>
-  <div><b>${per}</b>Percepção passiva</div>
- </div>
- <div class="sheet">
-  <div class="sheet-block" onclick="go(3)">
-   <h3>Atributos e salvaguardas <span class="edit-hint">editar</span></h3>
-   <ul class="list">`;
- AB.forEach(a=>{const m=mod(score(a)),ps=c.s.includes(a);h+=`<li><span>${ABN[a]} ${score(a)} (${fmt(m)})</span><span><span class="dot${ps?' p':''}"></span>salvaguarda ${fmt(m+(ps?pb:0))}</span></li>`});
- h+=`</ul></div>
-  <div class="sheet-block" onclick="go(4)">
-   <h3>Perícias <span class="edit-hint">editar</span></h3>
-   <ul class="list">`;
- ALL.forEach(k=>{const p=prof.has(k);h+=`<li><span><span class="dot${p?' p':''}"></span>${k}</span><span>${fmt(mod(score(SK[k]))+(p?pb:0))}</span></li>`});
- h+=`</ul></div>
-  <div class="sheet-block full" onclick="go(0)">
-   <h3>Espécie <span class="edit-hint">editar</span></h3>
-   <p><b>${sp.n}</b> · ${sp.sz} · Deslocamento ${sp.mov||'9 m'}</p>
+ const per=10+mod(score('SAB'))+(prof.has('Percepção')?pb:0);
+ const ini=fmt(mod(score('DES')));
+
+ let h=`<div class="ficha">
+  <div class="f-top">
+   <div class="box clickable f-fields" onclick="openModal('ident')">
+    <span class="edit">editar</span>
+    <div class="f-field"><span class="lbl">Nome do personagem</span><span class="val">${S.name||'—'}</span></div>
+    <div class="row2">
+     <div class="f-field"><span class="lbl">Origem</span><span class="val">${b.n}</span></div>
+     <div class="f-field"><span class="lbl">Classe</span><span class="val">${c.n}</span></div>
+    </div>
+    <div class="row2">
+     <div class="f-field"><span class="lbl">Espécie</span><span class="val">${sp.n}</span></div>
+     <div class="f-field"><span class="lbl">Nível</span><span class="val">1</span></div>
+    </div>
+   </div>
+   <div class="box f-combat">
+    <div class="f-ac"><span class="lbl">CA</span><div class="big">${ac}</div></div>
+    <div class="f-hp">
+     <div class="cell"><span class="lbl">PV atuais</span><div class="big">${hp}</div></div>
+     <div class="cell"><span class="lbl">PV máx.</span><div class="big">${hp}</div></div>
+     <div class="cell" style="grid-column:1/-1"><span class="lbl">Dado de vida</span><div class="big">1d${c.d}</div></div>
+    </div>
+    <div class="f-ac"><span class="lbl">Bônus prof.</span><div class="big">${fmt(pb)}</div></div>
+   </div>
+   <div class="box clickable" onclick="openModal('det')" style="display:flex;flex-direction:column;gap:6px">
+    <span class="edit">editar</span>
+    <div class="f-field"><span class="lbl">Alinhamento</span><span class="val">${S.align||'—'}</span></div>
+    <div class="f-field"><span class="lbl">Idiomas</span><span class="val">Comum${S.lang.length?', '+S.lang.join(', '):''}</span></div>
+   </div>
   </div>
-  <div class="sheet-block full" onclick="go(2)">
-   <h3>Antecedente <span class="edit-hint">editar</span></h3>
-   <p><b>${b.n}</b></p>
-   <p>Talento de origem: ${b.f}</p>
-   <p>Perícias: ${b.s.join(' e ')} · Ferramenta: ${b.i}</p>
+
+  <div class="f-mid">
+   <div class="f-abilities">
+    ${AB.map(a=>{
+      const sc=score(a),m=mod(sc),ps=c.s.includes(a);
+      return `<div class="box clickable ability" onclick="openModal('atr')">
+        <span class="edit">editar</span>
+        <div class="name">${ABN[a].toUpperCase()}</div>
+        <div class="score">${sc}</div>
+        <div class="mod">${fmt(m)}</div>
+        <div class="sv"><span class="dot${ps?' p':''}"></span>salv. ${fmt(m+(ps?pb:0))}</div>
+      </div>`;
+    }).join('')}
+   </div>
+   <div class="f-center">
+    <div class="f-stats-row">
+     <div class="box"><span class="lbl">Iniciativa</span><div class="big">${ini}</div></div>
+     <div class="box clickable" onclick="openModal('sp')"><span class="edit">editar</span><span class="lbl">Deslocamento</span><div class="big">${sp.mov||'9 m'}</div></div>
+     <div class="box clickable" onclick="openModal('sp')"><span class="edit">editar</span><span class="lbl">Tamanho</span><div class="big" style="font-size:.95rem">${sp.sz}</div></div>
+     <div class="box"><span class="lbl">Percepção passiva</span><div class="big">${per}</div></div>
+    </div>
+    <div class="box clickable f-skills" onclick="openModal('per')">
+     <span class="edit">editar</span>
+     <div class="skill-col">
+      ${['Acrobacia','Adestrar Animais','Arcanismo','Atletismo','Atuação','Enganação','Furtividade','História','Intimidação'].map(k=>{
+        const p=prof.has(k);return `<div class="skill-row"><span class="dot${p?' p':''}"></span><span class="nm">${k}</span><span class="bon">${fmt(mod(score(SK[k]))+(p?pb:0))}</span></div>`;
+      }).join('')}
+     </div>
+     <div class="skill-col">
+      ${['Intuição','Investigação','Medicina','Natureza','Percepção','Persuasão','Prestidigitação','Religião','Sobrevivência'].map(k=>{
+        const p=prof.has(k);return `<div class="skill-row"><span class="dot${p?' p':''}"></span><span class="nm">${k}</span><span class="bon">${fmt(mod(score(SK[k]))+(p?pb:0))}</span></div>`;
+      }).join('')}
+     </div>
+    </div>
+    <div class="f-bottom">
+     <div class="box clickable f-features" onclick="openModal('sp')">
+      <span class="edit">editar</span>
+      <span class="lbl">Características raciais</span>
+      <p><b>${sp.n}</b> · ${sp.sz} · ${sp.mov||'9 m'}</p>
+     </div>
+     <div class="box clickable f-features" onclick="openModal('bg')">
+      <span class="edit">editar</span>
+      <span class="lbl">Talentos / Antecedente</span>
+      <p><b>${b.n}</b> — ${b.f}</p>
+      <p>Perícias: ${b.s.join(' e ')}</p>
+      <p>Ferramenta: ${b.i}</p>
+     </div>
+    </div>
+    <div class="box clickable f-features" onclick="openModal('cls')">
+     <span class="edit">editar</span>
+     <span class="lbl">Características de classe</span>
+     <p><b>${c.n}</b> — ${CLD[c.n]}</p>
+     <p>Dado de vida d${c.d} · Salvaguardas ${c.s.map(a=>ABN[a]).join(', ')} · Atributo principal: ${c.p}</p>
+     ${SC[c.n]?`<p>Conjuração (${ABN[SC[c.n]]}): CD ${8+mod(score(SC[c.n]))+pb} · ataque ${fmt(mod(score(SC[c.n]))+pb)}</p>`:''}
+    </div>
+    <div class="box">
+     <span class="lbl">Ataques</span>
+     <p>Corpo a corpo: ${fmt(mod(score('FOR'))+pb)} · À distância: ${fmt(mod(score('DES'))+pb)}</p>
+    </div>
+   </div>
   </div>
-  <div class="sheet-block full" onclick="go(5)">
-   <h3>Detalhes <span class="edit-hint">editar</span></h3>
-   <p><b>Alinhamento:</b> ${S.align||'—'}</p>
-   <p><b>Idiomas:</b> Comum${S.lang.length?', '+S.lang.join(', '):''}</p>
-   <p><b>Dado de vida:</b> 1d${c.d}</p>
-   <p><b>Ataque corpo a corpo:</b> ${fmt(mod(score('FOR'))+pb)} · <b>à distância:</b> ${fmt(mod(score('DES'))+pb)}</p>`;
- if(SC[c.n]) h+=`<p><b>Conjuração (${ABN[SC[c.n]]}):</b> CD ${8+mod(score(SC[c.n]))+pb} · ataque ${fmt(mod(score(SC[c.n]))+pb)}</p>`;
- h+=`</div>
  </div>`;
- return h
+ return h;
+}
+
+/* Modal contents */
+function modalIdent(){
+ return `<h2>Identidade</h2>
+  <label>Nome<br><input style="width:100%" value="${(S.name||'').replace(/"/g,'&quot;')}" oninput="S.name=this.value"></label>
+  <p style="margin-top:12px;color:var(--mute)">Espécie, classe e origem têm seções próprias na ficha.</p>
+  <div class="modal-actions"><button class="btn" onclick="closeModal()">Concluir</button></div>`;
+}
+function modalList(title, items, selected, onPick){
+ let h=`<h2>${title}</h2><div class="side" style="max-height:50vh">`;
+ items.forEach((it,i)=>{
+  h+=`<button class="item${selected===i?' sel':''}" onclick="${onPick}(${i})"><span>${it.n}</span></button>`;
+ });
+ h+=`</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Concluir</button></div>`;
+ return h;
+}
+function modalSp(){
+ let h=`<h2>Espécie</h2>
+  <input class="race-search" type="search" value="${S.raceQuery.replace(/"/g,'&quot;')}" placeholder="Pesquisar..." oninput="S.raceQuery=this.value;render()">
+  <div class="side" style="max-height:45vh">`;
+ SP.forEach((s,i)=>{if(!norm(s.n).includes(norm(S.raceQuery)))return;h+=`<button class="item${S.sp===i?' sel':''}" onclick="set('sp',${i})"><span>${s.n}</span> <small style="color:var(--mute)">${s.sz} · ${s.mov||'9 m'}</small></button>`});
+ h+=`</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Concluir</button></div>`;
+ return h;
+}
+function modalCls(){
+ let h=`<h2>Classe</h2><div class="side" style="max-height:50vh">`;
+ CL.forEach((c,i)=>h+=`<button class="item${S.cls===i?' sel':''}" onclick="set('cls',${i})"><span>${c.n}</span></button>`);
+ if(S.cls!==null){const c=CL[S.cls];h+=`</div><div class="info"><p>${CLD[c.n]}</p><p>d${c.d} · ${c.p}</p></div>`;}
+ else h+='</div>';
+ h+=`<div class="modal-actions"><button class="btn" onclick="closeModal()">Concluir</button></div>`;
+ return h;
+}
+function modalBg(){
+ let h=`<h2>Antecedente</h2><div class="side" style="max-height:40vh">`;
+ BG.forEach((b,i)=>h+=`<button class="item${S.bg===i?' sel':''}" onclick="set('bg',${i})"><span>${b.n}</span></button>`);
+ h+='</div>';
+ if(S.bg!==null){
+  const b=BG[S.bg],o=b.a.map(a=>[a,ABN[a]]);
+  h+=`<div class="info"><p><b>${b.f}</b></p><p>${b.s.join(' e ')} · ${b.i}</p></div>
+  <div class="row"><label>Bônus<select onchange="set('mode',this.value)"><option value="21"${S.mode==='21'?' selected':''}>+2 e +1</option><option value="111"${S.mode==='111'?' selected':''}>+1 nos três</option></select></label>`;
+  if(S.mode==='21')h+=`<label>+2${sel('p2',o,S.p2,"set('p2',this.value)",'?')}</label><label>+1${sel('p1',o,S.p1,"set('p1',this.value)",'?')}</label>`;
+  h+='</div>';
+ }
+ h+=`<div class="modal-actions"><button class="btn" onclick="closeModal()">Concluir</button></div>`;
+ return h;
+}
+function modalAtr(){return `<h2>Atributos</h2>${vAtr()}<div class="modal-actions"><button class="btn" onclick="closeModal()">Concluir</button></div>`}
+function modalPer(){return `<h2>Perícias</h2>${vPer()}<div class="modal-actions"><button class="btn" onclick="closeModal()">Concluir</button></div>`}
+function modalDet(){return `<h2>Detalhes</h2>${vDet()}<div class="modal-actions"><button class="btn" onclick="closeModal()">Concluir</button></div>`}
+
+function renderModal(){
+ if(!S.modal){document.getElementById('modal-root').innerHTML='';return}
+ const map={ident:modalIdent,sp:modalSp,cls:modalCls,bg:modalBg,atr:modalAtr,per:modalPer,det:modalDet};
+ const body=(map[S.modal]||(()=>'<p>…</p>'))();
+ document.getElementById('modal-root').innerHTML=`<div class="modal-bg" onclick="if(event.target===this)closeModal()"><div class="modal"><button class="close-x" onclick="closeModal()" aria-label="Fechar">×</button>${body}</div></div>`;
 }
 
 function roll6(){const r=()=>{const d=[1,2,3,4].map(()=>1+Math.floor(Math.random()*6)).sort((x,y)=>x-y);return d[1]+d[2]+d[3]};S.rolled=[0,0,0,0,0,0].map(r).sort((x,y)=>y-x);S.std={};render()}
@@ -234,9 +394,18 @@ function rAtr(){if(S.method==='std'){const v=shuf(STD);S.std={};AB.forEach((a,i)
 function rPer(){const c=CL[S.cls];S.skills=shuf(c.l.filter(k=>!bgSk().includes(k))).slice(0,c.k)}
 function rDet(){S.align=pick(ALN.slice(0,6));S.lang=shuf(LANG).slice(0,2)}
 function rand(){const f=[rSp,rCls,rBg,rAtr,rPer,rDet];if(S.step<6)f[S.step]();else f.forEach(g=>g());render()}
-function render(){document.getElementById('steps').innerHTML=NAMES.map((n,i)=>`<button class="${i===S.step?'on':i<S.step?'done':''}" onclick="go(${i})">${n}</button>`).join('');const v=[vRaca,vClasse,vAntec,vAtr,vPer,vDet,vFicha];let h='<div class="panel">';if(S.step<6)h+=`<div class="nav"><button class="btn alt" onclick="go(${S.step-1})"${S.step?'':' disabled'}>Voltar</button><button class="btn alt" onclick="rand()">Aleatório</button><button class="btn" onclick="go(${S.step+1})"${valid(S.step)?'':' disabled'}>Próximo</button></div>`;else h+='<div class="nav"><button class="btn alt" onclick="go(0)">Editar</button><button class="btn alt" onclick="rand()">Sortear tudo</button><button class="btn alt" onclick="window.print()">Imprimir ficha</button></div>';h+=v[S.step]();document.getElementById('app').innerHTML=h+'</div>'}
-render();
 
+function render(){
+ document.getElementById('steps').innerHTML=NAMES.map((n,i)=>`<button class="${i===S.step?'on':i<S.step?'done':''}" onclick="go(${i})">${n}</button>`).join('');
+ const v=[vRaca,vClasse,vAntec,vAtr,vPer,vDet,vFicha];
+ let h='<div class="panel">';
+ if(S.step<6)h+=`<div class="nav"><button class="btn alt" onclick="go(${S.step-1})"${S.step?'':' disabled'}>Voltar</button><button class="btn alt" onclick="rand()">Aleatório</button><button class="btn" onclick="go(${S.step+1})"${valid(S.step)?'':' disabled'}>Próximo</button></div>`;
+ else h+=`<div class="nav"><button class="btn alt" onclick="rand()">Sortear tudo</button><button class="btn alt" onclick="window.print()">Imprimir</button></div>`;
+ h+=v[S.step]();
+ document.getElementById('app').innerHTML=h+'</div>';
+ renderModal();
+}
+render();
 </script>
 </body>
 </html>
