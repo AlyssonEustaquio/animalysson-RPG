@@ -353,7 +353,7 @@ function modalSp(){
  let h=`<h2>Espécie</h2>
   <input class="race-search" type="search" value="${S.raceQuery.replace(/"/g,'&quot;')}" placeholder="Pesquisar..." oninput="S.raceQuery=this.value;render()">
   <div class="side" style="max-height:45vh">`;
- SP.forEach((s,i)=>{if(!norm(s.n).includes(norm(S.raceQuery)))return;h+=`<button class="item${S.sp===i?' sel':''}" onclick="set('sp',${i})"><span>${s.n}</span> <small style="color:var(--mute)">${s.sz} · ${s.mov||'9 m'}</small></button>`});
+ SP.forEach((s,i)=>{if(!norm(s.n).includes(norm(S.raceQuery)))return;h+=`<button class="item${S.sp===i?' sel':''}" onclick="set('sp',${i})"><span>${s.n}</span></button>`});
  h+=`</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Concluir</button></div>`;
  return h;
 }
