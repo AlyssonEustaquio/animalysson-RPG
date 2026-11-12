@@ -38,7 +38,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 .abc select,.abc input{width:76px;text-align:center}
 .pm{width:32px;height:32px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;cursor:pointer}
 .pm:disabled{opacity:.35;cursor:default}
-.nav{display:flex;justify-content:space-between;flex-wrap:wrap;margin-top:18px;gap:10px}
+.nav{display:flex;justify-content:space-between;flex-wrap:wrap;margin-bottom:18px;gap:10px}
 .btn{padding:10px 20px;border-radius:6px;border:1px solid var(--red);background:var(--red);color:var(--redink);font:inherit;font-weight:700;cursor:pointer}
 .btn.alt{background:transparent;color:var(--red)}
 .btn:disabled{opacity:.4;cursor:default}
@@ -138,13 +138,13 @@ function vClasse(){let h='<h2>Escolha uma classe</h2><div class="split"><div cla
 function norm(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
 function vRaca(){
  let h=`<label>Nome do personagem<br><input value="${S.name.replace(/"/g,'&quot;')}" oninput="S.name=this.value" placeholder="Ex.: Thorin"></label>
- <h2 style="margin-top:18px">Escolha uma espécie</h2>
- <input class="race-search" type="search" value="${S.raceQuery.replace(/"/g,'&quot;')}" placeholder="Pesquisar espécie..." oninput="S.raceQuery=this.value;render()">
+ <h2 style="margin-top:18px">Escolha uma espécie</h2>`;
+ if(S.sp!==null){const sp=SP[S.sp];h+=`<div class="info"><p><b>${sp.n}</b> · <b>Tamanho:</b> ${sp.sz} · <b>Deslocamento:</b> ${sp.mov||'9 m'}</p></div>`}
+ h+=`<input class="race-search" type="search" value="${S.raceQuery.replace(/"/g,'&quot;')}" placeholder="Pesquisar espécie..." oninput="S.raceQuery=this.value;render()">
  <p class="race-count">${SP.filter(s=>norm(s.n).includes(norm(S.raceQuery))).length} opções no catálogo · ${SP.length} cadastradas</p><div class="grid">`;
  let count=0;SP.forEach((s,i)=>{if(!norm(s.n).includes(norm(S.raceQuery)))return;count++;h+=`<button class="opt${S.sp===i?' sel':''}" onclick="set('sp',${i})"><b>${s.n}</b><small>${s.sz} · ${s.mov||'9 m'}</small></button>`});
  if(!count)h+='<p>Nenhuma espécie encontrada. Tente outro termo.</p>';
  h+='</div>';
- if(S.sp!==null){const sp=SP[S.sp];h+=`<div class="info"><p><b>${sp.n}</b></p><p><b>Tamanho:</b> ${sp.sz} · <b>Deslocamento:</b> ${sp.mov||'9 m'}</p></div>`}
  return h}
 function vAntec(){let h='<h2>Escolha um antecedente</h2><div class="grid">';BG.forEach((b,i)=>h+=`<button class="opt${S.bg===i?' sel':''}" onclick="set('bg',${i})"><b>${b.n}</b><small>${b.f}</small></button>`);h+='</div>';if(S.bg!==null){const b=BG[S.bg],o=b.a.map(a=>[a,ABN[a]]);h+=`<div class="info"><p>Talento de origem: ${b.f}</p><p>Perícias: ${b.s.join(' e ')}</p><p>Ferramenta: ${b.i}</p></div><div class="row"><label>Como distribuir os bônus de atributo?<select onchange="set('mode',this.value)"><option value="21"${S.mode==='21'?' selected':''}>+2 em um e +1 em outro</option><option value="111"${S.mode==='111'?' selected':''}>+1 nos três</option></select></label>`;if(S.mode==='21')h+=`<label>Atributo com +2${sel('p2',o,S.p2,"set('p2',this.value)",'Escolha')}</label><label>Atributo com +1${sel('p1',o,S.p1,"set('p1',this.value)",'Escolha')}</label>`;h+='</div>';if(S.mode==='21'&&S.p2&&S.p2===S.p1)h+='<p class="warn">Escolha atributos diferentes para +2 e +1.</p>'}return h}
 const SUG={'Bárbaro':[15,13,14,10,12,8],'Bardo':[8,14,12,13,10,15],'Clérigo':[14,8,13,10,15,12],'Druida':[8,12,14,13,15,10],'Guerreiro':[15,14,13,8,10,12],'Monge':[12,15,13,10,14,8],'Paladino':[15,10,13,8,12,14],'Guardião':[12,15,13,8,14,10],'Ladino':[12,15,13,14,10,8],'Feiticeiro':[10,13,14,8,12,15],'Bruxo':[8,14,13,12,10,15],'Mago':[8,12,13,15,14,10]};
@@ -169,7 +169,7 @@ function rAtr(){if(S.method==='std'){const v=shuf(STD);S.std={};AB.forEach((a,i)
 function rPer(){const c=CL[S.cls];S.skills=shuf(c.l.filter(k=>!bgSk().includes(k))).slice(0,c.k)}
 function rDet(){S.align=pick(ALN.slice(0,6));S.lang=shuf(LANG).slice(0,2)}
 function rand(){const f=[rSp,rCls,rBg,rAtr,rPer,rDet];if(S.step<6)f[S.step]();else f.forEach(g=>g());render()}
-function render(){document.getElementById('steps').innerHTML=NAMES.map((n,i)=>`<button class="${i===S.step?'on':i<S.step?'done':''}" onclick="go(${i})">${n}</button>`).join('');const v=[vRaca,vClasse,vAntec,vAtr,vPer,vDet,vFicha];let h='<div class="panel">';h+=v[S.step]();if(S.step<6)h+=`<div class="nav"><button class="btn alt" onclick="go(${S.step-1})"${S.step?'':' disabled'}>Voltar</button><button class="btn alt" onclick="rand()">Aleatório</button><button class="btn" onclick="go(${S.step+1})"${valid(S.step)?'':' disabled'}>Próximo</button></div>`;else h+='<div class="nav"><button class="btn alt" onclick="go(0)">Editar</button><button class="btn alt" onclick="rand()">Sortear tudo</button></div>';document.getElementById('app').innerHTML=h+'</div>'}
+function render(){document.getElementById('steps').innerHTML=NAMES.map((n,i)=>`<button class="${i===S.step?'on':i<S.step?'done':''}" onclick="go(${i})">${n}</button>`).join('');const v=[vRaca,vClasse,vAntec,vAtr,vPer,vDet,vFicha];let h='<div class="panel">';if(S.step<6)h+=`<div class="nav"><button class="btn alt" onclick="go(${S.step-1})"${S.step?'':' disabled'}>Voltar</button><button class="btn alt" onclick="rand()">Aleatório</button><button class="btn" onclick="go(${S.step+1})"${valid(S.step)?'':' disabled'}>Próximo</button></div>`;else h+='<div class="nav"><button class="btn alt" onclick="go(0)">Editar</button><button class="btn alt" onclick="rand()">Sortear tudo</button></div>';h+=v[S.step]();document.getElementById('app').innerHTML=h+'</div>'}
 render();
 </script>
 </body>
