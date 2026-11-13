@@ -146,7 +146,7 @@ input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:
 <script>
 /* Carrega os catálogos sempre com um parâmetro novo na URL, para o navegador
    nunca reaproveitar uma versão antiga dos .js em cache. */
-['especies.js','classes.js','antecedentes.js','spells.js'].forEach(function(f){
+['especies.js','classes.js','antecedentes.js','spells.js','itens.js'].forEach(function(f){
   document.write('<script src="'+f+'?v='+Date.now()+'"><\/script>');
 });
 </script>
@@ -156,10 +156,13 @@ const CL=window.CLASSES;
 const CLD=window.CLASS_DESC;
 const BG=window.BACKGROUNDS;
 const SPELLS=window.SPELLS;
+const ITEMS=window.ITEMS;
+const MAGIC_ITEMS=window.MAGIC_ITEMS;
 if(!Array.isArray(SP)||!SP.length)throw new Error('Não foi possível carregar especies.js');
 if(!Array.isArray(CL)||!CL.length)throw new Error('Não foi possível carregar classes.js');
 if(!Array.isArray(BG)||!BG.length)throw new Error('Não foi possível carregar antecedentes.js');
 if(!Array.isArray(SPELLS)||!SPELLS.length)throw new Error('Não foi possível carregar spells.js');
+if(!Array.isArray(ITEMS)||!ITEMS.length)throw new Error('Não foi possível carregar itens.js');
 const AB=['FOR','DES','CON','INT','SAB','CAR'];
 const ABN={FOR:'Força',DES:'Destreza',CON:'Constituição',INT:'Inteligência',SAB:'Sabedoria',CAR:'Carisma'};
 const SK={'Acrobacia':'DES','Adestrar Animais':'SAB','Arcanismo':'INT','Atletismo':'FOR','Atuação':'CAR','Enganação':'CAR','Furtividade':'DES','História':'INT','Intimidação':'CAR','Intuição':'SAB','Investigação':'INT','Medicina':'SAB','Natureza':'INT','Percepção':'SAB','Persuasão':'CAR','Prestidigitação':'DES','Religião':'INT','Sobrevivência':'SAB'};
