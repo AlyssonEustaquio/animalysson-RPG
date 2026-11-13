@@ -1,17 +1,8 @@
-/*
- * Catálogo de antecedentes (origens) oficiais de D&D, regras 2024: 68 antecedentes.
- * Fontes: Livro do Jogador 2024, Heroes of Faerûn, Eberron: Forge of the Artificer,
- *         Astarion's Book of Hungers, Ravenloft: The Horrors Within e Arcana Unleashed.
- * Campos: n (nome), a (atributos de origem), f (talento de origem),
- *         s (perícias), i (ferramenta/item).
- * A lista é ordenada alfabeticamente no final do arquivo.
- */
 const GAME='Kit de jogo (à escolha)', ART='Ferramentas de artesão (à escolha)', CAL='Suprimentos de caligrafia',
       DIS='Kit de disfarce', HERB='Kit de herbalismo', THI='Ferramentas de ladrão', NAV='Ferramentas de navegador',
       CART='Ferramentas de cartógrafo', COOK='Utensílios de cozinheiro', MUS='Instrumento musical (à escolha)';
 
 window.BACKGROUNDS = [
-  // ===== Livro do Jogador 2024 =====
   {n:'Acólito',a:['INT','SAB','CAR'],f:'Iniciado em Magia (Clérigo)',s:['Intuição','Religião'],i:CAL},
   {n:'Artesão',a:['FOR','DES','INT'],f:'Artífice',s:['Investigação','Persuasão'],i:ART},
   {n:'Artista',a:['FOR','DES','CAR'],f:'Músico',s:['Acrobacia','Atuação'],i:MUS},
@@ -28,8 +19,6 @@ window.BACKGROUNDS = [
   {n:'Escriba',a:['DES','INT','SAB'],f:'Habilidoso',s:['Investigação','Percepção'],i:CAL},
   {n:'Soldado',a:['FOR','DES','CON'],f:'Atacante Selvagem',s:['Atletismo','Intimidação'],i:GAME},
   {n:'Andarilho',a:['DES','SAB','CAR'],f:'Sortudo',s:['Intuição','Furtividade'],i:THI},
-
-  // ===== Heroes of Faerûn =====
   {n:'Flibusteiro Chondathano',a:['FOR','DES','SAB'],f:'Habilidoso',s:['Atletismo','Prestidigitação'],i:'Ferramentas de tecelão'},
   {n:'Habitante da Magia Morta',a:['FOR','CON','SAB'],f:'Curandeiro',s:['Medicina','Sobrevivência'],i:'Ferramentas de curtidor'},
   {n:'Cultista do Dragão',a:['DES','CON','INT'],f:'Iniciado do Culto do Dragão',s:['Enganação','Furtividade'],i:CAL},
@@ -48,8 +37,6 @@ window.BACKGROUNDS = [
   {n:'Exilado dos Mestres das Sombras',a:['DES','INT','CAR'],f:'Atacante Selvagem',s:['Acrobacia','Furtividade'],i:THI},
   {n:'Iniciado do Fogo Mágico',a:['CON','INT','CAR'],f:'Fagulha do Fogo Mágico',s:['Arcanismo','Percepção'],i:GAME},
   {n:'Mercenário Zhentarim',a:['FOR','DES','CAR'],f:'Brutamontes Zhentarim',s:['Intimidação','Percepção'],i:'Kit de falsificação'},
-
-  // ===== Eberron: Forge of the Artificer =====
   {n:'Herdeiro Aberrante',a:['FOR','CON','CAR'],f:'Marca Dracônica Aberrante',s:['História','Intimidação'],i:DIS},
   {n:'Arqueólogo',a:['DES','INT','SAB'],f:'Habilidoso',s:['História','Sobrevivência'],i:CART},
   {n:'Agente de Casa',a:['FOR','INT','CAR'],f:'Sortudo',s:['Investigação','Persuasão'],i:ART},
@@ -67,19 +54,13 @@ window.BACKGROUNDS = [
   {n:'Herdeiro da Casa Thuranni',a:['DES','INT','CAR'],f:'Marca da Sombra',s:['Atuação','Furtividade'],i:MUS},
   {n:'Herdeiro da Casa Vadalis',a:['CON','SAB','CAR'],f:'Marca do Adestramento',s:['Adestrar Animais','Natureza'],i:HERB},
   {n:'Inquisitivo',a:['CON','INT','CAR'],f:'Alerta',s:['Intuição','Investigação'],i:THI},
-
-  // ===== Astarion's Book of Hungers =====
   {n:'Farrista',a:['DES','INT','CAR'],f:'Folião Incansável',s:['Enganação','Persuasão'],i:GAME},
   {n:'Devoto de Vampiro',a:['FOR','CON','CAR'],f:'Brinquedo do Vampiro',s:['Persuasão','Furtividade'],i:COOK},
   {n:'Sobrevivente de Vampiro',a:['DES','CON','SAB'],f:'Caçador de Vampiros',s:['Intuição','Religião'],i:'Ferramentas de entalhador'},
-
-  // ===== Ravenloft: The Horrors Within =====
   {n:'Assombrado',a:['CON','SAB','CAR'],f:'Sobrevivente ou um Dom Sombrio',s:['Arcanismo','Sobrevivência'],i:GAME},
   {n:'Investigador',a:['INT','SAB','CAR'],f:'Olho Afiado ou um Dom Sombrio',s:['Intuição','Investigação'],i:DIS},
   {n:'Andarilho da Névoa',a:['DES','CON','SAB'],f:'Um Dom Sombrio',s:['Sobrevivência','Furtividade'],i:ART},
   {n:'Médium',a:['CON','INT','SAB'],f:'Um Dom Sombrio',s:['Intuição','Religião'],i:GAME},
-
-  // ===== Arcana Unleashed =====
   {n:'Agente da Nona Pena',a:['DES','INT','CAR'],f:'Infiltrador Arcano',s:['Arcanismo','Prestidigitação'],i:THI},
   {n:'Espião do Conclave Cravejado',a:['DES','SAB','CAR'],f:'Eloquência Arcana',s:['Enganação','Percepção'],i:DIS},
   {n:'Experimento da Alvorada Cósmica',a:['FOR','DES','CON'],f:'Anatomia Transmutada',s:['Atletismo','Sobrevivência'],i:ART},
