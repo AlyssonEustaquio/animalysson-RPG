@@ -1,8 +1,3 @@
-/*
- * Catálogo de espécies jogáveis oficiais de D&D.
- * Uma entrada por espécie (versão oficial mais recente até nov/2026).
- * Campos: n (nome), sz (tamanho), mov (deslocamento).
- */
 window.SPECIES = [
   { "n": "Aasimar", "sz": "Médio ou Pequeno", "mov": "9 m" },
   { "n": "Draconato", "sz": "Médio", "mov": "9 m" },
