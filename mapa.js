@@ -119,23 +119,23 @@ function edgeBlocks(val) {
   return val === EDGE_MURO || val === EDGE_DOOR_C;
 }
 
-// Bloqueio ao cruzar de célula A para B (adjacentes ortogonais)
+// Bloqueio ao cruzar de célula A para B
 function blocksBetween(x0, y0, x1, y1) {
   if (x0 === x1 && y0 === y1) return false;
   if (isCellWall(x1, y1)) return true;
   if (y0 === y1) {
-    // horizontal move
-    if (x1 > x0) return edgeBlocks(getV(x1, y0)); // cruza aresta esquerda de destino
-    return edgeBlocks(getV(x0, y0)); // cruza aresta esquerda da origem
+    // movimento horizontal
+    if (x1 > x0) return edgeBlocks(getV(x1, y0));
+    return edgeBlocks(getV(x0, y0));
   }
   if (x0 === x1) {
+    // movimento vertical
     if (y1 > y0) return edgeBlocks(getH(x0, y1));
     return edgeBlocks(getH(x0, y0));
   }
-  // diagonal: bloqueia se qualquer lado ortogonal estiver bloqueado
-  var hBlocked = blocksBetween(x0, y0, x1, y0) || blocksBetween(x1, y0, x1, y1);
-  var vBlocked = blocksBetween(x0, y0, x0, y1) || blocksBetween(x0, y1, x1, y1);
-  return hBlocked && vBlocked;
+  // diagonal: bloqueia se QUALQUER aresta do canto estiver fechada
+  // (impede passar/luz na união das linhas)
+  return blocksBetween(x0, y0, x1, y0) || blocksBetween(x0, y0, x0, y1);
 }
 
 function sizeSquares(m) {
@@ -159,7 +159,8 @@ function colorForMonster(m) {
   return '#e57373';
 }
 
-// LOS: Bresenham + bloqueio por célula e por aresta ao cruzar
+// LOS: Bresenham + bloqueio por célula e por aresta
+// Diagonais usam OR (não AND) para não vazar luz na união/canto das linhas
 function hasLOS(x0, y0, x1, y1) {
   if (x0 === x1 && y0 === y1) return true;
   if (isCellWall(x1, y1) && !(x1 === x0 && y1 === y0)) return false;
@@ -169,15 +170,18 @@ function hasLOS(x0, y0, x1, y1) {
   var x = x0, y = y0;
   while (!(x === x1 && y === y1)) {
     var e2 = 2 * err;
+    var stepX = e2 > -dy;
+    var stepY = e2 < dx;
     var nx = x, ny = y;
-    if (e2 > -dy) { err -= dy; nx = x + sx; }
-    if (e2 < dx) { err += dx; ny = y + sy; }
-    // passo diagonal: verifica os dois caminhos ortogonais
+    if (stepX) { err -= dy; nx = x + sx; }
+    if (stepY) { err += dx; ny = y + sy; }
+
     if (nx !== x && ny !== y) {
-      if (blocksBetween(x, y, nx, y) && blocksBetween(x, y, x, ny)) return false;
-      if (blocksBetween(nx, y, nx, ny) && blocksBetween(x, ny, nx, ny)) return false;
-      // também bloqueia se a célula intermediária for parede
-      if (isCellWall(nx, y) && isCellWall(x, ny)) return false;
+      // passo diagonal: bloqueia se QUALQUER lado do canto tiver muro/porta fechada
+      // (evita luz passando na união das linhas)
+      if (blocksBetween(x, y, nx, y) || blocksBetween(x, y, x, ny)) return false;
+      if (blocksBetween(nx, y, nx, ny) || blocksBetween(x, ny, nx, ny)) return false;
+      if (isCellWall(nx, y) || isCellWall(x, ny)) return false;
     } else {
       if (blocksBetween(x, y, nx, ny)) return false;
     }
