@@ -1,347 +1,7 @@
 (function () {
   'use strict';
 
-  var DATA_URLS = [
-    'https://cdn.jsdelivr.net/gh/adkinn/srd-5.2.1@main/data/monsters.json',
-    'https://raw.githubusercontent.com/adkinn/srd-5.2.1/main/data/monsters.json'
-  ];
-
   var MONSTER_MANUAL_URL = 'https://www.dndbeyond.com/sources/dnd/mm-2024';
-
-  // Traduções de referência para nomes mais comuns. O nome inglês é sempre preservado.
-  // Para nomes não mapeados, não se presume que uma tradução seja oficial.
-  var PT_NAMES = {
-    'Aboleth': 'Abolete',
-    'Adult Black Dragon': 'Dragão Negro Adulto',
-    'Adult Blue Dragon': 'Dragão Azul Adulto',
-    'Adult Brass Dragon': 'Dragão de Latão Adulto',
-    'Adult Bronze Dragon': 'Dragão de Bronze Adulto',
-    'Adult Copper Dragon': 'Dragão de Cobre Adulto',
-    'Adult Gold Dragon': 'Dragão de Ouro Adulto',
-    'Adult Green Dragon': 'Dragão Verde Adulto',
-    'Adult Red Dragon': 'Dragão Vermelho Adulto',
-    'Adult Silver Dragon': 'Dragão de Prata Adulto',
-    'Adult White Dragon': 'Dragão Branco Adulto',
-    'Air Elemental': 'Elemental do Ar',
-    'Animated Armor': 'Armadura Animada',
-    'Animated Flying Sword': 'Espada Voadora Animada',
-    'Animated Rug of Smothering': 'Tapete Sufocante Animado',
-    'Ankheg': 'Ankheg',
-    'Ape': 'Macaco',
-    'Azer Sentinel': 'Sentinela Azer',
-    'Baboon': 'Babuíno',
-    'Badger': 'Texugo',
-    'Balor': 'Balor',
-    'Banshee': 'Banshee',
-    'Basilisk': 'Basilisco',
-    'Bat': 'Morcego',
-    'Behir': 'Behir',
-    'Beholder': 'Observador',
-    'Blink Dog': 'Cão Teleportador',
-    'Blood Hawk': 'Falcão Sangrento',
-    'Boar': 'Javali',
-    'Bone Devil': 'Diabo dos Ossos',
-    'Brown Bear': 'Urso Pardo',
-    'Bugbear Stalker': 'Perseguidor Bugbear',
-    'Bugbear Warrior': 'Guerreiro Bugbear',
-    'Bulette': 'Bulette',
-    'Cambion': 'Cambion',
-    'Camel': 'Camelo',
-    'Carrion Crawler': 'Rastejador da Carniça',
-    'Cat': 'Gato',
-    'Centaur Trooper': 'Tropa Centauro',
-    'Chain Devil': 'Diabo das Correntes',
-    'Chimera': 'Quimera',
-    'Chuul': 'Chuul',
-    'Clay Golem': 'Golem de Argila',
-    'Cloaker': 'Manto',
-    'Cloud Giant': 'Gigante das Nuvens',
-    'Cockatrice': 'Cocatriz',
-    'Commoner': 'Plebeu',
-    'Constrictor Snake': 'Cobra Constritora',
-    'Couatl': 'Couatl',
-    'Crab': 'Caranguejo',
-    'Crocodile': 'Crocodilo',
-    'Cultist': 'Cultista',
-    'Cultist Fanatic': 'Fanático Cultista',
-    'Cyclops': 'Ciclope',
-    'Darkmantle': 'Manto Sombrio',
-    'Death Dog': 'Cão da Morte',
-    'Death Knight': 'Cavaleiro da Morte',
-    'Deer': 'Cervo',
-    'Demilich': 'Demilich',
-    'Deva': 'Deva',
-    'Dire Wolf': 'Lobo Atroz',
-    'Displacer Beast': 'Fera Deslocadora',
-    'Djinni': 'Djinni',
-    'Doppelganger': 'Doppelganger',
-    'Dracolich': 'Dracolich',
-    'Dragon Turtle': 'Tartaruga-Dragão',
-    'Drider': 'Drider',
-    'Dryad': 'Dríade',
-    'Eagle': 'Águia',
-    'Earth Elemental': 'Elemental da Terra',
-    'Efreeti': 'Efreeti',
-    'Elephant': 'Elefante',
-    'Elk': 'Alce',
-    'Erinyes': 'Erínia',
-    'Ettercap': 'Ettercap',
-    'Ettin': 'Ettin',
-    'Fire Elemental': 'Elemental do Fogo',
-    'Fire Giant': 'Gigante do Fogo',
-    'Flameskull': 'Caveira Flamejante',
-    'Flesh Golem': 'Golem de Carne',
-    'Flumph': 'Flumph',
-    'Flying Snake': 'Cobra Voadora',
-    'Fomorian': 'Fomoriano',
-    'Frog': 'Sapo',
-    'Frost Giant': 'Gigante do Gelo',
-    'Galeb Duhr': 'Galeb Duhr',
-    'Gargoyle': 'Gárgula',
-    'Gelatinous Cube': 'Cubo Gelatinoso',
-    'Ghast': 'Carniçal Maior',
-    'Ghost': 'Fantasma',
-    'Ghoul': 'Carniçal',
-    'Giant Ape': 'Macaco Gigante',
-    'Giant Badger': 'Texugo Gigante',
-    'Giant Bat': 'Morcego Gigante',
-    'Giant Boar': 'Javali Gigante',
-    'Giant Centipede': 'Centípede Gigante',
-    'Giant Crab': 'Caranguejo Gigante',
-    'Giant Crocodile': 'Crocodilo Gigante',
-    'Giant Eagle': 'Águia Gigante',
-    'Giant Elk': 'Alce Gigante',
-    'Giant Fire Beetle': 'Besouro-de-Fogo Gigante',
-    'Giant Frog': 'Sapo Gigante',
-    'Giant Goat': 'Cabra Gigante',
-    'Giant Hyena': 'Hiena Gigante',
-    'Giant Lizard': 'Lagarto Gigante',
-    'Giant Octopus': 'Polvo Gigante',
-    'Giant Owl': 'Coruja Gigante',
-    'Giant Rat': 'Rato Gigante',
-    'Giant Scorpion': 'Escorpião Gigante',
-    'Giant Shark': 'Tubarão Gigante',
-    'Giant Spider': 'Aranha Gigante',
-    'Giant Toad': 'Sapo-Touro Gigante',
-    'Giant Vulture': 'Abutre Gigante',
-    'Giant Wasp': 'Vespa Gigante',
-    'Giant Weasel': 'Doninha Gigante',
-    'Gibbering Mouther': 'Boca Gorgolejante',
-    'Glabrezu': 'Glabrezu',
-    'Gladiator': 'Gladiador',
-    'Gnoll Warrior': 'Guerreiro Gnoll',
-    'Goblin Boss': 'Chefe Goblin',
-    'Goblin Minion': 'Lacaio Goblin',
-    'Goblin Warrior': 'Guerreiro Goblin',
-    'Gold Dragon Wyrmling': 'Filhote de Dragão de Ouro',
-    'Gorgon': 'Górgona',
-    'Goristro': 'Goristro',
-    'Gray Ooze': 'Gosma Cinzenta',
-    'Green Hag': 'Bruxa Verde',
-    'Grell': 'Grell',
-    'Grick': 'Grick',
-    'Griffon': 'Grifo',
-    'Grimlock': 'Grimlock',
-    'Guardian Naga': 'Naga Guardiã',
-    'Guard': 'Guarda',
-    'Guard Captain': 'Capitão da Guarda',
-    'Half-Dragon': 'Meio-Dragão',
-    'Harpy': 'Harpia',
-    'Hawk': 'Falcão',
-    'Hell Hound': 'Cão Infernal',
-    'Helmed Horror': 'Horror de Elmo',
-    'Hezrou': 'Hezrou',
-    'Hill Giant': 'Gigante da Colina',
-    'Hippogriff': 'Hipogrifo',
-    'Hippopotamus': 'Hipopótamo',
-    'Hobgoblin Captain': 'Capitão Hobgoblin',
-    'Hobgoblin Warrior': 'Guerreiro Hobgoblin',
-    'Homunculus': 'Homúnculo',
-    'Hook Horror': 'Horror Gancho',
-    'Horned Devil': 'Diabo Chifrudo',
-    'Hunter Shark': 'Tubarão Caçador',
-    'Hydra': 'Hidra',
-    'Hyena': 'Hiena',
-    'Ice Devil': 'Diabo do Gelo',
-    'Imp': 'Diabrete',
-    'Incubus': 'Íncubo',
-    'Intellect Devourer': 'Devorador de Intelecto',
-    'Invisible Stalker': 'Perseguidor Invisível',
-    'Iron Golem': 'Golem de Ferro',
-    'Jackal': 'Chacal',
-    'Jackalwere': 'Chacal-homem',
-    'Kenku': 'Kenku',
-    'Killer Whale': 'Orca',
-    'Knight': 'Cavaleiro',
-    'Kobold Warrior': 'Guerreiro Kobold',
-    'Kraken': 'Kraken',
-    'Kuo-toa': 'Kuo-toa',
-    'Kuo-toa Archpriest': 'Arquissacerdote Kuo-toa',
-    'Kuo-toa Monitor': 'Monitor Kuo-toa',
-    'Kuo-toa Whip': 'Chicote Kuo-toa',
-    'Lamia': 'Lâmia',
-    'Lemure': 'Lêmure',
-    'Lich': 'Lich',
-    'Lion': 'Leão',
-    'Lizard': 'Lagarto',
-    'Mage': 'Mago',
-    'Mage Apprentice': 'Aprendiz de Mago',
-    'Archmage': 'Arquimago',
-    'Magmin': 'Magmin',
-    'Mammoth': 'Mamute',
-    'Manticore': 'Mantícora',
-    'Marid': 'Marid',
-    'Marilith': 'Marilith',
-    'Mastiff': 'Mastim',
-    'Medusa': 'Medusa',
-    'Mephit': 'Mephit',
-    'Merfolk Skirmisher': 'Escaramuçador Tritão',
-    'Merrow': 'Merrow',
-    'Mezzoloth': 'Mezzoloth',
-    'Mimic': 'Mímico',
-    'Mind Flayer': 'Devorador de Mentes',
-    'Mind Flayer Arcanist': 'Arcanista Devorador de Mentes',
-    'Minotaur of Baphomet': 'Minotauro de Bafomé',
-    'Modron Monodrone': 'Monodrone Modron',
-    'Modron Duodrone': 'Duodrone Modron',
-    'Modron Tridrone': 'Tridrone Modron',
-    'Modron Quadrone': 'Quadrone Modron',
-    'Modron Pentadrone': 'Pentadrone Modron',
-    'Mule': 'Mula',
-    'Mummy': 'Múmia',
-    'Mummy Lord': 'Lorde das Múmias',
-    'Myconid Sprout': 'Broto Miconídeo',
-    'Myconid Adult': 'Miconídeo Adulto',
-    'Myconid Sovereign': 'Soberano Miconídeo',
-    'Nalfeshnee': 'Nalfeshnee',
-    'Night Hag': 'Bruxa da Noite',
-    'Nightmare': 'Pesadelo',
-    'Noble': 'Nobre',
-    'Nothic': 'Nótico',
-    'Nycaloth': 'Nycaloth',
-    'Ochre Jelly': 'Geleia Ocre',
-    'Octopus': 'Polvo',
-    'Ogre': 'Ogro',
-    'Oni': 'Oni',
-    'Otyugh': 'Otyugh',
-    'Owl': 'Coruja',
-    'Owlbear': 'Urso-Coruja',
-    'Primeval Owlbear': 'Urso-Coruja Primordial',
-    'Panther': 'Pantera',
-    'Pegasus': 'Pégaso',
-    'Performer': 'Artista',
-    'Peryton': 'Peryton',
-    'Phase Spider': 'Aranha Etérea',
-    'Piercer': 'Perfurador',
-    'Piranha': 'Piranha',
-    'Pirate': 'Pirata',
-    'Pirate Captain': 'Capitão Pirata',
-    'Pit Fiend': 'Diabo das Fossas',
-    'Pixie': 'Pixie',
-    'Planetar': 'Planetário',
-    'Plesiosaurus': 'Plesiossauro',
-    'Polar Bear': 'Urso Polar',
-    'Poltergeist': 'Poltergeist',
-    'Pony': 'Pônei',
-    'Priest': 'Sacerdote',
-    'Priest Acolyte': 'Acólito Sacerdote',
-    'Pseudodragon': 'Pseudodragão',
-    'Pteranodon': 'Pteranodonte',
-    'Purple Worm': 'Verme Púrpura',
-    'Quaggoth': 'Quaggoth',
-    'Quasit': 'Quasit',
-    'Rakshasa': 'Rakshasa',
-    'Rat': 'Rato',
-    'Raven': 'Corvo',
-    'Reef Shark': 'Tubarão-de-Recife',
-    'Remorhaz': 'Remorhaz',
-    'Revenant': 'Revenante',
-    'Rhinoceros': 'Rinoceronte',
-    'Riding Horse': 'Cavalo de Montaria',
-    'Roc': 'Roc',
-    'Roper': 'Roper',
-    'Rust Monster': 'Monstro da Ferrugem',
-    'Saber-Toothed Tiger': 'Tigre-dentes-de-sabre',
-    'Sahuagin Warrior': 'Guerreiro Sahuagin',
-    'Salamander': 'Salamandra',
-    'Satyr': 'Sátiro',
-    'Scarecrow': 'Espantalho',
-    'Scorpion': 'Escorpião',
-    'Scout': 'Batedor',
-    'Sea Hag': 'Bruxa do Mar',
-    'Seahorse': 'Cavalo-Marinho',
-    'Shadow': 'Sombra',
-    'Shadow Demon': 'Demônio das Sombras',
-    'Shambling Mound': 'Monte Errante',
-    'Shield Guardian': 'Guardião do Escudo',
-    'Skeleton': 'Esqueleto',
-    'Slaad Tadpole': 'Girino Slaad',
-    'Red Slaad': 'Slaad Vermelho',
-    'Blue Slaad': 'Slaad Azul',
-    'Green Slaad': 'Slaad Verde',
-    'Gray Slaad': 'Slaad Cinzento',
-    'Death Slaad': 'Slaad da Morte',
-    'Solar': 'Solar',
-    'Spectator': 'Espectador',
-    'Specter': 'Espectro',
-    'Sphinx of Wonder': 'Esfinge do Encanto',
-    'Sphinx of Lore': 'Esfinge do Conhecimento',
-    'Sphinx of Valor': 'Esfinge da Bravura',
-    'Spy': 'Espião',
-    'Spy Master': 'Mestre Espião',
-    'Spined Devil': 'Diabo Espinhento',
-    'Spirit Naga': 'Naga Espiritual',
-    'Sprite': 'Fada Silvestre',
-    'Stirge': 'Stirge',
-    'Stone Giant': 'Gigante de Pedra',
-    'Stone Golem': 'Golem de Pedra',
-    'Storm Giant': 'Gigante da Tempestade',
-    'Succubus': 'Súcubo',
-    'Tarrasque': 'Tarrasque',
-    'Thri-kreen': 'Thri-kreen',
-    'Tiger': 'Tigre',
-    'Tough': 'Brutamontes',
-    'Tough Boss': 'Chefe Brutamontes',
-    'Treant': 'Ent',
-    'Triceratops': 'Tricerátops',
-    'Troll': 'Troll',
-    'Troll Limb': 'Membro de Troll',
-    'Tyrannosaurus Rex': 'Tiranossauro Rex',
-    'Ultroloth': 'Ultroloth',
-    'Umber Hulk': 'Umber Hulk',
-    'Unicorn': 'Unicórnio',
-    'Vampire': 'Vampiro',
-    'Vampire Familiar': 'Familiar Vampírico',
-    'Vampire Spawn': 'Cria de Vampiro',
-    'Venomous Snake': 'Cobra Venenosa',
-    'Vrock': 'Vrock',
-    'Vulture': 'Abutre',
-    'Warhorse': 'Cavalo de Guerra',
-    'Warrior Infantry': 'Soldado de Infantaria',
-    'Warrior Veteran': 'Guerreiro Veterano',
-    'Warrior Commander': 'Comandante Guerreiro',
-    'Water Elemental': 'Elemental da Água',
-    'Water Weird': 'Estranho Aquático',
-    'Weasel': 'Doninha',
-    'Werebear': 'Urso-Lobisomem',
-    'Wereboar': 'Javali-Lobisomem',
-    'Wererat': 'Rato-Lobisomem',
-    'Weretiger': 'Tigre-Lobisomem',
-    'Werewolf': 'Lobisomem',
-    'White Dragon Wyrmling': 'Filhote de Dragão Branco',
-    'Wight': 'Carniçal',
-    'Will-o’-Wisp': 'Fogo-Fátuo',
-    'Winter Wolf': 'Lobo Invernal',
-    'Wolf': 'Lobo',
-    'Worg': 'Worg',
-    'Wraith': 'Aparição',
-    'Wyvern': 'Serpe',
-    'Xorn': 'Xorn',
-    'Yeti': 'Yeti',
-    'Abominable Yeti': 'Yeti Abominável',
-    'Yochlol': 'Yochlol',
-    'Zombie': 'Zumbi'
-  };
 
   var SIZE_PT = {
     'Tiny': 'Miúdo', 'Small': 'Pequeno', 'Medium': 'Médio',
@@ -355,78 +15,551 @@
     'plant': 'Planta', 'undead': 'Morto-vivo'
   };
 
+  /* Converte {n,d} em {name,description}. Aceita também strings. */
+  function entrada(item) {
+    if (typeof item === 'string') return { name: '', description: item };
+    return { name: item.n || '', description: item.d || '' };
+  }
+  function entradas(lista) {
+    return (lista || []).map(entrada);
+  }
 
-  // Traduções locais de termos recorrentes do bloco de estatísticas.
-  // Os nomes e termos são apresentados em PT-BR; o identificador original fica interno
-  // apenas para pesquisa cruzada e compatibilidade com os dados do SRD.
-  var TERMOS_PT = {
-    'Amphibious':'Anfíbio','False Appearance':'Aparência Falsa','Pack Tactics':'Táticas de Matilha',
-    'Keen Smell':'Olfato Aguçado','Keen Hearing':'Audição Aguçada','Keen Sight':'Visão Aguçada',
-    'Keen Senses':'Sentidos Aguçados','Echolocation':'Ecolocalização','Standing Leap':'Salto Parado',
-    'Flyby':'Voo Rasante','Charge':'Investida','Pounce':'Atacar de Bote','Rampage':'Frenesi',
-    'Regeneration':'Regeneração','Rejuvenation':'Rejuvenescimento','Incorporeal Movement':'Movimento Incorpóreo',
-    'Legendary Resistance':'Resistência Lendária','Magic Resistance':'Resistência à Magia',
-    'Magic Weapons':'Armas Mágicas','Sunlight Sensitivity':'Sensibilidade à Luz Solar',
-    'Sunlight Weakness':'Fraqueza à Luz Solar','Water Breathing':'Respiração Aquática',
-    'Hold Breath':'Prender a Respiração','Spider Climb':'Escalada Aracnídea','Web Sense':'Sentido de Teia',
-    'Web Walker':'Andar na Teia','Shapechanger':'Metamorfo','Shape-Shifting':'Mudança de Forma',
-    'Innate Spellcasting':'Conjuração Inata','Spellcasting':'Conjuração','Multiattack':'Ataque Múltiplo',
-    'Bite':'Mordida','Claw':'Garra','Claws':'Garras','Slam':'Pancada','Rake':'Rasgar',
-    'Sting':'Ferroada','Tail':'Cauda','Tentacle':'Tentáculo','Longsword':'Espada Longa',
-    'Shortsword':'Espada Curta','Greatsword':'Espada Grande','Greataxe':'Machado Grande',
-    'Battleaxe':'Machado de Batalha','Longbow':'Arco Longo','Shortbow':'Arco Curto',
-    'Heavy Crossbow':'Besta Pesada','Light Crossbow':'Besta Leve','Dagger':'Adaga',
-    'Spear':'Lança','Club':'Clava','Javelin':'Dardo','Rock':'Rocha','Fire Breath':'Sopro de Fogo',
-    'Lightning Breath':'Sopro Elétrico','Frightful Presence':'Presença Aterradora',
-    'Breath Weapon':'Arma de Sopro','Parry':'Aparar','Reactions':'Reações',
-    'Legendary Actions':'Ações Lendárias','Bonus Actions':'Ações Bônus',
-    'Damage Transfer':'Transferência de Dano','Death Burst':'Explosão Mortal',
-    'Magic Resistance':'Resistência à Magia','Turn Resistance':'Resistência à Expulsão',
-    'Undead Fortitude':'Resiliência dos Mortos-vivos','Pack Tactics':'Táticas de Matilha',
-    'Aggressive':'Agressivo','Brute':'Brutalidade','Charge':'Investida','Keen Smell':'Olfato Aguçado',
-    'Illumination':'Iluminação','Actions':'Ações'
-  };
-  var ATRIBUTOS_EN_PT = {str:'Força',dex:'Destreza',con:'Constituição',int:'Inteligência',wis:'Sabedoria',cha:'Carisma',strength:'Força',dexterity:'Destreza',constitution:'Constituição',intelligence:'Inteligência',wisdom:'Sabedoria',charisma:'Carisma'};
-  var PERICIAS_EN_PT = {acrobatics:'Acrobacia',animal_handling:'Adestrar Animais',arcana:'Arcanismo',athletics:'Atletismo',deception:'Enganação',history:'História',insight:'Intuição',intimidation:'Intimidação',investigation:'Investigação',medicine:'Medicina',nature:'Natureza',perception:'Percepção',performance:'Atuação',persuasion:'Persuasão',religion:'Religião',sleight_of_hand:'Prestidigitação',stealth:'Furtividade',survival:'Sobrevivência'};
-  var TIPOS_DANO_PT = {acid:'ácido',bludgeoning:'contundente',cold:'frio',fire:'fogo',force:'energia',lightning:'elétrico',necrotic:'necrótico',piercing:'perfurante',poison:'veneno',psychic:'psíquico',radiant:'radiante',slashing:'cortante',thunder:'trovejante'};
-  var IDIOMAS_PT = {Common:'Comum',Draconic:'Dracônico',Dwarvish:'Anão',Elvish:'Élfico',Giant:'Gigante',Gnomish:'Gnômico',Goblin:'Goblin',Halfling:'Halfling',Orc:'Orc',Abyssal:'Abissal',Celestial:'Celestial','Deep Speech':'Dialeto Obscuro',Infernal:'Infernal',Primordial:'Primordial',Sylvan:'Silvestre',Undercommon:'Subcomum',Auran:'Auran',Aquan:'Aquan',Ignan:'Ignan',Terran:'Terran'};
-  var SENTIDOS_PT = {darkvision:'visão no escuro',blindsight:'percepção às cegas',truesight:'visão verdadeira',tremorsense:'percepção sísmica',passive_perception:'Percepção passiva'};
-  var VELOCIDADES_PT = {walk:'deslocamento',climb:'escalada',fly:'voo',swim:'natação',burrow:'escavação'};
-  var FRASES_PT = [
-    [/Melee Weapon Attack:/gi,'Ataque com Arma Corpo a Corpo:'],[/Ranged Weapon Attack:/gi,'Ataque com Arma à Distância:'],
-    [/Melee Spell Attack:/gi,'Ataque Mágico Corpo a Corpo:'],[/Ranged Spell Attack:/gi,'Ataque Mágico à Distância:'],
-    [/Saving Throw:/gi,'Teste de Resistência:'],[/Strength saving throw/gi,'teste de resistência de Força'],[/Dexterity saving throw/gi,'teste de resistência de Destreza'],[/Constitution saving throw/gi,'teste de resistência de Constituição'],[/Intelligence saving throw/gi,'teste de resistência de Inteligência'],[/Wisdom saving throw/gi,'teste de resistência de Sabedoria'],[/Charisma saving throw/gi,'teste de resistência de Carisma'],
-    [/to hit/gi,'para acertar'],[/reach 5 ft\./gi,'alcance 1,5 m'],[/reach 10 ft\./gi,'alcance 3 m'],[/reach 15 ft\./gi,'alcance 4,5 m'],[/reach 20 ft\./gi,'alcance 6 m'],
-    [/one target/gi,'um alvo'],[/one creature/gi,'uma criatura'],[/each creature/gi,'cada criatura'],[/Hit:/gi,'Acerto:'],[/Miss:/gi,'Erro:'],
-    [/bludgeoning damage/gi,'dano contundente'],[/piercing damage/gi,'dano perfurante'],[/slashing damage/gi,'dano cortante'],[/acid damage/gi,'dano ácido'],[/cold damage/gi,'dano de frio'],[/fire damage/gi,'dano de fogo'],[/force damage/gi,'dano de energia'],[/lightning damage/gi,'dano elétrico'],[/necrotic damage/gi,'dano necrótico'],[/poison damage/gi,'dano de veneno'],[/psychic damage/gi,'dano psíquico'],[/radiant damage/gi,'dano radiante'],[/thunder damage/gi,'dano trovejante'],
-    [/half as much damage/gi,'metade do dano'],[/magical darkness/gi,'escuridão mágica'],[/magical effects/gi,'efeitos mágicos'],[/attack roll/gi,'jogada de ataque'],[/ability check/gi,'teste de atributo'],[/hit points/gi,'pontos de vida'],[/temporary hit points/gi,'pontos de vida temporários'],[/difficult terrain/gi,'terreno difícil'],[/until the start of its next turn/gi,'até o início do próximo turno dela'],[/until the end of its next turn/gi,'até o fim do próximo turno dela'],
-    [/The target must succeed on/gi,'O alvo precisa ser bem-sucedido em'],[/The target takes/gi,'O alvo sofre'],[/The creature takes/gi,'A criatura sofre'],[/the target is grappled/gi,'o alvo fica agarrado'],[/the target is restrained/gi,'o alvo fica impedido'],[/the target is frightened/gi,'o alvo fica amedrontado'],[/the target is poisoned/gi,'o alvo fica envenenado'],[/the target is paralyzed/gi,'o alvo fica paralisado'],[/the target is blinded/gi,'o alvo fica cego'],[/the target is charmed/gi,'o alvo fica enfeitiçado'],
-    [/A creature that succeeds on the saving throw/gi,'Uma criatura bem-sucedida no teste de resistência'],[/On a failed save/gi,'Em caso de falha'],[/On a successful save/gi,'Em caso de sucesso'],[/Failure:/gi,'Falha:'],[/Success:/gi,'Sucesso:'],[/Recharge 5–6/gi,'Recarga 5–6'],[/Recharge 6/gi,'Recarga 6'],[/\bDC\s+(\d+)\b/g,'CD $1'],
-    [/\b1 foot\b/gi,'30 cm'],[/\b5 feet\b/gi,'1,5 m'],[/\b10 feet\b/gi,'3 m'],[/\b15 feet\b/gi,'4,5 m'],[/\b20 feet\b/gi,'6 m'],[/\b30 feet\b/gi,'9 m'],[/\b40 feet\b/gi,'12 m'],[/\b60 feet\b/gi,'18 m'],[/\b80 feet\b/gi,'24 m'],[/\b100 feet\b/gi,'30 m'],[/\b120 feet\b/gi,'36 m']
+  /* Monta o registro no formato que o restante do app espera. */
+  function m(o) {
+    return {
+      id: o.id,
+      name: o.en,
+      nome_pt: o.pt,
+      size: o.size,
+      type: o.type,
+      cr: o.cr,
+      cr_numeric: o.crn,
+      armor_class: o.ac,
+      hp_max: o.hp,
+      hp_formula: o.hpF,
+      initiative_modifier: o.init,
+      stat_block_json: {
+        ability_scores: o.ab,
+        speed: o.spd || { walk: 30 },
+        saving_throws: o.sav || {},
+        skills: o.sk || {},
+        senses: o.sen || {},
+        languages: o.lang || [],
+        damage_resistances: o.res || [],
+        damage_vulnerabilities: o.vuln || [],
+        damage_immunities: o.imm || [],
+        condition_immunities: o.cimm || [],
+        traits: entradas(o.tr),
+        actions: entradas(o.act),
+        bonus_actions: entradas(o.ba),
+        reactions: entradas(o.rea),
+        legendary_actions: entradas(o.la)
+      }
+    };
+  }
+
+  /* ============================ CATÁLOGO ============================ */
+
+  var CATALOGO = [
+
+    m({
+      id: 'srd-rat', en: 'Rat', pt: 'Rato', size: 'Tiny', type: 'beast',
+      cr: '0', crn: 0, ac: 10, hp: 1, hpF: '1d6-1', init: 0,
+      ab: { str: 2, dex: 11, con: 9, int: 2, wis: 10, cha: 4 },
+      spd: { walk: 20 }, sen: { darkvision: 30, passive_perception: 10 },
+      tr: [{ n: 'Olfato Aguçado', d: 'O rato tem vantagem em testes de Sabedoria (Percepção) baseados em olfato.' }],
+      act: [{ n: 'Mordida', d: 'Ataque com Arma Corpo a Corpo: +0 para acertar, alcance 1,5 m, um alvo. Acerto: 1 de dano perfurante.' }]
+    }),
+
+    m({
+      id: 'srd-kobold-warrior', en: 'Kobold Warrior', pt: 'Guerreiro Kobold', size: 'Small', type: 'humanoid',
+      cr: '1/8', crn: 0.125, ac: 12, hp: 5, hpF: '2d6-2', init: 2,
+      ab: { str: 7, dex: 15, con: 9, int: 8, wis: 7, cha: 8 },
+      spd: { walk: 30 }, sen: { darkvision: 60, passive_perception: 8 },
+      lang: ['Comum', 'Dracônico'],
+      tr: [
+        { n: 'Sensibilidade à Luz Solar', d: 'Sob luz solar direta, o kobold tem desvantagem em jogadas de ataque e em testes de Sabedoria (Percepção) baseados em visão.' },
+        { n: 'Táticas de Matilha', d: 'O kobold tem vantagem na jogada de ataque contra uma criatura se pelo menos um aliado do kobold estiver a 1,5 m da criatura e não estiver incapacitado.' }
+      ],
+      act: [
+        { n: 'Adaga', d: 'Ataque com Arma Corpo a Corpo: +4 para acertar, alcance 1,5 m, um alvo. Acerto: 4 (1d4 + 2) de dano perfurante.' },
+        { n: 'Funda', d: 'Ataque com Arma à Distância: +4 para acertar, alcance 9/36 m, um alvo. Acerto: 4 (1d4 + 2) de dano contundente.' }
+      ]
+    }),
+
+    m({
+      id: 'srd-goblin-warrior', en: 'Goblin Warrior', pt: 'Guerreiro Goblin', size: 'Small', type: 'humanoid',
+      cr: '1/4', crn: 0.25, ac: 15, hp: 7, hpF: '2d6', init: 2,
+      ab: { str: 8, dex: 14, con: 10, int: 10, wis: 8, cha: 8 },
+      spd: { walk: 30 }, sk: { stealth: 6 }, sen: { darkvision: 60, passive_perception: 9 },
+      lang: ['Comum', 'Goblin'],
+      tr: [{ n: 'Fuga Ágil', d: 'O goblin pode usar a ação Desengajar ou Esconder-se como ação bônus em cada um de seus turnos.' }],
+      act: [
+        { n: 'Cimitarra', d: 'Ataque com Arma Corpo a Corpo: +4 para acertar, alcance 1,5 m, um alvo. Acerto: 5 (1d6 + 2) de dano cortante.' },
+        { n: 'Arco Curto', d: 'Ataque com Arma à Distância: +4 para acertar, alcance 24/96 m, um alvo. Acerto: 5 (1d6 + 2) de dano perfurante.' }
+      ]
+    }),
+
+    m({
+      id: 'srd-skeleton', en: 'Skeleton', pt: 'Esqueleto', size: 'Medium', type: 'undead',
+      cr: '1/4', crn: 0.25, ac: 13, hp: 13, hpF: '2d8+4', init: 0,
+      ab: { str: 10, dex: 14, con: 15, int: 6, wis: 8, cha: 5 },
+      spd: { walk: 30 }, vuln: ['bludgeoning'], imm: ['poison'],
+      cimm: ['Envenenado', 'Exausto'], sen: { darkvision: 60, passive_perception: 9 },
+      lang: ['Comum'],
+      act: [
+        { n: 'Espada Curta', d: 'Ataque com Arma Corpo a Corpo: +4 para acertar, alcance 1,5 m, um alvo. Acerto: 5 (1d6 + 2) de dano perfurante.' },
+        { n: 'Arco Curto', d: 'Ataque com Arma à Distância: +4 para acertar, alcance 24/96 m, um alvo. Acerto: 5 (1d6 + 2) de dano perfurante.' }
+      ]
+    }),
+
+    m({
+      id: 'srd-wolf', en: 'Wolf', pt: 'Lobo', size: 'Medium', type: 'beast',
+      cr: '1/4', crn: 0.25, ac: 13, hp: 11, hpF: '2d8+2', init: 2,
+      ab: { str: 12, dex: 15, con: 12, int: 3, wis: 12, cha: 6 },
+      spd: { walk: 40 }, sk: { perception: 3, stealth: 4 },
+      sen: { passive_perception: 13 },
+      tr: [
+        { n: 'Olfato e Audição Aguçados', d: 'O lobo tem vantagem em testes de Sabedoria (Percepção) baseados em olfato ou audição.' },
+        { n: 'Táticas de Matilha', d: 'O lobo tem vantagem na jogada de ataque contra uma criatura se pelo menos um aliado do lobo estiver a 1,5 m da criatura e não estiver incapacitado.' }
+      ],
+      act: [{ n: 'Mordida', d: 'Ataque com Arma Corpo a Corpo: +4 para acertar, alcance 1,5 m, um alvo. Acerto: 7 (2d4 + 2) de dano perfurante. Se o alvo for uma criatura, ele deve ser bem-sucedido em um teste de resistência de Força CD 11 ou fica Caído.' }]
+    }),
+
+    m({
+      id: 'srd-zombie', en: 'Zombie', pt: 'Zumbi', size: 'Medium', type: 'undead',
+      cr: '1/4', crn: 0.25, ac: 8, hp: 22, hpF: '3d8+9', init: -2,
+      ab: { str: 13, dex: 6, con: 16, int: 3, wis: 6, cha: 5 },
+      spd: { walk: 20 }, sav: { wis: 0 }, imm: ['poison'],
+      cimm: ['Envenenado'], sen: { darkvision: 60, passive_perception: 8 },
+      lang: ['Comum'],
+      tr: [{ n: 'Resiliência dos Mortos-vivos', d: 'Se o zumbi sofrer dano que o reduza a 0 pontos de vida, ele faz um teste de resistência de Constituição CD 5 + o dano sofrido, a menos que o dano seja radiante ou de um acerto crítico. Em sucesso, cai a 1 ponto de vida.' }],
+      act: [{ n: 'Pancada', d: 'Ataque com Arma Corpo a Corpo: +3 para acertar, alcance 1,5 m, um alvo. Acerto: 4 (1d6 + 1) de dano contundente.' }]
+    }),
+
+    m({
+      id: 'srd-hobgoblin-warrior', en: 'Hobgoblin Warrior', pt: 'Guerreiro Hobgoblin', size: 'Medium', type: 'humanoid',
+      cr: '1/2', crn: 0.5, ac: 18, hp: 11, hpF: '2d8+2', init: 1,
+      ab: { str: 13, dex: 12, con: 12, int: 10, wis: 10, cha: 9 },
+      spd: { walk: 30 }, sen: { darkvision: 60, passive_perception: 10 },
+      lang: ['Comum', 'Goblin'],
+      tr: [{ n: 'Vantagem Marcial', d: 'Uma vez por turno, quando o hobgoblin acerta uma criatura com um ataque com arma, ele causa 7 (2d6) de dano adicional se a criatura estiver a 1,5 m de um aliado do hobgoblin que não esteja incapacitado.' }],
+      act: [
+        { n: 'Espada Longa', d: 'Ataque com Arma Corpo a Corpo: +3 para acertar, alcance 1,5 m, um alvo. Acerto: 5 (1d8 + 1) de dano cortante, ou 6 (1d10 + 1) se usada com as duas mãos.' },
+        { n: 'Arco Longo', d: 'Ataque com Arma à Distância: +3 para acertar, alcance 45/180 m, um alvo. Acerto: 5 (1d8 + 1) de dano perfurante.' }
+      ]
+    }),
+
+    m({
+      id: 'srd-shadow', en: 'Shadow', pt: 'Sombra', size: 'Medium', type: 'undead',
+      cr: '1/2', crn: 0.5, ac: 12, hp: 16, hpF: '3d8+3', init: 2,
+      ab: { str: 6, dex: 14, con: 13, int: 6, wis: 10, cha: 8 },
+      spd: { walk: 40 }, sk: { stealth: 4 },
+      res: ['acid', 'cold', 'fire', 'lightning', 'thunder', 'bludgeoning', 'piercing', 'slashing'],
+      imm: ['necrotic', 'poison'],
+      cimm: ['Exausto', 'Amedrontado', 'Agarrado', 'Paralisado', 'Petrificado', 'Envenenado', 'Caído', 'Impedido', 'Inconsciente'],
+      sen: { darkvision: 60, passive_perception: 10 },
+      tr: [
+        { n: 'Amorfo', d: 'A sombra pode se mover através de espaços de 2,5 cm de largura sem se comprimir.' },
+        { n: 'Fraqueza à Luz Solar', d: 'Sob luz solar, a sombra tem desvantagem em jogadas de ataque, testes de atributo e testes de resistência.' }
+      ],
+      act: [{ n: 'Dreno de Força', d: 'Ataque Mágico Corpo a Corpo: +4 para acertar, alcance 1,5 m, uma criatura. Acerto: 9 (2d6 + 2) de dano necrótico, e o valor de Força do alvo é reduzido em 1d4. Se a Força do alvo chegar a 0, ele morre. A redução dura até o alvo terminar um descanso longo.' }]
+    }),
+
+    m({
+      id: 'srd-specter', en: 'Specter', pt: 'Espectro', size: 'Medium', type: 'undead',
+      cr: '1', crn: 1, ac: 12, hp: 22, hpF: '5d8', init: 2,
+      ab: { str: 1, dex: 14, con: 11, int: 10, wis: 10, cha: 11 },
+      spd: { walk: 0, fly: 50 }, res: ['acid', 'cold', 'fire', 'lightning', 'thunder', 'bludgeoning', 'piercing', 'slashing'],
+      imm: ['necrotic', 'poison'],
+      cimm: ['Enfeitiçado', 'Exausto', 'Agarrado', 'Paralisado', 'Petrificado', 'Envenenado', 'Caído', 'Impedido', 'Inconsciente'],
+      sen: { darkvision: 60, passive_perception: 10 },
+      tr: [
+        { n: 'Movimento Incorpóreo', d: 'O espectro pode se mover através de outras criaturas e objetos como se fossem terreno difícil. Ele sofre 5 (1d10) de dano de energia se terminar seu turno dentro de um objeto.' },
+        { n: 'Sensibilidade à Luz Solar', d: 'Sob luz solar, o espectro tem desvantagem em jogadas de ataque e testes de Sabedoria (Percepção) baseados em visão.' }
+      ],
+      act: [{ n: 'Dreno de Vida', d: 'Ataque Mágico Corpo a Corpo: +4 para acertar, alcance 1,5 m, uma criatura. Acerto: 10 (3d6) de dano necrótico. O alvo deve ser bem-sucedido em um teste de resistência de Constituição CD 10 ou seu máximo de pontos de vida é reduzido em uma quantidade igual ao dano sofrido.' }]
+    }),
+
+    m({
+      id: 'srd-goblin-boss', en: 'Goblin Boss', pt: 'Chefe Goblin', size: 'Small', type: 'humanoid',
+      cr: '1', crn: 1, ac: 17, hp: 21, hpF: '6d6', init: 2,
+      ab: { str: 10, dex: 14, con: 10, int: 10, wis: 8, cha: 10 },
+      spd: { walk: 30 }, sk: { stealth: 6 }, sen: { darkvision: 60, passive_perception: 9 },
+      lang: ['Comum', 'Goblin'],
+      tr: [{ n: 'Fuga Ágil', d: 'O goblin pode usar a ação Desengajar ou Esconder-se como ação bônus em cada um de seus turnos.' }],
+      act: [
+        { n: 'Ataque Múltiplo', d: 'O goblin faz dois ataques com a cimitarra ou o arco curto.' },
+        { n: 'Cimitarra', d: 'Ataque com Arma Corpo a Corpo: +4 para acertar, alcance 1,5 m, um alvo. Acerto: 5 (1d6 + 2) de dano cortante.' },
+        { n: 'Arco Curto', d: 'Ataque com Arma à Distância: +4 para acertar, alcance 24/96 m, um alvo. Acerto: 5 (1d6 + 2) de dano perfurante.' }
+      ],
+      rea: [{ n: 'Redirecionar Ataque', d: 'Quando uma criatura que o goblin possa ver faz um ataque contra ele, o goblin escolhe um aliado a até 1,5 m e troca de lugar com ele, tornando-se o alvo do ataque.' }]
+    }),
+
+    m({
+      id: 'srd-dire-wolf', en: 'Dire Wolf', pt: 'Lobo Atroz', size: 'Large', type: 'beast',
+      cr: '1', crn: 1, ac: 14, hp: 37, hpF: '5d10+10', init: 2,
+      ab: { str: 17, dex: 15, con: 15, int: 3, wis: 12, cha: 7 },
+      spd: { walk: 50 }, sk: { perception: 3, stealth: 4 },
+      sen: { passive_perception: 13 },
+      tr: [
+        { n: 'Olfato e Audição Aguçados', d: 'O lobo tem vantagem em testes de Sabedoria (Percepção) baseados em olfato ou audição.' },
+        { n: 'Táticas de Matilha', d: 'O lobo tem vantagem na jogada de ataque contra uma criatura se pelo menos um aliado do lobo estiver a 1,5 m da criatura e não estiver incapacitado.' }
+      ],
+      act: [{ n: 'Mordida', d: 'Ataque com Arma Corpo a Corpo: +5 para acertar, alcance 1,5 m, um alvo. Acerto: 10 (2d6 + 3) de dano perfurante. Se o alvo for uma criatura, ele deve ser bem-sucedido em um teste de resistência de Força CD 13 ou fica Caído.' }]
+    }),
+
+    m({
+      id: 'srd-giant-spider', en: 'Giant Spider', pt: 'Aranha Gigante', size: 'Large', type: 'beast',
+      cr: '1', crn: 1, ac: 14, hp: 26, hpF: '4d10+4', init: 3,
+      ab: { str: 14, dex: 16, con: 12, int: 2, wis: 11, cha: 4 },
+      spd: { walk: 30, climb: 30 }, sk: { stealth: 7 },
+      sen: { blindsight: 10, darkvision: 60, passive_perception: 10 },
+      tr: [
+        { n: 'Escalada Aracnídea', d: 'A aranha pode escalar superfícies difíceis, inclusive de cabeça para baixo em tetos, sem precisar de teste de atributo.' },
+        { n: 'Sentido de Teia', d: 'Enquanto em contato com uma teia, a aranha sabe a localização exata de qualquer criatura em contato com a mesma teia.' },
+        { n: 'Andar na Teia', d: 'A aranha ignora restrições de movimento causadas por teias.' }
+      ],
+      act: [
+        { n: 'Mordida', d: 'Ataque com Arma Corpo a Corpo: +5 para acertar, alcance 1,5 m, uma criatura. Acerto: 7 (1d8 + 3) de dano perfurante, e o alvo deve ser bem-sucedido em um teste de resistência de Constituição CD 11 ou sofre 9 (2d8) de dano de veneno, ou metade em sucesso.' },
+        { n: 'Teia', d: 'Ataque com Arma à Distância: +5 para acertar, alcance 9/18 m, uma criatura. Acerto: o alvo fica Impedido pelas teias. Uma criatura agarrada pode usar uma ação para fazer um teste de Força CD 12 e se libertar.' }
+      ]
+    }),
+
+    m({
+      id: 'srd-imp', en: 'Imp', pt: 'Diabrete', size: 'Tiny', type: 'fiend',
+      cr: '1', crn: 1, ac: 13, hp: 10, hpF: '3d4+3', init: 3,
+      ab: { str: 6, dex: 17, con: 13, int: 11, wis: 12, cha: 14 },
+      spd: { walk: 20, fly: 40 },
+      sk: { deception: 4, insight: 3, persuasion: 4, stealth: 5 },
+      res: ['cold', 'bludgeoning', 'piercing', 'slashing'],
+      imm: ['fire', 'poison'], cimm: ['Envenenado'],
+      sen: { darkvision: 120, passive_perception: 11 },
+      lang: ['Comum', 'Infernal'],
+      tr: [
+        { n: 'Metamorfo', d: 'O diabrete pode usar sua ação para se transformar em uma forma de besta (rato, corvo ou aranha) ou voltar à sua forma verdadeira.' },
+        { n: 'Visão do Diabo', d: 'A escuridão mágica não impede a visão no escuro do diabrete.' },
+        { n: 'Resistência à Magia', d: 'O diabrete tem vantagem em testes de resistência contra magias e outros efeitos mágicos.' }
+      ],
+      act: [{ n: 'Ferroada', d: 'Ataque com Arma Corpo a Corpo: +5 para acertar, alcance 1,5 m, uma criatura. Acerto: 5 (1d4 + 3) de dano perfurante, e o alvo deve ser bem-sucedido em um teste de resistência de Constituição CD 11 ou sofre 10 (3d6) de dano de veneno, ou metade em sucesso.' }]
+    }),
+
+    m({
+      id: 'srd-ogre', en: 'Ogre', pt: 'Ogro', size: 'Large', type: 'giant',
+      cr: '2', crn: 2, ac: 11, hp: 59, hpF: '7d10+21', init: -1,
+      ab: { str: 19, dex: 8, con: 16, int: 5, wis: 7, cha: 7 },
+      spd: { walk: 40 }, sen: { darkvision: 60, passive_perception: 8 },
+      lang: ['Comum', 'Gigante'],
+      act: [
+        { n: 'Porrete', d: 'Ataque com Arma Corpo a Corpo: +6 para acertar, alcance 1,5 m, um alvo. Acerto: 13 (2d8 + 4) de dano contundente.' },
+        { n: 'Azagaia', d: 'Ataque com Arma Corpo a Corpo ou à Distância: +6 para acertar, alcance 1,5 m ou 9/36 m, um alvo. Acerto: 11 (2d6 + 4) de dano perfurante.' }
+      ]
+    }),
+
+    m({
+      id: 'srd-ghoul', en: 'Ghoul', pt: 'Carniçal', size: 'Medium', type: 'undead',
+      cr: '1', crn: 1, ac: 12, hp: 22, hpF: '5d8', init: 2,
+      ab: { str: 13, dex: 15, con: 10, int: 7, wis: 10, cha: 6 },
+      spd: { walk: 30 }, imm: ['poison'],
+      cimm: ['Enfeitiçado', 'Exausto', 'Envenenado'],
+      sen: { darkvision: 60, passive_perception: 10 },
+      lang: ['Comum'],
+      act: [
+        { n: 'Mordida', d: 'Ataque com Arma Corpo a Corpo: +2 para acertar, alcance 1,5 m, uma criatura. Acerto: 9 (2d6 + 2) de dano perfurante.' },
+        { n: 'Garras', d: 'Ataque com Arma Corpo a Corpo: +4 para acertar, alcance 1,5 m, um alvo. Acerto: 7 (2d4 + 2) de dano cortante. Se o alvo for uma criatura que não seja elfo nem morto-vivo, ele deve ser bem-sucedido em um teste de resistência de Constituição CD 10 ou fica Paralisado por 1 minuto, repetindo o teste ao fim de cada turno.' }
+      ]
+    }),
+
+    m({
+      id: 'srd-knight', en: 'Knight', pt: 'Cavaleiro', size: 'Medium', type: 'humanoid',
+      cr: '3', crn: 3, ac: 18, hp: 52, hpF: '8d8+16', init: 0,
+      ab: { str: 16, dex: 11, con: 14, int: 11, wis: 11, cha: 15 },
+      spd: { walk: 30 }, sav: { con: 4, wis: 2 }, sen: { passive_perception: 10 },
+      lang: ['Comum'],
+      tr: [{ n: 'Corajoso', d: 'O cavaleiro tem vantagem em testes de resistência para evitar ficar Amedrontado.' }],
+      act: [
+        { n: 'Ataque Múltiplo', d: 'O cavaleiro faz dois ataques com a espada grande.' },
+        { n: 'Espada Grande', d: 'Ataque com Arma Corpo a Corpo: +5 para acertar, alcance 1,5 m, um alvo. Acerto: 10 (2d6 + 3) de dano cortante.' },
+        { n: 'Besta Pesada', d: 'Ataque com Arma à Distância: +2 para acertar, alcance 30/120 m, um alvo. Acerto: 5 (1d10) de dano perfurante.' }
+      ],
+      rea: [{ n: 'Aparar', d: 'O cavaleiro adiciona 2 à sua Classe de Armadura contra um ataque corpo a corpo que o acertaria. Para isso, precisa ver o atacante e estar empunhando uma arma corpo a corpo.' }]
+    }),
+
+    m({
+      id: 'srd-owlbear', en: 'Owlbear', pt: 'Urso-Coruja', size: 'Large', type: 'monstrosity',
+      cr: '3', crn: 3, ac: 13, hp: 59, hpF: '7d10+21', init: 1,
+      ab: { str: 20, dex: 12, con: 17, int: 3, wis: 12, cha: 7 },
+      spd: { walk: 40 }, sk: { perception: 3 },
+      sen: { darkvision: 60, passive_perception: 13 },
+      tr: [{ n: 'Visão e Olfato Aguçados', d: 'O urso-coruja tem vantagem em testes de Sabedoria (Percepção) baseados em visão ou olfato.' }],
+      act: [
+        { n: 'Ataque Múltiplo', d: 'O urso-coruja faz um ataque com o bico e um com as garras.' },
+        { n: 'Bico', d: 'Ataque com Arma Corpo a Corpo: +7 para acertar, alcance 1,5 m, uma criatura. Acerto: 10 (1d10 + 5) de dano perfurante.' },
+        { n: 'Garras', d: 'Ataque com Arma Corpo a Corpo: +7 para acertar, alcance 1,5 m, um alvo. Acerto: 14 (2d8 + 5) de dano cortante.' }
+      ]
+    }),
+
+    m({
+      id: 'srd-werewolf', en: 'Werewolf', pt: 'Lobisomem', size: 'Medium', type: 'humanoid',
+      cr: '3', crn: 3, ac: 12, hp: 58, hpF: '9d8+18', init: 1,
+      ab: { str: 15, dex: 13, con: 14, int: 10, wis: 11, cha: 10 },
+      spd: { walk: 30 }, sk: { perception: 4, stealth: 3 },
+      imm: ['bludgeoning', 'piercing', 'slashing'],
+      sen: { passive_perception: 14 },
+      lang: ['Comum'],
+      tr: [
+        { n: 'Metamorfo', d: 'O lobisomem pode usar sua ação para se transformar em um híbrido de lobo e humanoide ou em um lobo, ou voltar à forma humanoide. Suas estatísticas são as mesmas em todas as formas.' },
+        { n: 'Imunidade a Armas Não Mágicas', d: 'O lobisomem é imune a dano contundente, cortante e perfurante de armas não mágicas que não sejam de prata.' }
+      ],
+      act: [
+        { n: 'Ataque Múltiplo', d: 'Na forma de lobo, o lobisomem faz dois ataques com a mordida. Na forma híbrida, faz um ataque com a mordida e um com as garras.' },
+        { n: 'Mordida', d: 'Ataque com Arma Corpo a Corpo: +4 para acertar, alcance 1,5 m, um alvo. Acerto: 6 (1d8 + 2) de dano perfurante. Se o alvo for um humanoide, deve ser bem-sucedido em um teste de resistência de Constituição CD 12 ou é amaldiçoado com licantropia.' },
+        { n: 'Garras', d: 'Ataque com Arma Corpo a Corpo: +4 para acertar, alcance 1,5 m, uma criatura. Acerto: 7 (2d4 + 2) de dano cortante.' }
+      ]
+    }),
+
+    m({
+      id: 'srd-mummy', en: 'Mummy', pt: 'Múmia', size: 'Medium', type: 'undead',
+      cr: '3', crn: 3, ac: 11, hp: 58, hpF: '9d8+18', init: -1,
+      ab: { str: 16, dex: 8, con: 15, int: 6, wis: 10, cha: 12 },
+      spd: { walk: 20 }, sav: { wis: 2 }, vuln: ['fire'],
+      res: ['bludgeoning', 'piercing', 'slashing'],
+      imm: ['necrotic', 'poison'],
+      cimm: ['Enfeitiçado', 'Exausto', 'Amedrontado', 'Paralisado', 'Envenenado'],
+      sen: { darkvision: 60, passive_perception: 10 },
+      lang: ['Comum'],
+      act: [
+        { n: 'Ataque Múltiplo', d: 'A múmia faz um ataque com o punho apodrecido.' },
+        { n: 'Punho Apodrecido', d: 'Ataque com Arma Corpo a Corpo: +5 para acertar, alcance 1,5 m, um alvo. Acerto: 10 (2d6 + 3) de dano contundente mais 10 (3d6) de dano necrótico. Se o alvo for uma criatura, deve ser bem-sucedido em um teste de resistência de Constituição CD 12 ou é amaldiçoado com podridão da múmia.' }
+      ]
+    }),
+
+    m({
+      id: 'srd-troll', en: 'Troll', pt: 'Troll', size: 'Large', type: 'giant',
+      cr: '5', crn: 5, ac: 15, hp: 84, hpF: '8d10+40', init: 1,
+      ab: { str: 18, dex: 13, con: 20, int: 7, wis: 9, cha: 7 },
+      spd: { walk: 30 }, sk: { perception: 2 },
+      sen: { darkvision: 60, passive_perception: 12 },
+      lang: ['Gigante'],
+      tr: [
+        { n: 'Olfato Aguçado', d: 'O troll tem vantagem em testes de Sabedoria (Percepção) baseados em olfato.' },
+        { n: 'Regeneração', d: 'O troll recupera 10 pontos de vida no início de seu turno. Se sofrer dano de ácido ou de fogo, essa regeneração não funciona no início do próximo turno. O troll só morre se começar seu turno com 0 pontos de vida e não se regenerar.' }
+      ],
+      act: [
+        { n: 'Ataque Múltiplo', d: 'O troll faz um ataque com a mordida e dois com as garras.' },
+        { n: 'Mordida', d: 'Ataque com Arma Corpo a Corpo: +7 para acertar, alcance 1,5 m, um alvo. Acerto: 7 (1d6 + 4) de dano perfurante.' },
+        { n: 'Garras', d: 'Ataque com Arma Corpo a Corpo: +7 para acertar, alcance 1,5 m, um alvo. Acerto: 11 (2d6 + 4) de dano cortante.' }
+      ]
+    }),
+
+    m({
+      id: 'srd-fire-elemental', en: 'Fire Elemental', pt: 'Elemental do Fogo', size: 'Large', type: 'elemental',
+      cr: '5', crn: 5, ac: 13, hp: 102, hpF: '12d10+36', init: 3,
+      ab: { str: 10, dex: 17, con: 16, int: 6, wis: 10, cha: 7 },
+      spd: { walk: 50 },
+      res: ['bludgeoning', 'piercing', 'slashing'],
+      imm: ['fire', 'poison'],
+      cimm: ['Exausto', 'Agarrado', 'Paralisado', 'Petrificado', 'Envenenado', 'Caído', 'Impedido', 'Inconsciente'],
+      sen: { darkvision: 60, passive_perception: 10 },
+      lang: ['Primordial'],
+      tr: [
+        { n: 'Forma de Fogo', d: 'O elemental pode se mover através de espaços de 2,5 cm de largura sem se comprimir. Uma criatura que entre no elemental ou o toque sofre 5 (1d10) de dano de fogo.' },
+        { n: 'Iluminação', d: 'O elemental emite luz plena em um raio de 9 m e penumbra por mais 9 m.' },
+        { n: 'Susceptibilidade à Água', d: 'Para cada 1,5 m cúbico de água que o elemental toque, ele sofre 1 de dano de frio.' }
+      ],
+      act: [
+        { n: 'Ataque Múltiplo', d: 'O elemental faz dois ataques de toque.' },
+        { n: 'Toque', d: 'Ataque Mágico Corpo a Corpo: +6 para acertar, alcance 1,5 m, um alvo. Acerto: 10 (2d6 + 3) de dano de fogo. Se o alvo for uma criatura ou objeto inflamável, ele começa a queimar.' }
+      ]
+    }),
+
+    m({
+      id: 'srd-chimera', en: 'Chimera', pt: 'Quimera', size: 'Large', type: 'monstrosity',
+      cr: '6', crn: 6, ac: 14, hp: 114, hpF: '12d10+48', init: 0,
+      ab: { str: 19, dex: 11, con: 19, int: 3, wis: 14, cha: 10 },
+      spd: { walk: 30, fly: 60 }, sk: { perception: 8 },
+      sen: { darkvision: 60, passive_perception: 18 },
+      lang: ['Comum', 'Dracônico'],
+      act: [
+        { n: 'Ataque Múltiplo', d: 'A quimera faz três ataques: um com a mordida, um com os chifres e um com as garras.' },
+        { n: 'Mordida', d: 'Ataque com Arma Corpo a Corpo: +7 para acertar, alcance 1,5 m, um alvo. Acerto: 11 (2d6 + 4) de dano perfurante.' },
+        { n: 'Chifres', d: 'Ataque com Arma Corpo a Corpo: +7 para acertar, alcance 1,5 m, um alvo. Acerto: 10 (1d12 + 4) de dano contundente.' },
+        { n: 'Garras', d: 'Ataque com Arma Corpo a Corpo: +7 para acertar, alcance 1,5 m, um alvo. Acerto: 11 (2d6 + 4) de dano cortante.' },
+        { n: 'Sopro de Fogo (Recarga 5–6)', d: 'A cabeça de dragão exala fogo em um cone de 4,5 m. Cada criatura na área faz um teste de resistência de Destreza CD 15, sofrendo 31 (7d8) de dano de fogo em falha, ou metade em sucesso.' }
+      ]
+    }),
+
+    m({
+      id: 'srd-mage', en: 'Mage', pt: 'Mago', size: 'Medium', type: 'humanoid',
+      cr: '6', crn: 6, ac: 12, hp: 40, hpF: '9d8', init: 2,
+      ab: { str: 9, dex: 14, con: 11, int: 17, wis: 12, cha: 11 },
+      spd: { walk: 30 }, sav: { int: 6, wis: 4 },
+      sk: { arcana: 6, history: 6 }, sen: { passive_perception: 11 },
+      lang: ['Comum', 'Dracônico', 'Anão', 'Élfico'],
+      tr: [{ n: 'Conjuração', d: 'O mago é um conjurador de 9º nível. Seu atributo de conjuração é Inteligência (CD de resistência 14, +6 para acertar com ataques mágicos). Ele prepara magias como Mísseis Mágicos, Escudo Arcano, Bola de Fogo e Voo.' }],
+      act: [
+        { n: 'Adaga', d: 'Ataque com Arma Corpo a Corpo ou à Distância: +5 para acertar, alcance 1,5 m ou 6/18 m, um alvo. Acerto: 4 (1d4 + 2) de dano perfurante.' }
+      ]
+    }),
+
+    m({
+      id: 'srd-mind-flayer', en: 'Mind Flayer', pt: 'Devorador de Mentes', size: 'Medium', type: 'aberration',
+      cr: '7', crn: 7, ac: 15, hp: 71, hpF: '13d8+13', init: 2,
+      ab: { str: 11, dex: 12, con: 12, int: 19, wis: 17, cha: 17 },
+      spd: { walk: 30, fly: 15 },
+      sav: { int: 7, wis: 6, cha: 6 },
+      sk: { arcana: 7, deception: 6, insight: 6, perception: 6, persuasion: 6, stealth: 5 },
+      sen: { darkvision: 120, passive_perception: 16 },
+      lang: ['Dialeto Obscuro', 'Subcomum'],
+      tr: [
+        { n: 'Resistência à Magia', d: 'O devorador de mentes tem vantagem em testes de resistência contra magias e outros efeitos mágicos.' },
+        { n: 'Telepatia', d: 'O devorador de mentes pode se comunicar telepaticamente com qualquer criatura a até 36 m que compreenda ao menos um idioma.' }
+      ],
+      act: [
+        { n: 'Tentáculos', d: 'Ataque Mágico Corpo a Corpo: +7 para acertar, alcance 1,5 m, uma criatura. Acerto: 15 (2d10 + 4) de dano psíquico. Se o alvo for Médio ou menor, fica Agarrado (CD 15 para escapar).' },
+        { n: 'Explosão Mental (Recarga 5–6)', d: 'O devorador emite energia psíquica em um cone de 18 m. Cada criatura na área faz um teste de resistência de Inteligência CD 15, sofrendo 22 (4d8 + 4) de dano psíquico e ficando Atordoada por 1 minuto em falha, ou metade do dano em sucesso.' }
+      ]
+    }),
+
+    m({
+      id: 'srd-fire-giant', en: 'Fire Giant', pt: 'Gigante do Fogo', size: 'Huge', type: 'giant',
+      cr: '9', crn: 9, ac: 18, hp: 162, hpF: '13d12+78', init: -1,
+      ab: { str: 25, dex: 9, con: 23, int: 10, wis: 14, cha: 13 },
+      spd: { walk: 30 }, sav: { dex: 3, con: 10, cha: 5 },
+      sk: { athletics: 11, perception: 6 }, sen: { passive_perception: 16 },
+      lang: ['Gigante'],
+      act: [
+        { n: 'Ataque Múltiplo', d: 'O gigante faz dois ataques com a espada grande.' },
+        { n: 'Espada Grande', d: 'Ataque com Arma Corpo a Corpo: +11 para acertar, alcance 3 m, um alvo. Acerto: 28 (6d6 + 7) de dano cortante.' },
+        { n: 'Rocha', d: 'Ataque com Arma à Distância: +11 para acertar, alcance 18/72 m, um alvo. Acerto: 29 (4d10 + 7) de dano contundente.' }
+      ]
+    }),
+
+    m({
+      id: 'srd-archmage', en: 'Archmage', pt: 'Arquimago', size: 'Medium', type: 'humanoid',
+      cr: '12', crn: 12, ac: 12, hp: 99, hpF: '18d8+18', init: 2,
+      ab: { str: 10, dex: 14, con: 12, int: 20, wis: 15, cha: 16 },
+      spd: { walk: 30 }, sav: { int: 9, wis: 6 },
+      sk: { arcana: 13, history: 13 }, sen: { passive_perception: 12 },
+      lang: ['Comum', 'Dracônico', 'Anão', 'Élfico', 'Goblin', 'Infernal'],
+      tr: [
+        { n: 'Resistência à Magia', d: 'O arquimago tem vantagem em testes de resistência contra magias e outros efeitos mágicos.' },
+        { n: 'Conjuração', d: 'O arquimago é um conjurador de 18º nível. Seu atributo de conjuração é Inteligência (CD de resistência 17, +9 para acertar com ataques mágicos). Ele prepara magias como Contramágica, Bola de Fogo, Teleporte e Parar o Tempo.' }
+      ],
+      act: [
+        { n: 'Adaga', d: 'Ataque com Arma Corpo a Corpo ou à Distância: +6 para acertar, alcance 1,5 m ou 6/18 m, um alvo. Acerto: 4 (1d4 + 2) de dano perfurante.' }
+      ]
+    }),
+
+    m({
+      id: 'srd-beholder', en: 'Beholder', pt: 'Observador', size: 'Large', type: 'aberration',
+      cr: '13', crn: 13, ac: 18, hp: 180, hpF: '19d10+76', init: 2,
+      ab: { str: 10, dex: 14, con: 18, int: 17, wis: 15, cha: 17 },
+      spd: { walk: 0, fly: 20 }, sav: { int: 8, wis: 7, cha: 8 },
+      sk: { perception: 12 }, sen: { darkvision: 120, passive_perception: 22 },
+      lang: ['Dialeto Obscuro'],
+      tr: [
+        { n: 'Cone Antimagia', d: 'O olho central do observador cria uma área de antimagia em um cone de 45 m. Nenhuma magia ou efeito mágico funciona nessa área, exceto efeitos de artefatos ou divindades.' },
+        { n: 'Telepatia', d: 'O observador pode se comunicar telepaticamente com qualquer criatura a até 36 m que compreenda ao menos um idioma.' }
+      ],
+      act: [
+        { n: 'Mordida', d: 'Ataque com Arma Corpo a Corpo: +5 para acertar, alcance 1,5 m, um alvo. Acerto: 14 (4d6) de dano perfurante.' },
+        { n: 'Raios Oculares', d: 'O observador dispara três raios oculares aleatórios contra alvos que possa ver a até 36 m. Cada raio tem um efeito próprio, como paralisia, medo, dano necrótico ou desintegração, com testes de resistência apropriados.' }
+      ]
+    }),
+
+    m({
+      id: 'srd-adult-red-dragon', en: 'Adult Red Dragon', pt: 'Dragão Vermelho Adulto', size: 'Huge', type: 'dragon',
+      cr: '17', crn: 17, ac: 19, hp: 256, hpF: '19d12+133', init: 0,
+      ab: { str: 27, dex: 10, con: 25, int: 16, wis: 13, cha: 21 },
+      spd: { walk: 40, climb: 40, fly: 80 },
+      sav: { dex: 6, con: 13, wis: 7, cha: 11 },
+      sk: { perception: 13, stealth: 6 }, imm: ['fire'],
+      sen: { blindsight: 60, darkvision: 120, passive_perception: 23 },
+      lang: ['Comum', 'Dracônico'],
+      tr: [
+        { n: 'Resistência Lendária (3/dia)', d: 'Se o dragão falhar em um teste de resistência, pode escolher ser bem-sucedido.' }
+      ],
+      act: [
+        { n: 'Ataque Múltiplo', d: 'O dragão usa sua Presença Aterradora e faz três ataques: um com a mordida e dois com as garras.' },
+        { n: 'Mordida', d: 'Ataque com Arma Corpo a Corpo: +14 para acertar, alcance 3 m, um alvo. Acerto: 19 (2d10 + 8) de dano perfurante mais 7 (2d6) de dano de fogo.' },
+        { n: 'Garra', d: 'Ataque com Arma Corpo a Corpo: +14 para acertar, alcance 1,5 m, um alvo. Acerto: 15 (2d6 + 8) de dano cortante.' },
+        { n: 'Cauda', d: 'Ataque com Arma Corpo a Corpo: +14 para acertar, alcance 4,5 m, um alvo. Acerto: 17 (2d8 + 8) de dano contundente.' },
+        { n: 'Sopro de Fogo (Recarga 5–6)', d: 'O dragão exala fogo em um cone de 18 m. Cada criatura na área faz um teste de resistência de Destreza CD 21, sofrendo 63 (18d6) de dano de fogo em falha, ou metade em sucesso.' },
+        { n: 'Presença Aterradora', d: 'Cada criatura escolhida pelo dragão a até 36 m deve ser bem-sucedida em um teste de resistência de Sabedoria CD 19 ou fica Amedrontada por 1 minuto, repetindo o teste ao fim de cada turno.' }
+      ],
+      la: [
+        { n: 'Detectar', d: 'O dragão faz um teste de Sabedoria (Percepção).' },
+        { n: 'Ataque com a Cauda', d: 'O dragão faz um ataque com a cauda.' },
+        { n: 'Ataque com Asas', d: 'O dragão bate as asas. Cada criatura a até 3 m deve ser bem-sucedida em um teste de resistência de Destreza CD 22 ou sofre 15 (2d6 + 8) de dano contundente e fica Caída.' }
+      ]
+    }),
+
+    m({
+      id: 'srd-lich', en: 'Lich', pt: 'Lich', size: 'Medium', type: 'undead',
+      cr: '21', crn: 21, ac: 17, hp: 135, hpF: '18d8+54', init: 3,
+      ab: { str: 11, dex: 16, con: 16, int: 20, wis: 14, cha: 16 },
+      spd: { walk: 30 }, sav: { con: 10, int: 12, wis: 9 },
+      sk: { arcana: 19, history: 12, insight: 9, perception: 9 },
+      res: ['cold', 'lightning', 'necrotic', 'bludgeoning', 'piercing', 'slashing'],
+      imm: ['poison'],
+      cimm: ['Enfeitiçado', 'Exausto', 'Amedrontado', 'Paralisado', 'Envenenado'],
+      sen: { truesight: 36, passive_perception: 19 },
+      lang: ['Comum', 'Dialeto Obscuro', 'Infernal', 'Abissal', 'Dracônico'],
+      tr: [
+        { n: 'Resistência Lendária (3/dia)', d: 'Se o lich falhar em um teste de resistência, pode escolher ser bem-sucedido.' },
+        { n: 'Rejuvenescimento', d: 'Se o lich for destruído, ele recupera a forma em 1d10 dias, desde que sua filactéria exista.' },
+        { n: 'Conjuração', d: 'O lich é um conjurador de 18º nível. Seu atributo de conjuração é Inteligência (CD de resistência 20, +12 para acertar com ataques mágicos). Ele prepara magias como Dedo da Morte, Muralha de Força e Parar o Tempo.' }
+      ],
+      act: [
+        { n: 'Toque Paralisante', d: 'Ataque Mágico Corpo a Corpo: +12 para acertar, alcance 1,5 m, uma criatura. Acerto: 10 (3d6) de dano de frio. O alvo deve ser bem-sucedido em um teste de resistência de Constituição CD 18 ou fica Paralisado por 1 minuto, repetindo o teste ao fim de cada turno.' }
+      ],
+      la: [
+        { n: 'Truque', d: 'O lich lança um truque.' },
+        { n: 'Toque Paralisante', d: 'O lich faz um ataque com o Toque Paralisante.' },
+        { n: 'Olhar Aterrorizante', d: 'O lich olha para uma criatura a até 3 m. Se ela puder vê-lo, deve ser bem-sucedida em um teste de resistência de Sabedoria CD 18 ou fica Amedrontada por 1 minuto.' }
+      ]
+    }),
+
+    m({
+      id: 'srd-tarrasque', en: 'Tarrasque', pt: 'Tarrasque', size: 'Gargantuan', type: 'monstrosity',
+      cr: '30', crn: 30, ac: 25, hp: 676, hpF: '33d20+330', init: 0,
+      ab: { str: 30, dex: 11, con: 30, int: 3, wis: 11, cha: 11 },
+      spd: { walk: 40 }, sav: { int: 5, wis: 9, cha: 9 },
+      imm: ['fire', 'poison', 'bludgeoning', 'piercing', 'slashing'],
+      cimm: ['Enfeitiçado', 'Amedrontado', 'Paralisado', 'Envenenado'],
+      sen: { blindsight: 36, passive_perception: 10 },
+      tr: [
+        { n: 'Resistência Lendária (3/dia)', d: 'Se o tarrasque falhar em um teste de resistência, pode escolher ser bem-sucedido.' },
+        { n: 'Resistência à Magia', d: 'O tarrasque tem vantagem em testes de resistência contra magias e outros efeitos mágicos.' },
+        { n: 'Carapaça Refletora', d: 'Se o tarrasque for alvo de uma magia de raio e for bem-sucedido no teste de resistência, o raio é refletido de volta ao conjurador.' },
+        { n: 'Monstro de Cerco', d: 'O tarrasque causa o dobro de dano a objetos e estruturas.' }
+      ],
+      act: [
+        { n: 'Ataque Múltiplo', d: 'O tarrasque usa sua Presença Aterradora e faz cinco ataques: um com a mordida, dois com as garras, um com os chifres e um com a cauda.' },
+        { n: 'Mordida', d: 'Ataque com Arma Corpo a Corpo: +19 para acertar, alcance 3 m, um alvo. Acerto: 36 (4d12 + 10) de dano perfurante. Se o alvo for uma criatura, fica Agarrado (CD 20 para escapar).' },
+        { n: 'Garra', d: 'Ataque com Arma Corpo a Corpo: +19 para acertar, alcance 4,5 m, um alvo. Acerto: 28 (4d8 + 10) de dano cortante.' },
+        { n: 'Chifres', d: 'Ataque com Arma Corpo a Corpo: +19 para acertar, alcance 3 m, um alvo. Acerto: 27 (4d8 + 9) de dano perfurante.' },
+        { n: 'Cauda', d: 'Ataque com Arma Corpo a Corpo: +19 para acertar, alcance 6 m, um alvo. Acerto: 25 (4d6 + 10) de dano contundente.' },
+        { n: 'Presença Aterradora', d: 'Cada criatura escolhida pelo tarrasque a até 36 m deve ser bem-sucedida em um teste de resistência de Sabedoria CD 17 ou fica Amedrontada por 1 minuto.' }
+      ],
+      la: [
+        { n: 'Ataque', d: 'O tarrasque faz um ataque com a garra ou a cauda.' },
+        { n: 'Mover-se', d: 'O tarrasque se move até metade de seu deslocamento.' },
+        { n: 'Devorar', d: 'O tarrasque faz um ataque com a mordida contra uma criatura Agarrada por ele.' }
+      ]
+    })
+
   ];
-  function termoPt(value){ return TERMOS_PT[value] || value; }
-  function textoMonstroPt(value){
-    var out=String(value||'');
-    FRASES_PT.forEach(function(pair){out=out.replace(pair[0],pair[1]);});
-    Object.keys(TERMOS_PT).sort(function(a,b){return b.length-a.length;}).forEach(function(k){out=out.replace(new RegExp('(^|[^A-Za-z])'+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?=$|[^A-Za-z])','g'),function(_,p){return p+TERMOS_PT[k]});});
-    return out;
-  }
-  function traduzirRegistro(registros){
-    return (registros||[]).map(function(item){
-      if(typeof item==='string') return textoMonstroPt(item);
-      var copy=Object.assign({},item);
-      if(copy.name) copy.name=termoPt(copy.name);
-      if(copy.description) copy.description=textoMonstroPt(copy.description);
-      return copy;
-    });
-  }
+
+  /* ============================ NORMALIZAÇÃO ============================ */
 
   function normalizeMonster(monster) {
     var stat = monster.stat_block_json || {};
-    var ptName = PT_NAMES[monster.name] || null;
+    var ptName = monster.nome_pt || null;
     return {
       id: monster.id,
-      nome: ptName || textoMonstroPt(monster.name),
+      nome: ptName || monster.name,
       nomePt: ptName,
       nomeEn: monster.name,
       traducaoPtDisponivel: true,
@@ -450,72 +583,41 @@
       vulnerabilidadesDano: stat.damage_vulnerabilities || [],
       imunidadesDano: stat.damage_immunities || [],
       imunidadesCondicao: stat.condition_immunities || [],
-      tracos: traduzirRegistro(stat.traits),
-      acoes: traduzirRegistro(stat.actions),
-      acoesBonus: traduzirRegistro(stat.bonus_actions),
-      reacoes: traduzirRegistro(stat.reactions),
-      acoesLendarias: traduzirRegistro(stat.legendary_actions),
-      fonte: 'SRD 5.2.1',
+      tracos: stat.traits || [],
+      acoes: stat.actions || [],
+      acoesBonus: stat.bonus_actions || [],
+      reacoes: stat.reactions || [],
+      acoesLendarias: stat.legendary_actions || [],
+      fonte: 'SRD 5.2.1 (embutido)',
       licenca: 'CC BY 4.0',
       dados: stat
     };
   }
 
-  function loadJson(url) {
-    return fetch(url, { method: 'GET', mode: 'cors', cache: 'force-cache' }).then(function (response) {
-      if (!response.ok) throw new Error('HTTP ' + response.status + ' ao carregar ' + url);
-      return response.json();
-    });
-  }
+  /* ============================ API PÚBLICA ============================ */
 
-  function loadFromSources(index) {
-    if (index >= DATA_URLS.length) {
-      throw new Error('Não foi possível obter a base SRD 5.2.1. Verifique a conexão com a internet.');
-    }
-    return loadJson(DATA_URLS[index]).catch(function () {
-      return loadFromSources(index + 1);
-    });
-  }
-
-  var CACHE_KEY = 'animalysson-rpg-monsters-srd521-v1';
-  var cachedRecords = null;
-  try { cachedRecords = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); } catch (_) { cachedRecords = null; }
-  window.MONSTERS = Array.isArray(cachedRecords) ? cachedRecords.map(normalizeMonster) : [];
+  window.MONSTERS = CATALOGO.map(normalizeMonster);
   window.SRD_MONSTERS = window.MONSTERS;
   window.MONSTER_MANUAL_URL = MONSTER_MANUAL_URL;
   window.MONSTERS_ERROR = null;
+
   window.MONSTERS_META = {
-    sistema: 'Dungeons & Dragons 5.5e (regras revisadas de 2024)',
-    manualAtual: 'Livro dos Monstros (2025)',
-    edicaoBrasileira: 'Livro dos Monstros 5.5e — lançado no Brasil em setembro de 2026',
-    criaturasNoManual: 510,
-    blocosNovosNoManual: 87,
+    sistema: 'Dungeons & Dragons 5e',
+    manualAtual: 'Livro dos Monstros',
     srd: '5.2.1',
-    blocosCompletosAbertosEsperados: 322,
-    blocosCompletosCarregados: 0,
-    fonte: 'Wizards of the Coast / SRD 5.2.1, republicado via Open5e',
+    blocosCompletosCarregados: window.MONSTERS.length,
+    fonte: 'Dados embutidos diretamente em monsters.js (sem fetch, sem CDN)',
     licenca: 'Creative Commons Attribution 4.0 International (CC BY 4.0)',
     urlSRD: 'https://www.dndbeyond.com/srd',
     urlLivro: MONSTER_MANUAL_URL,
-    idiomaDadosDeRegra: 'PT-BR parcial por tradução local de termos recorrentes; descrições com trechos sem correspondência permanecem no idioma original',
+    idiomaDadosDeRegra: 'PT-BR',
     idiomaNomes: 'PT-BR',
-    cacheLocal: 'Os dados são guardados no navegador após a primeira carga; a primeira abertura ainda requer internet.',
-    aviso: 'Este catálogo contém os blocos abertos do SRD 5.2.1, não os 510 blocos comerciais integrais do Livro dos Monstros.'
+    cacheLocal: 'Não há cache: todo o bestiário está no arquivo e funciona offline.',
+    aviso: 'Catálogo embutido e ampliável. Adicione novos monstros no array CATALOGO.'
   };
 
-  window.MONSTERS_READY = window.MONSTERS.length ? Promise.resolve(window.MONSTERS) : loadFromSources(0).then(function (payload) {
-    var records = Array.isArray(payload) ? payload : payload.monsters;
-    if (!Array.isArray(records)) throw new Error('Formato inesperado da base de monstros SRD 5.2.1.');
-    try { localStorage.setItem(CACHE_KEY, JSON.stringify(records)); } catch (_) {}
-    window.MONSTERS = records.map(normalizeMonster);
-    window.SRD_MONSTERS = window.MONSTERS;
-    window.MONSTERS_META.blocosCompletosCarregados = window.MONSTERS.length;
-    return window.MONSTERS;
-  }).catch(function (error) {
-    window.MONSTERS_ERROR = error;
-    console.error('[monsters.js] Falha ao carregar o catálogo SRD:', error);
-    return window.MONSTERS;
-  });
+  /* Resolve imediatamente: nada é buscado de fora. */
+  window.MONSTERS_READY = Promise.resolve(window.MONSTERS);
 
   window.getMonsters = async function (filters) {
     var list = await window.MONSTERS_READY;
@@ -546,7 +648,9 @@
     var matches = await window.findMonster(query);
     var q = String(query || '').trim().toLocaleLowerCase('pt-BR');
     return matches.find(function (m) {
-      return [m.nome, m.nomeEn].some(function (n) { return String(n || '').toLocaleLowerCase('pt-BR') === q; });
+      return [m.nome, m.nomeEn].some(function (n) {
+        return String(n || '').toLocaleLowerCase('pt-BR') === q;
+      });
     }) || matches[0] || null;
   };
 })();
