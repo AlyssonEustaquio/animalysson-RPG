@@ -225,39 +225,43 @@ function draw() {
   updateDetailPanel();
 }
 
+function isCurrentlyVisible(x, y, px, py, r) {
+  // Sem luz dinâmica: áreas já exploradas ficam totalmente visíveis
+  if (!dynLight) return !state.fog[idx(x, y)];
+  if (px < 0) return false;
+  var dx = x - px, dy = y - py;
+  var dist = Math.sqrt(dx * dx + dy * dy);
+  if (dist > r + 0.01) return false;
+  return hasLOS(px, py, x, y);
+}
+
 function drawFogAndLight() {
+  // fog[i] === 1 → nunca explorado → 100% preto
+  // fog[i] === 0 e fora da visão atual → 50% preto
+  // na visão atual (raio + LOS) → sem névoa
   var player = state.tokens.find(function (t) { return t.tipo === 'player'; }) || state.tokens[0];
   var px = player ? player.x : -1;
   var py = player ? player.y : -1;
   var r = player ? (player.luz || lightRadius) : 0;
 
-  cx.fillStyle = 'rgba(0,0,0,0.92)';
   for (var y = 0; y < ROWS; y++) {
     for (var x = 0; x < COLS; x++) {
-      // paredes sempre "sólidas" visualmente na névoa? não — fog só em células cobertas
-      if (!state.fog[idx(x, y)]) continue;
+      var visible = isCurrentlyVisible(x, y, px, py, r);
+      if (visible) continue; // visão atual: mapa limpo
 
-      if (dynLight && player) {
-        var dx = x - px, dy = y - py;
-        var dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist <= r + 0.01) {
-          // só revela se houver linha de visão livre de paredes
-          if (hasLOS(px, py, x, y)) continue; // iluminado → sem fog
-          // sem LOS: mantém fog (luz não passa da parede)
-        } else if (dist <= r + 1.5) {
-          if (hasLOS(px, py, x, y)) {
-            cx.fillStyle = 'rgba(0,0,0,0.55)';
-            cx.fillRect(x * CELL, y * CELL, CELL + 0.5, CELL + 0.5);
-            cx.fillStyle = 'rgba(0,0,0,0.92)';
-            continue;
-          }
-        }
+      if (state.fog[idx(x, y)]) {
+        // nunca visto → 100%
+        cx.fillStyle = 'rgba(0,0,0,1)';
+        cx.fillRect(x * CELL, y * CELL, CELL + 0.5, CELL + 0.5);
+      } else if (dynLight) {
+        // já explorado, fora do campo de visão → 50%
+        cx.fillStyle = 'rgba(0,0,0,0.5)';
+        cx.fillRect(x * CELL, y * CELL, CELL + 0.5, CELL + 0.5);
       }
-      cx.fillRect(x * CELL, y * CELL, CELL + 0.5, CELL + 0.5);
     }
   }
 
-  // brilho suave só onde há LOS
+  // brilho suave na área iluminada
   if (dynLight && player) {
     var c = cellCenter(px, py);
     var rPx = r * CELL;
