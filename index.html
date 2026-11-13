@@ -189,6 +189,29 @@ input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:
 .mp-play #mp-edit{display:none}.mp-play #mp-hud{display:block}
 @media(max-width:700px){.mp-wrap{flex-direction:column-reverse;height:auto}.mp-side{width:100%;max-height:38vh;border-right:0;border-top:1px solid var(--line)}.mp-main{height:58vh}}
 @media print{.mp{display:none}}
+
+/* Mapas prontos / Tumba dos Horrores */
+.mapa-subtabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.mapa-subtabs button{padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--mute);border-radius:6px;font:inherit;cursor:pointer}
+.mapa-subtabs button.on{background:var(--red);border-color:var(--red);color:var(--redink);font-weight:700}
+.tomb-wrap{display:flex;flex-direction:column;gap:16px}
+.tomb-hero{display:grid;grid-template-columns:minmax(200px,320px) 1fr;gap:16px;align-items:start}
+.tomb-hero img{width:100%;border-radius:8px;border:1px solid var(--line);background:#0b0b0c}
+.tomb-info h2{margin-bottom:6px}
+.tomb-info p{color:var(--mute);margin:0 0 8px}
+.tomb-info .meta{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.tomb-info .meta span{background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:.82rem}
+.tomb-parts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tomb-parts figure{margin:0;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.tomb-parts figcaption{padding:6px 10px;font-size:.85rem;color:var(--mute);border-top:1px solid var(--line)}
+.tomb-parts img{width:100%;display:block;cursor:zoom-in;background:#0b0b0c}
+.tomb-parts img:hover{opacity:.92}
+.tomb-lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px}
+.tomb-lightbox img{max-width:100%;max-height:calc(100vh - 60px);object-fit:contain;border-radius:4px}
+.tomb-lightbox .lb-bar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;justify-content:center}
+.tomb-lightbox button{padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:6px;font:inherit;cursor:pointer}
+.tomb-lightbox button:hover{border-color:var(--red)}
+@media(max-width:700px){.tomb-hero{grid-template-columns:1fr}.tomb-parts{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -724,11 +747,78 @@ async function renderMonstersPage(){
   }
  }catch(e){const grid=document.getElementById('monsters-grid');if(grid)grid.innerHTML='<div class="empty-state">Não foi possível abrir o bestiário.</div>';}
 }
+var MAPS_SUB='editor'; // 'editor' | 'tomb'
+function setMapsSub(sub){
+  MAPS_SUB=sub;
+  if(window.MapEditor)window.MapEditor.unmount();
+  renderMapsPage();
+}
+function openTombPart(n){
+  var urls=['mapas/tumba-dos-horrores/part1.webp','mapas/tumba-dos-horrores/part2.webp','mapas/tumba-dos-horrores/part3.webp','mapas/tumba-dos-horrores/part4.webp'];
+  var labels=['Parte 1 (noroeste)','Parte 2 (nordeste)','Parte 3 (sudoeste)','Parte 4 (sudeste)'];
+  var idx=n-1;
+  var lb=document.createElement('div');
+  lb.className='tomb-lightbox';
+  lb.innerHTML='<img src="'+urls[idx]+'" alt="'+labels[idx]+'"><div class="lb-bar">'+
+    '<button type="button" data-a="prev">← Anterior</button>'+
+    '<button type="button" data-a="close">Fechar</button>'+
+    '<button type="button" data-a="next">Próxima →</button></div>';
+  document.body.appendChild(lb);
+  function show(i){
+    idx=(i+4)%4;
+    lb.querySelector('img').src=urls[idx];
+    lb.querySelector('img').alt=labels[idx];
+  }
+  lb.onclick=function(e){
+    var a=e.target.dataset&&e.target.dataset.a;
+    if(a==='close'||e.target===lb){lb.remove();return}
+    if(a==='prev')show(idx-1);
+    if(a==='next')show(idx+1);
+  };
+  document.addEventListener('keydown',function esc(e){
+    if(e.key==='Escape'){lb.remove();document.removeEventListener('keydown',esc)}
+    if(e.key==='ArrowLeft')show(idx-1);
+    if(e.key==='ArrowRight')show(idx+1);
+  });
+}
+function renderMapsPage(){
+  var app=document.getElementById('app');
+  var sub='<div class="mapa-subtabs">'+
+    '<button type="button" class="'+(MAPS_SUB==='editor'?'on':'')+'" onclick="setMapsSub(\'editor\')">▦ Editor de Mundo</button>'+
+    '<button type="button" class="'+(MAPS_SUB==='tomb'?'on':'')+'" onclick="setMapsSub(\'tomb\')">☠ Tumba dos Horrores</button>'+
+    '</div>';
+  if(MAPS_SUB==='editor'){
+    app.innerHTML=sub+'<div id="map-editor-root"></div>';
+    if(window.MapEditor)window.MapEditor.mount(document.getElementById('map-editor-root'));
+    else document.getElementById('map-editor-root').innerHTML='<div class="empty-state">mapa.js não encontrado.</div>';
+    return;
+  }
+  // Tumba dos Horrores
+  app.innerHTML=sub+
+  '<div class="tomb-wrap panel">'+
+    '<div class="tomb-hero">'+
+      '<img src="mapas/tumba-dos-horrores/preview.webp" alt="Prévia da Tumba dos Horrores" loading="lazy">'+
+      '<div class="tomb-info">'+
+        '<h2>Tumba dos Horrores</h2>'+
+        '<p>Mapa de batalha clássico (grid 72 × 95). Versão otimizada para o navegador a partir do pack original em alta resolução.</p>'+
+        '<div class="meta"><span>72 × 95 quadrados</span><span>1 quadrado ≈ 1,5 m</span><span>4 painéis</span></div>'+
+        '<p style="font-size:.9rem;margin-top:8px">Clique em qualquer parte abaixo para ampliar. Use as setas ← → ou os botões para navegar entre os painéis. Esc fecha.</p>'+
+      '</div>'+
+    '</div>'+
+    '<div class="tomb-parts">'+
+      '<figure><img src="mapas/tumba-dos-horrores/part1.webp" alt="Parte 1" loading="lazy" onclick="openTombPart(1)"><figcaption>Parte 1 — Noroeste</figcaption></figure>'+
+      '<figure><img src="mapas/tumba-dos-horrores/part2.webp" alt="Parte 2" loading="lazy" onclick="openTombPart(2)"><figcaption>Parte 2 — Nordeste</figcaption></figure>'+
+      '<figure><img src="mapas/tumba-dos-horrores/part3.webp" alt="Parte 3" loading="lazy" onclick="openTombPart(3)"><figcaption>Parte 3 — Sudoeste</figcaption></figure>'+
+      '<figure><img src="mapas/tumba-dos-horrores/part4.webp" alt="Parte 4" loading="lazy" onclick="openTombPart(4)"><figcaption>Parte 4 — Sudeste</figcaption></figure>'+
+    '</div>'+
+    '<p style="color:var(--mute);font-size:.85rem;margin:0">Dica: para uso em VTT ou impressão, utilize os arquivos originais em 200 ppi do pack <code>TombOfHorrors_72x95</code> (muito maiores).</p>'+
+  '</div>';
+}
 function render(){
  const steps=document.getElementById('steps');if(steps)steps.innerHTML='';
  updateTabs();
  if(ACTIVE_VIEW!=='maps'&&window.MapEditor)window.MapEditor.unmount();
- if(ACTIVE_VIEW==='maps'){document.getElementById('app').innerHTML='';window.MapEditor?window.MapEditor.mount(document.getElementById('app')):document.getElementById('app').innerHTML='<div class="empty-state">mapa.js não encontrado.</div>';return}
+ if(ACTIVE_VIEW==='maps'){renderMapsPage();return}
  if(ACTIVE_VIEW==='character')renderCharacterPage();
  else if(ACTIVE_VIEW==='items')renderItemsPage();
  else renderMonstersPage();
