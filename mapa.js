@@ -34,6 +34,8 @@ var selected = null;
 var measurePts = null;
 var pendingMonster = null;
 var blockMove = true;
+// Posição do cursor usada para desenhar a prévia da ferramenta antes do clique.
+var previewPointer = null;
 
 var state = load() || defaultState();
 var bgImages = [];
@@ -292,7 +294,14 @@ function draw() {
 
   if (showFog) drawFogAndLight();
 
-  state.tokens.forEach(function (t) { drawToken(t, t === selected); });
+  // Um token só aparece quando TODA a sua área ocupada está visível.
+  // Assim, criaturas fora do alcance de luz ou atrás de paredes não vazam pela névoa.
+  if (selected && !isTokenVisible(selected)) selected = null;
+  state.tokens.forEach(function (t) {
+    if (isTokenVisible(t)) drawToken(t, t === selected);
+  });
+
+  drawToolPreview();
 
   if (measurePts && measurePts.length === 2) {
     var a = cellCenter(measurePts[0].x, measurePts[0].y);
@@ -383,12 +392,203 @@ function drawEdges() {
 }
 
 function isCurrentlyVisible(x, y, px, py, r) {
+  if (x < 0 || y < 0 || x >= COLS || y >= ROWS) return false;
   if (!dynLight) return !state.fog[idx(x, y)];
   if (px < 0) return false;
   var dx = x - px, dy = y - py;
   var dist = Math.sqrt(dx * dx + dy * dy);
   if (dist > r + 0.01) return false;
   return hasLOS(px, py, x, y);
+}
+
+function isTokenVisible(t) {
+  if (!t) return false;
+  // O marcador do jogador é sempre mostrado para orientar a exploração.
+  if (t.tipo === 'player') return true;
+  var player = currentPlayer();
+  if (!player) return false;
+  var sq = t.raio || 1;
+  var radius = player.luz || lightRadius;
+  // Só revela o token quando toda a sua área ocupada está dentro da visão.
+  for (var dy = 0; dy < sq; dy++) {
+    for (var dx = 0; dx < sq; dx++) {
+      if (!isCurrentlyVisible(t.x + dx, t.y + dy, player.x, player.y, radius)) return false;
+    }
+  }
+  return true;
+}
+
+function currentPlayer() {
+  return state.tokens.find(function (t) { return t.tipo === 'player'; }) || state.tokens[0] || null;
+}
+
+function previewCell() {
+  if (!previewPointer) return null;
+  return worldToCell(previewPointer.x, previewPointer.y);
+}
+
+function previewHoveredToken(cell) {
+  if (!cell) return null;
+  for (var i = state.tokens.length - 1; i >= 0; i--) {
+    var t = state.tokens[i], sq = t.raio || 1;
+    if (!isTokenVisible(t)) continue;
+    if (cell.x >= t.x && cell.x < t.x + sq && cell.y >= t.y && cell.y < t.y + sq) return t;
+  }
+  return null;
+}
+
+function previewEdge() {
+  if (!previewPointer) return null;
+  return nearestEdge(previewPointer.x, previewPointer.y);
+}
+
+function previewDoorEdge() {
+  if (!previewPointer) return null;
+  var gx = previewPointer.x / CELL, gy = previewPointer.y / CELL;
+  var fx = Math.abs(gx - Math.round(gx)), fy = Math.abs(gy - Math.round(gy));
+  if (Math.min(fx, fy) >= 0.12) return null;
+  var edge = previewEdge(), value = edge ? getEdgeVal(edge) : EDGE_NONE;
+  return value === EDGE_DOOR_C || value === EDGE_DOOR_O ? edge : null;
+}
+
+function previewDescription(cell) {
+  if (tool === 'pan') return 'Arraste para deslocar a câmera sem alterar o mapa.';
+  if (!cell) return 'Mova o cursor sobre o mapa para visualizar a ação.';
+  var pos = ' (' + (cell.x + 1) + ', ' + (cell.y + 1) + ')';
+  if (tool === 'select') {
+    var hit = previewHoveredToken(cell);
+    if (hit) return 'Selecionar/mover ' + hit.nome + pos + '. Clique e arraste.';
+    if (previewDoorEdge()) return 'Alternar esta porta entre aberta e fechada.';
+    return 'Selecionar um token visível ou clicar em uma porta para alterná-la.';
+  }
+  if (tool === 'wall') return 'Adicionar uma parede no quadrado' + pos + '. Bloqueia passagem e visão.';
+  if (tool === 'erasewall') return 'Apagar a parede do quadrado' + pos + ', se houver.';
+  if (tool === 'muro') return 'Adicionar um muro na borda mais próxima deste quadrado.';
+  if (tool === 'porta') {
+    var pe = previewEdge(), pv = pe ? getEdgeVal(pe) : 0;
+    return pv === EDGE_DOOR_C ? 'A porta será aberta.' : pv === EDGE_DOOR_O ? 'A porta será fechada.' : 'Criar uma porta fechada nesta borda.';
+  }
+  if (tool === 'eraseedge') return 'Apagar o muro ou a porta na borda mais próxima.';
+  if (tool === 'spawn') return 'Mover o início do jogador para' + pos + ' e recalcular a área iluminada.';
+  if (tool === 'reveal') return 'Revelar um pincel de 3 × 3 quadrados ao redor de' + pos + '.';
+  if (tool === 'hide') return 'Cobrir com névoa um pincel de 3 × 3 quadrados ao redor de' + pos + '.';
+  if (tool === 'token') {
+    if (pendingMonster) return 'Colocar ' + pendingMonster.nome + ' (ND ' + pendingMonster.nd + ')' + pos + '.';
+    return 'Criar um token livre em' + pos + '. Ao clicar, você poderá definir o nome.';
+  }
+  if (tool === 'measure') {
+    if (measurePts && measurePts.length === 1) {
+      var d = Math.max(Math.abs(cell.x - measurePts[0].x), Math.abs(cell.y - measurePts[0].y));
+      return 'Finalizar a medição: ' + d + ' quadrado(s) · ' + (d * 1.5).toFixed(1) + ' m.';
+    }
+    if (measurePts && measurePts.length === 2) return 'Medição concluída. Clique para iniciar outra distância.';
+    return 'Marcar o ponto inicial da medição em' + pos + '.';
+  }
+  return 'Prévia da ferramenta ' + toolLabel(tool) + '.';
+}
+
+function drawPreviewCell(cell, fill, stroke) {
+  if (!cell) return;
+  cx.save();
+  cx.fillStyle = fill;
+  cx.fillRect(cell.x * CELL + 1, cell.y * CELL + 1, CELL - 2, CELL - 2);
+  cx.strokeStyle = stroke;
+  cx.lineWidth = 2 / zoom;
+  cx.setLineDash([5 / zoom, 3 / zoom]);
+  cx.strokeRect(cell.x * CELL + 1, cell.y * CELL + 1, CELL - 2, CELL - 2);
+  cx.setLineDash([]);
+  cx.restore();
+}
+
+function drawEdgePreview(edge, color, door) {
+  if (!edge) return;
+  cx.save();
+  cx.strokeStyle = color;
+  cx.fillStyle = color;
+  cx.lineWidth = Math.max(4, 5 / zoom);
+  cx.setLineDash([7 / zoom, 4 / zoom]);
+  if (edge.dir === 'h') {
+    var x0 = edge.x * CELL, y0 = edge.yEdge * CELL;
+    cx.beginPath(); cx.moveTo(x0, y0); cx.lineTo(x0 + CELL, y0); cx.stroke();
+    if (door) { cx.setLineDash([]); cx.beginPath(); cx.arc(x0 + CELL / 2, y0, 5 / zoom, 0, Math.PI * 2); cx.fill(); }
+  } else {
+    var xx = edge.xEdge * CELL, yy = edge.y * CELL;
+    cx.beginPath(); cx.moveTo(xx, yy); cx.lineTo(xx, yy + CELL); cx.stroke();
+    if (door) { cx.setLineDash([]); cx.beginPath(); cx.arc(xx, yy + CELL / 2, 5 / zoom, 0, Math.PI * 2); cx.fill(); }
+  }
+  cx.restore();
+}
+
+function drawToolPreview() {
+  if (!previewPointer || !cv) return;
+  var cell = previewCell();
+  var edge = previewEdge();
+  var center = cellCenter(cell.x, cell.y);
+  var ghost;
+
+  if (tool === 'wall') drawPreviewCell(cell, 'rgba(229,57,53,0.38)', '#ff5252');
+  else if (tool === 'erasewall') drawPreviewCell(cell, 'rgba(102,187,106,0.28)', '#81c784');
+  else if (tool === 'muro') drawEdgePreview(edge, '#ff5252', false);
+  else if (tool === 'porta') drawEdgePreview(edge, '#ffb74d', true);
+  else if (tool === 'eraseedge') drawEdgePreview(edge, '#80deea', false);
+  else if (tool === 'reveal' || tool === 'hide') {
+    cx.save();
+    cx.fillStyle = tool === 'reveal' ? 'rgba(255,235,59,0.22)' : 'rgba(0,0,0,0.5)';
+    cx.strokeStyle = tool === 'reveal' ? '#fff176' : '#b0bec5';
+    cx.lineWidth = 2 / zoom;
+    cx.setLineDash([5 / zoom, 3 / zoom]);
+    cx.fillRect((cell.x - 1) * CELL, (cell.y - 1) * CELL, CELL * 3, CELL * 3);
+    cx.strokeRect((cell.x - 1) * CELL, (cell.y - 1) * CELL, CELL * 3, CELL * 3);
+    cx.restore();
+  } else if (tool === 'spawn') {
+    var player = currentPlayer();
+    var radius = (player && player.luz) || lightRadius;
+    cx.save();
+    cx.fillStyle = 'rgba(255,213,79,0.08)';
+    cx.strokeStyle = 'rgba(255,213,79,0.9)';
+    cx.lineWidth = 2 / zoom;
+    cx.setLineDash([8 / zoom, 5 / zoom]);
+    cx.beginPath(); cx.arc(center.x, center.y, radius * CELL, 0, Math.PI * 2); cx.fill(); cx.stroke();
+    cx.restore();
+    ghost = { nome: 'J', tipo: 'player', x: cell.x, y: cell.y, cor: '#4fc3f7', raio: 1 };
+    cx.save(); cx.globalAlpha = 0.55; drawToken(ghost, false); cx.restore();
+  } else if (tool === 'token') {
+    var m = pendingMonster;
+    ghost = m ? {
+      nome: m.nome, tipo: 'npc', x: cell.x, y: cell.y,
+      cor: colorForMonster(m), raio: sizeSquares(m), hp: m.pontosVida,
+      hpMax: m.pontosVida
+    } : { nome: '?', tipo: 'npc', x: cell.x, y: cell.y, cor: '#e57373', raio: 1 };
+    cx.save(); cx.globalAlpha = 0.48; drawToken(ghost, false); cx.restore();
+  } else if (tool === 'measure') {
+    if (measurePts && measurePts.length === 1) {
+      var start = cellCenter(measurePts[0].x, measurePts[0].y);
+      var dist = Math.max(Math.abs(cell.x - measurePts[0].x), Math.abs(cell.y - measurePts[0].y));
+      cx.save();
+      cx.strokeStyle = '#ffeb3b'; cx.lineWidth = 2 / zoom;
+      cx.setLineDash([6 / zoom, 4 / zoom]);
+      cx.beginPath(); cx.moveTo(start.x, start.y); cx.lineTo(center.x, center.y); cx.stroke();
+      cx.setLineDash([]);
+      cx.fillStyle = 'rgba(0,0,0,0.8)';
+      cx.font = (14 / zoom) + 'px sans-serif'; cx.textAlign = 'center';
+      cx.fillText(dist + ' quad. (' + (dist * 1.5).toFixed(1) + ' m)', (start.x + center.x) / 2, (start.y + center.y) / 2 - 8 / zoom);
+      cx.restore();
+    } else drawPreviewCell(cell, 'rgba(255,235,59,0.14)', '#ffeb3b');
+  } else if (tool === 'select') {
+    var doorEdge = previewDoorEdge();
+    var hovered = previewHoveredToken(cell);
+    if (doorEdge) drawEdgePreview(doorEdge, '#ffb74d', true);
+    else if (hovered) {
+      var sq = hovered.raio || 1;
+      cx.save(); cx.strokeStyle = '#ffeb3b'; cx.lineWidth = 3 / zoom;
+      cx.setLineDash([5 / zoom, 3 / zoom]);
+      cx.strokeRect(hovered.x * CELL + 2, hovered.y * CELL + 2, sq * CELL - 4, sq * CELL - 4);
+      cx.restore();
+    } else drawPreviewCell(cell, 'rgba(255,255,255,0.05)', 'rgba(255,255,255,0.65)');
+  }
+
+  var info = $('#mp-preview');
+  if (info) info.textContent = previewDescription(cell);
 }
 
 function drawFogAndLight() {
@@ -627,6 +827,8 @@ function revealAround(cx, cy, radius) {
 // ---------- Input ----------
 function onPointerDown(e) {
   cv.setPointerCapture(e.pointerId);
+  var previewRect = cv.getBoundingClientRect();
+  previewPointer = screenToWorld(e.clientX - previewRect.left, e.clientY - previewRect.top);
   var rect = cv.getBoundingClientRect();
   var world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
   var cell = worldToCell(world.x, world.y);
@@ -714,6 +916,7 @@ function onPointerDown(e) {
     var hit = null;
     for (var i = state.tokens.length - 1; i >= 0; i--) {
       var t = state.tokens[i];
+      if (!isTokenVisible(t)) continue;
       var sq = t.raio || 1;
       if (cell.x >= t.x && cell.x < t.x + sq && cell.y >= t.y && cell.y < t.y + sq) {
         hit = t; break;
@@ -756,7 +959,9 @@ function onPointerDown(e) {
 }
 
 function onPointerMove(e) {
-  if (!drag) return;
+  var previewRect = cv.getBoundingClientRect();
+  previewPointer = screenToWorld(e.clientX - previewRect.left, e.clientY - previewRect.top);
+  if (!drag) { draw(); return; }
   if (drag.pan) {
     ox = drag.ox + (e.clientX - drag.x);
     oy = drag.oy + (e.clientY - drag.y);
@@ -812,6 +1017,10 @@ function onPointerUp() {
   drag = null;
 }
 
+function onPointerLeave() {
+  if (!drag) { previewPointer = null; draw(); }
+}
+
 function onWheel(e) {
   e.preventDefault();
   var rect = cv.getBoundingClientRect();
@@ -848,7 +1057,27 @@ function setTool(t) {
   R.querySelectorAll('#mp-tools button').forEach(function (b) {
     b.classList.toggle('on', b.dataset.t === t);
   });
+  var info = $('#mp-preview');
+  if (info) info.textContent = toolPreviewHelp(t);
+  if (cv) cv.style.cursor = t === 'pan' ? 'grab' : t === 'select' ? 'pointer' : 'crosshair';
   draw();
+}
+
+function toolPreviewHelp(t) {
+  return ({
+    select: 'Selecionar: passe sobre um token visível para destacá-lo; clique e arraste para mover.',
+    pan: 'Mover vista: arraste o mapa para mudar a área da câmera.',
+    wall: 'Parede: o quadrado destacado ficará bloqueado para movimento e visão.',
+    erasewall: 'Apagar parede: o quadrado destacado ficará livre.',
+    muro: 'Muro: a linha destacada bloqueará passagem e linha de visão.',
+    porta: 'Porta: a linha destacada receberá uma porta; clique novamente para alternar aberta/fechada.',
+    eraseedge: 'Apagar linha: o muro ou a porta destacados serão removidos.',
+    spawn: 'Início: o marcador e o círculo mostram a nova posição e o alcance de luz.',
+    reveal: 'Revelar: a área destacada de 3 × 3 quadrados perderá a névoa.',
+    hide: 'Ocultar: a área destacada de 3 × 3 quadrados ficará coberta pela névoa.',
+    token: 'Token: a silhueta mostra onde a criatura selecionada será colocada.',
+    measure: 'Medir: clique para marcar o início e mova o cursor para ver a distância.'
+  })[t] || 'A prévia acompanha o cursor.';
 }
 
 function mount(el) {
@@ -877,10 +1106,10 @@ function mount(el) {
     '<button id="mp-walls-vis" title="Mostrar paredes/muros (W)">Ver muros</button>' +
     '<label class="mp-luz"><input id="mp-block" type="checkbox" checked> Bloquear movimento</label>' +
     '<label class="mp-luz">Raio <input id="mp-lr" type="number" min="0" max="20" value="6" style="width:44px"></label>' +
-    '<button id="mp-reset-fog">Reset Névoa</button>' +
-    '<button id="mp-clear-fog">Revelar Tudo</button>' +
-    '<button id="mp-clear-walls">Limpar paredes</button>' +
-    '<button id="mp-clear-edges">Limpar muros/portas</button>' +
+    '<button id="mp-reset-fog" title="Cobrir novamente todas as áreas do mapa">Reset Névoa</button>' +
+    '<button id="mp-clear-fog" title="Remover a névoa de todo o mapa (pede confirmação)">Revelar Tudo</button>' +
+    '<button id="mp-clear-walls" title="Remover todas as paredes dos quadrados (pede confirmação)">Limpar paredes</button>' +
+    '<button id="mp-clear-edges" title="Remover todos os muros e portas das linhas (pede confirmação)">Limpar muros/portas</button>' +
     '<button id="mp-zo">−</button><button id="mp-zi">+</button>' +
     '</div>' +
     '<div class="mp-wrap vtt-wrap">' +
@@ -898,6 +1127,7 @@ function mount(el) {
     '<div class="mp-main">' +
     '<canvas id="mp-cv"></canvas>' +
     '<div id="mp-hud"></div>' +
+    '<div id="mp-preview" class="mp-preview">Selecione uma ferramenta para ver a prévia da ação.</div>' +
     '<div id="mp-st">Roda=zoom · Espaço=pan · G grid · F névoa · L luz · W muros</div>' +
     '</div></div></div>';
 
@@ -906,6 +1136,7 @@ function mount(el) {
 
   cv.addEventListener('pointerdown', onPointerDown);
   cv.addEventListener('pointermove', onPointerMove);
+  cv.addEventListener('pointerleave', onPointerLeave);
   cv.addEventListener('pointerup', onPointerUp);
   cv.addEventListener('pointercancel', onPointerUp);
   cv.addEventListener('wheel', onWheel, { passive: false });
@@ -931,7 +1162,11 @@ function mount(el) {
       state.fog = makeGrid(1); save(); draw();
     }
   };
-  $('#mp-clear-fog').onclick = function () { state.fog = makeGrid(0); save(); draw(); };
+  $('#mp-clear-fog').onclick = function () {
+    if (confirm('Revelar o mapa inteiro? A névoa será removida de todos os quadrados.')) {
+      state.fog = makeGrid(0); save(); draw();
+    }
+  };
   $('#mp-clear-walls').onclick = function () {
     if (confirm('Apagar todas as paredes de quadrado?')) {
       state.walls = makeGrid(0); save(); draw();
@@ -966,6 +1201,7 @@ function mount(el) {
   $('#mp-fog').classList.toggle('on', showFog);
   $('#mp-light').classList.toggle('on', dynLight);
   $('#mp-walls-vis').classList.toggle('on', showWalls);
+  if ($('#mp-preview')) $('#mp-preview').textContent = toolPreviewHelp(tool);
 
   function tryMonsters() { renderMonsterList($('#mp-q') ? $('#mp-q').value : ''); }
   tryMonsters();
@@ -984,7 +1220,7 @@ function unmount() {
   document.removeEventListener('keydown', onKey);
   document.removeEventListener('keyup', onKeyUp);
   window.removeEventListener('resize', draw);
-  R = null; cv = null; cx = null; bgImages = [];
+  R = null; cv = null; cx = null; bgImages = []; previewPointer = null;
 }
 
 window.MapEditor = { mount: mount, unmount: unmount };
