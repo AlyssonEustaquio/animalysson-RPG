@@ -165,13 +165,15 @@ input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:
 @media(max-width:520px){main{padding:12px 9px 40px}.site-head h1{font-size:1.45rem}.head-actions .btn{padding:8px 10px}.section-tabs{gap:5px}.section-tab{padding:10px 4px;font-size:.82rem;gap:5px}.catalog-tools{grid-template-columns:1fr}.catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.catalog-card{padding:10px;min-height:112px}.catalog-detail{padding:12px}}
 @media print{.section-tabs,.head-actions,.catalog-tools{display:none!important}.catalog-detail{position:static;max-height:none}}
 
+
+.item-description{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}.item-description h3{margin:0 0 10px;font-size:1rem}.item-description p{line-height:1.55}.detail-hint{color:var(--mute);font-size:.82rem}.rules-copy{line-height:1.55;overflow-wrap:anywhere}.rules-copy h3,.rules-copy h4,.rules-copy h5{margin:14px 0 6px}.rules-copy ul{padding-left:20px}.rules-copy li{margin:4px 0}.rules-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.88rem}.rules-table td{border:1px solid var(--line);padding:6px;vertical-align:top}.original-details{margin-top:12px}.original-details pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.75rem;background:var(--panel2);padding:10px;border-radius:8px}.catalog-card .card-stats{flex-wrap:wrap;gap:6px}.catalog-card .card-stats span{font-size:.76rem}
 </style>
 </head>
 <body>
 <main>
 <header class="site-head">
   <div><h1>Compêndio D&D</h1><p class="subtitle">Personagem · Itens · Monstros</p></div>
-  <div class="head-actions"><button class="btn alt" onclick="window.print()">Imprimir</button></div>
+  
 </header>
 <nav class="section-tabs" aria-label="Seções principais">
   <button id="tab-character" class="section-tab on" onclick="switchView('character')"><span>♙</span> Personagem</button>
@@ -478,7 +480,7 @@ function updateTabs(){
  });
 }
 function renderCharacterPage(){
- let h='<div class="panel"><div class="character-toolbar"><p>Sua ficha fica nesta área. Clique nos campos destacados para editar.</p><div class="row" style="margin:0"><button class="btn alt" onclick="rand()">Sortear personagem</button><button class="btn" onclick="window.print()">Imprimir ficha</button></div></div>';
+ let h='<div class="panel"><div class="character-toolbar"><p>Sua ficha fica nesta área. Clique nos campos destacados para editar.</p><div class="row" style="margin:0"><button class="btn alt" onclick="rand()">Sortear personagem</button></div></div>';
  h+=vFicha();
  document.getElementById('app').innerHTML=h+'</div>';
  renderModal();
@@ -490,7 +492,7 @@ function filteredItems(){
  const q=norm(ITEM_QUERY);
  return (ITEMS||[]).map(function(item,index){return {item:item,index:index}}).filter(function(row){
   const x=row.item;
-  const text=norm([x.n,x.en,x.categoria,x.tipo,x.raridade,x.fonte].filter(Boolean).join(' '));
+  const text=norm([x.n,x.en,x.categoria,x.tipo,x.raridade,x.preco,x.peso,x.descricao,x.uso,x.propriedades,x.maestria].filter(Boolean).join(' '));
   return (!q||text.includes(q))&&(ITEM_CATEGORY==='Todas'||(x.categoria||'Outros')===ITEM_CATEGORY);
  });
 }
@@ -499,19 +501,179 @@ function itemIcon(item){
  if(t.includes('arma'))return '⚔'; if(t.includes('armadura'))return '🛡'; if(t.includes('pocao')||t.includes('poção'))return '⚗';
  if(t.includes('ferramenta'))return '🧰'; if(item.magico)return '✦'; if(t.includes('montaria')||t.includes('veiculo'))return '🐎'; return '◇';
 }
+function formatItemPrice(value){
+ return String(value||'Não informado').replace(/\b(CP|SP|EP|GP|PP)\b/g,c=>({CP:'PC',SP:'PP',EP:'PE',GP:'PO',PP:'PL'}[c]));
+}
+function formatItemWeight(value){
+ return String(value||'Não especificado').replace(/\blb\b/gi,'lb (libras)');
+}
 function renderItemCard(row){
  const x=row.item,mag=x.magico?'Mágico':'Equipamento';
- return `<button class="catalog-card${row.index===SELECTED_ITEM_INDEX?' sel':''}" onclick="selectItem(${row.index})"><div class="card-topline"><span class="card-icon">${itemIcon(x)}</span><span class="card-tag">${escHtml(x.raridade||x.categoria||mag)}</span></div><strong>${escHtml(x.n||x.en||'Item')}</strong><small>${escHtml(x.en||x.tipo||'')}</small><div class="card-stats"><span>${escHtml(x.categoria||'Outros')}</span>${x.statusDMG2024?`<span>${escHtml(x.statusDMG2024)}</span>`:''}</div></button>`;
+ const price=x.magico&&x.categoria!=='Índice DMG 2024'?magicPriceByRarity(x):(x.preco||'Preço não informado');
+ const detail=window.MAGIC_ITEM_DETAIL_CACHE&&window.MAGIC_ITEM_DETAIL_CACHE[x.id];
+ const weight=(detail&&detail.weight)||x.peso||'Peso variável';
+ return `<button class="catalog-card${row.index===SELECTED_ITEM_INDEX?' sel':''}" onclick="selectItem(${row.index})"><div class="card-topline"><span class="card-icon">${itemIcon(x)}</span><span class="card-tag">${escHtml(x.raridade||x.categoria||mag)}</span></div><strong>${escHtml(x.n||x.en||'Item')}</strong><small>${escHtml(x.en||x.tipo||'')}</small><div class="card-stats"><span>${escHtml(formatItemPrice(price))}</span><span>${escHtml(formatItemWeight(weight))}</span></div></button>`;
+}
+function renderSafeMarkdown(markdown){
+ const lines=String(markdown||'').replace(/\r/g,'').split('\n');
+ let out='',para=[],list=false,table=false;
+ const closePara=()=>{if(para.length){out+='<p>'+inlineMd(para.join(' '))+'</p>';para=[]}};
+ const closeList=()=>{if(list){out+='</ul>';list=false}};
+ const closeTable=()=>{if(table){out+='</tbody></table>';table=false}};
+ const inlineMd=(v)=>escHtml(v).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/`([^`]+)`/g,'<code>$1</code>');
+ for(let i=0;i<lines.length;i++){
+  const line=lines[i].trim();
+  if(!line){closePara();closeList();closeTable();continue;}
+  if(/^\|.*\|$/.test(line)){
+   closePara();closeList();
+   if(/^\|?\s*:?-{2,}/.test(line))continue;
+   const cells=line.replace(/^\||\|$/g,'').split('|').map(c=>c.trim());
+   if(!table){out+='<table class="rules-table"><tbody>';table=true;}
+   out+='<tr>'+cells.map(c=>'<td>'+inlineMd(c)+'</td>').join('')+'</tr>';continue;
+  }
+  closeTable();
+  const heading=line.match(/^(#{1,4})\s+(.+)$/);
+  if(heading){closePara();closeList();const n=Math.min(heading[1].length+2,5);out+=`<h${n}>${inlineMd(heading[2])}</h${n}>`;continue;}
+  if(/^[-*]\s+/.test(line)){closePara();if(!list){out+='<ul>';list=true;}out+='<li>'+inlineMd(line.replace(/^[-*]\s+/,''))+'</li>';continue;}
+  closeList();para.push(line);
+ }
+ closePara();closeList();closeTable();
+ return '<div class="rules-copy">'+out+'</div>';
+}
+function magicPriceByRarity(item){
+ const rarity=(item.raridade||'').toLowerCase();
+ const values={'comum':100,'incomum':400,'rara':4000,'muito rara':40000,'lendária':200000,'lendaria':200000};
+ if(!values[rarity])return 'Definido pelo Mestre';
+ let v=values[rarity];
+ const en=(item.en||'').toLowerCase();
+ if(/potion|ammunition|bead|elixir|consumable/.test(en) && !/spell scroll/.test(en))v=Math.round(v/2);
+ return v.toLocaleString('pt-BR')+' PO (estimativa)';
+}
+function weaponPropertyExplanation(item){
+ const raw=String(item.propriedades||'');
+ if(!raw||raw==='—')return '';
+ const rules=[
+  [/Acuidade/i,'Acuidade','Você pode usar Força ou Destreza nas jogadas de ataque e dano com esta arma.'],
+  [/Leve/i,'Leve','Ao realizar a ação Atacar e atacar com uma arma Leve, você pode fazer um ataque extra com outra arma Leve como ação bônus no mesmo turno. Esse ataque extra não adiciona seu modificador de atributo ao dano, a menos que ele seja negativo.'],
+  [/Arremesso/i,'Arremesso','Você pode arremessar a arma para realizar um ataque à distância. Se ela for uma arma corpo a corpo, use o mesmo modificador de atributo usado no ataque corpo a corpo.'],
+  [/Duas mãos/i,'Duas mãos','A arma exige as duas mãos quando você faz um ataque com ela.'],
+  [/Versátil/i,'Versátil','A arma pode ser usada com uma ou duas mãos. O valor entre parênteses indica o dano quando usada com as duas mãos.'],
+  [/Munição/i,'Munição','Você precisa ter a munição apropriada para cada ataque à distância. Sacar a munição faz parte do ataque; ao fim do combate, você recupera metade da munição gasta se dedicar um minuto à busca.'],
+  [/Carregamento/i,'Carregamento','Por causa do tempo necessário para carregar a arma, você só pode disparar uma unidade de munição por ação, ação bônus ou reação usada para dispará-la, independentemente do número de ataques que normalmente poderia fazer.'],
+  [/Pesada/i,'Pesada','Criaturas Pequenas ou Miúdas têm desvantagem nas jogadas de ataque com esta arma.'],
+  [/Alcance/i,'Alcance','A arma aumenta em 1,5 m o alcance que você pode atingir com ela.']
+ ];
+ const found=rules.filter(([rx])=>rx.test(raw));
+ if(!found.length)return '';
+ return '<details class="original-details"><summary>Como funcionam as propriedades</summary>'+found.map(([,name,desc])=>`<div class="detail-line"><b>${name}:</b> ${desc}</div>`).join('')+'</details>';
+}
+function weaponMasteryExplanation(value){
+ const key=String(value||'').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'');
+ const rules={
+  'cleave':'Uma vez por turno, quando acertar uma criatura, você pode fazer um ataque corpo a corpo contra uma segunda criatura a até 1,5 m da primeira e dentro do seu alcance. Em um acerto, role o dano da arma, mas não adicione o modificador de atributo ao dano, a menos que ele seja negativo.',
+  'raspar':'Se errar uma criatura com esta arma, você ainda pode causar dano a ela igual ao modificador de atributo usado na jogada de ataque. O dano é do mesmo tipo da arma.',
+  'graze':'Se errar uma criatura com esta arma, você ainda pode causar dano a ela igual ao modificador de atributo usado na jogada de ataque. O dano é do mesmo tipo da arma.',
+  'nick':'Quando fizer o ataque extra concedido pela propriedade Leve, você pode fazê-lo como parte da ação Atacar, em vez de uma ação bônus. Você só pode fazer esse ataque extra uma vez por turno.',
+  'empurrar':'Quando acertar uma criatura com esta arma, você pode empurrá-la até 3 m para longe de você, desde que ela seja Grande ou menor.',
+  'push':'Quando acertar uma criatura com esta arma, você pode empurrá-la até 3 m para longe de você, desde que ela seja Grande ou menor.',
+  'sap':'Quando acertar uma criatura com esta arma, ela tem desvantagem na próxima jogada de ataque que fizer antes do início do seu próximo turno.',
+  'lento':'Quando acertar uma criatura com esta arma e causar dano, o deslocamento dela é reduzido em 3 m até o início do seu próximo turno. Se acertar novamente, a redução não aumenta.',
+  'slow':'Quando acertar uma criatura com esta arma e causar dano, o deslocamento dela é reduzido em 3 m até o início do seu próximo turno. Se acertar novamente, a redução não aumenta.',
+  'derrubar':'Quando acertar uma criatura com esta arma, você pode forçá-la a fazer uma salvaguarda de Constituição (CD 8 + seu modificador do atributo usado no ataque + bônus de proficiência). Se falhar, ela fica Caída.',
+  'topple':'Quando acertar uma criatura com esta arma, você pode forçá-la a fazer uma salvaguarda de Constituição (CD 8 + seu modificador do atributo usado no ataque + bônus de proficiência). Se falhar, ela fica Caída.',
+  'vex':'Quando acertar uma criatura com esta arma e causar dano, você tem vantagem na próxima jogada de ataque contra ela antes do fim do seu próximo turno.'
+ };
+ return rules[key]||'';
 }
 function renderItemDetail(index){
  const x=ITEMS[index];
  if(!x)return '<div class="empty-state">Selecione um item para ver seus dados.</div>';
- let h=`<div class="card-topline"><span class="card-icon">${itemIcon(x)}</span><span class="card-tag">${escHtml(x.raridade||x.categoria||'Item')}</span></div><h2 style="margin-top:10px">${escHtml(x.n||x.en)}</h2><p class="detail-sub">${escHtml(x.en||'')}</p><div class="detail-grid"><div class="detail-stat"><b>${x.magico?'Sim':'Não'}</b><small>Mágico</small></div><div class="detail-stat"><b>${escHtml(x.raridade||'—')}</b><small>Raridade</small></div><div class="detail-stat"><b>${escHtml(x.tipo||'—')}</b><small>Tipo</small></div></div>`;
- h+=`<div class="detail-line"><b>Categoria:</b> ${escHtml(x.categoria||'—')}</div><div class="detail-line"><b>Fonte:</b> ${escHtml(x.fonte||'—')}</div>`;
- if(x.statusDMG2024)h+=`<div class="detail-line"><b>Status no DMG 2024:</b> ${escHtml(x.statusDMG2024)}</div>`;
- if(x.nota)h+=`<div class="detail-note">${escHtml(x.nota)}</div>`;
- h+='<p class="source-note">Este catálogo apresenta os campos de referência disponíveis no projeto. Consulte a publicação indicada na fonte para o texto integral das regras do item.</p>';
+ const isIndexOnly=x.categoria==='Índice DMG 2024';
+ const isSrdMagic=x.magico&&!isIndexOnly;
+ const detail=MAGIC_ITEM_DETAIL_CACHE[x.id]||null;
+ let price=x.magico?magicPriceByRarity(x):(x.preco||'Não informado');
+ if(detail&&detail.price)price=String(detail.price);
+ let weight=x.peso||'Não especificado';
+ if(detail&&detail.weight)weight=String(detail.weight);
+ let h=`<div class="card-topline"><span class="card-icon">${itemIcon(x)}</span><span class="card-tag">${escHtml(x.raridade||x.categoria||'Item')}</span></div><h2 style="margin-top:10px">${escHtml(x.n||x.en)}</h2><p class="detail-sub">${escHtml(x.en||'')}</p>`;
+ h+=`<div class="detail-grid"><div class="detail-stat"><b>${escHtml(formatItemPrice(price))}</b><small>Preço / valor</small></div><div class="detail-stat"><b>${escHtml(formatItemWeight(weight))}</b><small>${String(weight).startsWith('Carga')?'Capacidade de carga':'Peso'}</small></div><div class="detail-stat"><b>${escHtml(x.raridade|| (x.magico?'Não informado':'—'))}</b><small>Raridade</small></div></div>`;
+ if(x.dano)h+=`<div class="detail-line"><b>Dano:</b> ${escHtml(x.dano)}</div>`;
+ if(x.propriedades){h+=`<div class="detail-line"><b>Propriedades:</b> ${escHtml(x.propriedades)}</div>`;h+=weaponPropertyExplanation(x);}
+ if(x.maestria){const mastery=x.maestriaDescricao||weaponMasteryExplanation(x.maestria);h+=`<div class="detail-line"><b>Maestria:</b> ${escHtml(x.maestria)}${mastery?' — '+escHtml(mastery):''}</div>`;}
+ if(x.classeArmadura)h+=`<div class="detail-line"><b>Classe de Armadura:</b> ${escHtml(x.classeArmadura)}</div>`;
+ if(x.forcaMinima&&x.forcaMinima!=='—')h+=`<div class="detail-line"><b>Força mínima:</b> ${escHtml(x.forcaMinima)}</div>`;
+ if(x.furtividade&&x.furtividade!=='—')h+=`<div class="detail-line"><b>Furtividade:</b> ${escHtml(x.furtividade)}</div>`;
+ if(x.tempoVestir)h+=`<div class="detail-line"><b>Tempo para vestir:</b> ${escHtml(x.tempoVestir)}</div>`;
+ if(x.habilidade)h+=`<div class="detail-line"><b>Atributo:</b> ${escHtml(x.habilidade)}</div>`;
+ if(x.statusDMG2024)h+=`<div class="detail-line"><b>Livro do Mestre 2024:</b> ${escHtml(x.statusDMG2024)}</div>`;
+ h+=`<section class="item-description"><h3>Descrição e utilização</h3><p>${escHtml(x.descricao||'Descrição ainda não disponível neste registro.')}</p>`;
+ if(x.uso && x.uso!==x.descricao && !/consulte o efeito\/uso detalhado acima/i.test(x.uso))h+=`<p><b>Uso:</b> ${escHtml(x.uso)}</p>`;
+ h+='</section>';
+ if(isIndexOnly){
+  h+='<div class="detail-note">Este nome aparece no índice público de alterações do Livro do Mestre 2024, mas a regra completa não faz parte do SRD aberto. Não há preço, peso ou efeito oficial disponível neste catálogo; esses dados não foram inventados.</div>';
+ }else if(isSrdMagic){
+  if(detail && detail.error){
+   h+=`<section class="item-description magic-rules"><h3>Regras completas do item</h3><p>Não foi possível carregar a descrição completa agora. Confira sua conexão e tente novamente.</p><p class="detail-hint">${escHtml(detail.error)}</p><button class="btn" onclick="retryMagicItemDetails(${index})">Tentar carregar novamente</button></section>`;
+  }else if(detail){
+   const text=detail.description_md||detail.description||'';
+   h+='<section class="item-description magic-rules"><h3>Regras completas do item</h3>'+(text?renderSafeMarkdown(text):'<p>O serviço não retornou o texto da descrição.</p>');
+   const attune=detail.attunement;
+   if(attune!==undefined && attune!==null && attune!==''){
+    const attuneText=attune===true?'Sim':attune===false?'Não':String(attune);
+    h+=`<div class="detail-line"><b>Sintonia:</b> ${escHtml(attuneText)}</div>`;
+   }
+   const props=detail.properties&&typeof detail.properties==='object'?detail.properties:{};
+   const skipProps=new Set(['rarity','requiresAttunement','attunement','weight','weight_lb','description','description_md','source']);
+   const entries=Object.entries(props).filter(([k,v])=>!skipProps.has(k)&&v!==null&&v!==undefined&&v!=='');
+   if(entries.length){
+    h+='<details class="original-details"><summary>Propriedades adicionais</summary><div class="property-list">'+entries.map(([k,v])=>`<div class="detail-line"><b>${escHtml(k.replace(/([A-Z])/g,' $1').replace(/^./,c=>c.toUpperCase()))}:</b> ${escHtml(typeof v==='object'?JSON.stringify(v):String(v))}</div>`).join('')+'</div></details>';
+   }
+   h+='<p class="detail-hint">Descrição integral em inglês conforme o SRD 5.2.1. O peso individual pode não estar definido no catálogo. O valor em ouro é uma estimativa por raridade, não um preço obrigatório de loja.</p></section>';
+  }else{
+   h+=`<section class="item-description magic-rules" id="magic-api-content"><h3>Regras completas do item</h3><p>${MAGIC_ITEM_LOADING.has(x.id)?'Carregando a descrição completa do SRD 5.2.1…':'A descrição completa será consultada ao abrir o item.'}</p></section>`;
+  }
+ }
+ if(x.nota&&!isIndexOnly&&!isSrdMagic)h+=`<div class="detail-note">${escHtml(x.nota)}</div>`;
  return h;
+}
+const MAGIC_ITEM_API='https://apisearch.thedmstoolkit.com/api/2024/items';
+const MAGIC_ITEM_DETAIL_CACHE=window.MAGIC_ITEM_DETAIL_CACHE=window.MAGIC_ITEM_DETAIL_CACHE||{};
+const MAGIC_ITEM_LOADING=window.MAGIC_ITEM_LOADING=window.MAGIC_ITEM_LOADING||new Set();
+let MAGIC_ITEM_INDEX_PROMISE=null;
+function normalizeItemKey(value){return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');}
+async function loadMagicItemDetails(index){
+ const x=ITEMS[index];if(!x||!x.magico||x.categoria==='Índice DMG 2024'||MAGIC_ITEM_DETAIL_CACHE[x.id]||MAGIC_ITEM_LOADING.has(x.id))return;
+ MAGIC_ITEM_LOADING.add(x.id);
+ if(SELECTED_ITEM_INDEX===index)updateItemResults();
+ try{
+  if(!MAGIC_ITEM_INDEX_PROMISE){
+   MAGIC_ITEM_INDEX_PROMISE=fetch(MAGIC_ITEM_API+'?limit=500',{headers:{'Accept':'application/json'}}).then(r=>{if(!r.ok)throw new Error('Não foi possível consultar o catálogo de itens.');return r.json();}).then(j=>j.data||j.results||j.items||[]);
+  }
+  const list=await MAGIC_ITEM_INDEX_PROMISE;
+  const target=normalizeItemKey(x.en||x.n);
+  let match=list.find(v=>normalizeItemKey(v.name)===target)||list.find(v=>normalizeItemKey(v.name).includes(target)||target.includes(normalizeItemKey(v.name)));
+  if(!match)throw new Error('Este item não foi localizado no catálogo aberto.');
+  let full=match;
+  if(match.slug){
+   const response=await fetch(MAGIC_ITEM_API+'/'+encodeURIComponent(match.slug),{headers:{'Accept':'application/json'}});
+   if(response.ok){const json=await response.json();full=json.data||json.item||json;}
+  }
+  const desc=full.description_md||full.description||match.description_md||match.description||'';
+  const props=full.properties||match.properties||{};
+  const rarity=props.rarity||full.rarity||x.raridade;
+  let attune=props.requiresAttunement??props.attunement??full.requiresAttunement??null;
+  if(attune===null&&/requires attunement/i.test(desc))attune='Sim';
+  const weight=props.weight||props.weight_lb||full.weight||null;
+  MAGIC_ITEM_DETAIL_CACHE[x.id]={description:full.description||match.description||desc,description_md:full.description_md||match.description_md||desc,properties:props,rarity:rarity,attunement:attune,weight:weight,source:full.source||match.source||'SRD 5.2.1'};
+ }catch(error){
+  MAGIC_ITEM_DETAIL_CACHE[x.id]={error:error.message||'Falha ao carregar o detalhe.'};
+ }finally{
+  MAGIC_ITEM_LOADING.delete(x.id);
+  if(SELECTED_ITEM_INDEX===index)updateItemResults();
+ }
+}
+function retryMagicItemDetails(index){
+ const x=ITEMS[index];if(!x)return;delete MAGIC_ITEM_DETAIL_CACHE[x.id];loadMagicItemDetails(index);
 }
 function updateItemResults(){
  const rows=filteredItems();
@@ -521,14 +683,14 @@ function updateItemResults(){
  if(rows.length && !rows.some(function(row){return row.index===SELECTED_ITEM_INDEX;}))SELECTED_ITEM_INDEX=rows[0].index;
  if(count)count.textContent=rows.length+' de '+(ITEMS||[]).length+' itens';
  if(grid)grid.innerHTML=rows.length?rows.map(renderItemCard).join(''):'<div class="empty-state">Nenhum item encontrado.</div>';
- if(detail)detail.innerHTML=renderItemDetail(SELECTED_ITEM_INDEX);
+ if(detail){detail.innerHTML=renderItemDetail(SELECTED_ITEM_INDEX);const selected=(ITEMS||[])[SELECTED_ITEM_INDEX];if(selected&&selected.magico&&selected.categoria!=='Índice DMG 2024'&&!MAGIC_ITEM_DETAIL_CACHE[selected.id])loadMagicItemDetails(SELECTED_ITEM_INDEX);}
 }
 function selectItem(index){SELECTED_ITEM_INDEX=index;updateItemResults()}
 function itemSearch(value){ITEM_QUERY=value;updateItemResults()}
 function itemCategory(value){ITEM_CATEGORY=value;updateItemResults()}
 function renderItemsPage(){
  const cats=itemCategoryList();
- let h=`<div class="catalog-head"><div><h2>Itens</h2><p>Explore armas, armaduras, equipamentos e itens mágicos.</p></div><span class="card-tag">${(ITEMS||[]).length} registros</span></div><div class="catalog-tools"><input type="search" placeholder="Buscar por nome, tipo ou raridade…" value="${escHtml(ITEM_QUERY)}" oninput="itemSearch(this.value)"><select onchange="itemCategory(this.value)">${cats.map(c=>`<option value="${escHtml(c)}"${c===ITEM_CATEGORY?' selected':''}>${escHtml(c)}</option>`).join('')}</select></div><div class="catalog-count" id="items-count"></div><div class="catalog-layout"><section><div class="catalog-grid" id="items-grid"></div></section><aside class="catalog-detail" id="item-detail"></aside></div><p class="source-note">Os nomes originais são preservados para facilitar a conferência. Itens do índice de alterações do DMG sem dados completos estão marcados no próprio detalhe.</p>`;
+ let h=`<div class="catalog-head"><div><h2>Itens</h2><p>Explore armas, armaduras, equipamentos e itens mágicos.</p></div><span class="card-tag">${(ITEMS||[]).length} registros</span></div><div class="catalog-tools"><input type="search" placeholder="Buscar por nome, tipo ou raridade…" value="${escHtml(ITEM_QUERY)}" oninput="itemSearch(this.value)"><select onchange="itemCategory(this.value)">${cats.map(c=>`<option value="${escHtml(c)}"${c===ITEM_CATEGORY?' selected':''}>${escHtml(c)}</option>`).join('')}</select></div><div class="catalog-count" id="items-count"></div><div class="catalog-layout"><section><div class="catalog-grid" id="items-grid"></div></section><aside class="catalog-detail" id="item-detail"></aside></div>`;
  document.getElementById('app').innerHTML=h;
  updateItemResults();
  renderModal();

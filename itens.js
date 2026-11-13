@@ -1,28 +1,15 @@
 /*
- * Catálogo de equipamentos e itens mágicos de D&D — regras 2024 / SRD 5.2.1.
- *
- * ESCOPO E PROCEDÊNCIA:
- * - Equipamento comum: listas das Basic Rules 2024 / SRD 5.2.1.
- * - Itens mágicos: catálogo aberto do SRD 5.2.1 (258 entradas de referência).
- * - Inclui também nomes adicionais que a Wizards of the Coast identifica publicamente
- *   como novos, redesenhados ou revisados no DMG 2024. Esses registros extras são
- *   somente um índice de nomes, não stat blocks completos.
- * - O DMG 2024 comercial contém mais itens do que o SRD aberto. Portanto, este arquivo
- *   NÃO afirma ser a lista integral de todos os itens publicados em todos os livros
- *   comerciais ou suplementos de D&D.
- * - Os nomes PT-BR são traduções de referência para navegação e não devem ser tratados
- *   como transcrição da localização oficial brasileira. O campo `en` preserva o título
- *   original oficial para conferência.
- * - Não contém descrições integrais nem regras completas dos itens.
- *
- * Atribuição: inclui material de regras do System Reference Document 5.2.1,
- * disponibilizado pela Wizards of the Coast sob CC BY 4.0.
- * https://www.dndbeyond.com/srd
- * Licença: https://creativecommons.org/licenses/by/4.0/
+ * Catálogo D&D 5e revisado (2024) — itens e equipamentos.
+ * Dados de equipamento e itens mágicos derivados do SRD 5.2.1.
+ * This work includes material from the System Reference Document 5.2.1 (SRD 5.2.1)
+ * by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd.
+ * Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0):
+ * https://creativecommons.org/licenses/by/4.0/legalcode.
+ * Traduções e resumos em PT-BR são de referência; nomes em inglês preservados em `en`.
  */
 (function () {
-  'use strict';
-  const EQUIPMENT = [
+'use strict';
+const EQUIPMENT = [
   {
     "n": "Clava",
     "en": "Club",
@@ -31,7 +18,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-001"
+    "id": "equip-001",
+    "preco": "1 SP",
+    "peso": "2 lb",
+    "dano": "1d4 contundente",
+    "propriedades": "Leve",
+    "maestria": "Lento",
+    "maestriaDescricao": "",
+    "descricao": "Clava simples de uma mão.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Adaga",
@@ -41,7 +36,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-002"
+    "id": "equip-002",
+    "preco": "2 GP",
+    "peso": "1 lb",
+    "dano": "1d4 perfurante",
+    "propriedades": "Acuidade; Leve; Arremesso 6/18 m",
+    "maestria": "Nick",
+    "maestriaDescricao": "O ataque extra concedido pela propriedade Leve pode ser feito como parte da ação Atacar, em vez de uma ação bônus. Uma vez por turno.",
+    "descricao": "Arma pequena de corpo a corpo que também pode ser arremessada.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Porrete",
@@ -51,7 +54,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-003"
+    "id": "equip-003",
+    "preco": "2 SP",
+    "peso": "10 lb",
+    "dano": "1d8 contundente",
+    "propriedades": "Duas mãos",
+    "maestria": "Empurrar",
+    "maestriaDescricao": "",
+    "descricao": "Porrete pesado que exige as duas mãos.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Machadinha",
@@ -61,7 +72,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-004"
+    "id": "equip-004",
+    "preco": "5 GP",
+    "peso": "2 lb",
+    "dano": "1d6 cortante",
+    "propriedades": "Leve; Arremesso 6/18 m",
+    "maestria": "Vex",
+    "maestriaDescricao": "Ao acertar e causar dano, você tem vantagem na próxima jogada de ataque contra aquela criatura antes do fim do seu próximo turno.",
+    "descricao": "Machadinha de uma mão que também pode ser arremessada.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Azagaia",
@@ -71,7 +90,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-005"
+    "id": "equip-005",
+    "preco": "5 SP",
+    "peso": "2 lb",
+    "dano": "1d6 perfurante",
+    "propriedades": "Arremesso 9/36 m",
+    "maestria": "Lento",
+    "maestriaDescricao": "",
+    "descricao": "Lança leve feita para arremesso.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Martelo Leve",
@@ -81,7 +108,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-006"
+    "id": "equip-006",
+    "preco": "2 GP",
+    "peso": "2 lb",
+    "dano": "1d4 contundente",
+    "propriedades": "Leve; Arremesso 6/18 m",
+    "maestria": "Nick",
+    "maestriaDescricao": "O ataque extra concedido pela propriedade Leve pode ser feito como parte da ação Atacar, em vez de uma ação bônus. Uma vez por turno.",
+    "descricao": "Martelo pequeno que pode ser usado corpo a corpo ou arremessado.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Maça",
@@ -91,7 +126,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-007"
+    "id": "equip-007",
+    "preco": "5 GP",
+    "peso": "4 lb",
+    "dano": "1d6 contundente",
+    "propriedades": "—",
+    "maestria": "Sap",
+    "maestriaDescricao": "Ao acertar, a criatura tem desvantagem na próxima jogada de ataque que fizer antes do início do seu próximo turno.",
+    "descricao": "Maça de impacto para combate corpo a corpo.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Bordão",
@@ -101,7 +144,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-008"
+    "id": "equip-008",
+    "preco": "2 SP",
+    "peso": "4 lb",
+    "dano": "1d6 contundente",
+    "propriedades": "Versátil (1d8)",
+    "maestria": "Derrubar",
+    "maestriaDescricao": "",
+    "descricao": "Bordão que pode ser empunhado com uma ou duas mãos.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Foice",
@@ -111,7 +162,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-009"
+    "id": "equip-009",
+    "preco": "1 GP",
+    "peso": "2 lb",
+    "dano": "1d4 cortante",
+    "propriedades": "Leve",
+    "maestria": "Nick",
+    "maestriaDescricao": "O ataque extra concedido pela propriedade Leve pode ser feito como parte da ação Atacar, em vez de uma ação bônus. Uma vez por turno.",
+    "descricao": "Foice curta de uma mão.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Lança",
@@ -121,7 +180,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-010"
+    "id": "equip-010",
+    "preco": "1 GP",
+    "peso": "3 lb",
+    "dano": "1d6 perfurante",
+    "propriedades": "Arremesso 6/18 m; Versátil (1d8)",
+    "maestria": "Sap",
+    "maestriaDescricao": "Ao acertar, a criatura tem desvantagem na próxima jogada de ataque que fizer antes do início do seu próximo turno.",
+    "descricao": "Lança que pode ser arremessada ou empunhada com duas mãos.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Dardo",
@@ -131,7 +198,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-011"
+    "id": "equip-011",
+    "preco": "5 CP",
+    "peso": "1/4 lb",
+    "dano": "1d4 perfurante",
+    "propriedades": "Acuidade; Arremesso 6/18 m",
+    "maestria": "Vex",
+    "maestriaDescricao": "Ao acertar e causar dano, você tem vantagem na próxima jogada de ataque contra aquela criatura antes do fim do seu próximo turno.",
+    "descricao": "Projétil pequeno e leve feito para arremesso.",
+    "uso": "Arma de ataque à distância"
   },
   {
     "n": "Besta Leve",
@@ -141,7 +216,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-012"
+    "id": "equip-012",
+    "preco": "25 GP",
+    "peso": "5 lb",
+    "dano": "1d8 perfurante",
+    "propriedades": "Munição (24/96 m; virote); Carregamento; Duas mãos",
+    "maestria": "Lento",
+    "maestriaDescricao": "",
+    "descricao": "Besta leve que dispara virotes. Cada disparo consome munição.",
+    "uso": "Arma de ataque à distância"
   },
   {
     "n": "Arco Curto",
@@ -151,7 +234,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-013"
+    "id": "equip-013",
+    "preco": "25 GP",
+    "peso": "2 lb",
+    "dano": "1d6 perfurante",
+    "propriedades": "Munição (24/96 m; flecha); Duas mãos",
+    "maestria": "Vex",
+    "maestriaDescricao": "Ao acertar e causar dano, você tem vantagem na próxima jogada de ataque contra aquela criatura antes do fim do seu próximo turno.",
+    "descricao": "Arco curto que dispara flechas.",
+    "uso": "Arma de ataque à distância"
   },
   {
     "n": "Funda",
@@ -161,7 +252,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-014"
+    "id": "equip-014",
+    "preco": "1 SP",
+    "peso": "—",
+    "dano": "1d4 contundente",
+    "propriedades": "Munição (9/36 m; bala)",
+    "maestria": "Lento",
+    "maestriaDescricao": "",
+    "descricao": "Atiradeira que dispara pequenas balas.",
+    "uso": "Arma de ataque à distância"
   },
   {
     "n": "Machado de Batalha",
@@ -171,7 +270,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-015"
+    "id": "equip-015",
+    "preco": "10 GP",
+    "peso": "4 lb",
+    "dano": "1d8 cortante",
+    "propriedades": "Versátil (1d10)",
+    "maestria": "Derrubar",
+    "maestriaDescricao": "",
+    "descricao": "Machado de batalha que pode ser usado com uma ou duas mãos.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Mangual",
@@ -181,7 +288,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-016"
+    "id": "equip-016",
+    "preco": "10 GP",
+    "peso": "2 lb",
+    "dano": "1d8 contundente",
+    "propriedades": "—",
+    "maestria": "Sap",
+    "maestriaDescricao": "Ao acertar, a criatura tem desvantagem na próxima jogada de ataque que fizer antes do início do seu próximo turno.",
+    "descricao": "Arma marcial com cabeça de impacto presa a uma corrente ou haste.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Glaive",
@@ -191,7 +306,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-017"
+    "id": "equip-017",
+    "preco": "20 GP",
+    "peso": "6 lb",
+    "dano": "1d10 cortante",
+    "propriedades": "Pesada; Alcance; Duas mãos",
+    "maestria": "Raspar",
+    "maestriaDescricao": "",
+    "descricao": "Arma de haste com lâmina na extremidade; alcança alvos a 3 m.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Machado Grande",
@@ -201,7 +324,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-018"
+    "id": "equip-018",
+    "preco": "30 GP",
+    "peso": "7 lb",
+    "dano": "1d12 cortante",
+    "propriedades": "Pesada; Duas mãos",
+    "maestria": "Cleave",
+    "maestriaDescricao": "Ao acertar uma criatura com ataque corpo a corpo, pode fazer um ataque adicional contra outra criatura a até 1,5 m da primeira e dentro do seu alcance. O dano do ataque extra não soma o modificador de atributo, salvo se negativo. Uma vez por turno.",
+    "descricao": "Machado grande de duas mãos.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Espada Grande",
@@ -211,7 +342,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-019"
+    "id": "equip-019",
+    "preco": "50 GP",
+    "peso": "6 lb",
+    "dano": "2d6 cortante",
+    "propriedades": "Pesada; Duas mãos",
+    "maestria": "Raspar",
+    "maestriaDescricao": "",
+    "descricao": "Espada grande que exige as duas mãos.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Alabarda",
@@ -221,7 +360,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-020"
+    "id": "equip-020",
+    "preco": "20 GP",
+    "peso": "6 lb",
+    "dano": "1d10 cortante",
+    "propriedades": "Pesada; Alcance; Duas mãos",
+    "maestria": "Cleave",
+    "maestriaDescricao": "Ao acertar uma criatura com ataque corpo a corpo, pode fazer um ataque adicional contra outra criatura a até 1,5 m da primeira e dentro do seu alcance. O dano do ataque extra não soma o modificador de atributo, salvo se negativo. Uma vez por turno.",
+    "descricao": "Arma de haste com lâmina e gancho; alcança alvos a 3 m.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Lança de Cavalaria",
@@ -231,7 +378,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-021"
+    "id": "equip-021",
+    "preco": "10 GP",
+    "peso": "6 lb",
+    "dano": "1d10 perfurante",
+    "propriedades": "Pesada; Alcance; Duas mãos (exceto montado)",
+    "maestria": "Derrubar",
+    "maestriaDescricao": "",
+    "descricao": "Lança longa ideal para combate montado; a regra de duas mãos não se aplica quando montado.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Espada Longa",
@@ -241,7 +396,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-022"
+    "id": "equip-022",
+    "preco": "15 GP",
+    "peso": "3 lb",
+    "dano": "1d8 cortante",
+    "propriedades": "Versátil (1d10)",
+    "maestria": "Sap",
+    "maestriaDescricao": "Ao acertar, a criatura tem desvantagem na próxima jogada de ataque que fizer antes do início do seu próximo turno.",
+    "descricao": "Espada longa, utilizável com uma ou duas mãos.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Malho",
@@ -251,7 +414,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-023"
+    "id": "equip-023",
+    "preco": "10 GP",
+    "peso": "10 lb",
+    "dano": "2d6 contundente",
+    "propriedades": "Pesada; Duas mãos",
+    "maestria": "Derrubar",
+    "maestriaDescricao": "",
+    "descricao": "Martelo de guerra pesado que exige as duas mãos.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Maça-estrela",
@@ -261,7 +432,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-024"
+    "id": "equip-024",
+    "preco": "15 GP",
+    "peso": "4 lb",
+    "dano": "1d8 perfurante",
+    "propriedades": "—",
+    "maestria": "Sap",
+    "maestriaDescricao": "Ao acertar, a criatura tem desvantagem na próxima jogada de ataque que fizer antes do início do seu próximo turno.",
+    "descricao": "Maça-estrela com cabeça perfurante.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Pique",
@@ -271,7 +450,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-025"
+    "id": "equip-025",
+    "preco": "5 GP",
+    "peso": "18 lb",
+    "dano": "1d10 perfurante",
+    "propriedades": "Pesada; Alcance; Duas mãos",
+    "maestria": "Empurrar",
+    "maestriaDescricao": "",
+    "descricao": "Pique longo que permite atacar a até 3 m.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Florete",
@@ -281,7 +468,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-026"
+    "id": "equip-026",
+    "preco": "25 GP",
+    "peso": "2 lb",
+    "dano": "1d8 perfurante",
+    "propriedades": "Acuidade",
+    "maestria": "Vex",
+    "maestriaDescricao": "Ao acertar e causar dano, você tem vantagem na próxima jogada de ataque contra aquela criatura antes do fim do seu próximo turno.",
+    "descricao": "Espada fina de estocada, que permite usar Força ou Destreza.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Cimitarra",
@@ -291,7 +486,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-027"
+    "id": "equip-027",
+    "preco": "25 GP",
+    "peso": "3 lb",
+    "dano": "1d6 cortante",
+    "propriedades": "Acuidade; Leve",
+    "maestria": "Nick",
+    "maestriaDescricao": "O ataque extra concedido pela propriedade Leve pode ser feito como parte da ação Atacar, em vez de uma ação bônus. Uma vez por turno.",
+    "descricao": "Lâmina curva e leve.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Espada Curta",
@@ -301,7 +504,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-028"
+    "id": "equip-028",
+    "preco": "10 GP",
+    "peso": "2 lb",
+    "dano": "1d6 perfurante",
+    "propriedades": "Acuidade; Leve",
+    "maestria": "Vex",
+    "maestriaDescricao": "Ao acertar e causar dano, você tem vantagem na próxima jogada de ataque contra aquela criatura antes do fim do seu próximo turno.",
+    "descricao": "Espada curta, leve e fácil de empunhar em combate ágil.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Tridente",
@@ -311,7 +522,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-029"
+    "id": "equip-029",
+    "preco": "5 GP",
+    "peso": "4 lb",
+    "dano": "1d8 perfurante",
+    "propriedades": "Arremesso 6/18 m; Versátil (1d10)",
+    "maestria": "Derrubar",
+    "maestriaDescricao": "",
+    "descricao": "Tridente que pode ser arremessado ou usado com duas mãos.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Martelo de Guerra",
@@ -321,7 +540,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-030"
+    "id": "equip-030",
+    "preco": "15 GP",
+    "peso": "5 lb",
+    "dano": "1d8 contundente",
+    "propriedades": "Versátil (1d10)",
+    "maestria": "Empurrar",
+    "maestriaDescricao": "",
+    "descricao": "Martelo de guerra que pode ser usado com uma ou duas mãos.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Picareta de Guerra",
@@ -331,7 +558,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-031"
+    "id": "equip-031",
+    "preco": "5 GP",
+    "peso": "2 lb",
+    "dano": "1d8 perfurante",
+    "propriedades": "Versátil (1d10)",
+    "maestria": "Sap",
+    "maestriaDescricao": "Ao acertar, a criatura tem desvantagem na próxima jogada de ataque que fizer antes do início do seu próximo turno.",
+    "descricao": "Picareta de guerra para perfurar armaduras.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Chicote",
@@ -341,7 +576,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-032"
+    "id": "equip-032",
+    "preco": "2 GP",
+    "peso": "3 lb",
+    "dano": "1d4 cortante",
+    "propriedades": "Acuidade; Alcance",
+    "maestria": "Lento",
+    "maestriaDescricao": "",
+    "descricao": "Chicote flexível que permite atacar a até 3 m.",
+    "uso": "Arma de ataque corpo a corpo"
   },
   {
     "n": "Zarabatana",
@@ -351,7 +594,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-033"
+    "id": "equip-033",
+    "preco": "10 GP",
+    "peso": "1 lb",
+    "dano": "1 perfurante",
+    "propriedades": "Munição (7,5/30 m; agulha); Carregamento",
+    "maestria": "Vex",
+    "maestriaDescricao": "Ao acertar e causar dano, você tem vantagem na próxima jogada de ataque contra aquela criatura antes do fim do seu próximo turno.",
+    "descricao": "Zarabatana que dispara agulhas pequenas.",
+    "uso": "Arma de ataque à distância"
   },
   {
     "n": "Besta de Mão",
@@ -361,7 +612,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-034"
+    "id": "equip-034",
+    "preco": "75 GP",
+    "peso": "3 lb",
+    "dano": "1d6 perfurante",
+    "propriedades": "Munição (9/36 m; virote); Leve; Carregamento",
+    "maestria": "Vex",
+    "maestriaDescricao": "Ao acertar e causar dano, você tem vantagem na próxima jogada de ataque contra aquela criatura antes do fim do seu próximo turno.",
+    "descricao": "Besta compacta que pode ser usada com uma mão.",
+    "uso": "Arma de ataque à distância"
   },
   {
     "n": "Besta Pesada",
@@ -371,7 +630,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-035"
+    "id": "equip-035",
+    "preco": "50 GP",
+    "peso": "18 lb",
+    "dano": "1d10 perfurante",
+    "propriedades": "Munição (30/120 m; virote); Pesada; Carregamento; Duas mãos",
+    "maestria": "Empurrar",
+    "maestriaDescricao": "",
+    "descricao": "Besta pesada de grande potência, exige as duas mãos.",
+    "uso": "Arma de ataque à distância"
   },
   {
     "n": "Arco Longo",
@@ -381,7 +648,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-036"
+    "id": "equip-036",
+    "preco": "50 GP",
+    "peso": "2 lb",
+    "dano": "1d8 perfurante",
+    "propriedades": "Munição (45/180 m; flecha); Pesada; Duas mãos",
+    "maestria": "Lento",
+    "maestriaDescricao": "",
+    "descricao": "Arco longo para disparos de grande alcance.",
+    "uso": "Arma de ataque à distância"
   },
   {
     "n": "Mosquete",
@@ -391,7 +666,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-037"
+    "id": "equip-037",
+    "preco": "500 GP",
+    "peso": "10 lb",
+    "dano": "1d12 perfurante",
+    "propriedades": "Munição (12/36 m; bala); Carregamento; Duas mãos",
+    "maestria": "Lento",
+    "maestriaDescricao": "",
+    "descricao": "Arma de fogo longa que dispara balas.",
+    "uso": "Arma de ataque à distância"
   },
   {
     "n": "Pistola",
@@ -401,7 +684,15 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-038"
+    "id": "equip-038",
+    "preco": "250 GP",
+    "peso": "3 lb",
+    "dano": "1d10 perfurante",
+    "propriedades": "Munição (9/27 m; bala); Carregamento",
+    "maestria": "Vex",
+    "maestriaDescricao": "Ao acertar e causar dano, você tem vantagem na próxima jogada de ataque contra aquela criatura antes do fim do seu próximo turno.",
+    "descricao": "Arma de fogo de uma mão.",
+    "uso": "Arma de ataque à distância"
   },
   {
     "n": "Armadura Acolchoada",
@@ -411,7 +702,16 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-039"
+    "id": "equip-039",
+    "preco": "5 GP",
+    "peso": "8 lb",
+    "classeArmadura": "11 + DES (máx. sem limite)",
+    "forcaMinima": "—",
+    "furtividade": "Desvantagem",
+    "categoriaArmadura": "Leve",
+    "tempoVestir": "1 minuto para vestir/retirar",
+    "descricao": "Armadura leve; a CA indicada já considera as limitações de modificador de Destreza. Penalidade de furtividade: desvantagem.",
+    "uso": "Vestir para obter a Classe de Armadura indicada."
   },
   {
     "n": "Armadura de Couro",
@@ -421,7 +721,16 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-040"
+    "id": "equip-040",
+    "preco": "10 GP",
+    "peso": "10 lb",
+    "classeArmadura": "11 + DES",
+    "forcaMinima": "—",
+    "furtividade": "—",
+    "categoriaArmadura": "Leve",
+    "tempoVestir": "1 minuto para vestir/retirar",
+    "descricao": "Armadura leve; a CA indicada já considera as limitações de modificador de Destreza. Penalidade de furtividade: nenhuma.",
+    "uso": "Vestir para obter a Classe de Armadura indicada."
   },
   {
     "n": "Armadura de Couro Batido",
@@ -431,7 +740,16 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-041"
+    "id": "equip-041",
+    "preco": "45 GP",
+    "peso": "13 lb",
+    "classeArmadura": "12 + DES",
+    "forcaMinima": "—",
+    "furtividade": "—",
+    "categoriaArmadura": "Leve",
+    "tempoVestir": "1 minuto para vestir/retirar",
+    "descricao": "Armadura leve; a CA indicada já considera as limitações de modificador de Destreza. Penalidade de furtividade: nenhuma.",
+    "uso": "Vestir para obter a Classe de Armadura indicada."
   },
   {
     "n": "Armadura de Peles",
@@ -441,7 +759,16 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-042"
+    "id": "equip-042",
+    "preco": "10 GP",
+    "peso": "12 lb",
+    "classeArmadura": "12 + DES (máx. +2)",
+    "forcaMinima": "—",
+    "furtividade": "—",
+    "categoriaArmadura": "Média",
+    "tempoVestir": "5 minutos para vestir; 1 minuto para retirar",
+    "descricao": "Armadura média; a CA indicada já considera as limitações de modificador de Destreza. Penalidade de furtividade: nenhuma.",
+    "uso": "Vestir para obter a Classe de Armadura indicada."
   },
   {
     "n": "Camisa de Cota de Malha",
@@ -451,7 +778,16 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-043"
+    "id": "equip-043",
+    "preco": "50 GP",
+    "peso": "20 lb",
+    "classeArmadura": "13 + DES (máx. +2)",
+    "forcaMinima": "—",
+    "furtividade": "—",
+    "categoriaArmadura": "Média",
+    "tempoVestir": "5 minutos para vestir; 1 minuto para retirar",
+    "descricao": "Armadura média; a CA indicada já considera as limitações de modificador de Destreza. Penalidade de furtividade: nenhuma.",
+    "uso": "Vestir para obter a Classe de Armadura indicada."
   },
   {
     "n": "Cota de Escamas",
@@ -461,7 +797,16 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-044"
+    "id": "equip-044",
+    "preco": "50 GP",
+    "peso": "45 lb",
+    "classeArmadura": "14 + DES (máx. +2)",
+    "forcaMinima": "—",
+    "furtividade": "Desvantagem",
+    "categoriaArmadura": "Média",
+    "tempoVestir": "5 minutos para vestir; 1 minuto para retirar",
+    "descricao": "Armadura média; a CA indicada já considera as limitações de modificador de Destreza. Penalidade de furtividade: desvantagem.",
+    "uso": "Vestir para obter a Classe de Armadura indicada."
   },
   {
     "n": "Peitoral",
@@ -471,7 +816,16 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-045"
+    "id": "equip-045",
+    "preco": "400 GP",
+    "peso": "20 lb",
+    "classeArmadura": "14 + DES (máx. +2)",
+    "forcaMinima": "—",
+    "furtividade": "—",
+    "categoriaArmadura": "Média",
+    "tempoVestir": "5 minutos para vestir; 1 minuto para retirar",
+    "descricao": "Armadura média; a CA indicada já considera as limitações de modificador de Destreza. Penalidade de furtividade: nenhuma.",
+    "uso": "Vestir para obter a Classe de Armadura indicada."
   },
   {
     "n": "Meia-Armadura de Placas",
@@ -481,7 +835,16 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-046"
+    "id": "equip-046",
+    "preco": "750 GP",
+    "peso": "40 lb",
+    "classeArmadura": "15 + DES (máx. +2)",
+    "forcaMinima": "—",
+    "furtividade": "Desvantagem",
+    "categoriaArmadura": "Média",
+    "tempoVestir": "5 minutos para vestir; 1 minuto para retirar",
+    "descricao": "Armadura média; a CA indicada já considera as limitações de modificador de Destreza. Penalidade de furtividade: desvantagem.",
+    "uso": "Vestir para obter a Classe de Armadura indicada."
   },
   {
     "n": "Cota de Anéis",
@@ -491,7 +854,16 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-047"
+    "id": "equip-047",
+    "preco": "30 GP",
+    "peso": "40 lb",
+    "classeArmadura": "14",
+    "forcaMinima": "—",
+    "furtividade": "Desvantagem",
+    "categoriaArmadura": "Pesada",
+    "tempoVestir": "10 minutos para vestir; 5 minutos para retirar",
+    "descricao": "Armadura pesada; a CA indicada já considera as limitações de modificador de Destreza. Penalidade de furtividade: desvantagem.",
+    "uso": "Vestir para obter a Classe de Armadura indicada."
   },
   {
     "n": "Cota de Malha",
@@ -501,7 +873,16 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-048"
+    "id": "equip-048",
+    "preco": "75 GP",
+    "peso": "55 lb",
+    "classeArmadura": "16",
+    "forcaMinima": "FOR 13",
+    "furtividade": "Desvantagem",
+    "categoriaArmadura": "Pesada",
+    "tempoVestir": "10 minutos para vestir; 5 minutos para retirar",
+    "descricao": "Armadura pesada; a CA indicada já considera as limitações de modificador de Destreza. Penalidade de furtividade: desvantagem.",
+    "uso": "Vestir para obter a Classe de Armadura indicada."
   },
   {
     "n": "Armadura de Talas",
@@ -511,7 +892,16 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-049"
+    "id": "equip-049",
+    "preco": "200 GP",
+    "peso": "60 lb",
+    "classeArmadura": "17",
+    "forcaMinima": "FOR 15",
+    "furtividade": "Desvantagem",
+    "categoriaArmadura": "Pesada",
+    "tempoVestir": "10 minutos para vestir; 5 minutos para retirar",
+    "descricao": "Armadura pesada; a CA indicada já considera as limitações de modificador de Destreza. Penalidade de furtividade: desvantagem.",
+    "uso": "Vestir para obter a Classe de Armadura indicada."
   },
   {
     "n": "Armadura de Placas",
@@ -521,7 +911,16 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-050"
+    "id": "equip-050",
+    "preco": "1.500 GP",
+    "peso": "65 lb",
+    "classeArmadura": "18",
+    "forcaMinima": "FOR 15",
+    "furtividade": "Desvantagem",
+    "categoriaArmadura": "Pesada",
+    "tempoVestir": "10 minutos para vestir; 5 minutos para retirar",
+    "descricao": "Armadura pesada; a CA indicada já considera as limitações de modificador de Destreza. Penalidade de furtividade: desvantagem.",
+    "uso": "Vestir para obter a Classe de Armadura indicada."
   },
   {
     "n": "Escudo",
@@ -531,7 +930,16 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-051"
+    "id": "equip-051",
+    "preco": "10 GP",
+    "peso": "6 lb",
+    "classeArmadura": "+2 CA",
+    "forcaMinima": "—",
+    "furtividade": "—",
+    "categoriaArmadura": "Escudo",
+    "tempoVestir": "Ação Utilizar",
+    "descricao": "Escudo que aumenta a CA em 2 quando empunhado com treinamento.",
+    "uso": "Vestir para obter a Classe de Armadura indicada."
   },
   {
     "n": "Suprimentos de Alquimista",
@@ -541,7 +949,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-052"
+    "id": "equip-052",
+    "preco": "50 GP",
+    "peso": "8 lb",
+    "habilidade": "INT",
+    "descricao": "Identificar substância ou iniciar fogo (CD 15). Pode fabricar ácido, fogo alquímico, bolsa de componentes, óleo, papel e perfume.",
+    "uso": "Identificar substância ou iniciar fogo (CD 15). Pode fabricar ácido, fogo alquímico, bolsa de componentes, óleo, papel e perfume."
   },
   {
     "n": "Suprimentos de Cervejeiro",
@@ -551,7 +964,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-053"
+    "id": "equip-053",
+    "preco": "20 GP",
+    "peso": "9 lb",
+    "habilidade": "INT",
+    "descricao": "Detectar bebida envenenada (CD 15) ou identificar álcool (CD 10). Pode fabricar antitoxina.",
+    "uso": "Detectar bebida envenenada (CD 15) ou identificar álcool (CD 10). Pode fabricar antitoxina."
   },
   {
     "n": "Suprimentos de Calígrafo",
@@ -561,7 +979,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-054"
+    "id": "equip-054",
+    "preco": "10 GP",
+    "peso": "5 lb",
+    "habilidade": "DES",
+    "descricao": "Produzir escrita ornamentada difícil de falsificar (CD 15). Pode fabricar tinta e pergaminhos de magia.",
+    "uso": "Produzir escrita ornamentada difícil de falsificar (CD 15). Pode fabricar tinta e pergaminhos de magia."
   },
   {
     "n": "Ferramentas de Carpinteiro",
@@ -571,7 +994,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-055"
+    "id": "equip-055",
+    "preco": "8 GP",
+    "peso": "6 lb",
+    "habilidade": "FOR",
+    "descricao": "Vedação ou arrombamento de porta/recipiente (CD 20). Fabricam clava, porrete, bordão, barril, baú, escada, vara, aríete portátil e tocha.",
+    "uso": "Vedação ou arrombamento de porta/recipiente (CD 20). Fabricam clava, porrete, bordão, barril, baú, escada, vara, aríete portátil e tocha."
   },
   {
     "n": "Ferramentas de Cartógrafo",
@@ -581,7 +1009,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-056"
+    "id": "equip-056",
+    "preco": "15 GP",
+    "peso": "6 lb",
+    "habilidade": "SAB",
+    "descricao": "Desenhar mapa de uma área pequena (CD 15). Podem fabricar mapas.",
+    "uso": "Desenhar mapa de uma área pequena (CD 15). Podem fabricar mapas."
   },
   {
     "n": "Ferramentas de Sapateiro",
@@ -591,7 +1024,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-057"
+    "id": "equip-057",
+    "preco": "5 GP",
+    "peso": "5 lb",
+    "habilidade": "DES",
+    "descricao": "Ajustar calçados para conceder vantagem no próximo teste de Destreza (Acrobacia) do usuário (CD 10). Podem fabricar kit de escalada.",
+    "uso": "Ajustar calçados para conceder vantagem no próximo teste de Destreza (Acrobacia) do usuário (CD 10). Podem fabricar kit de escalada."
   },
   {
     "n": "Utensílios de Cozinheiro",
@@ -601,7 +1039,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-058"
+    "id": "equip-058",
+    "preco": "1 GP",
+    "peso": "8 lb",
+    "habilidade": "SAB",
+    "descricao": "Melhorar o sabor da comida (CD 10) ou detectar alimento estragado/envenenado (CD 15). Podem fabricar rações.",
+    "uso": "Melhorar o sabor da comida (CD 10) ou detectar alimento estragado/envenenado (CD 15). Podem fabricar rações."
   },
   {
     "n": "Ferramentas de Vidreiro",
@@ -611,7 +1054,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-059"
+    "id": "equip-059",
+    "preco": "30 GP",
+    "peso": "5 lb",
+    "habilidade": "INT",
+    "descricao": "Descobrir o que um objeto de vidro guardou nas últimas 24 horas (CD 15). Fabricam garrafa de vidro, lupa, luneta e frasco.",
+    "uso": "Descobrir o que um objeto de vidro guardou nas últimas 24 horas (CD 15). Fabricam garrafa de vidro, lupa, luneta e frasco."
   },
   {
     "n": "Ferramentas de Joalheiro",
@@ -621,7 +1069,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-060"
+    "id": "equip-060",
+    "preco": "25 GP",
+    "peso": "2 lb",
+    "habilidade": "INT",
+    "descricao": "Avaliar o valor de uma gema (CD 15). Podem fabricar foco arcano e símbolo sagrado.",
+    "uso": "Avaliar o valor de uma gema (CD 15). Podem fabricar foco arcano e símbolo sagrado."
   },
   {
     "n": "Ferramentas de Curtidor",
@@ -631,7 +1084,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-061"
+    "id": "equip-061",
+    "preco": "5 GP",
+    "peso": "5 lb",
+    "habilidade": "DES",
+    "descricao": "Adicionar desenho a um item de couro (CD 10). Fabricam funda, chicote, armaduras de couro/peles, mochila, estojo de virotes, estojo de mapa, pergaminho, bolsa, aljava e odre.",
+    "uso": "Adicionar desenho a um item de couro (CD 10). Fabricam funda, chicote, armaduras de couro/peles, mochila, estojo de virotes, estojo de mapa, pergaminho, bolsa, aljava e odre."
   },
   {
     "n": "Ferramentas de Pedreiro",
@@ -641,7 +1099,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-062"
+    "id": "equip-062",
+    "preco": "10 GP",
+    "peso": "8 lb",
+    "habilidade": "FOR",
+    "descricao": "Esculpir símbolo ou cavidade em pedra (CD 10). Podem fabricar roldana e talha.",
+    "uso": "Esculpir símbolo ou cavidade em pedra (CD 10). Podem fabricar roldana e talha."
   },
   {
     "n": "Suprimentos de Pintor",
@@ -651,7 +1114,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-063"
+    "id": "equip-063",
+    "preco": "10 GP",
+    "peso": "5 lb",
+    "habilidade": "SAB",
+    "descricao": "Pintar imagem reconhecível de algo que você viu (CD 10). Podem fabricar foco druídico e símbolo sagrado.",
+    "uso": "Pintar imagem reconhecível de algo que você viu (CD 10). Podem fabricar foco druídico e símbolo sagrado."
   },
   {
     "n": "Ferramentas de Oleiro",
@@ -661,7 +1129,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-064"
+    "id": "equip-064",
+    "preco": "10 GP",
+    "peso": "3 lb",
+    "habilidade": "INT",
+    "descricao": "Descobrir o que um objeto de cerâmica guardou nas últimas 24 horas (CD 15). Fabricam jarro e lâmpada.",
+    "uso": "Descobrir o que um objeto de cerâmica guardou nas últimas 24 horas (CD 15). Fabricam jarro e lâmpada."
   },
   {
     "n": "Ferramentas de Ferreiro",
@@ -671,7 +1144,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-065"
+    "id": "equip-065",
+    "preco": "20 GP",
+    "peso": "8 lb",
+    "habilidade": "FOR",
+    "descricao": "Arrombar porta ou recipiente (CD 20). Fabricam armas corpo a corpo (com exceções), armaduras médias/pesadas, esferas, balde, estrepes, corrente, pé de cabra, balas, gancho, panela e espigões.",
+    "uso": "Arrombar porta ou recipiente (CD 20). Fabricam armas corpo a corpo (com exceções), armaduras médias/pesadas, esferas, balde, estrepes, corrente, pé de cabra, balas, gancho, panela e espigões."
   },
   {
     "n": "Ferramentas de Funileiro",
@@ -681,7 +1159,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-066"
+    "id": "equip-066",
+    "preco": "50 GP",
+    "peso": "10 lb",
+    "habilidade": "DES",
+    "descricao": "Montar um pequeno objeto com sucata (CD 20); ele se desfaz após 1 minuto. Fabricam mosquete, pistola, sino, lanternas, frasco, armadilha, fechadura, algemas, espelho, pá, apito e pederneira.",
+    "uso": "Montar um pequeno objeto com sucata (CD 20); ele se desfaz após 1 minuto. Fabricam mosquete, pistola, sino, lanternas, frasco, armadilha, fechadura, algemas, espelho, pá, apito e pederneira."
   },
   {
     "n": "Ferramentas de Tecelão",
@@ -691,7 +1174,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-067"
+    "id": "equip-067",
+    "preco": "1 GP",
+    "peso": "5 lb",
+    "habilidade": "DES",
+    "descricao": "Consertar rasgo em roupa (CD 10) ou costurar desenho minúsculo (CD 10). Fabricam armadura acolchoada, cesta, saco de dormir, cobertor, roupas finas, rede, veste, corda, saco, barbante e barraca.",
+    "uso": "Consertar rasgo em roupa (CD 10) ou costurar desenho minúsculo (CD 10). Fabricam armadura acolchoada, cesta, saco de dormir, cobertor, roupas finas, rede, veste, corda, saco, barbante e barraca."
   },
   {
     "n": "Ferramentas de Entalhador",
@@ -701,7 +1189,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-068"
+    "id": "equip-068",
+    "preco": "1 GP",
+    "peso": "5 lb",
+    "habilidade": "DES",
+    "descricao": "Entalhar padrão em madeira (CD 10). Fabricam clava, porrete, bordão, armas à distância (com exceções), foco arcano, flechas, virotes, foco druídico, pena e agulhas.",
+    "uso": "Entalhar padrão em madeira (CD 10). Fabricam clava, porrete, bordão, armas à distância (com exceções), foco arcano, flechas, virotes, foco druídico, pena e agulhas."
   },
   {
     "n": "Kit de Disfarce",
@@ -711,7 +1204,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-069"
+    "id": "equip-069",
+    "preco": "25 GP",
+    "peso": "3 lb",
+    "habilidade": "CAR",
+    "descricao": "Aplicar maquiagem e disfarces (CD 10). Pode fabricar fantasias.",
+    "uso": "Aplicar maquiagem e disfarces (CD 10). Pode fabricar fantasias."
   },
   {
     "n": "Kit de Falsificação",
@@ -721,7 +1219,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-070"
+    "id": "equip-070",
+    "preco": "15 GP",
+    "peso": "5 lb",
+    "habilidade": "DES",
+    "descricao": "Imitar até 10 palavras da caligrafia de alguém (CD 15) ou duplicar um selo de cera (CD 20).",
+    "uso": "Imitar até 10 palavras da caligrafia de alguém (CD 15) ou duplicar um selo de cera (CD 20)."
   },
   {
     "n": "Conjunto de Jogos",
@@ -731,7 +1234,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-071"
+    "id": "equip-071",
+    "preco": "Varia",
+    "peso": "—",
+    "habilidade": "SAB",
+    "descricao": "Conjunto para jogos. Pode perceber se alguém está trapaceando (CD 10) ou tentar vencer a partida (CD 20).",
+    "uso": "Conjunto para jogos. Pode perceber se alguém está trapaceando (CD 10) ou tentar vencer a partida (CD 20)."
   },
   {
     "n": "Kit de Herbalismo",
@@ -741,7 +1249,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-072"
+    "id": "equip-072",
+    "preco": "5 GP",
+    "peso": "3 lb",
+    "habilidade": "INT",
+    "descricao": "Identificar uma planta (CD 10). Pode fabricar antitoxina, vela, kit de curandeiro e poção de cura.",
+    "uso": "Identificar uma planta (CD 10). Pode fabricar antitoxina, vela, kit de curandeiro e poção de cura."
   },
   {
     "n": "Instrumento Musical",
@@ -751,7 +1264,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-073"
+    "id": "equip-073",
+    "preco": "Varia",
+    "peso": "Varia",
+    "habilidade": "CAR",
+    "descricao": "Tocar uma melodia conhecida (CD 10) ou improvisar uma canção (CD 15). Cada instrumento exige proficiência própria.",
+    "uso": "Tocar uma melodia conhecida (CD 10) ou improvisar uma canção (CD 15). Cada instrumento exige proficiência própria."
   },
   {
     "n": "Ferramentas de Navegador",
@@ -761,7 +1279,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-074"
+    "id": "equip-074",
+    "preco": "25 GP",
+    "peso": "2 lb",
+    "habilidade": "SAB",
+    "descricao": "Traçar rota (CD 10) ou determinar posição observando as estrelas (CD 15).",
+    "uso": "Traçar rota (CD 10) ou determinar posição observando as estrelas (CD 15)."
   },
   {
     "n": "Kit de Envenenador",
@@ -771,7 +1294,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-075"
+    "id": "equip-075",
+    "preco": "50 GP",
+    "peso": "2 lb",
+    "habilidade": "INT",
+    "descricao": "Detectar objeto envenenado (CD 10). Pode fabricar veneno básico.",
+    "uso": "Detectar objeto envenenado (CD 10). Pode fabricar veneno básico."
   },
   {
     "n": "Ferramentas de Ladrão",
@@ -781,7 +1309,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-076"
+    "id": "equip-076",
+    "preco": "25 GP",
+    "peso": "1 lb",
+    "habilidade": "DES",
+    "descricao": "Arrombar fechadura (CD 15) ou desarmar armadilha (CD 15).",
+    "uso": "Arrombar fechadura (CD 15) ou desarmar armadilha (CD 15)."
   },
   {
     "n": "Ácido",
@@ -791,7 +1324,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-077"
+    "id": "equip-077",
+    "preco": "25 GP",
+    "peso": "1 lb",
+    "descricao": "Como parte da ação Atacar, arremesse o frasco contra criatura ou objeto visível a até 6 m. O alvo faz salvaguarda de Destreza (CD 8 + modificador de DES + bônus de proficiência); falha: sofre 2d6 de dano ácido.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Fogo Alquímico",
@@ -801,7 +1338,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-078"
+    "id": "equip-078",
+    "preco": "50 GP",
+    "peso": "1 lb",
+    "descricao": "Como parte da ação Atacar, arremesse o frasco contra criatura ou objeto a até 6 m. Em falha na salvaguarda de Destreza (CD 8 + DES + proficiência), causa 1d4 de dano de fogo e o alvo começa a queimar.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Antitoxina",
@@ -811,7 +1352,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-079"
+    "id": "equip-079",
+    "preco": "50 GP",
+    "peso": "—",
+    "descricao": "Como ação bônus, beba o frasco para obter vantagem em salvaguardas para evitar ou encerrar a condição Envenenado durante 1 hora.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Mochila",
@@ -821,7 +1366,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-080"
+    "id": "equip-080",
+    "preco": "2 GP",
+    "peso": "5 lb",
+    "descricao": "Guarda até 30 lb de equipamento em aproximadamente 1 pé cúbico. Também pode servir como alforje.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Esferas de Metal",
@@ -831,7 +1380,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-081"
+    "id": "equip-081",
+    "preco": "1 GP",
+    "peso": "2 lb",
+    "descricao": "Com a ação Utilizar, espalhe as esferas para cobrir uma área nivelada de 3 m × 3 m a até 3 m. A primeira criatura que entrar na área em um turno faz salvaguarda de Destreza CD 10 ou fica Caída. Recolher leva 10 minutos.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Barril",
@@ -841,7 +1394,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-082"
+    "id": "equip-082",
+    "preco": "2 GP",
+    "peso": "70 lb",
+    "descricao": "Recipiente que comporta até 40 galões de líquido ou 4 pés cúbicos de bens secos.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Cesta",
@@ -851,7 +1408,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-083"
+    "id": "equip-083",
+    "preco": "4 SP",
+    "peso": "2 lb",
+    "descricao": "Cesto capaz de transportar até 40 lb em cerca de 2 pés cúbicos.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Saco de Dormir",
@@ -861,7 +1422,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-084"
+    "id": "equip-084",
+    "preco": "1 GP",
+    "peso": "7 lb",
+    "descricao": "Colchonete de viagem para uma criatura Pequena ou Média. Enquanto estiver nele, você tem sucesso automático em salvaguardas contra frio extremo.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Sino",
@@ -871,7 +1436,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-085"
+    "id": "equip-085",
+    "preco": "1 GP",
+    "peso": "—",
+    "descricao": "Ao ser tocado usando a ação Utilizar, produz um som audível a até 18 m.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Cobertor",
@@ -881,7 +1450,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-086"
+    "id": "equip-086",
+    "preco": "5 SP",
+    "peso": "3 lb",
+    "descricao": "Enquanto estiver enrolado no cobertor, você tem vantagem em salvaguardas contra frio extremo.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Roldana e Talha",
@@ -891,7 +1464,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-087"
+    "id": "equip-087",
+    "preco": "1 GP",
+    "peso": "5 lb",
+    "descricao": "Sistema de roldanas que permite erguer até quatro vezes o peso que você normalmente conseguiria levantar.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Livro",
@@ -901,7 +1478,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-088"
+    "id": "equip-088",
+    "preco": "25 GP",
+    "peso": "5 lb",
+    "descricao": "Livro de ficção ou não ficção. Consultar um livro de não ficção confiável sobre o assunto concede +5 em testes de Inteligência (Arcanismo, História, Natureza ou Religião) relacionados ao tema.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Garrafa de Vidro",
@@ -911,7 +1492,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-089"
+    "id": "equip-089",
+    "preco": "2 GP",
+    "peso": "2 lb",
+    "descricao": "Garrafa de vidro que comporta até 1,5 pint (aprox. 0,7 litro).",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Balde",
@@ -921,7 +1506,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-090"
+    "id": "equip-090",
+    "preco": "5 CP",
+    "peso": "2 lb",
+    "descricao": "Balde que comporta até meio pé cúbico de conteúdo.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Miguelitos",
@@ -931,7 +1520,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-091"
+    "id": "equip-091",
+    "preco": "1 GP",
+    "peso": "2 lb",
+    "descricao": "Com a ação Utilizar, espalhe-os em um quadrado de 1,5 m a até 1,5 m. A primeira criatura que entrar na área em um turno faz salvaguarda de Destreza CD 15; em falha sofre 1 de dano perfurante e fica com deslocamento 0 até o início do próximo turno. Recolher leva 10 minutos.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Vela",
@@ -941,7 +1534,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-092"
+    "id": "equip-092",
+    "preco": "1 CP",
+    "peso": "—",
+    "descricao": "Queima por 1 hora, fornecendo luz plena em raio de 1,5 m e penumbra por mais 1,5 m.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Estojo de Virotes",
@@ -951,7 +1548,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-093"
+    "id": "equip-093",
+    "preco": "1 GP",
+    "peso": "1 lb",
+    "descricao": "Estojo que comporta até 20 virotes de besta.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Estojo de Mapa ou Pergaminho",
@@ -961,7 +1562,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-094"
+    "id": "equip-094",
+    "preco": "1 GP",
+    "peso": "1 lb",
+    "descricao": "Estojo que comporta até 10 folhas de papel ou 5 folhas de pergaminho.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Corrente",
@@ -971,7 +1576,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-095"
+    "id": "equip-095",
+    "preco": "5 GP",
+    "peso": "10 lb",
+    "descricao": "Pode prender uma criatura a até 1,5 m que esteja Agarrada, Incapacitada ou Contida, com teste de Força (Atletismo) CD 13. Para escapar: Destreza (Acrobacia) CD 18; para arrebentar: Força (Atletismo) CD 20.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Baú",
@@ -981,7 +1590,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-096"
+    "id": "equip-096",
+    "preco": "5 GP",
+    "peso": "25 lb",
+    "descricao": "Baú com capacidade aproximada de 12 pés cúbicos.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Kit de Escalada",
@@ -991,7 +1604,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-097"
+    "id": "equip-097",
+    "preco": "25 GP",
+    "peso": "12 lb",
+    "descricao": "Inclui pontas para botas, luvas, pitões e arnês. Com a ação Utilizar, fixe-se a um ponto de ancoragem: não pode cair mais de 7,5 m do ponto nem afastar-se mais de 7,5 m sem desfazer a ancoragem com uma ação bônus.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Roupas Finas",
@@ -1001,7 +1618,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-098"
+    "id": "equip-098",
+    "preco": "15 GP",
+    "peso": "6 lb",
+    "descricao": "Roupas de tecido caro, com acabamento refinado. Certos eventos e locais exigem vestimentas desse tipo.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Roupas de Viajante",
@@ -1011,7 +1632,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-099"
+    "id": "equip-099",
+    "preco": "2 GP",
+    "peso": "4 lb",
+    "descricao": "Roupas resistentes, preparadas para viagens em ambientes variados.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Bolsa de Componentes",
@@ -1021,7 +1646,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-100"
+    "id": "equip-100",
+    "preco": "25 GP",
+    "peso": "2 lb",
+    "descricao": "Bolsa impermeável com compartimentos para os componentes materiais de magias que não tenham custo especificado e não sejam consumidos.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Fantasia",
@@ -1031,7 +1660,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-101"
+    "id": "equip-101",
+    "preco": "5 GP",
+    "peso": "4 lb",
+    "descricao": "Enquanto usa uma fantasia, você tem vantagem em testes de atributo para se passar pela pessoa ou tipo de pessoa que ela representa.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Pé de Cabra",
@@ -1041,7 +1674,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-102"
+    "id": "equip-102",
+    "preco": "2 GP",
+    "peso": "5 lb",
+    "descricao": "Alavanca que concede vantagem em testes de Força nos quais seja possível usar sua alavancagem.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Frasco",
@@ -1051,7 +1688,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-103"
+    "id": "equip-103",
+    "preco": "2 CP",
+    "peso": "1 lb",
+    "descricao": "Recipiente que comporta até 1 pint (aprox. 0,47 litro).",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Gancho de Escalada",
@@ -1061,7 +1702,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-104"
+    "id": "equip-104",
+    "preco": "5 GP",
+    "peso": "4 lb",
+    "descricao": "Com a ação Utilizar, arremesse-o a até 15 m para prendê-lo a uma grade, beirada ou ponto de apoio; exige teste de Destreza (Acrobacia) CD 13. Com uma corda presa, permite escalar.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Kit de Curandeiro",
@@ -1071,7 +1716,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-105"
+    "id": "equip-105",
+    "preco": "5 GP",
+    "peso": "3 lb",
+    "descricao": "Contém 10 usos. Com a ação Utilizar, gaste um uso para estabilizar uma criatura inconsciente com 0 PV sem precisar de teste de Sabedoria (Medicina).",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Símbolo Sagrado",
@@ -1081,7 +1730,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-106"
+    "id": "equip-106",
+    "preco": "Varia",
+    "peso": "Varia",
+    "descricao": "Pode ser amuleto, emblema ou relíquia. Clérigos e paladinos podem usá-lo como foco de conjuração.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Água Benta",
@@ -1091,7 +1744,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-107"
+    "id": "equip-107",
+    "preco": "25 GP",
+    "peso": "1 lb",
+    "descricao": "Como parte da ação Atacar, arremesse o frasco contra uma criatura a até 6 m. Em falha na salvaguarda de Destreza (CD 8 + DES + proficiência), um ínfero ou morto-vivo sofre 2d8 de dano radiante.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Armadilha de Caça",
@@ -1101,7 +1758,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-108"
+    "id": "equip-108",
+    "preco": "5 GP",
+    "peso": "25 lb",
+    "descricao": "Armadilha metálica com corrente, fixada a um objeto imóvel. A criatura que pisa nela faz salvaguarda de Destreza CD 13; em falha sofre 1d4 perfurante e tem deslocamento 0 até o início do próximo turno. Pode tentar se libertar com Força (Atletismo) CD 13; cada falha causa 1 de dano perfurante.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Tinta",
@@ -1111,7 +1772,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-109"
+    "id": "equip-109",
+    "preco": "10 GP",
+    "peso": "—",
+    "descricao": "Frasco de 1 onça, suficiente para escrever aproximadamente 500 páginas.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Pena de Tinta",
@@ -1121,7 +1786,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-110"
+    "id": "equip-110",
+    "preco": "2 CP",
+    "peso": "—",
+    "descricao": "Pena usada para escrever ou desenhar com tinta.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Jarro",
@@ -1131,7 +1800,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-111"
+    "id": "equip-111",
+    "preco": "2 CP",
+    "peso": "4 lb",
+    "descricao": "Jarro que comporta até 1 galão (aprox. 3,8 litros).",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Escada",
@@ -1141,7 +1814,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-112"
+    "id": "equip-112",
+    "preco": "1 SP",
+    "peso": "25 lb",
+    "descricao": "Escada de 3 m de altura. É necessário escalá-la para subir ou descer.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Lâmpada",
@@ -1151,7 +1828,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-113"
+    "id": "equip-113",
+    "preco": "5 SP",
+    "peso": "1 lb",
+    "descricao": "Usa óleo como combustível; emite luz plena em raio de 4,5 m e penumbra por mais 9 m.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Lanterna Focal",
@@ -1161,7 +1842,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-114"
+    "id": "equip-114",
+    "preco": "10 GP",
+    "peso": "2 lb",
+    "descricao": "Usa óleo como combustível; emite luz plena em um cone de 18 m e penumbra por mais 18 m.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Lanterna Coberta",
@@ -1171,7 +1856,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-115"
+    "id": "equip-115",
+    "preco": "5 GP",
+    "peso": "2 lb",
+    "descricao": "Usa óleo; emite luz plena em raio de 9 m e penumbra por mais 9 m. Com ação bônus, pode baixar a cobertura para reduzir a luz a penumbra em raio de 1,5 m ou reabri-la.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Fechadura",
@@ -1181,7 +1870,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-116"
+    "id": "equip-116",
+    "preco": "10 GP",
+    "peso": "1 lb",
+    "descricao": "Vem com uma chave. Sem ela, pode ser aberto com ferramentas de ladrão e teste de Destreza (Prestidigitação) CD 15.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Lupa",
@@ -1191,7 +1884,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-117"
+    "id": "equip-117",
+    "preco": "100 GP",
+    "peso": "—",
+    "descricao": "Concede vantagem em testes de atributo para avaliar ou inspecionar itens muito detalhados. Para acender fogo, precisa de luz solar concentrada, material inflamável e cerca de 5 minutos.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Algemas",
@@ -1201,7 +1898,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-118"
+    "id": "equip-118",
+    "preco": "2 GP",
+    "peso": "6 lb",
+    "descricao": "Podem prender criatura Pequena ou Média que esteja Agarrada, Incapacitada ou Contida, com Destreza (Prestidigitação) CD 13. Enquanto presa, tem desvantagem em ataques; se fixada a corrente/gancho imóvel, fica Contida. Escapar: CD 20; arrebentar: Força CD 25; abrir fechadura: CD 15 com ferramentas de ladrão.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Mapa",
@@ -1211,7 +1912,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-119"
+    "id": "equip-119",
+    "preco": "1 GP",
+    "peso": "—",
+    "descricao": "Mapa preciso concede +5 em testes de Sabedoria (Sobrevivência) para encontrar o caminho na região representada.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Espelho",
@@ -1221,7 +1926,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-120"
+    "id": "equip-120",
+    "preco": "5 GP",
+    "peso": "1/2 lb",
+    "descricao": "Espelho portátil de aço, útil para cuidados pessoais, observar ao redor de esquinas ou refletir luz como sinal.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Rede",
@@ -1231,7 +1940,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-121"
+    "id": "equip-121",
+    "preco": "1 GP",
+    "peso": "3 lb",
+    "descricao": "Como parte da ação Atacar, arremesse contra criatura visível a até 4,5 m. O alvo faz salvaguarda de Destreza (CD 8 + DES + proficiência) ou fica Contido. Criaturas Enormes ou maiores têm sucesso automático. Para escapar, teste de Força (Atletismo) CD 10; a rede tem CA 10, 5 PV e imunidade a dano contundente, venenoso e psíquico.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Óleo",
@@ -1241,7 +1954,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-122"
+    "id": "equip-122",
+    "preco": "1 SP",
+    "peso": "1 lb",
+    "descricao": "Pode cobrir criatura/objeto: em falha na salvaguarda de Destreza, o óleo cobre o alvo e, se sofrer fogo antes de secar (1 minuto), recebe +5 de dano de fogo. Derramado no chão, cobre quadrado de 1,5 m e, ao ser aceso, causa 5 de fogo a quem entrar/terminar o turno ali, uma vez por turno. Também alimenta lâmpadas e lanternas por 6 horas.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Papel",
@@ -1251,7 +1968,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-123"
+    "id": "equip-123",
+    "preco": "2 SP",
+    "peso": "—",
+    "descricao": "Uma folha comporta cerca de 250 palavras manuscritas.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Pergaminho",
@@ -1261,7 +1982,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-124"
+    "id": "equip-124",
+    "preco": "1 SP",
+    "peso": "—",
+    "descricao": "Uma folha de pergaminho comporta cerca de 250 palavras manuscritas.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Perfume",
@@ -1271,7 +1996,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-125"
+    "id": "equip-125",
+    "preco": "5 GP",
+    "peso": "—",
+    "descricao": "Frasco de 4 onças. Por 1 hora após aplicar, você tem vantagem em testes de Carisma (Persuasão) para influenciar um humanoide Indiferente a até 1,5 m.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Veneno Básico",
@@ -1281,7 +2010,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-126"
+    "id": "equip-126",
+    "preco": "100 GP",
+    "peso": "—",
+    "descricao": "Como ação bônus, aplique a um arma ou até 3 munições. Um alvo que sofra dano perfurante ou cortante da arma envenenada recebe +1d4 de dano venenoso. A substância dura 1 minuto ou até causar dano.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Vara",
@@ -1291,7 +2024,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-127"
+    "id": "equip-127",
+    "preco": "5 CP",
+    "peso": "7 lb",
+    "descricao": "Vara de 3 m para tocar objetos a até 3 m. Também concede vantagem em testes de Força (Atletismo) para saltos em altura ou distância quando usada para impulsionar o salto.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Panela de Ferro",
@@ -1301,7 +2038,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-128"
+    "id": "equip-128",
+    "preco": "2 GP",
+    "peso": "10 lb",
+    "descricao": "Panela de ferro com capacidade de até 1 galão (aprox. 3,8 litros).",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Bolsa",
@@ -1311,7 +2052,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-129"
+    "id": "equip-129",
+    "preco": "5 SP",
+    "peso": "1 lb",
+    "descricao": "Bolsa que comporta até 6 lb em cerca de um quinto de pé cúbico.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Aljava",
@@ -1321,7 +2066,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-130"
+    "id": "equip-130",
+    "preco": "1 GP",
+    "peso": "1 lb",
+    "descricao": "Aljava que comporta até 20 flechas.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Aríete Portátil",
@@ -1331,7 +2080,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-131"
+    "id": "equip-131",
+    "preco": "4 GP",
+    "peso": "35 lb",
+    "descricao": "Aríete para arrombar portas. Concede +4 no teste de Força; outra criatura pode ajudar para conceder vantagem nesse teste.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Raçoes",
@@ -1341,7 +2094,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-132"
+    "id": "equip-132",
+    "preco": "5 SP",
+    "peso": "2 lb",
+    "descricao": "Comida de viagem pronta para consumo, como carne seca, frutas secas, biscoitos duros e nozes.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Veste",
@@ -1351,7 +2108,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-133"
+    "id": "equip-133",
+    "preco": "1 GP",
+    "peso": "4 lb",
+    "descricao": "Veste com significado profissional ou cerimonial. Alguns eventos e lugares exigem vestes de determinadas cores ou símbolos.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Corda",
@@ -1361,7 +2122,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-134"
+    "id": "equip-134",
+    "preco": "1 GP",
+    "peso": "5 lb",
+    "descricao": "Permite amarrar um nó com ação Utilizar e Destreza (Prestidigitação) CD 10; arrebentar exige Força (Atletismo) CD 20. Só é possível amarrar uma criatura involuntária se ela estiver Agarrada, Incapacitada ou Contida. Para escapar: Destreza (Acrobacia) CD 15.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Saco",
@@ -1371,7 +2136,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-135"
+    "id": "equip-135",
+    "preco": "1 CP",
+    "peso": "1/2 lb",
+    "descricao": "Saco que comporta até 30 lb em 1 pé cúbico.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Pá",
@@ -1381,7 +2150,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-136"
+    "id": "equip-136",
+    "preco": "2 GP",
+    "peso": "5 lb",
+    "descricao": "Com 1 hora de trabalho, permite cavar um buraco de aproximadamente 1,5 m de cada lado em terra ou material similar.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Apito de Sinalização",
@@ -1391,7 +2164,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-137"
+    "id": "equip-137",
+    "preco": "5 CP",
+    "peso": "—",
+    "descricao": "Ao ser soprado com a ação Utilizar, produz som audível a até 180 m.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Barraca",
@@ -1401,7 +2178,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-138"
+    "id": "equip-138",
+    "preco": "2 GP",
+    "peso": "20 lb",
+    "descricao": "Barraca que abriga até duas criaturas Pequenas ou Médias.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Pederneira",
@@ -1411,7 +2192,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-139"
+    "id": "equip-139",
+    "preco": "5 SP",
+    "peso": "1 lb",
+    "descricao": "Pequeno estojo com pederneira, aço e material inflamável. Acender vela, lâmpada, lanterna ou tocha exige ação bônus; acender outro fogo leva 1 minuto.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Tocha",
@@ -1421,7 +2206,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-140"
+    "id": "equip-140",
+    "preco": "1 CP",
+    "peso": "1 lb",
+    "descricao": "Queima por 1 hora, iluminando plenamente 6 m e com penumbra por mais 6 m. Pode ser usada como arma corpo a corpo simples; ao acertar causa 1 de dano de fogo.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Frasco Pequeno",
@@ -1431,7 +2220,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-141"
+    "id": "equip-141",
+    "preco": "1 GP",
+    "peso": "—",
+    "descricao": "Frasco pequeno que comporta até 4 onças (aprox. 120 ml).",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Odre",
@@ -1441,7 +2234,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-142"
+    "id": "equip-142",
+    "preco": "2 SP",
+    "peso": "5 lb (cheio)",
+    "descricao": "Odre que comporta até 4 pintas (aprox. 1,9 litro) de água. O peso indicado considera o recipiente cheio; a falta de água pode causar desidratação.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Camelo",
@@ -1451,7 +2248,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-143"
+    "id": "equip-143",
+    "preco": "50 GP",
+    "peso": "Carga 450 lb",
+    "descricao": "Animal de montaria resistente; capacidade de carga de 450 lb.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Elefante",
@@ -1461,7 +2262,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-144"
+    "id": "equip-144",
+    "preco": "200 GP",
+    "peso": "Carga 1.320 lb",
+    "descricao": "Animal de grande porte usado como montaria e transporte; capacidade de carga de 1.320 lb.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Cavalo de Tração",
@@ -1471,7 +2276,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-145"
+    "id": "equip-145",
+    "preco": "50 GP",
+    "peso": "Carga 540 lb",
+    "descricao": "Cavalo de tração para puxar veículos ou transportar cargas; capacidade de carga de 540 lb.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Cavalo de Montaria",
@@ -1481,7 +2290,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-146"
+    "id": "equip-146",
+    "preco": "75 GP",
+    "peso": "Carga 480 lb",
+    "descricao": "Cavalo treinado para montaria; capacidade de carga de 480 lb.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Mastim",
@@ -1491,7 +2304,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-147"
+    "id": "equip-147",
+    "preco": "25 GP",
+    "peso": "Carga 195 lb",
+    "descricao": "Cão grande treinado para montaria de criaturas pequenas e transporte; capacidade de carga de 195 lb.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Mula",
@@ -1501,7 +2318,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-148"
+    "id": "equip-148",
+    "preco": "8 GP",
+    "peso": "Carga 420 lb",
+    "descricao": "Animal de carga resistente; capacidade de carga de 420 lb.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Pônei",
@@ -1511,7 +2332,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-149"
+    "id": "equip-149",
+    "preco": "30 GP",
+    "peso": "Carga 225 lb",
+    "descricao": "Pônei de montaria e carga; capacidade de carga de 225 lb.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Cavalo de Guerra",
@@ -1521,7 +2346,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-150"
+    "id": "equip-150",
+    "preco": "400 GP",
+    "peso": "Carga 540 lb",
+    "descricao": "Cavalo treinado para combate; capacidade de carga de 540 lb.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Carruagem",
@@ -1531,7 +2360,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-151"
+    "id": "equip-151",
+    "preco": "100 GP",
+    "peso": "600 lb",
+    "descricao": "Veículo terrestre puxado por animais, usado para transportar passageiros.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Carroça",
@@ -1541,7 +2374,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-152"
+    "id": "equip-152",
+    "preco": "15 GP",
+    "peso": "200 lb",
+    "descricao": "Carroça simples de duas rodas para transportar carga.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Carruagem de Guerra",
@@ -1551,7 +2388,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-153"
+    "id": "equip-153",
+    "preco": "250 GP",
+    "peso": "100 lb",
+    "descricao": "Veículo leve de combate puxado por animais.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Trenó",
@@ -1561,7 +2402,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-154"
+    "id": "equip-154",
+    "preco": "20 GP",
+    "peso": "300 lb",
+    "descricao": "Trenó para transporte sobre neve ou gelo.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Vagão",
@@ -1571,7 +2416,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-155"
+    "id": "equip-155",
+    "preco": "35 GP",
+    "peso": "400 lb",
+    "descricao": "Vagão de transporte de carga puxado por animais.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Aeronave",
@@ -1581,7 +2430,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-156"
+    "id": "equip-156",
+    "preco": "40.000 GP",
+    "peso": "—",
+    "descricao": "Aeronave: velocidade 8 mph; tripulação 10; capacidade para 20 passageiros e 1 tonelada de carga; CA 13 e 300 PV.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Galé",
@@ -1591,7 +2444,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-157"
+    "id": "equip-157",
+    "preco": "30.000 GP",
+    "peso": "—",
+    "descricao": "Navio a remo e vela: velocidade 4 mph; tripulação 80; carga 150 toneladas; CA 15, 500 PV e limiar de dano 20.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Barco de Quilha",
@@ -1601,7 +2458,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-158"
+    "id": "equip-158",
+    "preco": "3.000 GP",
+    "peso": "—",
+    "descricao": "Barco de quilha: velocidade 1 mph; tripulação 1; 6 passageiros; carga 1/2 tonelada; CA 15, 100 PV e limiar de dano 10.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Navio Longo",
@@ -1611,7 +2472,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-159"
+    "id": "equip-159",
+    "preco": "10.000 GP",
+    "peso": "—",
+    "descricao": "Navio longo: velocidade 3 mph; tripulação 40; 150 passageiros; 10 toneladas de carga; CA 15, 300 PV e limiar de dano 15.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Barco a Remo",
@@ -1621,7 +2486,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-160"
+    "id": "equip-160",
+    "preco": "50 GP",
+    "peso": "100 lb",
+    "descricao": "Barco a remo: velocidade 1,5 mph; tripulação 1; 3 passageiros; CA 11 e 50 PV. O barco pode ser carregado.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Navio à Vela",
@@ -1631,7 +2500,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-161"
+    "id": "equip-161",
+    "preco": "10.000 GP",
+    "peso": "—",
+    "descricao": "Navio à vela: velocidade 2 mph; tripulação 20; 20 passageiros; 100 toneladas de carga; CA 15, 300 PV e limiar de dano 15.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Navio de Guerra",
@@ -1641,7 +2514,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-162"
+    "id": "equip-162",
+    "preco": "25.000 GP",
+    "peso": "—",
+    "descricao": "Navio de guerra: velocidade 2,5 mph; tripulação 60; 60 passageiros; 200 toneladas de carga; CA 15, 500 PV e limiar de dano 20.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Munição",
@@ -1651,7 +2528,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-163"
+    "id": "equip-163",
+    "preco": "Varia",
+    "peso": "Varia",
+    "descricao": "Munição necessária para armas com a propriedade Munição. Cada ataque consome uma unidade. Flechas: 20 por 1 GP, 1 lb; virotes: 20 por 1 GP, 1,5 lb; balas de arma de fogo: 10 por 3 GP, 2 lb; balas de funda: 20 por 4 CP, 1,5 lb; agulhas: 50 por 1 GP, 1 lb. O estojo/aljava é comprado separadamente.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Foco Arcano",
@@ -1661,7 +2542,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-164"
+    "id": "equip-164",
+    "preco": "Varia",
+    "peso": "Varia",
+    "descricao": "Cristal (10 GP, 1 lb), orbe (20 GP, 3 lb), bastão/vara (10 GP, 2 lb), cajado (5 GP, 4 lb) ou varinha (10 GP, 1 lb). Feiticeiros, bruxos e magos podem usar um foco arcano como foco de conjuração.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Foco Druídico",
@@ -1671,7 +2556,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-165"
+    "id": "equip-165",
+    "preco": "Varia",
+    "peso": "Varia",
+    "descricao": "Pode assumir uma das formas previstas para focos druídicos, como ramo, totem, objeto natural ou cajado. Druidas e patrulheiros podem usá-lo como foco de conjuração.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Pacote de Ladrão",
@@ -1681,7 +2570,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-166"
+    "id": "equip-166",
+    "preco": "16 GP",
+    "peso": "42 lb",
+    "descricao": "Pacote contendo mochila, esferas de metal, sino, 10 velas, pé de cabra, lanterna coberta, 7 frascos de óleo, rações para 5 dias, corda, pederneira e odre.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Pacote de Diplomata",
@@ -1691,7 +2584,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-167"
+    "id": "equip-167",
+    "preco": "39 GP",
+    "peso": "39 lb",
+    "descricao": "Contém baú, roupas finas, tinta, 5 penas, lâmpada, 2 estojos de mapa/pergaminho, 4 frascos de óleo, 5 folhas de papel, 5 folhas de pergaminho, perfume e pederneira.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Pacote de Explorador de Masmorras",
@@ -1701,7 +2598,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-168"
+    "id": "equip-168",
+    "preco": "12 GP",
+    "peso": "55 lb",
+    "descricao": "Contém mochila, estrepes, pé de cabra, 2 frascos de óleo, rações para 10 dias, corda, pederneira, 10 tochas e odre.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Pacote de Artista",
@@ -1711,7 +2612,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-169"
+    "id": "equip-169",
+    "preco": "40 GP",
+    "peso": "58,5 lb",
+    "descricao": "Contém mochila, saco de dormir, sino, lanterna focal, 3 fantasias, espelho, 8 frascos de óleo, rações para 9 dias, pederneira e odre.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Pacote de Explorador",
@@ -1721,7 +2626,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-170"
+    "id": "equip-170",
+    "preco": "10 GP",
+    "peso": "55 lb",
+    "descricao": "Contém mochila, saco de dormir, 2 frascos de óleo, rações para 10 dias, corda, pederneira, 10 tochas e odre.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Pacote de Sacerdote",
@@ -1731,7 +2640,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-171"
+    "id": "equip-171",
+    "preco": "Não informado no SRD",
+    "peso": "Não especificado",
+    "descricao": "O catálogo não contém dados mecânicos completos para este registro. Confira a referência aberta do equipamento 2024 antes de usar em jogo.",
+    "uso": "Dados não especificados no catálogo disponível."
   },
   {
     "n": "Pacote de Estudioso",
@@ -1741,7 +2654,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-172"
+    "id": "equip-172",
+    "preco": "Não informado no SRD",
+    "peso": "Não especificado",
+    "descricao": "O catálogo não contém dados mecânicos completos para este registro. Confira a referência aberta do equipamento 2024 antes de usar em jogo.",
+    "uso": "Dados não especificados no catálogo disponível."
   },
   {
     "n": "Gaita de Fole",
@@ -1751,7 +2668,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-173"
+    "id": "equip-173",
+    "preco": "30 GP",
+    "peso": "6 lb",
+    "habilidade": "CAR",
+    "descricao": "Instrumento musical. Pode tocar uma melodia conhecida (CD 10) ou improvisar uma canção (CD 15). Exige proficiência específica neste instrumento.",
+    "uso": "Execução musical; testes de Carisma para apresentação e interação."
   },
   {
     "n": "Tambor",
@@ -1761,7 +2683,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-174"
+    "id": "equip-174",
+    "preco": "6 GP",
+    "peso": "3 lb",
+    "habilidade": "CAR",
+    "descricao": "Instrumento musical. Pode tocar uma melodia conhecida (CD 10) ou improvisar uma canção (CD 15). Exige proficiência específica neste instrumento.",
+    "uso": "Execução musical; testes de Carisma para apresentação e interação."
   },
   {
     "n": "Saltério",
@@ -1771,7 +2698,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-175"
+    "id": "equip-175",
+    "preco": "25 GP",
+    "peso": "10 lb",
+    "habilidade": "CAR",
+    "descricao": "Instrumento musical. Pode tocar uma melodia conhecida (CD 10) ou improvisar uma canção (CD 15). Exige proficiência específica neste instrumento.",
+    "uso": "Execução musical; testes de Carisma para apresentação e interação."
   },
   {
     "n": "Flauta",
@@ -1781,7 +2713,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-176"
+    "id": "equip-176",
+    "preco": "2 GP",
+    "peso": "1 lb",
+    "habilidade": "CAR",
+    "descricao": "Instrumento musical. Pode tocar uma melodia conhecida (CD 10) ou improvisar uma canção (CD 15). Exige proficiência específica neste instrumento.",
+    "uso": "Execução musical; testes de Carisma para apresentação e interação."
   },
   {
     "n": "Berrante",
@@ -1791,7 +2728,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-177"
+    "id": "equip-177",
+    "preco": "3 GP",
+    "peso": "2 lb",
+    "habilidade": "CAR",
+    "descricao": "Instrumento musical. Pode tocar uma melodia conhecida (CD 10) ou improvisar uma canção (CD 15). Exige proficiência específica neste instrumento.",
+    "uso": "Execução musical; testes de Carisma para apresentação e interação."
   },
   {
     "n": "Alaúde",
@@ -1801,7 +2743,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-178"
+    "id": "equip-178",
+    "preco": "35 GP",
+    "peso": "2 lb",
+    "habilidade": "CAR",
+    "descricao": "Instrumento musical. Pode tocar uma melodia conhecida (CD 10) ou improvisar uma canção (CD 15). Exige proficiência específica neste instrumento.",
+    "uso": "Execução musical; testes de Carisma para apresentação e interação."
   },
   {
     "n": "Lira",
@@ -1811,7 +2758,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-179"
+    "id": "equip-179",
+    "preco": "30 GP",
+    "peso": "2 lb",
+    "habilidade": "CAR",
+    "descricao": "Instrumento musical. Pode tocar uma melodia conhecida (CD 10) ou improvisar uma canção (CD 15). Exige proficiência específica neste instrumento.",
+    "uso": "Execução musical; testes de Carisma para apresentação e interação."
   },
   {
     "n": "Flauta de Pã",
@@ -1821,7 +2773,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-180"
+    "id": "equip-180",
+    "preco": "12 GP",
+    "peso": "2 lb",
+    "habilidade": "CAR",
+    "descricao": "Instrumento musical. Pode tocar uma melodia conhecida (CD 10) ou improvisar uma canção (CD 15). Exige proficiência específica neste instrumento.",
+    "uso": "Execução musical; testes de Carisma para apresentação e interação."
   },
   {
     "n": "Charamela",
@@ -1831,7 +2788,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-181"
+    "id": "equip-181",
+    "preco": "2 GP",
+    "peso": "1 lb",
+    "habilidade": "CAR",
+    "descricao": "Instrumento musical. Pode tocar uma melodia conhecida (CD 10) ou improvisar uma canção (CD 15). Exige proficiência específica neste instrumento.",
+    "uso": "Execução musical; testes de Carisma para apresentação e interação."
   },
   {
     "n": "Viola de Arco",
@@ -1841,7 +2803,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-182"
+    "id": "equip-182",
+    "preco": "30 GP",
+    "peso": "1 lb",
+    "habilidade": "CAR",
+    "descricao": "Instrumento musical. Pode tocar uma melodia conhecida (CD 10) ou improvisar uma canção (CD 15). Exige proficiência específica neste instrumento.",
+    "uso": "Execução musical; testes de Carisma para apresentação e interação."
   },
   {
     "n": "Conjunto de Jogos, Dados",
@@ -1851,7 +2818,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-183"
+    "id": "equip-183",
+    "preco": "1 SP",
+    "peso": "—",
+    "habilidade": "SAB",
+    "descricao": "Conjunto de jogo. Use proficiência para perceber trapaças (CD 10) ou tentar vencer uma partida (CD 20).",
+    "uso": "Jogo e interação social; exige proficiência específica no conjunto."
   },
   {
     "n": "Conjunto de Jogos, Xadrez Dracônico",
@@ -1861,7 +2833,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-184"
+    "id": "equip-184",
+    "preco": "1 GP",
+    "peso": "—",
+    "habilidade": "SAB",
+    "descricao": "Conjunto de jogo. Use proficiência para perceber trapaças (CD 10) ou tentar vencer uma partida (CD 20).",
+    "uso": "Jogo e interação social; exige proficiência específica no conjunto."
   },
   {
     "n": "Conjunto de Jogos, Cartas",
@@ -1871,7 +2848,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-185"
+    "id": "equip-185",
+    "preco": "5 SP",
+    "peso": "—",
+    "habilidade": "SAB",
+    "descricao": "Conjunto de jogo. Use proficiência para perceber trapaças (CD 10) ou tentar vencer uma partida (CD 20).",
+    "uso": "Jogo e interação social; exige proficiência específica no conjunto."
   },
   {
     "n": "Conjunto de Jogos, Três Dragões",
@@ -1881,7 +2863,12 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-186"
+    "id": "equip-186",
+    "preco": "1 GP",
+    "peso": "—",
+    "habilidade": "SAB",
+    "descricao": "Conjunto de jogo. Use proficiência para perceber trapaças (CD 10) ou tentar vencer uma partida (CD 20).",
+    "uso": "Jogo e interação social; exige proficiência específica no conjunto."
   },
   {
     "n": "Sela Exótica",
@@ -1891,7 +2878,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-187"
+    "id": "equip-187",
+    "preco": "60 GP",
+    "peso": "40 lb",
+    "descricao": "Sela necessária para montar animais aquáticos ou voadores.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Sela Militar",
@@ -1901,7 +2892,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-188"
+    "id": "equip-188",
+    "preco": "20 GP",
+    "peso": "30 lb",
+    "descricao": "Sela que concede vantagem em testes de atributo para permanecer montado.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Sela de Montaria",
@@ -1911,7 +2906,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-189"
+    "id": "equip-189",
+    "preco": "10 GP",
+    "peso": "25 lb",
+    "descricao": "Sela comum para montaria; inclui arreios, freio, rédeas e acessórios necessários.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Ração para Montaria (por dia)",
@@ -1921,7 +2920,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-190"
+    "id": "equip-190",
+    "preco": "5 CP",
+    "peso": "10 lb",
+    "descricao": "Alimento para uma montaria por dia.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Estadia em Estábulo (por dia)",
@@ -1931,7 +2934,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-191"
+    "id": "equip-191",
+    "preco": "5 SP",
+    "peso": "—",
+    "descricao": "Estadia e cuidados de uma montaria em estábulo por dia.",
+    "uso": "Transporte, montaria ou veículo; os dados de carga, tripulação e passageiros estão descritos acima."
   },
   {
     "n": "Pergaminho de Magia, Truque",
@@ -1941,7 +2948,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-192"
+    "id": "equip-192",
+    "preco": "30 GP",
+    "peso": "—",
+    "descricao": "Item mágico consumível com um truque escolhido pelo criador. Se o truque estiver na lista da sua classe, você pode lê-lo e conjurá-lo com o tempo normal, sem componentes materiais. CD de magia 13 e bônus de ataque +5 quando aplicáveis. O pergaminho se desfaz após a conjuração.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Pergaminho de Magia, 1º Círculo",
@@ -1951,7 +2962,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-193"
+    "id": "equip-193",
+    "preco": "50 GP",
+    "peso": "—",
+    "descricao": "Item mágico consumível com uma magia de 1º círculo escolhida pelo criador. Se estiver na lista da sua classe, você pode lê-la e conjurá-la com o tempo normal, sem componentes materiais. CD de magia 13 e bônus de ataque +5 quando aplicáveis. O pergaminho se desfaz após a conjuração.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Estrepes de Ferro",
@@ -1961,7 +2976,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-194"
+    "id": "equip-194",
+    "preco": "1 GP",
+    "peso": "5 lb",
+    "descricao": "Vêm em conjuntos de 10. Com um objeto sem fio, como martelo leve, fixe um espigão em madeira, terra ou material semelhante para travar uma porta ou prender uma corda/corrente.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Luneta",
@@ -1971,7 +2990,11 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-195"
+    "id": "equip-195",
+    "preco": "1.000 GP",
+    "peso": "1 lb",
+    "descricao": "Luneta que amplia para o dobro do tamanho os objetos observados.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   },
   {
     "n": "Barbante",
@@ -1981,10 +3004,14 @@
     "raridade": null,
     "fonte": "Basic Rules 2024 / SRD 5.2.1",
     "magico": false,
-    "id": "equip-196"
+    "id": "equip-196",
+    "preco": "1 SP",
+    "peso": "—",
+    "descricao": "Corda fina com 3 m de comprimento; permite amarrar nós com a ação Utilizar.",
+    "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   }
 ];
-  const MAGIC_ITEMS = [
+const MAGIC_ITEMS = [
   {
     "n": "Armadura de Adamante",
     "en": "Adamantine Armor",
@@ -1994,7 +3021,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-001"
+    "id": "magic-001",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Munição +1, +2 ou +3",
@@ -2005,7 +3036,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-002"
+    "id": "magic-002",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Munição de Extermínio",
@@ -2016,7 +3051,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-003"
+    "id": "magic-003",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Amuleto da Saúde",
@@ -2027,7 +3066,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-004"
+    "id": "magic-004",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Amuleto contra Detecção e Localização",
@@ -2038,7 +3081,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-005"
+    "id": "magic-005",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Amuleto dos Planos",
@@ -2049,7 +3096,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-006"
+    "id": "magic-006",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Escudo Animado",
@@ -2060,7 +3111,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-007"
+    "id": "magic-007",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Aparelho do Caranguejo",
@@ -2071,7 +3126,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-008"
+    "id": "magic-008",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Armadura +1, +2 ou +3",
@@ -2082,7 +3141,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-009"
+    "id": "magic-009",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Armadura da Invulnerabilidade",
@@ -2093,7 +3156,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-010"
+    "id": "magic-010",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Armadura da Resistência",
@@ -2104,7 +3171,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-011"
+    "id": "magic-011",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Armadura da Vulnerabilidade",
@@ -2115,7 +3186,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-012"
+    "id": "magic-012",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Escudo Apanhador de Flechas",
@@ -2126,7 +3201,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-013"
+    "id": "magic-013",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Bolsa de Feijões",
@@ -2137,7 +3216,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-014"
+    "id": "magic-014",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Bolsa Devoradora",
@@ -2148,7 +3231,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-015"
+    "id": "magic-015",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Bolsa de Carga",
@@ -2159,7 +3246,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-016"
+    "id": "magic-016",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Bolsa de Truques",
@@ -2170,7 +3261,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-017"
+    "id": "magic-017",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Conta de Força",
@@ -2181,7 +3276,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-018"
+    "id": "magic-018",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Conta de Nutrição",
@@ -2192,7 +3291,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-019"
+    "id": "magic-019",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Cinto dos Anões",
@@ -2203,7 +3306,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-020"
+    "id": "magic-020",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Cinto de Força Gigante",
@@ -2214,7 +3321,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-021"
+    "id": "magic-021",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Machado do Berserker",
@@ -2225,7 +3336,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-022"
+    "id": "magic-022",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Botas Élficas",
@@ -2236,7 +3351,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-023"
+    "id": "magic-023",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Botas de Levitação",
@@ -2247,7 +3366,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-024"
+    "id": "magic-024",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Botas da Velocidade",
@@ -2258,7 +3381,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-025"
+    "id": "magic-025",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Botas de Caminhar e Saltar",
@@ -2269,7 +3396,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-026"
+    "id": "magic-026",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Botas das Terras Invernais",
@@ -2280,7 +3411,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-027"
+    "id": "magic-027",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Tigela de Comando de Elementais da Água",
@@ -2291,7 +3426,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-028"
+    "id": "magic-028",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Braçadeiras de Arquearia",
@@ -2302,7 +3441,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-029"
+    "id": "magic-029",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Braçadeiras de Defesa",
@@ -2313,7 +3456,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-030"
+    "id": "magic-030",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Braseiro de Comando de Elementais do Fogo",
@@ -2324,7 +3471,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-031"
+    "id": "magic-031",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Broche de Proteção",
@@ -2335,7 +3486,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-032"
+    "id": "magic-032",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Vassoura Voadora",
@@ -2346,7 +3501,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-033"
+    "id": "magic-033",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Vela de Invocação",
@@ -2357,7 +3516,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-034"
+    "id": "magic-034",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Capa do Charlatão",
@@ -2368,7 +3531,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-035"
+    "id": "magic-035",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Tapete Voador",
@@ -2379,7 +3546,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-036"
+    "id": "magic-036",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Incensário de Controle de Elementais do Ar",
@@ -2390,7 +3561,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-037"
+    "id": "magic-037",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Carrilhão de Abertura",
@@ -2401,7 +3576,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-038"
+    "id": "magic-038",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Diadema de Explosão",
@@ -2412,7 +3591,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-039"
+    "id": "magic-039",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Manto da Aracnídea",
@@ -2423,7 +3606,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-040"
+    "id": "magic-040",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Manto de Deslocamento",
@@ -2434,7 +3621,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-041"
+    "id": "magic-041",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Manto Élfico",
@@ -2445,7 +3636,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-042"
+    "id": "magic-042",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Manto da Invisibilidade",
@@ -2456,7 +3651,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-043"
+    "id": "magic-043",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Manto de Proteção",
@@ -2467,7 +3666,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-044"
+    "id": "magic-044",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Manto do Morcego",
@@ -2478,7 +3681,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-045"
+    "id": "magic-045",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Manto da Raia Manta",
@@ -2489,7 +3696,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-046"
+    "id": "magic-046",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Bola de Cristal",
@@ -2500,7 +3711,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-047"
+    "id": "magic-047",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Bola de Cristal de Leitura Mental",
@@ -2511,7 +3726,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-048"
+    "id": "magic-048",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Bola de Cristal de Telepatia",
@@ -2522,7 +3741,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-049"
+    "id": "magic-049",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Bola de Cristal de Visão da Verdade",
@@ -2533,7 +3756,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-050"
+    "id": "magic-050",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Cubo de Força",
@@ -2544,7 +3771,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-051"
+    "id": "magic-051",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Portal Cúbico",
@@ -2555,7 +3786,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-052"
+    "id": "magic-052",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Adaga Venenosa",
@@ -2566,7 +3801,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-053"
+    "id": "magic-053",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Espada Dançarina",
@@ -2577,7 +3816,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-054"
+    "id": "magic-054",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Jarra de Água Infinita",
@@ -2588,7 +3831,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-055"
+    "id": "magic-055",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Baralho de Ilusões",
@@ -2599,7 +3846,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-056"
+    "id": "magic-056",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Defensora",
@@ -2610,7 +3861,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-057"
+    "id": "magic-057",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Armadura Demoníaca",
@@ -2621,7 +3876,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-058"
+    "id": "magic-058",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Algemas Dimensionais",
@@ -2632,7 +3891,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-059"
+    "id": "magic-059",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Orbe Dracônico",
@@ -2643,7 +3906,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-060"
+    "id": "magic-060",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Cota de Escamas de Dragão",
@@ -2654,7 +3921,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-061"
+    "id": "magic-061",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Matadora de Dragões",
@@ -2665,7 +3936,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-062"
+    "id": "magic-062",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Pó do Desaparecimento",
@@ -2676,7 +3951,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-063"
+    "id": "magic-063",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Pó da Secura",
@@ -2687,7 +3966,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-064"
+    "id": "magic-064",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Pó de Espirros e Sufocamento",
@@ -2698,7 +3981,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-065"
+    "id": "magic-065",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Armadura de Placas Anã",
@@ -2709,7 +3996,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-066"
+    "id": "magic-066",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Martelo Anão Arremessador",
@@ -2720,7 +4011,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-067"
+    "id": "magic-067",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Aljava Eficiente",
@@ -2731,7 +4026,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-068"
+    "id": "magic-068",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Garrafa de Efreeti",
@@ -2742,7 +4041,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-069"
+    "id": "magic-069",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Gema Elemental",
@@ -2753,7 +4056,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-070"
+    "id": "magic-070",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Elixir da Saúde",
@@ -2764,7 +4071,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-071"
+    "id": "magic-071",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Cota Élfica",
@@ -2775,7 +4086,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-072"
+    "id": "magic-072",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Arco de Energia",
@@ -2786,7 +4101,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-073"
+    "id": "magic-073",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Garrafa de Fumaça Infinita",
@@ -2797,7 +4116,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-074"
+    "id": "magic-074",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Olhos do Encantamento",
@@ -2808,7 +4131,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-075"
+    "id": "magic-075",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Olhos da Visão Minuciosa",
@@ -2819,7 +4146,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-076"
+    "id": "magic-076",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Olhos da Águia",
@@ -2830,7 +4161,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-077"
+    "id": "magic-077",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Ficha de Pena",
@@ -2841,7 +4176,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-078"
+    "id": "magic-078",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Estatueta de Poder Maravilhoso",
@@ -2852,7 +4191,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-079"
+    "id": "magic-079",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Língua Flamejante",
@@ -2863,7 +4206,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-080"
+    "id": "magic-080",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Barco Dobrável",
@@ -2874,7 +4221,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-081"
+    "id": "magic-081",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Marca Gélida",
@@ -2885,7 +4236,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-082"
+    "id": "magic-082",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Manoplas de Força de Ogro",
@@ -2896,7 +4251,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-083"
+    "id": "magic-083",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Gema do Brilho",
@@ -2907,7 +4266,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-084"
+    "id": "magic-084",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Gema da Visão",
@@ -2918,7 +4281,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-085"
+    "id": "magic-085",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Matadora de Gigantes",
@@ -2929,7 +4296,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-086"
+    "id": "magic-086",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Couro Batido Ilusório",
@@ -2940,7 +4311,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-087"
+    "id": "magic-087",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Luvas de Aparar Projéteis",
@@ -2951,7 +4326,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-088"
+    "id": "magic-088",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Luvas de Natação e Escalada",
@@ -2962,7 +4341,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-089"
+    "id": "magic-089",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Luvas de Ladinagem",
@@ -2973,7 +4356,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-090"
+    "id": "magic-090",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Óculos da Noite",
@@ -2984,7 +4371,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-091"
+    "id": "magic-091",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Martelo dos Trovões",
@@ -2995,7 +4386,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-092"
+    "id": "magic-092",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Mochila Prática",
@@ -3006,7 +4401,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-093"
+    "id": "magic-093",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Chapéu do Disfarce",
@@ -3017,7 +4416,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-094"
+    "id": "magic-094",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Chapéu de Muitas Magias",
@@ -3028,7 +4431,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-095"
+    "id": "magic-095",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Tiara do Intelecto",
@@ -3039,7 +4446,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-096"
+    "id": "magic-096",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Elmo do Brilho",
@@ -3050,7 +4461,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-097"
+    "id": "magic-097",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Elmo da Compreensão de Idiomas",
@@ -3061,7 +4476,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-098"
+    "id": "magic-098",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Elmo da Telepatia",
@@ -3072,7 +4491,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-099"
+    "id": "magic-099",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Elmo do Teletransporte",
@@ -3083,7 +4506,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-100"
+    "id": "magic-100",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Vingadora Sagrada",
@@ -3094,7 +4521,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-101"
+    "id": "magic-101",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Buzina Explosiva",
@@ -3105,7 +4536,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-102"
+    "id": "magic-102",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Chifre de Valhala",
@@ -3116,7 +4551,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-103"
+    "id": "magic-103",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Ferraduras de Zéfiro",
@@ -3127,7 +4566,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-104"
+    "id": "magic-104",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Ferraduras da Velocidade",
@@ -3138,7 +4581,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-105"
+    "id": "magic-105",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Bastão Imóvel",
@@ -3149,7 +4596,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-106"
+    "id": "magic-106",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Fortaleza Instantânea",
@@ -3160,7 +4611,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-107"
+    "id": "magic-107",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Pedra Ioun",
@@ -3171,7 +4626,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-108"
+    "id": "magic-108",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Faixas de Ferro",
@@ -3182,7 +4641,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-109"
+    "id": "magic-109",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Frasco de Ferro",
@@ -3193,7 +4656,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-110"
+    "id": "magic-110",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Azagaia Relampejante",
@@ -3204,7 +4671,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-111"
+    "id": "magic-111",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Lanterna Reveladora",
@@ -3215,7 +4686,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-112"
+    "id": "magic-112",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Lâmina da Sorte",
@@ -3226,7 +4701,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-113"
+    "id": "magic-113",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Maça da Ruptura",
@@ -3237,7 +4716,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-114"
+    "id": "magic-114",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Maça Esmagadora",
@@ -3248,7 +4731,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-115"
+    "id": "magic-115",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Maça do Terror",
@@ -3259,7 +4746,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-116"
+    "id": "magic-116",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Manto de Resistência a Magia",
@@ -3270,7 +4761,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-117"
+    "id": "magic-117",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Manual da Saúde Corporal",
@@ -3281,7 +4776,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-118"
+    "id": "magic-118",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Manual do Exercício Físico",
@@ -3292,7 +4791,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-119"
+    "id": "magic-119",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Manual dos Golems",
@@ -3303,7 +4806,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-120"
+    "id": "magic-120",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Manual da Agilidade de Ação",
@@ -3314,7 +4821,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-121"
+    "id": "magic-121",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Pigmentos Maravilhosos",
@@ -3325,7 +4836,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-122"
+    "id": "magic-122",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Medalhão dos Pensamentos",
@@ -3336,7 +4851,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-123"
+    "id": "magic-123",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Espelho de Aprisionamento",
@@ -3347,7 +4866,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-124"
+    "id": "magic-124",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Armadura de Mithral",
@@ -3358,7 +4881,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-125"
+    "id": "magic-125",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Baralho Misterioso",
@@ -3369,7 +4896,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-126"
+    "id": "magic-126",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Colar de Adaptação",
@@ -3380,7 +4911,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-127"
+    "id": "magic-127",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Colar de Bolas de Fogo",
@@ -3391,7 +4926,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-128"
+    "id": "magic-128",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Colar de Contas de Oração",
@@ -3402,7 +4941,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-129"
+    "id": "magic-129",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Ladrão de Nove Vidas",
@@ -3413,7 +4956,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-130"
+    "id": "magic-130",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Arco do Juramento",
@@ -3424,7 +4971,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-131"
+    "id": "magic-131",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Óleo da Eterealidade",
@@ -3435,7 +4986,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-132"
+    "id": "magic-132",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Óleo do Fio Afiado",
@@ -3446,7 +5001,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-133"
+    "id": "magic-133",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Óleo da Escorregadela",
@@ -3457,7 +5016,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-134"
+    "id": "magic-134",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Pérola do Poder",
@@ -3468,7 +5031,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-135"
+    "id": "magic-135",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Periapto da Saúde",
@@ -3479,7 +5046,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-136"
+    "id": "magic-136",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Periapto contra Veneno",
@@ -3490,7 +5061,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-137"
+    "id": "magic-137",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Periapto de Fechamento de Feridas",
@@ -3501,7 +5076,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-138"
+    "id": "magic-138",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Filtro do Amor",
@@ -3512,7 +5091,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-139"
+    "id": "magic-139",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Flautas Assombradoras",
@@ -3523,7 +5106,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-140"
+    "id": "magic-140",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Flautas dos Esgotos",
@@ -3534,7 +5121,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-141"
+    "id": "magic-141",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Armadura de Placas Etérea",
@@ -3545,7 +5136,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-142"
+    "id": "magic-142",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Buraco Portátil",
@@ -3556,7 +5151,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-143"
+    "id": "magic-143",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Poção de Amizade Animal",
@@ -3567,7 +5166,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-144"
+    "id": "magic-144",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Poção de Clarividência",
@@ -3578,7 +5181,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-145"
+    "id": "magic-145",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Poção de Escalada",
@@ -3589,7 +5196,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-146"
+    "id": "magic-146",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Poção de Redução",
@@ -3600,7 +5211,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-147"
+    "id": "magic-147",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Poção de Voo",
@@ -3611,7 +5226,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-148"
+    "id": "magic-148",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Poção de Forma Gasosa",
@@ -3622,7 +5241,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-149"
+    "id": "magic-149",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Poção de Força de Gigante",
@@ -3633,7 +5256,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-150"
+    "id": "magic-150",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Poção de Crescimento",
@@ -3644,7 +5271,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-151"
+    "id": "magic-151",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Poções de Cura",
@@ -3655,7 +5286,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-152"
+    "id": "magic-152",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Poção de Heroísmo",
@@ -3666,7 +5301,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-153"
+    "id": "magic-153",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Poção de Invisibilidade",
@@ -3677,7 +5316,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-154"
+    "id": "magic-154",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Poção de Invulnerabilidade",
@@ -3688,7 +5331,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-155"
+    "id": "magic-155",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Poção de Longevidade",
@@ -3699,7 +5346,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-156"
+    "id": "magic-156",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Poção de Leitura Mental",
@@ -3710,7 +5361,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-157"
+    "id": "magic-157",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Poção de Veneno",
@@ -3721,7 +5376,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-158"
+    "id": "magic-158",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Poção de Resistência",
@@ -3732,7 +5391,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-159"
+    "id": "magic-159",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Poção de Velocidade",
@@ -3743,7 +5406,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-160"
+    "id": "magic-160",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Poção de Vitalidade",
@@ -3754,7 +5421,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-161"
+    "id": "magic-161",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Poção de Respiração Aquática",
@@ -3765,7 +5436,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-162"
+    "id": "magic-162",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Bordão do Acrobata",
@@ -3776,7 +5451,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-163"
+    "id": "magic-163",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Anel de Influência Animal",
@@ -3787,7 +5466,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-164"
+    "id": "magic-164",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Anel de Invocação de Djinni",
@@ -3798,7 +5481,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-165"
+    "id": "magic-165",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Anel de Comando Elemental",
@@ -3809,7 +5496,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-166"
+    "id": "magic-166",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Anel de Evasão",
@@ -3820,7 +5511,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-167"
+    "id": "magic-167",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Anel de Queda Suave",
@@ -3831,7 +5526,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-168"
+    "id": "magic-168",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Anel de Liberdade de Movimento",
@@ -3842,7 +5541,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-169"
+    "id": "magic-169",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Anel da Invisibilidade",
@@ -3853,7 +5556,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-170"
+    "id": "magic-170",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Anel de Salto",
@@ -3864,7 +5571,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-171"
+    "id": "magic-171",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Anel de Proteção Mental",
@@ -3875,7 +5586,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-172"
+    "id": "magic-172",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Anel de Proteção",
@@ -3886,7 +5601,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-173"
+    "id": "magic-173",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Anel de Regeneração",
@@ -3897,7 +5616,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-174"
+    "id": "magic-174",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Anel de Resistência",
@@ -3908,7 +5631,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-175"
+    "id": "magic-175",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Anel de Estrelas Cadentes",
@@ -3919,7 +5646,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-176"
+    "id": "magic-176",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Anel de Armazenar Magias",
@@ -3930,7 +5661,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-177"
+    "id": "magic-177",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Anel de Reversão de Magias",
@@ -3941,7 +5676,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-178"
+    "id": "magic-178",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Anel de Natação",
@@ -3952,7 +5691,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-179"
+    "id": "magic-179",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Anel de Telecinese",
@@ -3963,7 +5706,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-180"
+    "id": "magic-180",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Anel do Aríete",
@@ -3974,7 +5721,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-181"
+    "id": "magic-181",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Anel dos Três Desejos",
@@ -3985,7 +5736,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-182"
+    "id": "magic-182",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Anel do Calor",
@@ -3996,7 +5751,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-183"
+    "id": "magic-183",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Anel de Caminhar sobre as Águas",
@@ -4007,7 +5766,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-184"
+    "id": "magic-184",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Anel de Visão de Raios X",
@@ -4018,7 +5781,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-185"
+    "id": "magic-185",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Manto dos Olhos",
@@ -4029,7 +5796,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-186"
+    "id": "magic-186",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Manto de Cores Cintilantes",
@@ -4040,7 +5811,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-187"
+    "id": "magic-187",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Manto das Estrelas",
@@ -4051,7 +5826,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-188"
+    "id": "magic-188",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Manto do Arquimago",
@@ -4062,7 +5841,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-189"
+    "id": "magic-189",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Manto de Itens Úteis",
@@ -4073,7 +5856,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-190"
+    "id": "magic-190",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Bastão de Absorção",
@@ -4084,7 +5871,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-191"
+    "id": "magic-191",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Bastão de Alerta",
@@ -4095,7 +5886,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-192"
+    "id": "magic-192",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Bastão do Poder Senhorial",
@@ -4106,7 +5901,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-193"
+    "id": "magic-193",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Bastão da Ressurreição",
@@ -4117,7 +5916,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-194"
+    "id": "magic-194",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Bastão de Domínio",
@@ -4128,7 +5931,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-195"
+    "id": "magic-195",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Bastão da Segurança",
@@ -4139,7 +5946,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-196"
+    "id": "magic-196",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Corda de Escalada",
@@ -4150,7 +5961,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-197"
+    "id": "magic-197",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Corda de Enredamento",
@@ -4161,7 +5976,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-198"
+    "id": "magic-198",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Escaravelho de Proteção",
@@ -4172,7 +5991,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-199"
+    "id": "magic-199",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Cimitarra da Velocidade",
@@ -4183,7 +6006,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-200"
+    "id": "magic-200",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Pedras de Mensagem",
@@ -4194,7 +6021,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-201"
+    "id": "magic-201",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Escudo Sentinela",
@@ -4205,7 +6036,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-202"
+    "id": "magic-202",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Escudo +1, +2 ou +3",
@@ -4216,7 +6051,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-203"
+    "id": "magic-203",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Escudo de Atração de Projéteis",
@@ -4227,7 +6066,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-204"
+    "id": "magic-204",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Escudo do Cavaleiro",
@@ -4238,7 +6081,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-205"
+    "id": "magic-205",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Chinelos de Escalada Aracnídea",
@@ -4249,7 +6096,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-206"
+    "id": "magic-206",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Cola Soberana",
@@ -4260,7 +6111,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-207"
+    "id": "magic-207",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Escudo Guardião de Magias",
@@ -4271,7 +6126,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-208"
+    "id": "magic-208",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Pergaminho de Magia",
@@ -4282,7 +6141,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-209"
+    "id": "magic-209",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Esfera da Aniquilação",
@@ -4293,7 +6156,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-210"
+    "id": "magic-210",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Cajado do Encantamento",
@@ -4304,7 +6171,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-211"
+    "id": "magic-211",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Cajado do Fogo",
@@ -4315,7 +6186,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-212"
+    "id": "magic-212",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Cajado do Gelo",
@@ -4326,7 +6201,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-213"
+    "id": "magic-213",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Cajado da Cura",
@@ -4337,7 +6216,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-214"
+    "id": "magic-214",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Cajado do Poder",
@@ -4348,7 +6231,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-215"
+    "id": "magic-215",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Cajado do Golpe",
@@ -4359,7 +6246,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-216"
+    "id": "magic-216",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Cajado do Enxame de Insetos",
@@ -4370,7 +6261,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-217"
+    "id": "magic-217",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Cajado dos Magos",
@@ -4381,7 +6276,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-218"
+    "id": "magic-218",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Cajado da Píton",
@@ -4392,7 +6291,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-219"
+    "id": "magic-219",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Cajado das Florestas",
@@ -4403,7 +6306,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-220"
+    "id": "magic-220",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Cajado do Trovão e Relâmpago",
@@ -4414,7 +6321,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-221"
+    "id": "magic-221",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Cajado da Murcha",
@@ -4425,7 +6336,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-222"
+    "id": "magic-222",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Pedra de Controle de Elementais da Terra",
@@ -4436,7 +6351,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-223"
+    "id": "magic-223",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Pedra da Boa Sorte",
@@ -4447,7 +6366,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-224"
+    "id": "magic-224",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Lâmina Solar",
@@ -4458,7 +6381,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-225"
+    "id": "magic-225",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Espada Sugadora de Vida",
@@ -4469,7 +6396,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-226"
+    "id": "magic-226",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Espada Afiada",
@@ -4480,7 +6411,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-227"
+    "id": "magic-227",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Espada das Feridas",
@@ -4491,7 +6426,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-228"
+    "id": "magic-228",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Talismã do Bem Puro",
@@ -4502,7 +6441,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-229"
+    "id": "magic-229",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Talismã da Esfera",
@@ -4513,7 +6456,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-230"
+    "id": "magic-230",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Talismã do Mal Absoluto",
@@ -4524,7 +6471,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-231"
+    "id": "magic-231",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Porrete Trovejante",
@@ -4535,7 +6486,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-232"
+    "id": "magic-232",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Tomo do Pensamento Claro",
@@ -4546,7 +6501,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-233"
+    "id": "magic-233",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Tomo da Liderança e Influência",
@@ -4557,7 +6516,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-234"
+    "id": "magic-234",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Tomo da Compreensão",
@@ -4568,7 +6531,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-235"
+    "id": "magic-235",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Tridente de Comando de Peixes",
@@ -4579,7 +6546,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-236"
+    "id": "magic-236",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Solvente Universal",
@@ -4590,7 +6561,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-237"
+    "id": "magic-237",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Arma Cruel",
@@ -4601,7 +6576,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-238"
+    "id": "magic-238",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Espada Vorpal",
@@ -4612,7 +6591,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-239"
+    "id": "magic-239",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Varinha de Aprisionamento",
@@ -4623,7 +6606,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-240"
+    "id": "magic-240",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Varinha de Detecção de Inimigos",
@@ -4634,7 +6621,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-241"
+    "id": "magic-241",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Varinha do Medo",
@@ -4645,7 +6636,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-242"
+    "id": "magic-242",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Varinha de Bolas de Fogo",
@@ -4656,7 +6651,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-243"
+    "id": "magic-243",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Varinha de Relâmpagos",
@@ -4667,7 +6666,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-244"
+    "id": "magic-244",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Varinha de Detecção de Magia",
@@ -4678,7 +6681,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-245"
+    "id": "magic-245",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Varinha de Mísseis Mágicos",
@@ -4689,7 +6696,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-246"
+    "id": "magic-246",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Varinha de Paralisia",
@@ -4700,7 +6711,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-247"
+    "id": "magic-247",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Varinha de Polimorfia",
@@ -4711,7 +6726,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-248"
+    "id": "magic-248",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Varinha dos Segredos",
@@ -4722,7 +6741,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-249"
+    "id": "magic-249",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Varinha do Mago de Guerra +1, +2 ou +3",
@@ -4733,7 +6756,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-250"
+    "id": "magic-250",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Varinha de Teia",
@@ -4744,7 +6771,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-251"
+    "id": "magic-251",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Varinha das Maravilhas",
@@ -4755,7 +6786,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-252"
+    "id": "magic-252",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Arma +1, +2 ou +3",
@@ -4766,7 +6801,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-253"
+    "id": "magic-253",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Arma de Alerta",
@@ -4777,7 +6816,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-254"
+    "id": "magic-254",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Poço de Muitos Mundos",
@@ -4788,7 +6831,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-255"
+    "id": "magic-255",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Leque de Vento",
@@ -4799,7 +6846,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-256"
+    "id": "magic-256",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Botas Aladas",
@@ -4810,7 +6861,11 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-257"
+    "id": "magic-257",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   },
   {
     "n": "Asas Voadoras",
@@ -4821,10 +6876,14 @@
     "fonte": "SRD 5.2.1",
     "magico": true,
     "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
-    "id": "magic-258"
+    "id": "magic-258",
+    "peso": "Não especificado no SRD",
+    "preco": "Estimativa por raridade (ver detalhe)",
+    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
+    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
   }
 ];
-  const DMG_2024_ONLY_ITEMS = [
+const DMG_2024_ONLY_ITEMS = [
   {
     "n": "Arma de Adamante",
     "en": "Adamantine Weapon",
@@ -4835,7 +6894,11 @@
     "magico": true,
     "statusDMG2024": "Novo",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-259"
+    "id": "magic-259",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Vassoura Dançante de Baba Yaga",
@@ -4847,7 +6910,11 @@
     "magico": true,
     "statusDMG2024": "Novo",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-260"
+    "id": "magic-260",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Cubo de Invocação",
@@ -4859,7 +6926,11 @@
     "magico": true,
     "statusDMG2024": "Novo",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-261"
+    "id": "magic-261",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Armadura Encantada",
@@ -4871,7 +6942,11 @@
     "magico": true,
     "statusDMG2024": "Novo",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-262"
+    "id": "magic-262",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Cajado Encantado",
@@ -4883,7 +6958,11 @@
     "magico": true,
     "statusDMG2024": "Novo",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-263"
+    "id": "magic-263",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Arma Encantada",
@@ -4895,7 +6974,11 @@
     "magico": true,
     "statusDMG2024": "Novo",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-264"
+    "id": "magic-264",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Machado do Carrasco",
@@ -4907,7 +6990,11 @@
     "magico": true,
     "statusDMG2024": "Novo",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-265"
+    "id": "magic-265",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Olho de Bruxa",
@@ -4919,7 +7006,11 @@
     "magico": true,
     "statusDMG2024": "Novo",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-266"
+    "id": "magic-266",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Alaúde do Impacto Trovejante",
@@ -4931,7 +7022,11 @@
     "magico": true,
     "statusDMG2024": "Novo",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-267"
+    "id": "magic-267",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Poção de Pugilismo",
@@ -4943,7 +7038,11 @@
     "magico": true,
     "statusDMG2024": "Novo",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-268"
+    "id": "magic-268",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Moeda Rival",
@@ -4955,7 +7054,11 @@
     "magico": true,
     "statusDMG2024": "Novo",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-269"
+    "id": "magic-269",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Pergaminho de Invocação de Titã",
@@ -4967,7 +7070,11 @@
     "magico": true,
     "statusDMG2024": "Novo",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-270"
+    "id": "magic-270",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Arma Argentada",
@@ -4979,7 +7086,11 @@
     "magico": true,
     "statusDMG2024": "Novo",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-271"
+    "id": "magic-271",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Tabuleiro Espiritual",
@@ -4991,7 +7102,11 @@
     "magico": true,
     "statusDMG2024": "Novo",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-272"
+    "id": "magic-272",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Garra Silvestre",
@@ -5003,7 +7118,11 @@
     "magico": true,
     "statusDMG2024": "Novo",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-273"
+    "id": "magic-273",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Faixas de Poder Desarmado",
@@ -5015,7 +7134,11 @@
     "magico": true,
     "statusDMG2024": "Novo",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-274"
+    "id": "magic-274",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Jarro de Alquimia",
@@ -5027,7 +7150,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-275"
+    "id": "magic-275",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Machado dos Senhores Anões",
@@ -5039,7 +7166,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-276"
+    "id": "magic-276",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Lâmina Negra",
@@ -5051,7 +7182,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-277"
+    "id": "magic-277",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Livro dos Grandes Feitos",
@@ -5063,7 +7198,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-278"
+    "id": "magic-278",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Livro da Escuridão Vil",
@@ -5075,7 +7214,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-279"
+    "id": "magic-279",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Botas de Rastros Falsos",
@@ -5087,7 +7230,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-280"
+    "id": "magic-280",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Baralho de Muitas Coisas",
@@ -5099,7 +7246,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-281"
+    "id": "magic-281",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Olho e Mão de Vecna",
@@ -5111,7 +7262,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-282"
+    "id": "magic-282",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Mochila Prática de Heward",
@@ -5123,7 +7278,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-283"
+    "id": "magic-283",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Chifre do Alarme Silencioso",
@@ -5135,7 +7294,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-284"
+    "id": "magic-284",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Instrumento de Transcrição",
@@ -5147,7 +7310,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-285"
+    "id": "magic-285",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Instrumento dos Bardos",
@@ -5159,7 +7326,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-286"
+    "id": "magic-286",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Armadura do Marinheiro",
@@ -5171,7 +7342,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-287"
+    "id": "magic-287",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Lâmina Lunar",
@@ -5183,7 +7358,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-288"
+    "id": "magic-288",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Espada Tocada pela Lua",
@@ -5195,7 +7374,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-289"
+    "id": "magic-289",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Pigmentos Maravilhosos de Nolzur",
@@ -5207,7 +7390,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-290"
+    "id": "magic-290",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Orbe da Natureza Dracônica",
@@ -5219,7 +7406,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-291"
+    "id": "magic-291",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Poção de Invisibilidade Maior",
@@ -5231,7 +7422,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-292"
+    "id": "magic-292",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Pergaminho de Proteção",
@@ -5243,7 +7438,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-293"
+    "id": "magic-293",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Cajado da Víbora",
@@ -5255,7 +7454,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-294"
+    "id": "magic-294",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Varinha de Orcus",
@@ -5267,7 +7470,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-295"
+    "id": "magic-295",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Onda",
@@ -5279,7 +7486,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-296"
+    "id": "magic-296",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Estrondo",
@@ -5291,7 +7502,11 @@
     "magico": true,
     "statusDMG2024": "Redesenhado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-297"
+    "id": "magic-297",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Aparelho de Kwalish",
@@ -5303,7 +7518,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-298"
+    "id": "magic-298",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Armadura Cintilante",
@@ -5315,7 +7534,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-299"
+    "id": "magic-299",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Gorro de Respiração Aquática",
@@ -5327,7 +7550,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-300"
+    "id": "magic-300",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Armadura Removível",
@@ -5339,7 +7566,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-301"
+    "id": "magic-301",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Caldeirão do Renascimento",
@@ -5351,7 +7582,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-302"
+    "id": "magic-302",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Fortaleza Instantânea de Daern",
@@ -5363,7 +7598,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-303"
+    "id": "magic-303",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Amuleto da Lasca Negra",
@@ -5375,7 +7614,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-304"
+    "id": "magic-304",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Demonômicon de Iggwilv",
@@ -5387,7 +7630,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-305"
+    "id": "magic-305",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Globo Flutuante",
@@ -5399,7 +7646,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-306"
+    "id": "magic-306",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Olho Artificial",
@@ -5411,7 +7662,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-307"
+    "id": "magic-307",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Chapéu de Feitiçaria",
@@ -5423,7 +7678,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-308"
+    "id": "magic-308",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Bolsa de Especiarias Prática de Heward",
@@ -5435,7 +7694,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-309"
+    "id": "magic-309",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Instrumento de Ilusões",
@@ -5447,7 +7710,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-310"
+    "id": "magic-310",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Faixas de Ferro de Bilarro",
@@ -5459,7 +7726,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-311"
+    "id": "magic-311",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Pomada de Keoghtom",
@@ -5471,7 +7742,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-312"
+    "id": "magic-312",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Orbe de Direção",
@@ -5483,7 +7758,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-313"
+    "id": "magic-313",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Orbe do Tempo",
@@ -5495,7 +7774,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-314"
+    "id": "magic-314",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Perfume de Enfeitiçamento",
@@ -5507,7 +7790,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-315"
+    "id": "magic-315",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Cachimbo de Monstros de Fumaça",
@@ -5519,7 +7806,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-316"
+    "id": "magic-316",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Vara de Pesca",
@@ -5531,7 +7822,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-317"
+    "id": "magic-317",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Vara Dobrável",
@@ -5543,7 +7838,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-318"
+    "id": "magic-318",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Membro Protético",
@@ -5555,7 +7854,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-319"
+    "id": "magic-319",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Ficha de Pena de Quaal",
@@ -5567,7 +7870,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-320"
+    "id": "magic-320",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Bastão do Guardião do Pacto",
@@ -5579,7 +7886,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-321"
+    "id": "magic-321",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Corda de Reparo",
@@ -5591,7 +7902,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-322"
+    "id": "magic-322",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Rubi do Mago de Guerra",
@@ -5603,7 +7918,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-323"
+    "id": "magic-323",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Cajado de Chamados de Pássaros",
@@ -5615,7 +7934,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-324"
+    "id": "magic-324",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Cajado das Flores",
@@ -5627,7 +7950,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-325"
+    "id": "magic-325",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Espada de Kas",
@@ -5639,7 +7966,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-326"
+    "id": "magic-326",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Bastão de Tentáculos",
@@ -5651,7 +7982,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-327"
+    "id": "magic-327",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Varinha de Regência",
@@ -5663,7 +7998,11 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-328"
+    "id": "magic-328",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   },
   {
     "n": "Varinha de Pirotecnia",
@@ -5675,10 +8014,14 @@
     "magico": true,
     "statusDMG2024": "Revisado",
     "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-329"
+    "id": "magic-329",
+    "preco": "Não publicado no índice aberto",
+    "peso": "Não publicado no índice aberto",
+    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
+    "uso": "Requer consulta ao Livro do Mestre 2024."
   }
 ];
-  const DMG_2024_INDEX = [
+const DMG_2024_INDEX = [
   {
     "n": "Arma de Adamante",
     "en": "Adamantine Weapon",
@@ -7925,45 +10268,30 @@
   }
 ];
 
-  const ALL_ITEMS = EQUIPMENT.concat(MAGIC_ITEMS, DMG_2024_ONLY_ITEMS);
-  window.EQUIPMENT = EQUIPMENT;
-  window.MAGIC_ITEMS = MAGIC_ITEMS;
-  window.SRD_MAGIC_ITEMS = MAGIC_ITEMS;
-  window.DMG_2024_ONLY_ITEMS = DMG_2024_ONLY_ITEMS;
-  window.DMG_2024_ITEM_INDEX = DMG_2024_INDEX;
-  window.ITEMS = ALL_ITEMS;
-
-  window.findItem = function (query) {
-    const q = String(query || '').trim().toLocaleLowerCase('pt-BR');
-    if (!q) return [];
-    return ALL_ITEMS.filter(function (item) {
-      return (item.n || '').toLocaleLowerCase('pt-BR').includes(q) ||
-        (item.en || '').toLocaleLowerCase('en').includes(q) ||
-        (item.tipo || '').toLocaleLowerCase('pt-BR').includes(q) ||
-        (item.categoria || '').toLocaleLowerCase('pt-BR').includes(q);
-    });
-  };
-
-  window.getItems = function (filters) {
-    const f = filters || {};
-    return ALL_ITEMS.filter(function (item) {
-      if (f.categoria && item.categoria !== f.categoria) return false;
-      if (f.tipo && item.tipo !== f.tipo) return false;
-      if (f.raridade && item.raridade !== f.raridade) return false;
-      if (f.magico !== undefined && item.magico !== Boolean(f.magico)) return false;
-      if (f.fonte && item.fonte !== f.fonte) return false;
-      return true;
-    });
-  };
-
-  window.ITEMS_META = {
-    ruleset: 'D&D 5e revisado (2024)',
-    srd: '5.2.1',
-    equipmentCount: EQUIPMENT.length,
-    magicCount: MAGIC_ITEMS.length,
-    dmgIndexExtraCount: DMG_2024_ONLY_ITEMS.length,
-    dmgIndexCount: DMG_2024_INDEX.length,
-    totalCount: ALL_ITEMS.length,
-    translations: 'PT-BR de referência; nomes originais preservados em `en`'
-  };
+const ALL_ITEMS = EQUIPMENT.concat(MAGIC_ITEMS, DMG_2024_ONLY_ITEMS);
+window.EQUIPMENT = EQUIPMENT;
+window.MAGIC_ITEMS = MAGIC_ITEMS;
+window.SRD_MAGIC_ITEMS = MAGIC_ITEMS;
+window.DMG_2024_ONLY_ITEMS = DMG_2024_ONLY_ITEMS;
+window.DMG_2024_ITEM_INDEX = DMG_2024_INDEX;
+window.ITEMS = ALL_ITEMS;
+window.findItem = function (query) {
+  const q = String(query || '').trim().toLocaleLowerCase('pt-BR');
+  if (!q) return [];
+  return ALL_ITEMS.filter(function (item) {
+    return [item.n,item.en,item.tipo,item.categoria,item.descricao,item.uso,item.propriedades].filter(Boolean).join(' ').toLocaleLowerCase('pt-BR').includes(q);
+  });
+};
+window.getItems = function (filters) {
+  const f=filters||{};
+  return ALL_ITEMS.filter(function(item){
+    if(f.categoria && item.categoria!==f.categoria) return false;
+    if(f.tipo && item.tipo!==f.tipo) return false;
+    if(f.raridade && item.raridade!==f.raridade) return false;
+    if(f.magico!==undefined && item.magico!==Boolean(f.magico)) return false;
+    if(f.fonte && item.fonte!==f.fonte) return false;
+    return true;
+  });
+};
+window.ITEMS_META={ruleset:'D&D 5e revisado (2024)',srd:'5.2.1',equipmentCount:EQUIPMENT.length,magicCount:MAGIC_ITEMS.length,dmgIndexExtraCount:DMG_2024_ONLY_ITEMS.length,totalCount:ALL_ITEMS.length,translations:'PT-BR de referência; nomes originais preservados em en'};
 })();
