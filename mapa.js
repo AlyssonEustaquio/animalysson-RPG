@@ -243,6 +243,38 @@ function setEdgeVal(edge, val) {
   else setV(edge.xEdge, edge.y, val);
 }
 
+function isDoorEdge(val) {
+  return val === EDGE_DOOR_C || val === EDGE_DOOR_O;
+}
+
+// Retorna todas as partes de uma porta contínua na mesma linha.
+// Portas que apenas se tocam pelas pontas formam um único conjunto.
+function getDoorRun(edge) {
+  if (!edge || !isDoorEdge(getEdgeVal(edge))) return edge ? [edge] : [];
+  var run = [];
+  if (edge.dir === 'h') {
+    var startX = edge.x, endX = edge.x, ye = edge.yEdge;
+    while (startX > 0 && isDoorEdge(getH(startX - 1, ye))) startX--;
+    while (endX + 1 < COLS && isDoorEdge(getH(endX + 1, ye))) endX++;
+    for (var x = startX; x <= endX; x++) run.push({ dir: 'h', x: x, yEdge: ye });
+  } else {
+    var startY = edge.y, endY = edge.y, xe = edge.xEdge;
+    while (startY > 0 && isDoorEdge(getV(xe, startY - 1))) startY--;
+    while (endY + 1 < ROWS && isDoorEdge(getV(xe, endY + 1))) endY++;
+    for (var y = startY; y <= endY; y++) run.push({ dir: 'v', xEdge: xe, y: y });
+  }
+  return run;
+}
+
+function setDoorRunValue(edge, val) {
+  getDoorRun(edge).forEach(function (part) { setEdgeVal(part, val); });
+}
+
+function doorRunIsClosed(edge) {
+  var run = getDoorRun(edge);
+  return run.every(function (part) { return getEdgeVal(part) === EDGE_DOOR_C; });
+}
+
 // ---------- Draw ----------
 function draw() {
   if (!cv || !cx) return;
@@ -326,66 +358,54 @@ function draw() {
 
 function drawEdges() {
   var lw = Math.max(2.5, 3.5 / zoom);
-  // horizontais
+  // Horizontais: muros continuam individuais; portas encostadas viram um único vão.
   for (var ye = 0; ye <= ROWS; ye++) {
     for (var x = 0; x < COLS; x++) {
       var v = getH(x, ye);
-      if (!v) continue;
-      var x0 = x * CELL, y0 = ye * CELL, x1 = (x + 1) * CELL;
       if (v === EDGE_MURO) {
         cx.strokeStyle = '#c62828';
         cx.lineWidth = lw;
+        cx.beginPath(); cx.moveTo(x * CELL, ye * CELL); cx.lineTo((x + 1) * CELL, ye * CELL); cx.stroke();
+      } else if (isDoorEdge(v)) {
+        if (x > 0 && isDoorEdge(getH(x - 1, ye))) continue;
+        var endX = x;
+        while (endX + 1 < COLS && isDoorEdge(getH(endX + 1, ye))) endX++;
+        var closed = false;
+        for (var hx = x; hx <= endX; hx++) if (getH(hx, ye) === EDGE_DOOR_C) closed = true;
+        var x0 = x * CELL, x1 = (endX + 1) * CELL, y0 = ye * CELL;
+        cx.strokeStyle = closed ? '#8d6e63' : 'rgba(141,110,99,0.35)';
+        cx.lineWidth = closed ? lw : lw * 0.7;
+        if (!closed) cx.setLineDash([6 / zoom, 4 / zoom]);
         cx.beginPath(); cx.moveTo(x0, y0); cx.lineTo(x1, y0); cx.stroke();
-      } else if (v === EDGE_DOOR_C) {
-        cx.strokeStyle = '#8d6e63';
-        cx.lineWidth = lw;
-        cx.beginPath(); cx.moveTo(x0, y0); cx.lineTo(x1, y0); cx.stroke();
-        // marca de porta fechada
-        cx.fillStyle = '#ffcc80';
-        cx.beginPath();
-        cx.arc((x0 + x1) / 2, y0, 4 / zoom, 0, Math.PI * 2);
-        cx.fill();
-      } else if (v === EDGE_DOOR_O) {
-        cx.strokeStyle = 'rgba(141,110,99,0.35)';
-        cx.lineWidth = lw * 0.7;
-        cx.setLineDash([6 / zoom, 4 / zoom]);
-        cx.beginPath(); cx.moveTo(x0, y0); cx.lineTo(x1, y0); cx.stroke();
-        cx.setLineDash([]);
-        cx.fillStyle = '#a5d6a7';
-        cx.beginPath();
-        cx.arc((x0 + x1) / 2, y0, 4 / zoom, 0, Math.PI * 2);
-        cx.fill();
+        if (!closed) cx.setLineDash([]);
+        cx.fillStyle = closed ? '#ffcc80' : '#a5d6a7';
+        cx.beginPath(); cx.arc((x0 + x1) / 2, y0, 4 / zoom, 0, Math.PI * 2); cx.fill();
       }
     }
   }
-  // verticais
+
+  // Verticais: mesma regra para portas encostadas na mesma coluna.
   for (var y = 0; y < ROWS; y++) {
     for (var xe = 0; xe <= COLS; xe++) {
       var vv = getV(xe, y);
-      if (!vv) continue;
-      var xx = xe * CELL, yy0 = y * CELL, yy1 = (y + 1) * CELL;
       if (vv === EDGE_MURO) {
         cx.strokeStyle = '#c62828';
         cx.lineWidth = lw;
+        cx.beginPath(); cx.moveTo(xe * CELL, y * CELL); cx.lineTo(xe * CELL, (y + 1) * CELL); cx.stroke();
+      } else if (isDoorEdge(vv)) {
+        if (y > 0 && isDoorEdge(getV(xe, y - 1))) continue;
+        var endY = y;
+        while (endY + 1 < ROWS && isDoorEdge(getV(xe, endY + 1))) endY++;
+        var vClosed = false;
+        for (var vy = y; vy <= endY; vy++) if (getV(xe, vy) === EDGE_DOOR_C) vClosed = true;
+        var xx = xe * CELL, yy0 = y * CELL, yy1 = (endY + 1) * CELL;
+        cx.strokeStyle = vClosed ? '#8d6e63' : 'rgba(141,110,99,0.35)';
+        cx.lineWidth = vClosed ? lw : lw * 0.7;
+        if (!vClosed) cx.setLineDash([6 / zoom, 4 / zoom]);
         cx.beginPath(); cx.moveTo(xx, yy0); cx.lineTo(xx, yy1); cx.stroke();
-      } else if (vv === EDGE_DOOR_C) {
-        cx.strokeStyle = '#8d6e63';
-        cx.lineWidth = lw;
-        cx.beginPath(); cx.moveTo(xx, yy0); cx.lineTo(xx, yy1); cx.stroke();
-        cx.fillStyle = '#ffcc80';
-        cx.beginPath();
-        cx.arc(xx, (yy0 + yy1) / 2, 4 / zoom, 0, Math.PI * 2);
-        cx.fill();
-      } else if (vv === EDGE_DOOR_O) {
-        cx.strokeStyle = 'rgba(141,110,99,0.35)';
-        cx.lineWidth = lw * 0.7;
-        cx.setLineDash([6 / zoom, 4 / zoom]);
-        cx.beginPath(); cx.moveTo(xx, yy0); cx.lineTo(xx, yy1); cx.stroke();
-        cx.setLineDash([]);
-        cx.fillStyle = '#a5d6a7';
-        cx.beginPath();
-        cx.arc(xx, (yy0 + yy1) / 2, 4 / zoom, 0, Math.PI * 2);
-        cx.fill();
+        if (!vClosed) cx.setLineDash([]);
+        cx.fillStyle = vClosed ? '#ffcc80' : '#a5d6a7';
+        cx.beginPath(); cx.arc(xx, (yy0 + yy1) / 2, 4 / zoom, 0, Math.PI * 2); cx.fill();
       }
     }
   }
@@ -502,19 +522,23 @@ function drawPreviewCell(cell, fill, stroke) {
 
 function drawEdgePreview(edge, color, door) {
   if (!edge) return;
+  var run = door && isDoorEdge(getEdgeVal(edge)) ? getDoorRun(edge) : [edge];
+  var first = run[0], last = run[run.length - 1];
   cx.save();
   cx.strokeStyle = color;
   cx.fillStyle = color;
   cx.lineWidth = Math.max(4, 5 / zoom);
   cx.setLineDash([7 / zoom, 4 / zoom]);
   if (edge.dir === 'h') {
-    var x0 = edge.x * CELL, y0 = edge.yEdge * CELL;
-    cx.beginPath(); cx.moveTo(x0, y0); cx.lineTo(x0 + CELL, y0); cx.stroke();
-    if (door) { cx.setLineDash([]); cx.beginPath(); cx.arc(x0 + CELL / 2, y0, 5 / zoom, 0, Math.PI * 2); cx.fill(); }
+    var x0 = first.x * CELL, y0 = first.yEdge * CELL;
+    var x1 = (last.x + 1) * CELL;
+    cx.beginPath(); cx.moveTo(x0, y0); cx.lineTo(x1, y0); cx.stroke();
+    if (door) { cx.setLineDash([]); cx.beginPath(); cx.arc((x0 + x1) / 2, y0, 5 / zoom, 0, Math.PI * 2); cx.fill(); }
   } else {
-    var xx = edge.xEdge * CELL, yy = edge.y * CELL;
-    cx.beginPath(); cx.moveTo(xx, yy); cx.lineTo(xx, yy + CELL); cx.stroke();
-    if (door) { cx.setLineDash([]); cx.beginPath(); cx.arc(xx, yy + CELL / 2, 5 / zoom, 0, Math.PI * 2); cx.fill(); }
+    var xx = first.xEdge * CELL, yy0 = first.y * CELL;
+    var yy1 = (last.y + 1) * CELL;
+    cx.beginPath(); cx.moveTo(xx, yy0); cx.lineTo(xx, yy1); cx.stroke();
+    if (door) { cx.setLineDash([]); cx.beginPath(); cx.arc(xx, (yy0 + yy1) / 2, 5 / zoom, 0, Math.PI * 2); cx.fill(); }
   }
   cx.restore();
 }
@@ -530,7 +554,7 @@ function drawToolPreview() {
   else if (tool === 'erasewall') drawPreviewCell(cell, 'rgba(102,187,106,0.28)', '#81c784');
   else if (tool === 'muro') drawEdgePreview(edge, '#ff5252', false);
   else if (tool === 'porta') drawEdgePreview(edge, '#ffb74d', true);
-  else if (tool === 'eraseedge') drawEdgePreview(edge, '#80deea', false);
+  else if (tool === 'eraseedge') drawEdgePreview(edge, '#80deea', isDoorEdge(getEdgeVal(edge))); 
   else if (tool === 'reveal' || tool === 'hide') {
     cx.save();
     cx.fillStyle = tool === 'reveal' ? 'rgba(255,235,59,0.22)' : 'rgba(0,0,0,0.5)';
@@ -846,13 +870,14 @@ function onPointerDown(e) {
       setEdgeVal(edge, EDGE_MURO);
       drag = { edgePaint: true, mode: 'muro' };
     } else if (tool === 'porta') {
-      // se já é porta, alterna aberta/fechada; senão cria fechada
-      if (cur === EDGE_DOOR_C) setEdgeVal(edge, EDGE_DOOR_O);
-      else if (cur === EDGE_DOOR_O) setEdgeVal(edge, EDGE_DOOR_C);
+      // Uma sequência de portas encostadas abre/fecha como uma única porta.
+      if (isDoorEdge(cur)) setDoorRunValue(edge, doorRunIsClosed(edge) ? EDGE_DOOR_O : EDGE_DOOR_C);
       else setEdgeVal(edge, EDGE_DOOR_C);
       drag = { edgePaint: true, mode: 'porta' };
     } else {
-      setEdgeVal(edge, EDGE_NONE);
+      // Apagar qualquer trecho de uma porta agrupada remove o conjunto inteiro.
+      if (isDoorEdge(cur)) setDoorRunValue(edge, EDGE_NONE);
+      else setEdgeVal(edge, EDGE_NONE);
       drag = { edgePaint: true, mode: 'erase' };
     }
     save();
@@ -906,8 +931,8 @@ function onPointerDown(e) {
     var gx = world.x / CELL, gy = world.y / CELL;
     var fx = Math.abs(gx - Math.round(gx)), fy = Math.abs(gy - Math.round(gy));
     var nearLine = Math.min(fx, fy) < 0.12;
-    if (nearLine && (ev === EDGE_DOOR_C || ev === EDGE_DOOR_O)) {
-      setEdgeVal(edge2, ev === EDGE_DOOR_C ? EDGE_DOOR_O : EDGE_DOOR_C);
+    if (nearLine && isDoorEdge(ev)) {
+      setDoorRunValue(edge2, doorRunIsClosed(edge2) ? EDGE_DOOR_O : EDGE_DOOR_C);
       save();
       draw();
       return;
@@ -976,7 +1001,8 @@ function onPointerMove(e) {
     else if (drag.mode === 'porta') {
       var c = getEdgeVal(edge);
       if (c !== EDGE_DOOR_C && c !== EDGE_DOOR_O) setEdgeVal(edge, EDGE_DOOR_C);
-    } else setEdgeVal(edge, EDGE_NONE);
+    } else if (isDoorEdge(getEdgeVal(edge))) setDoorRunValue(edge, EDGE_NONE);
+    else setEdgeVal(edge, EDGE_NONE);
     draw();
     return;
   }
