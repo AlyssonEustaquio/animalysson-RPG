@@ -1,26 +1,3 @@
-/*
- * Catálogo de criaturas de Dungeons & Dragons — regras revisadas 2024 (5.5e).
- *
- * ESCOPO E PROCEDÊNCIA:
- * - Blocos de estatísticas completos: 322 criaturas do SRD 5.2.1 (edição revisada),
- *   texto aberto pela Wizards of the Coast sob Creative Commons Attribution 4.0.
- * - A base estruturada é distribuída pelo projeto adkinn/srd-5.2.1, que republica
- *   o conteúdo do SRD via Open5e, também sob CC BY 4.0.
- * - O Livro dos Monstros 2025 (edição revisada 5.5e) contém 510 criaturas na edição
- *   brasileira; seu conteúdo comercial completo não é reproduzido aqui. A Wizards
- *   disponibiliza apenas parte das criaturas no SRD. O índice oficial do livro está
- *   ligado em MONSTER_MANUAL_URL.
- * - Os nomes em `nomePt` são traduções de referência quando mapeadas. Quando não há
- *   tradução confirmada no conjunto aberto, `nomePt` fica null e `nome` usa o original.
- * - As descrições de traços, ações e demais regras permanecem no idioma de origem (EN)
- *   da base aberta. Os campos originais ficam preservados em `dados`.
- *
- * Atribuição exigida pela licença CC BY 4.0:
- * “This work includes material from the System Reference Document 5.2.1 (SRD 5.2.1)
- * by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd. The SRD 5.2.1
- * is licensed under the Creative Commons Attribution 4.0 International License,
- * available at https://creativecommons.org/licenses/by/4.0/legalcode.”
- */
 (function () {
   'use strict';
 
