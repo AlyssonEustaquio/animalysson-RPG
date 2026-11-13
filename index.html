@@ -287,8 +287,8 @@ function vFicha(){
     <div class="f-ac"><span class="lbl">Bônus prof.</span><div class="big">${fmt(pb)}</div></div>
    </div>
    <div class="box" style="display:flex;flex-direction:column;gap:6px">
-    <div class="f-field clickable" onclick="openModal('det')"><span class="edit">editar</span><span class="lbl">Alinhamento</span><span class="val">${S.align||'—'}</span></div>
-    <div class="f-field clickable" onclick="openModal('det')"><span class="edit">editar</span><span class="lbl">Idiomas</span><span class="val">Comum${S.lang.length?', '+S.lang.join(', '):''}</span></div>
+    <div class="f-field clickable" onclick="openModal('align')"><span class="edit">editar</span><span class="lbl">Alinhamento</span><span class="val">${S.align||'—'}</span></div>
+    <div class="f-field clickable" onclick="openModal('lang')"><span class="edit">editar</span><span class="lbl">Idiomas</span><span class="val">Comum${S.lang.length?', '+S.lang.join(', '):''}</span></div>
    </div>
   </div>
 
@@ -389,11 +389,13 @@ function modalPer(){
  if(S.cls===null)return `<h2>Perícias</h2><p>Escolha uma classe primeiro.</p><div class="modal-actions"><button class="btn" onclick="closeModal()">Fechar</button></div>`;
  return `<h2>Perícias</h2>${vPer()}<div class="modal-actions"><button class="btn" onclick="closeModal()">Concluir</button></div>`;
 }
+function modalAlign(){let h='<h2>Alinhamento</h2><div class="grid">';ALN.forEach(a=>h+=`<button class="opt${S.align===a?' sel':''}" onclick="set('align','${a}')"><b>${a}</b></button>`);return h+'</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Concluir</button></div>'}
+function modalLang(){let h=`<h2>Idiomas</h2><p>Comum + 2. Selecionados: ${S.lang.length}/2.</p><div class="sk">`;LANG.forEach(l=>{const on=S.lang.includes(l);h+=`<label><input type="checkbox" ${on?'checked':''} ${!on&&S.lang.length>=2?'disabled':''} onchange="const i=S.lang.indexOf('${l}');if(i>=0)S.lang.splice(i,1);else if(S.lang.length<2)S.lang.push('${l}');render()">${l}</label>`});return h+'</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Concluir</button></div>'}
 function modalDet(){return `<h2>Detalhes</h2>${vDet()}<div class="modal-actions"><button class="btn" onclick="closeModal()">Concluir</button></div>`}
 
 function renderModal(){
  if(!S.modal){document.getElementById('modal-root').innerHTML='';return}
- const map={ident:modalIdent,sp:modalSp,cls:modalCls,bg:modalBg,atr:modalAtr,per:modalPer,det:modalDet};
+ const map={ident:modalIdent,sp:modalSp,cls:modalCls,bg:modalBg,atr:modalAtr,per:modalPer,det:modalDet,align:modalAlign,lang:modalLang};
  const body=(map[S.modal]||(()=>'<p>…</p>'))();
  document.getElementById('modal-root').innerHTML=`<div class="modal-bg" onclick="if(event.target===this)closeModal()"><div class="modal"><button class="close-x" onclick="closeModal()" aria-label="Fechar">×</button>${body}</div></div>`;
 }
