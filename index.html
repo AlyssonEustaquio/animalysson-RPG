@@ -222,6 +222,35 @@ input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:
 .mp.vtt .mp-main{height:calc(100vh - 180px);min-height:480px;position:relative;background:#0a0a0b;border:1px solid var(--line);border-radius:8px;overflow:hidden}
 .mp.vtt #mp-cv{width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
 .mp.vtt button.on{background:var(--red);border-color:var(--red);color:#fff}
+
+/* VTT bestiário + detalhe */
+.vtt-wrap{display:flex;height:calc(100vh - 180px);min-height:480px;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.vtt-wrap .mp-side{width:260px;flex:none;overflow:auto;background:var(--card);border-right:1px solid var(--line);padding:10px;font-size:.86rem}
+.vtt-wrap .mp-main{flex:1;min-width:0;position:relative;background:#0a0a0b}
+.vtt-wrap .mp-side h4{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:0 0 6px}
+.mp-ml{display:flex;flex-direction:column;gap:3px;max-height:42vh;overflow:auto}
+.mp-mbtn{display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding:6px 8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;cursor:pointer;font:inherit;width:100%}
+.mp-mbtn:hover,.mp-mbtn.on{border-color:var(--red);background:#2a1a1a}
+.mp-mbtn .mp-mn{font-weight:600;font-size:.9rem}
+.mp-mbtn small{color:var(--mute);font-size:.75rem}
+.mp-detail{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;min-height:80px}
+.mp-detail-empty{color:var(--mute);font-size:.85rem}
+.mp-detail-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.mp-detail-head .card-tag{font-size:.72rem;background:var(--red);color:#fff;padding:2px 7px;border-radius:999px}
+.mp-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;margin:8px 0;font-size:.84rem}
+.mp-stat-grid b{color:var(--ok)}
+.mp-actions{font-size:.8rem;margin-top:8px}
+.mp-actions ul{margin:4px 0 0;padding-left:16px}
+.mp-actions li{margin-bottom:4px}
+.mp-hp-row{display:flex;align-items:center;gap:8px;margin:6px 0}
+.mp-detail-tools{margin-top:10px}
+.mp-detail-tools button{width:100%}
+@media(max-width:800px){
+  .vtt-wrap{flex-direction:column-reverse;height:auto}
+  .vtt-wrap .mp-side{width:100%;max-height:36vh;border-right:0;border-top:1px solid var(--line)}
+  .vtt-wrap .mp-main{height:55vh}
+}
+
 </style>
 </head>
 <body>
