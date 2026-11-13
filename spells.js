@@ -1,26 +1,3 @@
-/*
- * Catálogo de magias de D&D 5e — SRD 5.1 (regras de 2014).
- *
- * Dados indexáveis: nome em PT-BR, nome original, nível, escola, classes,
- * tempo de conjuração, alcance, concentração e ritual.
- *
- * ESCOPO E PROCEDÊNCIA:
- * - Contém 319 magias do SRD 5.1 (regras de 2014), não o catálogo completo
- *   do Livro do Jogador 2024 nem de suplementos.
- * - A terminologia PT-BR foi consultada na lista pública do Boteco do RPG
- *   (https://botecodorpg.com.br/sistemas/dnd-5e/magias). Essa tradução é
- *   comunitária/não oficial e pode diferir da edição brasileira oficial.
- * - Não inclui os textos integrais das magias.
- * - A classe Patrulheiro (Ranger) é exposta como Guardião para combinar com
- *   classes.js deste projeto.
- *
- * Atribuição SRD 5.1 (CC BY 4.0):
- * This work includes material taken from the System Reference Document 5.1
- * ("SRD 5.1") by Wizards of the Coast LLC, available at
- * https://dnd.wizards.com/resources/systems-reference-document.
- * The SRD 5.1 is licensed under the Creative Commons Attribution 4.0
- * International License: https://creativecommons.org/licenses/by/4.0/.
- */
 (function () {
   const CLASSES = {
     B: 'Bardo', Br: 'Bruxo', C: 'Clérigo', D: 'Druida', F: 'Feiticeiro',
