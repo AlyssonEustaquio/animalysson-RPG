@@ -214,10 +214,8 @@ function closeModal(){S.modal=null;render()}
 function vRaca(){
  let h=`<label>Nome do personagem<br><input value="${S.name.replace(/"/g,'&quot;')}" oninput="S.name=this.value" placeholder="Ex.: Thorin"></label>
  <h2 style="margin-top:16px">Escolha uma espécie</h2>
- <input class="race-search" type="search" value="${S.raceQuery.replace(/"/g,'&quot;')}" placeholder="Pesquisar espécie..." oninput="S.raceQuery=this.value;render()">
- <p class="race-count">${SP.filter(s=>norm(s.n).includes(norm(S.raceQuery))).length} opções · ${SP.length} cadastradas</p>
  <div class="split"><div class="side">`;
- SP.forEach((s,i)=>{if(!norm(s.n).includes(norm(S.raceQuery)))return;h+=`<button class="item${S.sp===i?' sel':''}" onclick="set('sp',${i})"><span>${s.n}</span></button>`});
+ SP.forEach((s,i)=>{h+=`<button class="item${S.sp===i?' sel':''}" onclick="set('sp',${i})"><span>${s.n}</span></button>`});
  h+='</div><div class="detail">';
  if(S.sp===null)h+='<p>Selecione uma espécie na lista.</p>';
  else{const sp=SP[S.sp];h+=`<h2>${sp.n}</h2><div class="stat"><div><b>${sp.sz}</b>Tamanho</div><div><b>${sp.mov||'9 m'}</b>Deslocamento</div></div><button class="btn" onclick="go(1)">Escolher ${sp.n}</button>`}
@@ -356,9 +354,8 @@ function modalIdent(){
 }
 function modalSp(){
  let h=`<h2>Espécie</h2>
-  <input class="race-search" type="search" value="${S.raceQuery.replace(/"/g,'&quot;')}" placeholder="Pesquisar..." oninput="S.raceQuery=this.value;render()">
   <div class="side" style="max-height:45vh">`;
- SP.forEach((s,i)=>{if(!norm(s.n).includes(norm(S.raceQuery)))return;h+=`<button class="item${S.sp===i?' sel':''}" onclick="set('sp',${i})"><span>${s.n}</span></button>`});
+ SP.forEach((s,i)=>{h+=`<button class="item${S.sp===i?' sel':''}" onclick="set('sp',${i})"><span>${s.n}</span></button>`});
  h+=`</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Concluir</button></div>`;
  return h;
 }
