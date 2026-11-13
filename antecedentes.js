@@ -1,23 +1,95 @@
 /*
- * Catálogo de antecedentes oficiais de D&D (PHB 2024).
+ * Catálogo de antecedentes (origens) oficiais de D&D, regras 2024: 68 antecedentes.
+ * Fontes: Livro do Jogador 2024, Heroes of Faerûn, Eberron: Forge of the Artificer,
+ *         Astarion's Book of Hungers, Ravenloft: The Horrors Within e Arcana Unleashed.
  * Campos: n (nome), a (atributos de origem), f (talento de origem),
  *         s (perícias), i (ferramenta/item).
+ * A lista é ordenada alfabeticamente no final do arquivo.
  */
+const GAME='Kit de jogo (à escolha)', ART='Ferramentas de artesão (à escolha)', CAL='Suprimentos de caligrafia',
+      DIS='Kit de disfarce', HERB='Kit de herbalismo', THI='Ferramentas de ladrão', NAV='Ferramentas de navegador',
+      CART='Ferramentas de cartógrafo', COOK='Utensílios de cozinheiro', MUS='Instrumento musical (à escolha)';
+
 window.BACKGROUNDS = [
-  {n:'Acólito',a:['INT','SAB','CAR'],f:'Iniciado em Magia (Clérigo)',s:['Intuição','Religião'],i:'Suprimentos de caligrafia'},
-  {n:'Artesão',a:['FOR','DES','INT'],f:'Artífice',s:['Investigação','Persuasão'],i:'Ferramentas de artesão (à escolha)'},
-  {n:'Artista',a:['FOR','DES','CAR'],f:'Músico',s:['Acrobacia','Atuação'],i:'Instrumento musical (à escolha)'},
+  // ===== Livro do Jogador 2024 =====
+  {n:'Acólito',a:['INT','SAB','CAR'],f:'Iniciado em Magia (Clérigo)',s:['Intuição','Religião'],i:CAL},
+  {n:'Artesão',a:['FOR','DES','INT'],f:'Artífice',s:['Investigação','Persuasão'],i:ART},
+  {n:'Artista',a:['FOR','DES','CAR'],f:'Músico',s:['Acrobacia','Atuação'],i:MUS},
   {n:'Charlatão',a:['DES','CON','CAR'],f:'Habilidoso',s:['Enganação','Prestidigitação'],i:'Kit de falsificação'},
-  {n:'Criminoso',a:['DES','CON','INT'],f:'Alerta',s:['Prestidigitação','Furtividade'],i:'Ferramentas de ladrão'},
-  {n:'Eremita',a:['CON','SAB','CAR'],f:'Curandeiro',s:['Medicina','Religião'],i:'Kit de herbalismo'},
+  {n:'Criminoso',a:['DES','CON','INT'],f:'Alerta',s:['Prestidigitação','Furtividade'],i:THI},
+  {n:'Eremita',a:['CON','SAB','CAR'],f:'Curandeiro',s:['Medicina','Religião'],i:HERB},
   {n:'Fazendeiro',a:['FOR','CON','SAB'],f:'Vigoroso',s:['Adestrar Animais','Natureza'],i:'Ferramentas de carpinteiro'},
-  {n:'Guarda',a:['FOR','INT','SAB'],f:'Alerta',s:['Atletismo','Percepção'],i:'Kit de jogo (à escolha)'},
-  {n:'Guia',a:['DES','CON','SAB'],f:'Iniciado em Magia (Druida)',s:['Furtividade','Sobrevivência'],i:'Ferramentas de cartógrafo'},
-  {n:'Mercador',a:['CON','INT','CAR'],f:'Sortudo',s:['Adestrar Animais','Persuasão'],i:'Ferramentas de navegador'},
-  {n:'Nobre',a:['FOR','INT','CAR'],f:'Habilidoso',s:['História','Persuasão'],i:'Kit de jogo (à escolha)'},
-  {n:'Sábio',a:['CON','INT','SAB'],f:'Iniciado em Magia (Mago)',s:['Arcanismo','História'],i:'Suprimentos de caligrafia'},
-  {n:'Marinheiro',a:['FOR','DES','SAB'],f:'Brigão de Taverna',s:['Acrobacia','Percepção'],i:'Ferramentas de navegador'},
-  {n:'Escriba',a:['DES','INT','SAB'],f:'Habilidoso',s:['Investigação','Percepção'],i:'Suprimentos de caligrafia'},
-  {n:'Soldado',a:['FOR','DES','CON'],f:'Atacante Selvagem',s:['Atletismo','Intimidação'],i:'Kit de jogo (à escolha)'},
-  {n:'Andarilho',a:['DES','SAB','CAR'],f:'Sortudo',s:['Intuição','Furtividade'],i:'Ferramentas de ladrão'}
+  {n:'Guarda',a:['FOR','INT','SAB'],f:'Alerta',s:['Atletismo','Percepção'],i:GAME},
+  {n:'Guia',a:['DES','CON','SAB'],f:'Iniciado em Magia (Druida)',s:['Furtividade','Sobrevivência'],i:CART},
+  {n:'Mercador',a:['CON','INT','CAR'],f:'Sortudo',s:['Adestrar Animais','Persuasão'],i:NAV},
+  {n:'Nobre',a:['FOR','INT','CAR'],f:'Habilidoso',s:['História','Persuasão'],i:GAME},
+  {n:'Sábio',a:['CON','INT','SAB'],f:'Iniciado em Magia (Mago)',s:['Arcanismo','História'],i:CAL},
+  {n:'Marinheiro',a:['FOR','DES','SAB'],f:'Brigão de Taverna',s:['Acrobacia','Percepção'],i:NAV},
+  {n:'Escriba',a:['DES','INT','SAB'],f:'Habilidoso',s:['Investigação','Percepção'],i:CAL},
+  {n:'Soldado',a:['FOR','DES','CON'],f:'Atacante Selvagem',s:['Atletismo','Intimidação'],i:GAME},
+  {n:'Andarilho',a:['DES','SAB','CAR'],f:'Sortudo',s:['Intuição','Furtividade'],i:THI},
+
+  // ===== Heroes of Faerûn =====
+  {n:'Flibusteiro Chondathano',a:['FOR','DES','SAB'],f:'Habilidoso',s:['Atletismo','Prestidigitação'],i:'Ferramentas de tecelão'},
+  {n:'Habitante da Magia Morta',a:['FOR','CON','SAB'],f:'Curandeiro',s:['Medicina','Sobrevivência'],i:'Ferramentas de curtidor'},
+  {n:'Cultista do Dragão',a:['DES','CON','INT'],f:'Iniciado do Culto do Dragão',s:['Enganação','Furtividade'],i:CAL},
+  {n:'Zelador do Enclave Esmeralda',a:['CON','INT','SAB'],f:'Noviço do Enclave Esmeralda',s:['Natureza','Sobrevivência'],i:HERB},
+  {n:'Mercenário do Punho Flamejante',a:['FOR','CON','CAR'],f:'Vigoroso',s:['Intimidação','Percepção'],i:'Ferramentas de ferreiro'},
+  {n:'Tocado por Gênio',a:['DES','SAB','CAR'],f:'Iniciado em Magia (Mago)',s:['Percepção','Persuasão'],i:'Ferramentas de vidreiro'},
+  {n:'Harper',a:['DES','INT','CAR'],f:'Agente Harper',s:['Atuação','Prestidigitação'],i:DIS},
+  {n:'Pescador de Gelo',a:['FOR','DES','CON'],f:'Alerta',s:['Adestrar Animais','Atletismo'],i:'Ferramentas de entalhador'},
+  {n:'Cavaleiro da Manopla',a:['FOR','INT','SAB'],f:'Novato da Manopla',s:['Atletismo','Medicina'],i:'Ferramentas de ferreiro'},
+  {n:'Vassalo da Aliança dos Lordes',a:['FOR','INT','CAR'],f:'Agente da Aliança dos Lordes',s:['Intuição','Persuasão'],i:CAL},
+  {n:'Peregrino do Poço Lunar',a:['CON','SAB','CAR'],f:'Iniciado em Magia (Druida)',s:['Natureza','Atuação'],i:'Suprimentos de pintor'},
+  {n:'Saqueador de Tumbas Mulhorandi',a:['DES','CON','INT'],f:'Sortudo',s:['Investigação','Religião'],i:'Ferramentas de pedreiro'},
+  {n:'Guardião do Mythal',a:['INT','SAB','CAR'],f:'Artífice',s:['Arcanismo','História'],i:'Ferramentas de joalheiro'},
+  {n:'Escudeiro do Dragão Púrpura',a:['FOR','SAB','CAR'],f:'Peão do Dragão Púrpura',s:['Adestrar Animais','Intuição'],i:NAV},
+  {n:'Andarilho Rashemi',a:['FOR','CON','CAR'],f:'Vigoroso',s:['Intimidação','Percepção'],i:CART},
+  {n:'Exilado dos Mestres das Sombras',a:['DES','INT','CAR'],f:'Atacante Selvagem',s:['Acrobacia','Furtividade'],i:THI},
+  {n:'Iniciado do Fogo Mágico',a:['CON','INT','CAR'],f:'Fagulha do Fogo Mágico',s:['Arcanismo','Percepção'],i:GAME},
+  {n:'Mercenário Zhentarim',a:['FOR','DES','CAR'],f:'Brutamontes Zhentarim',s:['Intimidação','Percepção'],i:'Kit de falsificação'},
+
+  // ===== Eberron: Forge of the Artificer =====
+  {n:'Herdeiro Aberrante',a:['FOR','CON','CAR'],f:'Marca Dracônica Aberrante',s:['História','Intimidação'],i:DIS},
+  {n:'Arqueólogo',a:['DES','INT','SAB'],f:'Habilidoso',s:['História','Sobrevivência'],i:CART},
+  {n:'Agente de Casa',a:['FOR','INT','CAR'],f:'Sortudo',s:['Investigação','Persuasão'],i:ART},
+  {n:'Herdeiro da Casa Cannith',a:['FOR','DES','INT'],f:'Marca da Criação',s:['Investigação','Prestidigitação'],i:ART},
+  {n:'Herdeiro da Casa Deneith',a:['FOR','CON','SAB'],f:'Marca da Sentinela',s:['Intuição','Percepção'],i:GAME},
+  {n:'Herdeiro da Casa Ghallanda',a:['DES','SAB','CAR'],f:'Marca da Hospitalidade',s:['Intuição','Persuasão'],i:COOK},
+  {n:'Herdeiro da Casa Jorasco',a:['DES','CON','SAB'],f:'Marca da Cura',s:['Medicina','Furtividade'],i:HERB},
+  {n:'Herdeiro da Casa Kundarak',a:['FOR','CON','INT'],f:'Marca da Proteção',s:['Arcanismo','Investigação'],i:THI},
+  {n:'Herdeiro da Casa Lyrandar',a:['FOR','DES','CAR'],f:'Marca da Tempestade',s:['Acrobacia','Natureza'],i:NAV},
+  {n:'Herdeiro da Casa Medani',a:['DES','INT','SAB'],f:'Marca da Detecção',s:['Intuição','Investigação'],i:DIS},
+  {n:'Herdeiro da Casa Orien',a:['DES','CON','INT'],f:'Marca da Passagem',s:['Acrobacia','Atletismo'],i:CART},
+  {n:'Herdeiro da Casa Phiarlan',a:['DES','SAB','CAR'],f:'Marca da Sombra',s:['Enganação','Furtividade'],i:DIS},
+  {n:'Herdeiro da Casa Sivis',a:['INT','SAB','CAR'],f:'Marca da Escrita',s:['História','Percepção'],i:CAL},
+  {n:'Herdeiro da Casa Tharashk',a:['CON','INT','SAB'],f:'Marca da Descoberta',s:['Percepção','Sobrevivência'],i:GAME},
+  {n:'Herdeiro da Casa Thuranni',a:['DES','INT','CAR'],f:'Marca da Sombra',s:['Atuação','Furtividade'],i:MUS},
+  {n:'Herdeiro da Casa Vadalis',a:['CON','SAB','CAR'],f:'Marca do Adestramento',s:['Adestrar Animais','Natureza'],i:HERB},
+  {n:'Inquisitivo',a:['CON','INT','CAR'],f:'Alerta',s:['Intuição','Investigação'],i:THI},
+
+  // ===== Astarion's Book of Hungers =====
+  {n:'Farrista',a:['DES','INT','CAR'],f:'Folião Incansável',s:['Enganação','Persuasão'],i:GAME},
+  {n:'Devoto de Vampiro',a:['FOR','CON','CAR'],f:'Brinquedo do Vampiro',s:['Persuasão','Furtividade'],i:COOK},
+  {n:'Sobrevivente de Vampiro',a:['DES','CON','SAB'],f:'Caçador de Vampiros',s:['Intuição','Religião'],i:'Ferramentas de entalhador'},
+
+  // ===== Ravenloft: The Horrors Within =====
+  {n:'Assombrado',a:['CON','SAB','CAR'],f:'Sobrevivente ou um Dom Sombrio',s:['Arcanismo','Sobrevivência'],i:GAME},
+  {n:'Investigador',a:['INT','SAB','CAR'],f:'Olho Afiado ou um Dom Sombrio',s:['Intuição','Investigação'],i:DIS},
+  {n:'Andarilho da Névoa',a:['DES','CON','SAB'],f:'Um Dom Sombrio',s:['Sobrevivência','Furtividade'],i:ART},
+  {n:'Médium',a:['CON','INT','SAB'],f:'Um Dom Sombrio',s:['Intuição','Religião'],i:GAME},
+
+  // ===== Arcana Unleashed =====
+  {n:'Agente da Nona Pena',a:['DES','INT','CAR'],f:'Infiltrador Arcano',s:['Arcanismo','Prestidigitação'],i:THI},
+  {n:'Espião do Conclave Cravejado',a:['DES','SAB','CAR'],f:'Eloquência Arcana',s:['Enganação','Percepção'],i:DIS},
+  {n:'Experimento da Alvorada Cósmica',a:['FOR','DES','CON'],f:'Anatomia Transmutada',s:['Atletismo','Sobrevivência'],i:ART},
+  {n:'Recruta do Pacto do Túmulo',a:['FOR','INT','SAB'],f:'Coveiro Arcano',s:['História','Medicina'],i:HERB},
+  {n:'Caçador de Tempestades do Crisol',a:['FOR','CON','INT'],f:'Sobrecarga Arcana',s:['Atletismo','Natureza'],i:'Ferramentas de vidreiro'},
+  {n:'Treinador de Familiares',a:['CON','INT','SAB'],f:'Amigo Familiar',s:['Adestrar Animais','Arcanismo'],i:GAME},
+  {n:'Iniciado dos Tecelões do Horizonte',a:['DES','CON','SAB'],f:'Saltador de Portais',s:['Acrobacia','Sobrevivência'],i:'Ferramentas de tecelão'},
+  {n:'Artista do Circo Fantasmagórico',a:['DES','CON','CAR'],f:'Artista Arcano',s:['Enganação','Atuação'],i:DIS},
+  {n:'Aprendiz de Vidente',a:['INT','SAB','CAR'],f:'Presságios Arcanos',s:['História','Intuição'],i:NAV},
+  {n:'Protegido das Mãos Acolhedoras',a:['CON','SAB','CAR'],f:'Salvaguarda Arcana',s:['Intuição','Medicina'],i:COOK}
 ];
+
+window.BACKGROUNDS.sort((x,y)=>x.n.localeCompare(y.n,'pt-BR'));
