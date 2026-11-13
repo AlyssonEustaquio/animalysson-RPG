@@ -1,5 +1,13 @@
-https://alyssoneustaquio.github.io/animalysson-RPG/
+# Compêndio D&D 2024
 
-Catálogo adicional: `monsters.js` carrega os 322 blocos completos de monstros do SRD 5.2.1 sob CC BY 4.0 por CDN (requer internet). O Livro dos Monstros revisado (2025) tem 510 criaturas, mas seus blocos comerciais completos não estão incluídos no SRD. Consulte o índice oficial em https://www.dndbeyond.com/sources/dnd/mm-2024.
+O site foi organizado em três áreas principais, acessíveis pela navegação superior:
 
-Uso de `monsters.js`: aguarde `await MONSTERS_READY` antes de ler `MONSTERS`. Exemplos: `await findMonster('dragão')`, `await getMonster('Goblin')` e `await getMonsters({ tipo: 'dragão', maxND: 5 })`. O catálogo é carregado pela internet; se estiver offline, `MONSTERS_ERROR` informa a falha e os outros recursos da ficha continuam disponíveis.
+- **Personagem:** abre diretamente a ficha; campos destacados podem ser editados clicando neles.
+- **Itens:** grade visual pesquisável, filtro por categoria e painel de detalhes.
+- **Monstros:** grade visual pesquisável, filtro por tipo e ficha individual ao clicar na criatura.
+
+## Arquivos de dados
+
+`especies.js`, `classes.js`, `antecedentes.js`, `spells.js`, `itens.js` e `monsters.js` são carregados pelo `index.html`. O catálogo de monstros usa a base SRD 5.2.1 por CDN e requer internet.
+
+Os detalhes dos itens exibem os campos atualmente disponíveis no catálogo. Os blocos de monstros disponíveis no SRD mostram CA, PV, ND, atributos, deslocamento, sentidos, resistências, características e ações. O conteúdo comercial integral dos livros não está incluído.

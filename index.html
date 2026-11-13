@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
-<title>Criador de personagem D&D 2024</title>
+<title>Compêndio D&D 2024</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -134,11 +134,50 @@ input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:
   .panel,.ficha,.box{border-color:#999;background:#fff}
   main{max-width:none;padding:0}
 }
+
+/* Main section navigation and visual catalogs */
+.site-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 14px}
+.site-head h1{margin:0}.subtitle{color:var(--mute);margin:2px 0 0;font-size:.9rem}.head-actions{display:flex;gap:8px}
+.section-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 18px;position:sticky;top:0;z-index:20;padding:8px 0;background:var(--bg)}
+.section-tab{border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--mute);font:inherit;font-weight:700;padding:12px 10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;transition:.15s}
+.section-tab span{font-size:1.2rem}.section-tab.on{background:var(--red);border-color:var(--red);color:#fff}.section-tab:hover{border-color:var(--red);color:var(--ink)}.section-tab.on:hover{color:#fff}
+.catalog-head{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.catalog-head p{margin:3px 0 0;color:var(--mute)}
+.catalog-tools{display:grid;grid-template-columns:minmax(220px,1fr) minmax(160px,240px);gap:8px;margin:14px 0}
+.catalog-tools input,.catalog-tools select{width:100%;min-width:0;padding:10px 12px}
+.catalog-count{font-size:.85rem;color:var(--mute);margin:6px 0 10px}
+.catalog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:10px;align-items:stretch}
+.catalog-card{appearance:none;text-align:left;background:linear-gradient(145deg,var(--card),var(--bg));border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:13px;cursor:pointer;min-height:116px;display:flex;flex-direction:column;gap:8px;transition:border-color .15s,transform .15s,box-shadow .15s}
+.catalog-card:hover{border-color:var(--red);transform:translateY(-2px);box-shadow:0 6px 18px #0004}.catalog-card.sel{border-color:var(--red);box-shadow:inset 0 0 0 1px var(--red)}
+.card-topline{display:flex;justify-content:space-between;align-items:center;gap:8px}.card-icon{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;background:#c5313122;color:#ff7777;font-size:1.2rem;flex:none}
+.card-tag{font-size:.69rem;color:var(--mute);border:1px solid var(--line);border-radius:20px;padding:3px 7px;white-space:nowrap}.catalog-card strong{font-family:"Roboto Condensed",system-ui,sans-serif;font-size:1.05rem;line-height:1.2}.catalog-card small{color:var(--mute);line-height:1.3}.card-stats{display:flex;flex-wrap:wrap;gap:5px;margin-top:auto}.card-stats span{font-size:.75rem;padding:3px 6px;border-radius:5px;background:var(--box);color:var(--mute)}
+.catalog-layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr);gap:14px;align-items:start}
+.catalog-detail{background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:16px;min-height:230px;position:sticky;top:76px;max-height:calc(100vh - 100px);overflow:auto}
+.catalog-detail h2{margin:0 0 5px}.catalog-detail h3{margin:16px 0 7px;color:#e6aaaa;border-bottom:1px solid var(--line);padding-bottom:5px}
+.detail-sub{color:var(--mute);margin:0 0 12px;font-size:.88rem}.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:7px;margin:12px 0}
+.detail-stat{background:var(--box);border:1px solid var(--line);border-radius:7px;padding:8px;text-align:center}.detail-stat b{display:block;font:700 1.3rem "Roboto Condensed",sans-serif}.detail-stat small{color:var(--mute);font-size:.7rem;text-transform:uppercase}
+.detail-line{padding:7px 0;border-bottom:1px dotted var(--line);font-size:.86rem}.detail-line b{color:var(--ink)}.detail-note{background:var(--box);border-left:3px solid var(--red);padding:9px 11px;border-radius:0 6px 6px 0;color:#ddd;font-size:.85rem;margin-top:12px}
+.detail-entries{display:grid;gap:8px}.detail-entry{padding:9px 10px;background:var(--box);border:1px solid var(--line);border-radius:7px}.detail-entry b{display:block;margin-bottom:4px}.detail-entry p{margin:0;color:#ddd;font-size:.84rem;white-space:pre-wrap}
+.empty-state{border:1px dashed var(--line);border-radius:9px;padding:28px;text-align:center;color:var(--mute);background:var(--bg)}
+.source-note{font-size:.75rem;color:var(--mute);margin-top:10px}
+.character-toolbar{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.character-toolbar p{margin:0;color:var(--mute);font-size:.85rem}
+@media(max-width:820px){.catalog-layout{grid-template-columns:1fr}.catalog-detail{position:static;max-height:none}.catalog-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}}
+@media(max-width:520px){main{padding:12px 9px 40px}.site-head h1{font-size:1.45rem}.head-actions .btn{padding:8px 10px}.section-tabs{gap:5px}.section-tab{padding:10px 4px;font-size:.82rem;gap:5px}.catalog-tools{grid-template-columns:1fr}.catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.catalog-card{padding:10px;min-height:112px}.catalog-detail{padding:12px}}
+@media print{.section-tabs,.head-actions,.catalog-tools{display:none!important}.catalog-detail{position:static;max-height:none}}
+
 </style>
 </head>
 <body>
 <main>
-<h1>Criador de personagem</h1>
+<header class="site-head">
+  <div><h1>Compêndio D&D</h1><p class="subtitle">Personagem · Itens · Monstros</p></div>
+  <div class="head-actions"><button class="btn alt" onclick="window.print()">Imprimir</button></div>
+</header>
+<nav class="section-tabs" aria-label="Seções principais">
+  <button id="tab-character" class="section-tab on" onclick="switchView('character')"><span>♙</span> Personagem</button>
+  <button id="tab-items" class="section-tab" onclick="switchView('items')"><span>⚒</span> Itens</button>
+  <button id="tab-monsters" class="section-tab" onclick="switchView('monsters')"><span>♜</span> Monstros</button>
+</nav>
 <div class="steps" id="steps" style="display:none"></div>
 <div id="app"></div>
 </main>
@@ -158,6 +197,14 @@ const BG=window.BACKGROUNDS;
 const SPELLS=window.SPELLS;
 const ITEMS=window.ITEMS;
 const MAGIC_ITEMS=window.MAGIC_ITEMS;
+let ACTIVE_VIEW='character';
+let ITEM_QUERY='';
+let ITEM_CATEGORY='Todas';
+let SELECTED_ITEM_INDEX=0;
+let MONSTER_QUERY='';
+let MONSTER_TYPE='Todos';
+let SELECTED_MONSTER_ID=null;
+let MONSTER_CACHE=[];
 if(!Array.isArray(SP)||!SP.length)throw new Error('Não foi possível carregar especies.js');
 if(!Array.isArray(CL)||!CL.length)throw new Error('Não foi possível carregar classes.js');
 if(!Array.isArray(BG)||!BG.length)throw new Error('Não foi possível carregar antecedentes.js');
@@ -415,13 +462,163 @@ function rPer(){if(S.cls===null)return;const c=CL[S.cls];S.skills=shuf(c.l.filte
 function rDet(){S.align=pick(ALN.slice(0,6));S.lang=shuf(LANG).slice(0,2)}
 function rand(){const f=[rSp,rCls,rBg,rAtr,rPer,rDet];f.forEach(g=>g());render()}
 
-function render(){
- document.getElementById('steps').innerHTML='';
- let h='<div class="panel">';
- h+=`<div class="nav"><button class="btn alt" onclick="rand()">Sortear tudo</button></div>`;
+function escHtml(value){
+ return String(value===undefined||value===null?'':value).replace(/[&<>"']/g,function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]});
+}
+function switchView(view){
+ ACTIVE_VIEW=view;
+ S.modal=null;
+ ITEM_QUERY=''; MONSTER_QUERY='';
+ render();
+}
+function updateTabs(){
+ ['character','items','monsters'].forEach(function(v){
+  const el=document.getElementById('tab-'+v);
+  if(el)el.classList.toggle('on',ACTIVE_VIEW===v);
+ });
+}
+function renderCharacterPage(){
+ let h='<div class="panel"><div class="character-toolbar"><p>Sua ficha fica nesta área. Clique nos campos destacados para editar.</p><div class="row" style="margin:0"><button class="btn alt" onclick="rand()">Sortear personagem</button><button class="btn" onclick="window.print()">Imprimir ficha</button></div></div>';
  h+=vFicha();
  document.getElementById('app').innerHTML=h+'</div>';
  renderModal();
+}
+function itemCategoryList(){
+ return ['Todas'].concat(Array.from(new Set((ITEMS||[]).map(function(x){return x.categoria||'Outros'}))).sort(function(a,b){return a.localeCompare(b,'pt-BR')}));
+}
+function filteredItems(){
+ const q=norm(ITEM_QUERY);
+ return (ITEMS||[]).map(function(item,index){return {item:item,index:index}}).filter(function(row){
+  const x=row.item;
+  const text=norm([x.n,x.en,x.categoria,x.tipo,x.raridade,x.fonte].filter(Boolean).join(' '));
+  return (!q||text.includes(q))&&(ITEM_CATEGORY==='Todas'||(x.categoria||'Outros')===ITEM_CATEGORY);
+ });
+}
+function itemIcon(item){
+ const t=norm((item.categoria||'')+' '+(item.tipo||''));
+ if(t.includes('arma'))return '⚔'; if(t.includes('armadura'))return '🛡'; if(t.includes('pocao')||t.includes('poção'))return '⚗';
+ if(t.includes('ferramenta'))return '🧰'; if(item.magico)return '✦'; if(t.includes('montaria')||t.includes('veiculo'))return '🐎'; return '◇';
+}
+function renderItemCard(row){
+ const x=row.item,mag=x.magico?'Mágico':'Equipamento';
+ return `<button class="catalog-card${row.index===SELECTED_ITEM_INDEX?' sel':''}" onclick="selectItem(${row.index})"><div class="card-topline"><span class="card-icon">${itemIcon(x)}</span><span class="card-tag">${escHtml(x.raridade||x.categoria||mag)}</span></div><strong>${escHtml(x.n||x.en||'Item')}</strong><small>${escHtml(x.en||x.tipo||'')}</small><div class="card-stats"><span>${escHtml(x.categoria||'Outros')}</span>${x.statusDMG2024?`<span>${escHtml(x.statusDMG2024)}</span>`:''}</div></button>`;
+}
+function renderItemDetail(index){
+ const x=ITEMS[index];
+ if(!x)return '<div class="empty-state">Selecione um item para ver seus dados.</div>';
+ let h=`<div class="card-topline"><span class="card-icon">${itemIcon(x)}</span><span class="card-tag">${escHtml(x.raridade||x.categoria||'Item')}</span></div><h2 style="margin-top:10px">${escHtml(x.n||x.en)}</h2><p class="detail-sub">${escHtml(x.en||'')}</p><div class="detail-grid"><div class="detail-stat"><b>${x.magico?'Sim':'Não'}</b><small>Mágico</small></div><div class="detail-stat"><b>${escHtml(x.raridade||'—')}</b><small>Raridade</small></div><div class="detail-stat"><b>${escHtml(x.tipo||'—')}</b><small>Tipo</small></div></div>`;
+ h+=`<div class="detail-line"><b>Categoria:</b> ${escHtml(x.categoria||'—')}</div><div class="detail-line"><b>Fonte:</b> ${escHtml(x.fonte||'—')}</div>`;
+ if(x.statusDMG2024)h+=`<div class="detail-line"><b>Status no DMG 2024:</b> ${escHtml(x.statusDMG2024)}</div>`;
+ if(x.nota)h+=`<div class="detail-note">${escHtml(x.nota)}</div>`;
+ h+='<p class="source-note">Este catálogo apresenta os campos de referência disponíveis no projeto. Consulte a publicação indicada na fonte para o texto integral das regras do item.</p>';
+ return h;
+}
+function updateItemResults(){
+ const rows=filteredItems();
+ const count=document.getElementById('items-count');
+ const grid=document.getElementById('items-grid');
+ const detail=document.getElementById('item-detail');
+ if(rows.length && !rows.some(function(row){return row.index===SELECTED_ITEM_INDEX;}))SELECTED_ITEM_INDEX=rows[0].index;
+ if(count)count.textContent=rows.length+' de '+(ITEMS||[]).length+' itens';
+ if(grid)grid.innerHTML=rows.length?rows.map(renderItemCard).join(''):'<div class="empty-state">Nenhum item encontrado.</div>';
+ if(detail)detail.innerHTML=renderItemDetail(SELECTED_ITEM_INDEX);
+}
+function selectItem(index){SELECTED_ITEM_INDEX=index;updateItemResults()}
+function itemSearch(value){ITEM_QUERY=value;updateItemResults()}
+function itemCategory(value){ITEM_CATEGORY=value;updateItemResults()}
+function renderItemsPage(){
+ const cats=itemCategoryList();
+ let h=`<div class="catalog-head"><div><h2>Itens</h2><p>Explore armas, armaduras, equipamentos e itens mágicos.</p></div><span class="card-tag">${(ITEMS||[]).length} registros</span></div><div class="catalog-tools"><input type="search" placeholder="Buscar por nome, tipo ou raridade…" value="${escHtml(ITEM_QUERY)}" oninput="itemSearch(this.value)"><select onchange="itemCategory(this.value)">${cats.map(c=>`<option value="${escHtml(c)}"${c===ITEM_CATEGORY?' selected':''}>${escHtml(c)}</option>`).join('')}</select></div><div class="catalog-count" id="items-count"></div><div class="catalog-layout"><section><div class="catalog-grid" id="items-grid"></div></section><aside class="catalog-detail" id="item-detail"></aside></div><p class="source-note">Os nomes originais são preservados para facilitar a conferência. Itens do índice de alterações do DMG sem dados completos estão marcados no próprio detalhe.</p>`;
+ document.getElementById('app').innerHTML=h;
+ updateItemResults();
+ renderModal();
+}
+function monsterTypeList(){
+ return ['Todos'].concat(Array.from(new Set((MONSTER_CACHE||[]).map(function(m){return m.tipo||'Outros'}))).sort(function(a,b){return a.localeCompare(b,'pt-BR')}));
+}
+function filteredMonsters(){
+ const q=norm(MONSTER_QUERY);
+ return MONSTER_CACHE.map(function(m,index){return {monster:m,index:index}}).filter(function(row){
+  const m=row.monster;
+  const hay=norm([m.nome,m.nomePt,m.nomeEn,m.tipo,m.tamanho,m.nd].filter(Boolean).join(' '));
+  return (!q||hay.includes(q))&&(MONSTER_TYPE==='Todos'||m.tipo===MONSTER_TYPE);
+ }).sort(function(a,b){return String(a.monster.nome||'').localeCompare(String(b.monster.nome||''),'pt-BR')});
+}
+function monsterAttrEntries(m){
+ const a=m.atributos||{};
+ const pairs=[['Força',['strength','str','for']],['Destreza',['dexterity','dex','des']],['Constituição',['constitution','con','con']],['Inteligência',['intelligence','int','int']],['Sabedoria',['wisdom','wis','sab']],['Carisma',['charisma','cha','car']]];
+ return pairs.map(function(pair){let val='—';for(const key of pair[1]){if(a[key]!==undefined){val=a[key];break}}return {name:pair[0],value:val}});
+}
+function renderMonsterCard(row){
+ const m=row.monster;
+ return `<button class="catalog-card${(m.id||m.nomeEn)===SELECTED_MONSTER_ID?' sel':''}" onclick="selectMonster(${row.index})"><div class="card-topline"><span class="card-icon">♜</span><span class="card-tag">ND ${escHtml(m.nd||'—')}</span></div><strong>${escHtml(m.nome||m.nomeEn||'Criatura')}</strong><small>${escHtml(m.nomeEn||'')} · ${escHtml(m.tipo||'')}</small><div class="card-stats"><span>CA ${escHtml(m.classeArmadura??'—')}</span><span>PV ${escHtml(m.pontosVida??'—')}</span><span>${escHtml(m.tamanho||'')}</span></div></button>`;
+}
+function formatMonsterValue(value){
+ if(value===null||value===undefined||value==='')return '—';
+ if(Array.isArray(value))return value.map(formatMonsterValue).join(', ');
+ if(typeof value==='object')return Object.entries(value).map(function(pair){return escHtml(pair[0])+': '+formatMonsterValue(pair[1])}).join(' · ');
+ return escHtml(value);
+}
+function renderMonsterEntries(title,entries){
+ if(!Array.isArray(entries)||!entries.length)return '';
+ return `<h3>${escHtml(title)}</h3><div class="detail-entries">${entries.map(function(entry){
+  if(typeof entry==='string')return `<div class="detail-entry"><p>${escHtml(entry)}</p></div>`;
+  const name=entry.name||entry.title||entry.nome||'';
+  const desc=entry.desc||entry.description||entry.text||entry.value||'';
+  const extras=Object.keys(entry).filter(k=>!['name','title','nome','desc','description','text','value'].includes(k)).map(k=>`${escHtml(k)}: ${formatMonsterValue(entry[k])}`).join(' · ');
+  return `<div class="detail-entry">${name?`<b>${escHtml(name)}</b>`:''}${desc?`<p>${escHtml(desc)}</p>`:''}${extras?`<p>${extras}</p>`:''}</div>`;
+ }).join('')}</div>`;
+}
+function renderMonsterDetail(m){
+ if(!m)return '<div class="empty-state">Clique em um monstro para abrir sua ficha.</div>';
+ let h=`<div class="card-topline"><span class="card-icon">♜</span><span class="card-tag">ND ${escHtml(m.nd||'—')}</span></div><h2 style="margin-top:10px">${escHtml(m.nome||m.nomeEn)}</h2><p class="detail-sub">${escHtml(m.nomeEn||'')} · ${escHtml(m.tamanho||'')} ${escHtml(m.tipo||'')}</p><div class="detail-grid"><div class="detail-stat"><b>${escHtml(m.classeArmadura??'—')}</b><small>Classe de Armadura</small></div><div class="detail-stat"><b>${escHtml(m.pontosVida??'—')}</b><small>Pontos de Vida</small></div><div class="detail-stat"><b>${escHtml(m.nd||'—')}</b><small>Nível de Desafio</small></div></div>`;
+ h+=`<div class="detail-line"><b>Iniciativa:</b> ${formatMonsterValue(m.iniciativa)}</div><div class="detail-line"><b>Deslocamento:</b> ${formatMonsterValue(m.deslocamento)}</div>`;
+ h+='<h3>Atributos</h3><div class="detail-grid">'+monsterAttrEntries(m).map(function(a){return `<div class="detail-stat"><b>${escHtml(a.value)}</b><small>${escHtml(a.name)}</small></div>`}).join('')+'</div>';
+ [['Salvaguardas',m.salvaguardas],['Perícias',m.pericias],['Sentidos',m.sentidos],['Idiomas',m.idiomas],['Resistências a dano',m.resistenciasDano],['Vulnerabilidades a dano',m.vulnerabilidadesDano],['Imunidades a dano',m.imunidadesDano],['Imunidades a condições',m.imunidadesCondicao]].forEach(function(pair){if(pair[1]&&((Array.isArray(pair[1])&&pair[1].length)||(!Array.isArray(pair[1])&&Object.keys(pair[1]).length)))h+=`<div class="detail-line"><b>${escHtml(pair[0])}:</b> ${formatMonsterValue(pair[1])}</div>`});
+ h+=renderMonsterEntries('Características',m.tracos);
+ h+=renderMonsterEntries('Ações',m.acoes);
+ h+=renderMonsterEntries('Ações bônus',m.acoesBonus);
+ h+=renderMonsterEntries('Reações',m.reacoes);
+ h+=renderMonsterEntries('Ações lendárias',m.acoesLendarias);
+ h+=`<p class="source-note">Fonte: ${escHtml(m.fonte||'SRD 5.2.1')} · Bloco aberto sob licença CC BY 4.0. Texto das regras preservado no idioma da fonte.</p>`;
+ return h;
+}
+function updateMonsterResults(){
+ const rows=filteredMonsters();
+ const count=document.getElementById('monsters-count'),grid=document.getElementById('monsters-grid'),detail=document.getElementById('monster-detail');
+ if(count)count.textContent=rows.length+' de '+MONSTER_CACHE.length+' criaturas';
+ if(grid)grid.innerHTML=rows.length?rows.map(renderMonsterCard).join(''):'<div class="empty-state">Nenhum monstro encontrado.</div>';
+ let selected=MONSTER_CACHE.find(function(m){return (m.id||m.nomeEn)===SELECTED_MONSTER_ID});
+ if(rows.length && !rows.some(function(row){return (row.monster.id||row.monster.nomeEn)===SELECTED_MONSTER_ID;})){selected=rows[0].monster;SELECTED_MONSTER_ID=selected.id||selected.nomeEn;}
+ if(!selected&&rows.length){selected=rows[0].monster;SELECTED_MONSTER_ID=selected.id||selected.nomeEn;}
+ if(grid)grid.innerHTML=rows.map(renderMonsterCard).join('');
+ if(detail)detail.innerHTML=renderMonsterDetail(selected);
+}
+function selectMonster(index){const m=MONSTER_CACHE[index];if(!m)return;SELECTED_MONSTER_ID=m.id||m.nomeEn;updateMonsterResults()}
+function monsterSearch(value){MONSTER_QUERY=value;updateMonsterResults()}
+function monsterType(value){MONSTER_TYPE=value;updateMonsterResults()}
+async function renderMonstersPage(){
+ const types=monsterTypeList();
+ let h=`<div class="catalog-head"><div><h2>Monstros</h2><p>Selecione uma criatura para abrir sua ficha e suas ações.</p></div><span class="card-tag">${MONSTER_CACHE.length||'…'} criaturas</span></div><div class="catalog-tools"><input type="search" placeholder="Buscar monstro por nome, tipo ou ND…" value="${escHtml(MONSTER_QUERY)}" oninput="monsterSearch(this.value)"><select onchange="monsterType(this.value)">${types.map(t=>`<option value="${escHtml(t)}"${t===MONSTER_TYPE?' selected':''}>${escHtml(t)}</option>`).join('')}</select></div><div id="monsters-count" class="catalog-count">Carregando criaturas…</div><div class="catalog-layout"><section><div class="catalog-grid" id="monsters-grid"><div class="empty-state">Carregando catálogo de monstros…</div></div></section><aside class="catalog-detail" id="monster-detail"><div class="empty-state">As fichas aparecerão aqui quando o catálogo terminar de carregar.</div></aside></div><p class="source-note">Os blocos completos são os disponibilizados pelo SRD 5.2.1. O livro comercial tem criaturas adicionais que não estão integralmente neste catálogo aberto.</p>`;
+ document.getElementById('app').innerHTML=h;
+ renderModal();
+ try{
+  if(window.MONSTERS_READY)MONSTER_CACHE=await window.MONSTERS_READY;
+  else MONSTER_CACHE=window.MONSTERS||[];
+  if(ACTIVE_VIEW==='monsters'){
+   const sel=document.querySelector('.catalog-tools select');
+   if(sel){const keep=MONSTER_TYPE;sel.innerHTML=monsterTypeList().map(t=>`<option value="${escHtml(t)}"${t===keep?' selected':''}>${escHtml(t)}</option>`).join('')}
+   updateMonsterResults();
+   const counter=document.querySelector('.catalog-head .card-tag');if(counter)counter.textContent=MONSTER_CACHE.length+' criaturas';
+  }
+ }catch(e){const grid=document.getElementById('monsters-grid');if(grid)grid.innerHTML='<div class="empty-state">Não foi possível carregar os monstros. Verifique sua conexão.</div>';}
+}
+function render(){
+ const steps=document.getElementById('steps');if(steps)steps.innerHTML='';
+ updateTabs();
+ if(ACTIVE_VIEW==='character')renderCharacterPage();
+ else if(ACTIVE_VIEW==='items')renderItemsPage();
+ else renderMonstersPage();
 }
 render();
 </script>
