@@ -1,13 +1,3 @@
-/*
- * Catálogo D&D 5e revisado (2024) — itens e equipamentos.
- * Inclui dados e resumos em português dos equipamentos e dos itens mágicos do SRD 5.2.1.
- * This work includes material from the System Reference Document 5.2.1 (SRD 5.2.1)
- * by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd.
- * Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0):
- * https://creativecommons.org/licenses/by/4.0/legalcode.
- * Traduções e resumos em PT-BR são de referência; nomes originais preservados em `en`.
- * Descrições mágicas estão embutidas localmente; este arquivo não consulta APIs externas.
- */
 (function () {
 'use strict';
 const EQUIPMENT = [
