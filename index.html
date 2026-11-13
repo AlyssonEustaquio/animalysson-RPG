@@ -185,6 +185,8 @@ input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:
 </main>
 <div id="modal-root"></div>
 <script>
+/* Carrega os catálogos sempre com um parâmetro novo na URL, para o navegador
+   nunca reaproveitar uma versão antiga dos .js em cache. */
 ['especies.js','classes.js','antecedentes.js','spells.js','itens.js','monsters.js'].forEach(function(f){
   document.write('<script src="'+f+'?v='+Date.now()+'"><\/script>');
 });
@@ -217,6 +219,7 @@ const ALL=Object.keys(SK);
 const SK_BY_AB={FOR:['Atletismo'],DES:['Acrobacia','Prestidigitação','Furtividade'],CON:[],INT:['Arcanismo','História','Investigação','Natureza','Religião'],SAB:['Adestrar Animais','Intuição','Medicina','Percepção','Sobrevivência'],CAR:['Atuação','Enganação','Intimidação','Persuasão']};
 CL.forEach(c=>{if(c.l===null)c.l=ALL});
 const STD=[15,14,13,12,10,8], COST={8:0,9:1,10:2,11:3,12:4,13:5,14:7,15:9};
+// ====== ESTADO INICIAL ZERADO ======
 const S={
   step:0,
   name:'',
@@ -300,6 +303,8 @@ function vAtr(){const ass=S.method==='std'||S.method==='rnd';let h=`<h2>Valores 
 function bgSk(){return S.bg===null?[]:BG[S.bg].s}
 function vPer(){const c=CL[S.cls];let h=`<h2>Perícias de ${c.n}</h2><p>Escolha ${c.k}. Selecionadas: ${S.skills.length}/${c.k}.</p><div class="sk">`;c.l.forEach(k=>{const lock=bgSk().includes(k),on=lock||S.skills.includes(k);h+=`<label class="${lock?'lock':''}"><input type="checkbox" ${on?'checked':''} ${lock||(!on&&S.skills.length>=c.k)?'disabled':''} onchange="togSkill('${k}')">${k} (${SK[k]})</label>`});return h+'</div>'}
 function vDet(){let h='<h2>Alinhamento</h2><div class="grid">';ALN.forEach(a=>h+=`<button class="opt${S.align===a?' sel':''}" onclick="set('align','${a}')"><b>${a}</b></button>`);h+=`</div><h2 style="margin-top:16px">Idiomas</h2><p>Comum + 2. Selecionados: ${S.lang.length}/2.</p><div class="sk">`;LANG.forEach(l=>{const on=S.lang.includes(l);h+=`<label><input type="checkbox" ${on?'checked':''} ${!on&&S.lang.length>=2?'disabled':''} onchange="const i=S.lang.indexOf('${l}');if(i>=0)S.lang.splice(i,1);else if(S.lang.length<2)S.lang.push('${l}');render()">${l}</label>`});return h+'</div>'}
+
+/* Official-style interactive sheet — protegida contra estado zerado */
 function vFicha(){
  const c = S.cls!==null ? CL[S.cls] : null;
  const sp = S.sp!==null ? SP[S.sp] : null;
@@ -394,6 +399,7 @@ function vFicha(){
  return h;
 }
 
+/* Modal contents */
 function modalIdent(){
  return `<h2>Identidade</h2>
   <label>Nome<br><input style="width:100%" value="${(S.name||'').replace(/"/g,'&quot;')}" oninput="S.name=this.value"></label>
@@ -681,7 +687,7 @@ function monsterSearch(value){MONSTER_QUERY=value;updateMonsterResults()}
 function monsterType(value){MONSTER_TYPE=value;updateMonsterResults()}
 async function renderMonstersPage(){
  const types=monsterTypeList();
- let h=`<div class="catalog-head"><div><h2>Monstros</h2><p>Selecione uma criatura para abrir sua ficha e suas ações.</p></div><span class="card-tag">${MONSTER_CACHE.length||'…'} criaturas</span></div><div class="catalog-tools"><input type="search" placeholder="Buscar monstro por nome, tipo ou ND…" value="${escHtml(MONSTER_QUERY)}" oninput="monsterSearch(this.value)"><select onchange="monsterType(this.value)">${types.map(t=>`<option value="${escHtml(t)}"${t===MONSTER_TYPE?' selected':''}>${escHtml(t)}</option>`).join('')}</select></div><div id="monsters-count" class="catalog-count">Carregando bestiário…</div><p class="detail-note">Depois da primeira conexão, o bestiário fica salvo neste navegador para consultas offline.</p><div class="catalog-layout"><section><div class="catalog-grid" id="monsters-grid"><div class="empty-state">Carregando bestiário…</div></div></section><aside class="catalog-detail" id="monster-detail"><div class="empty-state">As fichas aparecerão aqui quando o catálogo terminar de carregar.</div></aside></div>`;
+ let h=`<div class="catalog-head"><div><h2>Monstros</h2><p>Selecione uma criatura para abrir sua ficha e suas ações.</p></div><span class="card-tag">${MONSTER_CACHE.length||'…'} criaturas</span></div><div class="catalog-tools"><input type="search" placeholder="Buscar monstro por nome, tipo ou ND…" value="${escHtml(MONSTER_QUERY)}" oninput="monsterSearch(this.value)"><select onchange="monsterType(this.value)">${types.map(t=>`<option value="${escHtml(t)}"${t===MONSTER_TYPE?' selected':''}>${escHtml(t)}</option>`).join('')}</select></div><div id="monsters-count" class="catalog-count">Carregando bestiário…</div><div class="catalog-layout"><section><div class="catalog-grid" id="monsters-grid"><div class="empty-state">Carregando bestiário…</div></div></section><aside class="catalog-detail" id="monster-detail"><div class="empty-state">As fichas aparecerão aqui quando o catálogo terminar de carregar.</div></aside></div>`;
  document.getElementById('app').innerHTML=h;
  renderModal();
  try{
@@ -693,7 +699,7 @@ async function renderMonstersPage(){
    updateMonsterResults();
    const counter=document.querySelector('.catalog-head .card-tag');if(counter)counter.textContent=MONSTER_CACHE.length+' criaturas';
   }
- }catch(e){const grid=document.getElementById('monsters-grid');if(grid)grid.innerHTML='<div class="empty-state">Não foi possível abrir o bestiário. Na primeira carga, conecte-se à internet para salvar os dados no navegador.</div>';}
+ }catch(e){const grid=document.getElementById('monsters-grid');if(grid)grid.innerHTML='<div class="empty-state">Não foi possível abrir o bestiário.</div>';}
 }
 function render(){
  const steps=document.getElementById('steps');if(steps)steps.innerHTML='';
