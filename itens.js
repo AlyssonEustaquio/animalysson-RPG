@@ -1,11 +1,12 @@
 /*
  * Catálogo D&D 5e revisado (2024) — itens e equipamentos.
- * Dados de equipamento e itens mágicos derivados do SRD 5.2.1.
+ * Inclui dados e resumos em português dos equipamentos e dos itens mágicos do SRD 5.2.1.
  * This work includes material from the System Reference Document 5.2.1 (SRD 5.2.1)
  * by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd.
  * Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0):
  * https://creativecommons.org/licenses/by/4.0/legalcode.
- * Traduções e resumos em PT-BR são de referência; nomes em inglês preservados em `en`.
+ * Traduções e resumos em PT-BR são de referência; nomes originais preservados em `en`.
+ * Descrições mágicas estão embutidas localmente; este arquivo não consulta APIs externas.
  */
 (function () {
 'use strict';
@@ -3011,6 +3012,7 @@ const EQUIPMENT = [
     "uso": "Equipamento de aventura; consulte o efeito/uso detalhado acima."
   }
 ];
+
 const MAGIC_ITEMS = [
   {
     "n": "Armadura de Adamante",
@@ -3020,12 +3022,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-001",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Armadura feita ou reforçada com adamante. Enquanto você a veste, qualquer acerto crítico que receba de um ataque se transforma em um acerto normal; o golpe ainda causa dano normalmente.",
+    "uso": ""
   },
   {
     "n": "Munição +1, +2 ou +3",
@@ -3035,12 +3036,11 @@ const MAGIC_ITEMS = [
     "raridade": "Varia",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-002",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Este conjunto contém dez peças de munição mágica. Cada peça concede o bônus indicado (+1, +2 ou +3) às jogadas de ataque e dano feitas com ela. Depois de acertar um alvo, a peça perde a magia; o bônus depende da raridade da versão.",
+    "uso": ""
   },
   {
     "n": "Munição de Extermínio",
@@ -3050,12 +3050,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-003",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A munição é criada para caçar um tipo específico de criatura, escolhido quando a munição é encontrada. Ao atingir uma criatura desse tipo, ela deve passar em uma salvaguarda de Constituição CD 17 ou sofre 6d10 de dano de força adicional; em sucesso, sofre metade. A peça perde a magia após o ataque.",
+    "uso": ""
   },
   {
     "n": "Amuleto da Saúde",
@@ -3065,12 +3064,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-004",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Enquanto estiver usando o amuleto, seu valor de Constituição passa a ser 19. O efeito não altera um valor que já seja 19 ou maior.",
+    "uso": ""
   },
   {
     "n": "Amuleto contra Detecção e Localização",
@@ -3080,12 +3078,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-005",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Enquanto estiver usando este amuleto, você não pode ser localizado por magias de adivinhação nem percebido por sensores mágicos de observação à distância. O efeito não impede que alguém o encontre por meios normais ou por magia que não dependa de adivinhação.",
+    "uso": ""
   },
   {
     "n": "Amuleto dos Planos",
@@ -3095,12 +3092,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-006",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O amuleto permite tentar abrir uma passagem para outro Plano de Existência. Ao usá-lo, escolha um destino planar que conheça e faça um teste de Inteligência (Arcanismo) CD 15: em sucesso, você e as criaturas voluntárias próximas são transportados para lá; em falha, o grupo vai para um destino planar aleatório.",
+    "uso": ""
   },
   {
     "n": "Escudo Animado",
@@ -3110,12 +3106,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-007",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Este escudo pode flutuar e proteger você sem ocupar uma das mãos. Com uma ação bônus, você o ativa por até 1 minuto; enquanto estiver animado, ele concede os benefícios de um escudo que você estivesse empunhando. O efeito termina quando você o desativa, fica incapacitado ou morre.",
+    "uso": ""
   },
   {
     "n": "Aparelho do Caranguejo",
@@ -3125,12 +3120,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-008",
-    "peso": "Não especificado no SRD",
+    "peso": "500 lb",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Este veículo de ferro lembra um caranguejo gigante e comporta duas criaturas Médias ou menores. Seus controles internos permitem andar, nadar, agarrar e atacar com pinças; cada alavanca aciona uma função diferente e exige que o operador aprenda seu funcionamento. O aparelho é extremamente pesado e resistente, mas pode ser danificado como qualquer objeto.",
+    "uso": ""
   },
   {
     "n": "Armadura +1, +2 ou +3",
@@ -3140,12 +3134,11 @@ const MAGIC_ITEMS = [
     "raridade": "Varia",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-009",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Armadura mágica que concede um bônus à Classe de Armadura conforme sua versão: +1 (incomum), +2 (rara) ou +3 (muito rara). O bônus é aplicado além da CA normal da armadura e não exige uma ação para funcionar.",
+    "uso": ""
   },
   {
     "n": "Armadura da Invulnerabilidade",
@@ -3155,12 +3148,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-010",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Enquanto veste esta armadura, você tem resistência a dano contundente, cortante e perfurante de fontes não mágicas. Uma vez por dia, pode ativá-la para ficar imune a dano não mágico por 10 minutos; o efeito termina se retirar a armadura.",
+    "uso": ""
   },
   {
     "n": "Armadura da Resistência",
@@ -3170,12 +3162,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-011",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A armadura concede resistência a um tipo de dano determinado quando o item é criado: ácido, frio, fogo, energia, elétrico, necrótico, veneno, psíquico, radiante ou trovejante. A resistência funciona enquanto você estiver vestindo a armadura.",
+    "uso": ""
   },
   {
     "n": "Armadura da Vulnerabilidade",
@@ -3185,12 +3176,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-012",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta armadura amaldiçoada oferece resistência a um dos tipos de dano físico, mas também torna você vulnerável aos outros dois entre contundente, cortante e perfurante. A maldição permanece mesmo depois que você tira a armadura e só pode ser removida por magia apropriada.",
+    "uso": ""
   },
   {
     "n": "Escudo Apanhador de Flechas",
@@ -3200,12 +3190,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-013",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Além do bônus normal de um escudo, este item fornece +2 na CA contra ataques à distância. Quando uma criatura próxima é atingida por um ataque à distância, você pode usar sua reação para redirecionar o ataque para si, desde que esteja em posição de interceptá-lo.",
+    "uso": ""
   },
   {
     "n": "Bolsa de Feijões",
@@ -3215,12 +3204,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-014",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A bolsa contém 3d4 feijões secos. Ao espalhar ou plantar um feijão, ocorre um efeito mágico imprevisível: pode surgir uma árvore, um gêiser, uma criatura ou outro fenômeno extraordinário. Cada feijão produz seu próprio resultado e desaparece depois de usado.",
+    "uso": ""
   },
   {
     "n": "Bolsa Devoradora",
@@ -3230,12 +3218,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-015",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta bolsa possui uma abertura que leva ao interior de uma criatura extradimensional. Objetos orgânicos introduzidos nela podem ser devorados; uma criatura que coloque parte do corpo na abertura corre o risco de ser puxada para dentro. A bolsa é perigosa e não funciona como recipiente de armazenamento comum.",
+    "uso": ""
   },
   {
     "n": "Bolsa de Carga",
@@ -3245,12 +3232,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-016",
-    "peso": "Não especificado no SRD",
+    "peso": "15 lb",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A bolsa tem um espaço extradimensional interno de até 64 pés cúbicos e comporta até 500 libras, embora pese apenas 15 libras quando vazia. Recuperar um objeto exige procurar dentro dela. Se for sobrecarregada, perfurada ou rasgada, a bolsa se rompe e seu conteúdo é perdido em um plano aleatório.",
+    "uso": ""
   },
   {
     "n": "Bolsa de Truques",
@@ -3260,12 +3246,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-017",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A bolsa contém pequenas bolas de pelos que se transformam em animais quando retiradas e arremessadas. O animal depende da cor da bolsa e é determinado aleatoriamente; ele segue comandos simples e desaparece ao amanhecer seguinte ou quando chega a 0 pontos de vida.",
+    "uso": ""
   },
   {
     "n": "Conta de Força",
@@ -3275,12 +3260,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-018",
-    "peso": "Não especificado no SRD",
+    "peso": "1 oz",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A conta pode ser arremessada para um ponto a até 18 metros, onde cria uma esfera de força de 3 metros de raio. Criaturas na área fazem salvaguarda de Destreza CD 15; quem falhar sofre 5d4 de dano de força e pode ficar preso na esfera por até 1 minuto. A esfera bloqueia passagem física, mas não ataques ou efeitos que atravessem força mágica.",
+    "uso": ""
   },
   {
     "n": "Conta de Nutrição",
@@ -3290,12 +3274,11 @@ const MAGIC_ITEMS = [
     "raridade": "Comum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-019",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta pequena conta gelatinosa se dissolve na língua e fornece nutrição equivalente a uma porção diária de comida e água para uma criatura. Não tem sabor e não precisa ser mastigada ou preparada.",
+    "uso": ""
   },
   {
     "n": "Cinto dos Anões",
@@ -3305,12 +3288,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-020",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O cinto concede conhecimento do idioma Anão e vantagem em testes de Carisma (Persuasão) feitos para influenciar anões. Também aumenta sua Constituição em 2, até o máximo de 20. Se você não for anão, recebe visão no escuro de 18 metros, resistência a dano de veneno e vantagem em salvaguardas contra a condição Envenenado.",
+    "uso": ""
   },
   {
     "n": "Cinto de Força Gigante",
@@ -3320,12 +3302,11 @@ const MAGIC_ITEMS = [
     "raridade": "Varia",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-021",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Enquanto usar o cinto, seu valor de Força é substituído pelo valor indicado pela versão: 21 (colina), 23 (gelo ou pedra), 25 (fogo), 27 (nuvem) ou 29 (tempestade). O efeito não reduz uma Força que já seja igual ou maior que o valor concedido.",
+    "uso": ""
   },
   {
     "n": "Machado do Berserker",
@@ -3335,12 +3316,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-022",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Este machado mágico concede +1 nas jogadas de ataque e dano. Ele aumenta seus pontos de vida máximos em 1 por nível, mas é amaldiçoado: você reluta em se separar dele e, quando sofre dano, pode entrar em fúria e atacar a criatura mais próxima, sem distinguir aliados.",
+    "uso": ""
   },
   {
     "n": "Botas Élficas",
@@ -3350,12 +3330,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-023",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "As botas abafam os passos de quem as usa. Enquanto estiver calçando-as, você tem vantagem em testes de Destreza (Furtividade) feitos para se mover silenciosamente.",
+    "uso": ""
   },
   {
     "n": "Botas de Levitação",
@@ -3365,12 +3344,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-024",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "As botas permitem que você lance Levitação sobre si mesmo. O efeito permite subir ou descer verticalmente e permanecer suspenso, mas não fornece deslocamento horizontal por si só; você pode se apoiar em superfícies ou usar outros meios para se mover.",
+    "uso": ""
   },
   {
     "n": "Botas da Velocidade",
@@ -3380,12 +3358,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-025",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao bater os calcanhares como ação bônus, você duplica seu deslocamento de caminhada e criaturas têm desvantagem em ataques de oportunidade contra você. O efeito dura até 10 minutos por ativação; depois disso, as botas não podem ser ativadas novamente até o próximo descanso longo.",
+    "uso": ""
   },
   {
     "n": "Botas de Caminhar e Saltar",
@@ -3395,12 +3372,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-026",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "As botas mantêm seu deslocamento de caminhada em pelo menos 9 metros, mesmo com carga ou armadura pesada. Além disso, uma vez por turno, você pode saltar até 9 metros sem corrida, consumindo apenas 3 metros de deslocamento.",
+    "uso": ""
   },
   {
     "n": "Botas das Terras Invernais",
@@ -3410,12 +3386,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-027",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "As botas concedem resistência a dano de frio, permitem suportar temperaturas de até −18 °C sem proteção adicional e impedem que neve ou gelo sejam terreno difícil para você.",
+    "uso": ""
   },
   {
     "n": "Tigela de Comando de Elementais da Água",
@@ -3425,12 +3400,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-028",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Quando a tigela contém água, você pode invocar um elemental da água em um espaço desocupado próximo. Ele obedece às suas ordens, age logo após você na iniciativa e desaparece após 1 hora, ao chegar a 0 PV ou quando você o dispensar; a tigela recupera o uso ao amanhecer.",
+    "uso": ""
   },
   {
     "n": "Braçadeiras de Arquearia",
@@ -3440,12 +3414,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-029",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Enquanto usar estas braçadeiras, você tem proficiência com arcos curtos e longos e recebe +2 nas jogadas de dano feitas com essas armas. O bônus se aplica aos ataques realizados com os arcos apropriados.",
+    "uso": ""
   },
   {
     "n": "Braçadeiras de Defesa",
@@ -3455,12 +3428,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-030",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Enquanto não estiver usando armadura nem empunhando escudo, você recebe +2 na Classe de Armadura. O bônus representa proteção mágica ao redor dos braços e do corpo.",
+    "uso": ""
   },
   {
     "n": "Braseiro de Comando de Elementais do Fogo",
@@ -3470,12 +3442,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-031",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao acender o braseiro, você pode invocar um elemental do fogo em um espaço desocupado próximo. Ele obedece aos seus comandos e permanece por até 1 hora, até ser reduzido a 0 PV ou até você dispensá-lo; o braseiro recupera o poder ao amanhecer.",
+    "uso": ""
   },
   {
     "n": "Broche de Proteção",
@@ -3485,12 +3456,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-032",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O broche concede resistência a dano de força e torna você imune ao dano causado pela magia Mísseis Mágicos. Ele precisa estar preso à roupa ou à armadura para funcionar.",
+    "uso": ""
   },
   {
     "n": "Vassoura Voadora",
@@ -3500,12 +3470,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-033",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A vassoura pode voar quando você a segura e usa uma ação mágica para ativá-la. Ela voa a até 15 metros por rodada; pode carregar até 200 kg sem perder velocidade, mas com carga maior voa mais lentamente. A criatura que a monta controla a direção e a altitude.",
+    "uso": ""
   },
   {
     "n": "Vela de Invocação",
@@ -3515,12 +3484,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-034",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A vela queima por até 4 horas e fortalece a magia de quem compartilha seu alinhamento e devoção. Enquanto estiver acesa, ela melhora conjurações e permite lançar uma magia de alto nível associada ao alinhamento; apagar e reacender conserva o tempo restante.",
+    "uso": ""
   },
   {
     "n": "Capa do Charlatão",
@@ -3530,12 +3498,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-035",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A capa permite que você lance a magia Porta Dimensional uma vez por dia, sem gastar espaço de magia. Ao desaparecer, deixa uma nuvem de fumaça que obscurece sua posição até o fim do seu próximo turno.",
+    "uso": ""
   },
   {
     "n": "Tapete Voador",
@@ -3545,12 +3512,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-036",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O tapete voa quando você pronuncia sua palavra de comando. Sua velocidade e capacidade de carga dependem do tamanho: tapetes menores são mais rápidos, enquanto os maiores transportam mais criaturas e equipamento. Você pode comandá-lo a até 9 metros de distância.",
+    "uso": ""
   },
   {
     "n": "Incensário de Controle de Elementais do Ar",
@@ -3560,12 +3526,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-037",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao queimar incenso no recipiente, você pode invocar um elemental do ar em um espaço desocupado próximo. Ele segue suas ordens por até 1 hora, até ser derrotado ou dispensado; o incensário recupera a capacidade de invocação ao amanhecer.",
+    "uso": ""
   },
   {
     "n": "Carrilhão de Abertura",
@@ -3575,12 +3540,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-038",
-    "peso": "Não especificado no SRD",
+    "peso": "1 lb",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Este pequeno carrilhão possui dez usos. Ao tocá-lo, você produz o efeito da magia Arrombar, abrindo fechaduras e mecanismos comuns ou mágicos dentro do alcance. Depois do décimo uso, o carrilhão se quebra e perde a magia.",
+    "uso": ""
   },
   {
     "n": "Diadema de Explosão",
@@ -3590,12 +3554,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-039",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O diadema permite lançar Raio Ardente uma vez por dia, sem gastar espaço de magia. O ataque mágico recebe +5 na jogada de ataque e produz os raios de fogo normalmente.",
+    "uso": ""
   },
   {
     "n": "Manto da Aracnídea",
@@ -3605,12 +3568,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-040",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A capa concede resistência a veneno, capacidade de escalar superfícies como uma aranha e permite lançar Teia. Também ajuda a atravessar paredes e tetos enquanto estiver escalando; os efeitos de escalada dependem de você estar usando a capa.",
+    "uso": ""
   },
   {
     "n": "Manto de Deslocamento",
@@ -3620,12 +3582,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-041",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A capa cria imagens ilusórias que deslocam sua posição aparente. Ataques contra você têm desvantagem enquanto o efeito funciona; sofrer dano suprime o benefício até o início do seu próximo turno. O efeito não funciona enquanto você estiver incapacitado ou com deslocamento 0.",
+    "uso": ""
   },
   {
     "n": "Manto Élfico",
@@ -3635,12 +3596,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-042",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A capa faz você parecer menos nítido e confunde observadores. Criaturas têm desvantagem em testes de Sabedoria (Percepção) para vê-lo, e você tem vantagem em Destreza (Furtividade) para se esconder.",
+    "uso": ""
   },
   {
     "n": "Manto da Invisibilidade",
@@ -3650,12 +3610,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-043",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A capa possui três cargas e recupera 1d3 cargas ao amanhecer. Com uma ação, você gasta uma carga para ficar invisível por até 1 hora; o efeito termina se você atacar, conjurar magia ou retirar o capuz.",
+    "uso": ""
   },
   {
     "n": "Manto de Proteção",
@@ -3665,12 +3624,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-044",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Enquanto estiver usando esta capa, você recebe +1 na Classe de Armadura e em todos os testes de resistência. O bônus é constante e não exige ativação.",
+    "uso": ""
   },
   {
     "n": "Manto do Morcego",
@@ -3680,12 +3638,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-045",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A capa concede vantagem em testes de Destreza (Furtividade). Em luz fraca ou escuridão, você pode usar uma ação para assumir a forma de morcego ou voar segurando suas bordas, conforme as funções mágicas do manto.",
+    "uso": ""
   },
   {
     "n": "Manto da Raia Manta",
@@ -3695,12 +3652,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-046",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A capa permite respirar debaixo d'água e concede deslocamento de natação. Ao estender a peça, ela se transforma em uma manta-raia que pode nadar com você; o efeito deixa de funcionar quando a capa é removida.",
+    "uso": ""
   },
   {
     "n": "Bola de Cristal",
@@ -3710,12 +3666,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-047",
-    "peso": "Não especificado no SRD",
+    "peso": "3 lb",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A bola de cristal permite observar à distância uma criatura ou local conhecido, como na magia Vidência. A observação dura até 10 minutos e exige concentração; o alvo pode resistir ao efeito com uma salvaguarda apropriada.",
+    "uso": ""
   },
   {
     "n": "Bola de Cristal de Leitura Mental",
@@ -3725,12 +3680,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-048",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta versão da bola de cristal funciona como uma bola de cristal comum e também permite tentar ler os pensamentos da criatura observada. O alvo pode resistir à leitura mental, e a comunicação não concede controle sobre suas decisões.",
+    "uso": ""
   },
   {
     "n": "Bola de Cristal de Telepatia",
@@ -3740,12 +3694,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-049",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Além da função de vidência, esta bola de cristal permite estabelecer comunicação telepática com a criatura observada, desde que ela esteja no alcance e seja capaz de compreender a mensagem.",
+    "uso": ""
   },
   {
     "n": "Bola de Cristal de Visão da Verdade",
@@ -3755,12 +3708,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-050",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Além da função de vidência, esta bola de cristal concede visão verdadeira ao observador durante a utilização, permitindo enxergar através de ilusões, detectar criaturas invisíveis e perceber transformações mágicas dentro do alcance da visão verdadeira.",
+    "uso": ""
   },
   {
     "n": "Cubo de Força",
@@ -3770,12 +3722,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-051",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O cubo possui 36 cargas e seis faces, cada uma associada a uma barreira diferente. Ao pressionar uma face, você gasta cargas para criar uma barreira de força ao redor de si; o tamanho e a proteção dependem da face escolhida. O cubo recupera 1d20 cargas diariamente.",
+    "uso": ""
   },
   {
     "n": "Portal Cúbico",
@@ -3785,12 +3736,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-052",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Cada uma das seis faces do cubo corresponde a um Plano de Existência. Ao pressionar uma face, você pode abrir um portal para o plano associado ou fechar um portal existente; o uso exige cuidado, pois criaturas e efeitos podem atravessar a passagem.",
+    "uso": ""
   },
   {
     "n": "Adaga Venenosa",
@@ -3800,12 +3750,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-053",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta adaga concede +1 nas jogadas de ataque e dano. Uma vez por dia, você pode revesti-la com veneno como ação bônus; no próximo acerto, o alvo faz uma salvaguarda de Constituição ou sofre dano de veneno adicional e fica envenenado.",
+    "uso": ""
   },
   {
     "n": "Espada Dançarina",
@@ -3815,12 +3764,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-054",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A espada pode lutar por conta própria. Com uma ação bônus, você a arremessa ao ar e pronuncia uma palavra de comando; ela flutua, ataca um alvo escolhido por até 1 minuto e retorna à sua mão quando o efeito termina, desde que esteja livre.",
+    "uso": ""
   },
   {
     "n": "Jarra de Água Infinita",
@@ -3830,12 +3778,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-055",
-    "peso": "Não especificado no SRD",
+    "peso": "2 lb",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A jarra produz água em quantidades diferentes conforme a palavra de comando: um fio constante, uma fonte abundante ou um jato poderoso capaz de empurrar criaturas. O fluxo pode ser interrompido com outra palavra de comando.",
+    "uso": ""
   },
   {
     "n": "Baralho de Ilusões",
@@ -3845,12 +3792,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-056",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O baralho contém cartas que, quando retiradas e lançadas, criam ilusões de criaturas. A imagem parece real à primeira vista, mas não possui substância; ela desaparece quando dissipada ou quando alguém interage com ela de forma convincente.",
+    "uso": ""
   },
   {
     "n": "Defensora",
@@ -3860,12 +3806,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-057",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta arma concede +3 nas jogadas de ataque e dano. Ao realizar um ataque, antes de rolar, você pode transferir parte ou todo o bônus de +3 para sua CA; a escolha permanece até o início do seu próximo turno.",
+    "uso": ""
   },
   {
     "n": "Armadura Demoníaca",
@@ -3875,12 +3820,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-058",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta armadura de placas concede +1 à CA. Suas manoplas se transformam em garras mágicas que causam 1d8 de dano cortante, e o elmo permite lançar Medo uma vez por dia. A armadura é amaldiçoada e prende-se ao usuário até que a maldição seja removida.",
+    "uso": ""
   },
   {
     "n": "Algemas Dimensionais",
@@ -3890,12 +3834,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-059",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "As algemas se ajustam a uma criatura Grande ou menor e impedem teletransporte e viagens planares. Elas são difíceis de quebrar ou abrir, e a magia que permitiria escapar é suprimida enquanto a criatura estiver presa.",
+    "uso": ""
   },
   {
     "n": "Orbe Dracônico",
@@ -3905,12 +3848,11 @@ const MAGIC_ITEMS = [
     "raridade": "Artefato",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-060",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O orbe dracônico é um artefato ligado a dragões. Ele pode detectar a presença de dragões, comunicar-se com eles e tentar influenciar criaturas dracônicas; seu poder também atrai a atenção de dragões que reconhecem o artefato.",
+    "uso": ""
   },
   {
     "n": "Cota de Escamas de Dragão",
@@ -3920,12 +3862,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-061",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta cota de escamas concede +1 na CA, resistência ao tipo de dano associado ao dragão de origem e vantagem em salvaguardas contra o sopro de dragões. Você também pode localizar o dragão mais próximo do tipo relacionado, desde que esteja no mesmo plano.",
+    "uso": ""
   },
   {
     "n": "Matadora de Dragões",
@@ -3935,12 +3876,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-062",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta arma concede +1 nas jogadas de ataque e dano e causa 3d6 de dano adicional quando atinge um dragão. O bônus especial só funciona contra criaturas do tipo Dragão.",
+    "uso": ""
   },
   {
     "n": "Pó do Desaparecimento",
@@ -3950,12 +3890,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-063",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao espalhar o pó no ar, ele cria uma nuvem que torna invisíveis as criaturas e objetos em uma área. A invisibilidade dura 2d4 minutos e termina antes para uma criatura que ataque, cause dano ou conjure uma magia.",
+    "uso": ""
   },
   {
     "n": "Pó da Secura",
@@ -3965,12 +3904,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-064",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O pó contém várias pitadas; cada uma transforma até 4,5 metros cúbicos de água em uma pequena bolinha sólida. Se for lançado contra um elemental da água, causa dano necrótico e exige uma salvaguarda de Constituição para reduzir o dano.",
+    "uso": ""
   },
   {
     "n": "Pó de Espirros e Sufocamento",
@@ -3980,12 +3918,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-065",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao soprar o pó, ele cria uma nuvem que provoca espirros intensos e sufocamento. Criaturas na área fazem salvaguarda de Constituição; quem falhar fica incapacitado e começa a sufocar, podendo repetir a salvaguarda ao fim dos turnos para encerrar o efeito.",
+    "uso": ""
   },
   {
     "n": "Armadura de Placas Anã",
@@ -3995,12 +3932,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-066",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta armadura de placas concede +2 à Classe de Armadura. Enquanto a veste, você tem vantagem em salvaguardas de Força feitas para resistir a efeitos que o empurrem ou o derrubem; seu peso não reduz seu deslocamento.",
+    "uso": ""
   },
   {
     "n": "Martelo Anão Arremessador",
@@ -4010,12 +3946,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-067",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Este martelo de guerra concede +3 nas jogadas de ataque e dano, exige sintonia por um anão e retorna à sua mão imediatamente após ser arremessado. Quando atinge um gigante, causa 1d8 de dano contundente adicional; se for arremessado, o dano extra contra gigantes aumenta para 2d8.",
+    "uso": ""
   },
   {
     "n": "Aljava Eficiente",
@@ -4025,12 +3960,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-068",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A aljava possui compartimentos extradimensionais que armazenam grande quantidade de flechas, virotes, azagaias e até arcos. Sacar uma peça de munição ou arma guardada nela exige a interação normal de sacar equipamento.",
+    "uso": ""
   },
   {
     "n": "Garrafa de Efreeti",
@@ -4040,12 +3974,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-069",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A garrafa contém um efreeti que pode ser libertado ao abrir a tampa. O resultado varia: o gênio pode atacar, conceder desejos limitados ou servir por um período; depois de usado, a garrafa fica inativa por um intervalo antes de poder ser aberta novamente.",
+    "uso": ""
   },
   {
     "n": "Gema Elemental",
@@ -4055,12 +3988,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-070",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A gema se quebra quando você a usa e invoca um elemental correspondente à cor da pedra: ar, terra, fogo ou água. O elemental obedece às suas ordens por até 1 hora ou até ser reduzido a 0 PV, quando desaparece.",
+    "uso": ""
   },
   {
     "n": "Elixir da Saúde",
@@ -4070,12 +4002,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-071",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao beber o elixir, você encerra doenças e condições que afetem seus sentidos ou corpo, como cegueira, surdez, paralisia e envenenamento. O efeito não restaura pontos de vida perdidos nem remove maldições que não sejam doenças.",
+    "uso": ""
   },
   {
     "n": "Cota Élfica",
@@ -4085,12 +4016,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-072",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta cota de malha concede +1 à Classe de Armadura. Uma criatura pode vesti-la mesmo sem proficiência em armaduras médias; nesse caso, não sofre a desvantagem normal em testes de Destreza (Furtividade) por falta de proficiência.",
+    "uso": ""
   },
   {
     "n": "Arco de Energia",
@@ -4100,12 +4030,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-073",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Este arco cria flechas de energia ao ser tensionado, não precisando de munição física. Seus disparos são mágicos e podem atingir alvos como ataques à distância; o poder e o dano exato dependem da versão apresentada no catálogo.",
+    "uso": ""
   },
   {
     "n": "Garrafa de Fumaça Infinita",
@@ -4115,12 +4044,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-074",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao retirar a rolha, a garrafa libera uma nuvem de fumaça espessa que se espalha e obscurece uma grande área. Recolocar a rolha encerra a emissão; a fumaça se dissipa depois de alguns minutos ou conforme o vento e as condições do ambiente.",
+    "uso": ""
   },
   {
     "n": "Olhos do Encantamento",
@@ -4130,12 +4058,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-075",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "As lentes possuem três cargas e recuperam cargas ao amanhecer. Ao olhar para um humanoide e usar uma carga, você pode tentar encantá-lo; o alvo faz uma salvaguarda de Sabedoria ou fica enfeitiçado por você por um período limitado.",
+    "uso": ""
   },
   {
     "n": "Olhos da Visão Minuciosa",
@@ -4145,12 +4072,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-076",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "As lentes permitem enxergar detalhes minúsculos com clareza. Enquanto as usa, você tem vantagem em testes de Inteligência (Investigação) que dependam de examinar objetos, inscrições, mecanismos ou pistas pequenas.",
+    "uso": ""
   },
   {
     "n": "Olhos da Águia",
@@ -4160,12 +4086,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-077",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "As lentes concedem vantagem em testes de Sabedoria (Percepção) relacionados à visão. Além disso, olhar a longas distâncias não impõe a desvantagem normal nos testes de Percepção por distância.",
+    "uso": ""
   },
   {
     "n": "Ficha de Pena",
@@ -4175,12 +4100,11 @@ const MAGIC_ITEMS = [
     "raridade": "Varia",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-078",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Cada ficha de pena possui um efeito específico, como criar uma embarcação, uma árvore, um chicote ou um pássaro mensageiro. Ao usar a ficha, o efeito correspondente acontece e a pena desaparece; cada tipo tem um uso único.",
+    "uso": ""
   },
   {
     "n": "Estatueta de Poder Maravilhoso",
@@ -4190,12 +4114,11 @@ const MAGIC_ITEMS = [
     "raridade": "Varia",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-079",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A estatueta é uma pequena figura que se transforma em uma criatura viva quando você pronuncia sua palavra de comando. A criatura serve por um período limitado, segue suas ordens e depois retorna à forma de estatueta; a duração e o intervalo de reutilização variam conforme o animal representado.",
+    "uso": ""
   },
   {
     "n": "Língua Flamejante",
@@ -4205,12 +4128,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-080",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta arma pode ser ativada para envolver sua lâmina em chamas. Enquanto estiver acesa, causa dano de fogo adicional em cada acerto; a chama pode ser extinta e reacendida com uma palavra de comando.",
+    "uso": ""
   },
   {
     "n": "Barco Dobrável",
@@ -4220,12 +4142,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-081",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O barco dobrável assume três formas: uma caixa pequena, um barco de remo ou um navio maior. Uma palavra de comando altera a forma; o veículo aparece ou desaparece em um espaço adequado e pode transportar passageiros e carga conforme seu tamanho.",
+    "uso": ""
   },
   {
     "n": "Marca Gélida",
@@ -4235,12 +4156,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-082",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta arma concede +1 nas jogadas de ataque e dano e causa 1d6 de dano de frio adicional em cada acerto. Enquanto estiver empunhada, você tem resistência a dano de fogo; como ação, pode extinguir todas as chamas não mágicas em uma área próxima.",
+    "uso": ""
   },
   {
     "n": "Manoplas de Força de Ogro",
@@ -4250,12 +4170,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-083",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Enquanto usar estas manoplas, seu valor de Força passa a ser 19, a menos que já seja 19 ou maior. O efeito permite usar armas pesadas e realizar proezas físicas com a força de um ogro.",
+    "uso": ""
   },
   {
     "n": "Gema do Brilho",
@@ -4265,12 +4184,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-084",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A gema possui cargas que podem ser gastas para emitir luz intensa, cegar criaturas ou revelar coisas ocultas. Ela recupera cargas ao amanhecer; quando todas são gastas, perde seu brilho mágico até ser recarregada por meios apropriados.",
+    "uso": ""
   },
   {
     "n": "Gema da Visão",
@@ -4280,12 +4198,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-085",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A gema concede visão verdadeira por um período limitado quando você a observa e se concentra. Ela permite enxergar criaturas invisíveis, ilusões, transformações e formas etéreas dentro do alcance da visão verdadeira.",
+    "uso": ""
   },
   {
     "n": "Matadora de Gigantes",
@@ -4295,12 +4212,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-086",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta arma concede +1 nas jogadas de ataque e dano e causa 2d6 de dano adicional contra gigantes. Quando acerta um gigante Grande ou maior, ele deve passar em uma salvaguarda de Força CD 15 ou fica Caído.",
+    "uso": ""
   },
   {
     "n": "Couro Batido Ilusório",
@@ -4310,12 +4226,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-087",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta armadura de couro batido pode mudar de aparência para parecer roupas comuns ou outro traje. Como ação, você altera sua aparência visual, mas mantém as estatísticas e a proteção da armadura.",
+    "uso": ""
   },
   {
     "n": "Luvas de Aparar Projéteis",
@@ -4325,12 +4240,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-088",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Quando um ataque à distância com arma acerta você, pode usar sua reação para reduzir o dano. Se o projétil for pequeno o bastante e sua mão estiver livre, pode até segurá-lo após reduzir o dano a zero.",
+    "uso": ""
   },
   {
     "n": "Luvas de Natação e Escalada",
@@ -4340,12 +4254,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-089",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "As luvas concedem deslocamento de natação igual ao de caminhada e permitem escalar superfícies difíceis sem teste adicional. Elas também ajudam a manter a pegada enquanto você nada ou escala.",
+    "uso": ""
   },
   {
     "n": "Luvas de Ladinagem",
@@ -4355,12 +4268,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-090",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "As luvas concedem +5 em testes de Destreza (Prestidigitação) e em testes de Destreza para abrir fechaduras. O bônus funciona enquanto você as estiver usando, sem exigir ativação.",
+    "uso": ""
   },
   {
     "n": "Óculos da Noite",
@@ -4370,12 +4282,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-091",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Os óculos concedem visão no escuro a até 18 metros. Se você já tiver visão no escuro, o alcance aumenta em 18 metros.",
+    "uso": ""
   },
   {
     "n": "Martelo dos Trovões",
@@ -4385,12 +4296,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-092",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O martelo de guerra concede bônus mágico de ataque e dano e aumenta a Força do usuário, além de produzir efeitos de trovão quando atinge um alvo. Para liberar todo o poder, é necessário possuir itens complementares e satisfazer as condições de sintonia estabelecidas pelo item.",
+    "uso": ""
   },
   {
     "n": "Mochila Prática",
@@ -4400,12 +4310,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-093",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A mochila possui três bolsos internos extradimensionais. Cada bolso pode armazenar objetos, e retirar um objeto de qualquer compartimento é uma interação rápida; a mochila pesa pouco mesmo quando cheia, mas tem limite de capacidade.",
+    "uso": ""
   },
   {
     "n": "Chapéu do Disfarce",
@@ -4415,12 +4324,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-094",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O chapéu permite lançar Disfarçar-se à vontade. Você altera a aparência de roupas, armadura e corpo dentro dos limites da magia, mas não muda sua voz nem as propriedades físicas dos objetos.",
+    "uso": ""
   },
   {
     "n": "Chapéu de Muitas Magias",
@@ -4430,12 +4338,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-095",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Este chapéu guarda um repertório limitado de magias que pode ser conjurado por meio de palavras ou gestos do usuário. As magias disponíveis, cargas e restrições de uso dependem do registro específico do item; a ativação não exige consultar uma base externa.",
+    "uso": ""
   },
   {
     "n": "Tiara do Intelecto",
@@ -4445,12 +4352,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-096",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Enquanto usar a tiara, seu valor de Inteligência passa a ser 19, a menos que já seja 19 ou maior. Ela melhora testes e salvaguardas que usem Inteligência, mas não concede proficiência em perícias.",
+    "uso": ""
   },
   {
     "n": "Elmo do Brilho",
@@ -4460,12 +4366,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-097",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O elmo contém gemas que podem ser usadas para lançar magias de fogo, luz ou proteção. Cada gema possui cargas próprias e pode se apagar quando consumida; se todas forem destruídas, o elmo perde grande parte de seu poder e pode explodir.",
+    "uso": ""
   },
   {
     "n": "Elmo da Compreensão de Idiomas",
@@ -4475,12 +4380,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-098",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O elmo permite compreender qualquer idioma falado que você ouça. Ele não concede a capacidade de falar ou escrever idiomas desconhecidos e não decifra automaticamente textos codificados.",
+    "uso": ""
   },
   {
     "n": "Elmo da Telepatia",
@@ -4490,12 +4394,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-099",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O elmo permite comunicar-se telepaticamente com uma criatura visível e ler seus pensamentos superficiais. O alvo pode resistir à leitura mental com uma salvaguarda de Sabedoria; você também pode enviar mensagens sem falar.",
+    "uso": ""
   },
   {
     "n": "Elmo do Teletransporte",
@@ -4505,12 +4408,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-100",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O elmo possui cargas que permitem lançar Teletransporte. Você escolhe um destino conhecido ou descrito; o resultado depende do conhecimento do local e das regras da magia, e as cargas são recuperadas ao amanhecer.",
+    "uso": ""
   },
   {
     "n": "Vingadora Sagrada",
@@ -4520,12 +4422,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-101",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta espada sagrada concede bônus mágico de ataque e dano. Nas mãos de um paladino sintonizado, emite luz, causa dano radiante adicional a mortos-vivos e ínferos e pode criar uma aura que protege aliados contra magia.",
+    "uso": ""
   },
   {
     "n": "Buzina Explosiva",
@@ -4535,12 +4436,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-102",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao soprar a buzina, ela emite uma explosão sonora em um cone de 9 metros. Criaturas e objetos na área sofrem 5d8 de dano trovejante e fazem salvaguarda de Constituição CD 15 para reduzir o dano à metade. Há 10% de chance de a buzina explodir após cada uso, ferindo quem a sopra.",
+    "uso": ""
   },
   {
     "n": "Chifre de Valhala",
@@ -4550,12 +4450,11 @@ const MAGIC_ITEMS = [
     "raridade": "Varia",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-103",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O chifre invoca guerreiros berserkers de Valhala para lutar ao seu lado. O número e a força dos guerreiros dependem do material do chifre; eles permanecem por um período limitado e depois desaparecem. O uso exige intervalo para recarga.",
+    "uso": ""
   },
   {
     "n": "Ferraduras de Zéfiro",
@@ -4565,12 +4464,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-104",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "As ferraduras permitem que a montaria flutue alguns centímetros acima do chão, evitando terreno difícil e deixando marcas mínimas. O cavalo pode atravessar água e superfícies frágeis sem afundar, mas não ganha capacidade de voar.",
+    "uso": ""
   },
   {
     "n": "Ferraduras da Velocidade",
@@ -4580,12 +4478,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-105",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "As ferraduras aumentam o deslocamento de caminhada da montaria em 9 metros. O bônus funciona enquanto as quatro ferraduras estiverem colocadas e não exige ativação.",
+    "uso": ""
   },
   {
     "n": "Bastão Imóvel",
@@ -4595,12 +4492,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-106",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O bastão pode ser ativado para ficar fixo no espaço, mesmo no ar. Ele suporta até 8.000 libras de força; uma criatura pode tentar movê-lo com um teste de Força CD 30. Uma nova ativação libera o bastão.",
+    "uso": ""
   },
   {
     "n": "Fortaleza Instantânea",
@@ -4610,12 +4506,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-107",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A fortaleza é uma pequena peça metálica que se transforma em uma torre de ferro quando você pronuncia a palavra de comando. Ela cria uma estrutura defensiva com espaço interno e pode esmagar criaturas próximas durante a expansão; outra palavra a reduz novamente.",
+    "uso": ""
   },
   {
     "n": "Pedra Ioun",
@@ -4625,12 +4520,11 @@ const MAGIC_ITEMS = [
     "raridade": "Varia",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-108",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Uma pedra Ioun orbita a cabeça de quem a sintoniza e concede um benefício específico, como bônus a atributos, defesa, regeneração ou armazenamento de magia. A pedra pode ser agarrada ou derrubada por um adversário, interrompendo temporariamente seu efeito.",
+    "uso": ""
   },
   {
     "n": "Faixas de Ferro",
@@ -4640,12 +4534,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-109",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "As faixas podem ser arremessadas contra uma criatura Enorme ou menor a até 18 metros. O alvo faz uma salvaguarda de Força CD 20; em falha, fica contido pelas bandas. A criatura pode tentar escapar com teste de Força CD 20, e as faixas têm CA 20 e 25 PV.",
+    "uso": ""
   },
   {
     "n": "Frasco de Ferro",
@@ -4655,12 +4548,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-110",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O frasco de ferro pode aprisionar uma criatura extraplanar que esteja próxima quando a palavra de comando é pronunciada. A criatura fica contida no interior; abrir o frasco pode libertá-la ou permitir tentar comandá-la, mas cada abertura traz riscos e consequências.",
+    "uso": ""
   },
   {
     "n": "Azagaia Relampejante",
@@ -4670,12 +4562,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-111",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A azagaia se transforma em um raio quando arremessada. O alvo sofre o dano normal da arma e um raio se estende em linha, causando dano elétrico às criaturas no caminho; o item recupera sua forma após o ataque.",
+    "uso": ""
   },
   {
     "n": "Lanterna Reveladora",
@@ -4685,12 +4576,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-112",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A lanterna revela criaturas e objetos invisíveis dentro de sua luz. Quando acesa, ilumina uma área normal e uma área maior de luz fraca; seres invisíveis ficam visíveis enquanto permanecerem na região iluminada.",
+    "uso": ""
   },
   {
     "n": "Lâmina da Sorte",
@@ -4700,12 +4590,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-113",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta espada concede bônus mágico de ataque e dano e contém desejos limitados. Ela pode armazenar até três desejos; alguns usos consomem um desejo, enquanto a arma também pode conceder bônus defensivos ou ofensivos conforme a quantidade restante.",
+    "uso": ""
   },
   {
     "n": "Maça da Ruptura",
@@ -4715,12 +4604,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-114",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A maça concede bônus mágico de ataque e dano e causa dano radiante adicional contra mortos-vivos. Se um morto-vivo for reduzido a poucos pontos de vida pelo golpe, pode ser destruído em vez de apenas sofrer dano.",
+    "uso": ""
   },
   {
     "n": "Maça Esmagadora",
@@ -4730,12 +4618,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-115",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A maça concede bônus de ataque e dano e causa dano adicional contra construtos. Quando o resultado do ataque é um acerto crítico contra um construto, o dano adicional aumenta significativamente.",
+    "uso": ""
   },
   {
     "n": "Maça do Terror",
@@ -4745,12 +4632,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-116",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A maça possui cargas que podem ser gastas para emitir uma onda de terror. Criaturas próximas fazem salvaguarda de Sabedoria; quem falhar fica amedrontado e tenta fugir, repetindo a salvaguarda ao fim dos turnos para encerrar o efeito.",
+    "uso": ""
   },
   {
     "n": "Manto de Resistência a Magia",
@@ -4760,12 +4646,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-117",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Enquanto usar este manto, você tem vantagem em salvaguardas contra magias. A proteção se aplica a efeitos mágicos que exijam uma salvaguarda, mas não concede resistência a todos os tipos de dano mágico.",
+    "uso": ""
   },
   {
     "n": "Manual da Saúde Corporal",
@@ -4775,12 +4660,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-118",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao estudar o manual durante 48 horas ao longo de seis dias, sua Constituição aumenta em 2, até o máximo de 30, e seu máximo de Constituição aumenta na mesma quantidade. Depois de usado, o livro perde a magia por um século.",
+    "uso": ""
   },
   {
     "n": "Manual do Exercício Físico",
@@ -4790,12 +4674,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-119",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao estudar o manual durante 48 horas ao longo de seis dias, sua Força aumenta em 2, até o máximo de 30, e seu máximo de Força aumenta na mesma quantidade. Depois de usado, o livro perde a magia por um século.",
+    "uso": ""
   },
   {
     "n": "Manual dos Golems",
@@ -4805,12 +4688,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-120",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Este livro contém as instruções necessárias para construir um tipo específico de golem. A leitura exige tempo, componentes caros e proficiência apropriada; ao concluir o processo, o leitor pode criar o golem descrito, que obedece às regras e custos do manual.",
+    "uso": ""
   },
   {
     "n": "Manual da Agilidade de Ação",
@@ -4820,12 +4702,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-121",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao estudar o manual durante 48 horas ao longo de seis dias, sua Destreza aumenta em 2, até o máximo de 30, e seu máximo de Destreza aumenta na mesma quantidade. Depois de usado, o livro perde a magia por um século.",
+    "uso": ""
   },
   {
     "n": "Pigmentos Maravilhosos",
@@ -4835,12 +4716,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-122",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Os pigmentos permitem pintar objetos ou criaturas em superfícies, fazendo com que o desenho se torne real. O conjunto possui várias cores e aplicações; a quantidade de pigmento limita o tamanho e o número de criações, que podem desaparecer se forem danificadas ou removidas.",
+    "uso": ""
   },
   {
     "n": "Medalhão dos Pensamentos",
@@ -4850,12 +4730,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-123",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O medalhão possui cargas que permitem detectar pensamentos de criaturas próximas. Ao gastar uma carga, você pode perceber pensamentos superficiais e, com concentração, tentar aprofundar a leitura; o alvo pode resistir com salvaguarda de Sabedoria.",
+    "uso": ""
   },
   {
     "n": "Espelho de Aprisionamento",
@@ -4865,12 +4744,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-124",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O espelho contém compartimentos extradimensionais que podem aprisionar criaturas que vejam seu reflexo. Uma criatura que falhe na salvaguarda é absorvida para uma cela interna; o espelho pode armazenar várias criaturas e permite libertá-las de forma controlada.",
+    "uso": ""
   },
   {
     "n": "Armadura de Mithral",
@@ -4880,12 +4758,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-125",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Armadura de mithral é extremamente leve e flexível. Se for uma armadura média ou pesada, não impõe desvantagem em testes de Destreza (Furtividade) e remove requisitos de Força; armadura pesada de mithral também não reduz o deslocamento por peso.",
+    "uso": ""
   },
   {
     "n": "Baralho Misterioso",
@@ -4895,12 +4772,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-126",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O baralho misterioso contém cartas com efeitos mágicos variados, determinados aleatoriamente quando uma carta é retirada. Cada carta pode conceder um benefício ou impor uma consequência significativa; o efeito depende da carta revelada e não pode ser escolhido pelo usuário.",
+    "uso": ""
   },
   {
     "n": "Colar de Adaptação",
@@ -4910,12 +4786,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-127",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O colar permite respirar normalmente em qualquer ambiente, inclusive debaixo d'água ou em ar rarefeito, e concede vantagem em salvaguardas contra gases nocivos e efeitos que dependam de inalação.",
+    "uso": ""
   },
   {
     "n": "Colar de Bolas de Fogo",
@@ -4925,12 +4800,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-128",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O colar contém várias contas explosivas. Você pode remover uma ou mais contas e arremessá-las a até 18 metros; cada conta explode como uma Bola de Fogo centrada no ponto de impacto. Criaturas na área fazem salvaguarda de Destreza CD 15, sofrendo 8d6 de dano de fogo em falha ou metade em sucesso; lançar várias contas aumenta o dano.",
+    "uso": ""
   },
   {
     "n": "Colar de Contas de Oração",
@@ -4940,12 +4814,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-129",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O colar reúne contas de oração removíveis. Cada conta permite conjurar uma magia divina específica, como Bênção, Curar Ferimentos, Restauração ou outras magias sagradas; a conta desaparece depois do uso e a lista de magias varia conforme o tipo de conta.",
+    "uso": ""
   },
   {
     "n": "Ladrão de Nove Vidas",
@@ -4955,12 +4828,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-130",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta espada possui nove cargas. Quando você obtém um acerto crítico contra uma criatura que tenha 100 pontos de vida ou menos, pode gastar uma carga para forçar o alvo a fazer uma salvaguarda de Constituição CD 15; em falha, ele morre instantaneamente. A espada perde uma carga por tentativa.",
+    "uso": ""
   },
   {
     "n": "Arco do Juramento",
@@ -4970,12 +4842,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-131",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O arco do juramento permite marcar um inimigo como presa. Contra o alvo escolhido, seus ataques têm vantagem e ignoram certos tipos de cobertura; se acertar, causa dano perfurante adicional. O efeito dura até o alvo cair ou o usuário escolher outro após descanso.",
+    "uso": ""
   },
   {
     "n": "Óleo da Eterealidade",
@@ -4985,12 +4856,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-132",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao aplicar o óleo sobre si, você se torna etéreo por 1 hora. Enquanto estiver no Plano Etéreo, pode atravessar criaturas e objetos físicos, mas não pode afetar normalmente o Plano Material; o efeito termina quando o tempo acaba.",
+    "uso": ""
   },
   {
     "n": "Óleo do Fio Afiado",
@@ -5000,12 +4870,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-133",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Este óleo aplicado em uma arma ou até cinco peças de munição concede bônus às jogadas de ataque e dano e transforma os acertos em golpes mágicos de grande precisão. O efeito dura 1 hora ou até que a quantidade de ataques permitida seja consumida.",
+    "uso": ""
   },
   {
     "n": "Óleo da Escorregadela",
@@ -5015,12 +4884,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-134",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao aplicar o óleo na pele, você fica escorregadio e difícil de agarrar. Durante 8 horas, tem vantagem em testes e salvaguardas para escapar de agarrões e contenções, e criaturas têm dificuldade para manter contato físico com você.",
+    "uso": ""
   },
   {
     "n": "Pérola do Poder",
@@ -5030,12 +4898,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-135",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A pérola permite recuperar um espaço de magia gasto. Ao usar uma ação, escolha um espaço de até 3º círculo; a pérola restaura esse espaço uma vez por dia.",
+    "uso": ""
   },
   {
     "n": "Periapto da Saúde",
@@ -5045,12 +4912,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-136",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Enquanto portar o periapto, você fica imune a doenças. Qualquer doença que já esteja afetando você é suprimida enquanto o item estiver em sua posse.",
+    "uso": ""
   },
   {
     "n": "Periapto contra Veneno",
@@ -5060,12 +4926,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-137",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O periapto concede imunidade a venenos e à condição Envenenado. Toxinas ingeridas ou aplicadas não produzem efeito enquanto o amuleto estiver sendo usado.",
+    "uso": ""
   },
   {
     "n": "Periapto de Fechamento de Feridas",
@@ -5075,12 +4940,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-138",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O periapto estabiliza você automaticamente quando começa seu turno com 0 pontos de vida. Além disso, quando você rola dados para recuperar pontos de vida após cair a 0 PV, qualquer dado que mostre 1 é tratado como 2.",
+    "uso": ""
   },
   {
     "n": "Filtro do Amor",
@@ -5090,12 +4954,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-139",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Quem beber o filtro fica enfeitiçado pela próxima criatura que enxergar dentro do período de efeito. A criatura escolhida parece encantadora ao bebedor, que passa a agir como admirador; o efeito termina conforme a duração da poção ou se for removido por magia.",
+    "uso": ""
   },
   {
     "n": "Flautas Assombradoras",
@@ -5105,12 +4968,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-140",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "As flautas podem produzir uma música sobrenatural que assusta criaturas próximas. Ao tocar, escolha as criaturas que conseguem ouvir; elas fazem salvaguarda de Sabedoria ou ficam amedrontadas, repetindo o teste para encerrar o efeito.",
+    "uso": ""
   },
   {
     "n": "Flautas dos Esgotos",
@@ -5120,12 +4982,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-141",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "As flautas atraem ratos e permitem comandá-los. Ao tocar, você pode chamar enxames de ratos próximos e dar ordens simples; criaturas que não sejam ratos não são afetadas pela música.",
+    "uso": ""
   },
   {
     "n": "Armadura de Placas Etérea",
@@ -5135,12 +4996,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-142",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta armadura de placas pode transportar o usuário para o Plano Etéreo. Ao ativar sua propriedade, você se torna etéreo por um período limitado e pode atravessar objetos físicos; a ativação consome cargas ou usos conforme a ficha do item.",
+    "uso": ""
   },
   {
     "n": "Buraco Portátil",
@@ -5150,12 +5010,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-143",
-    "peso": "Não especificado no SRD",
+    "peso": "— (tecido dobrado)",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O buraco portátil é um círculo de tecido que, ao ser colocado sobre uma superfície, abre um espaço extradimensional com cerca de 3 metros de profundidade. Pode armazenar criaturas e objetos; dobrá-lo fecha a passagem, e o ar dentro do espaço é limitado.",
+    "uso": ""
   },
   {
     "n": "Poção de Amizade Animal",
@@ -5165,12 +5024,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-144",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao beber esta poção, você pode lançar Amizade Animal sobre uma criatura do tipo Besta. O alvo faz a salvaguarda exigida pela magia; em falha, fica amigável e não agressivo pelo período do efeito.",
+    "uso": ""
   },
   {
     "n": "Poção de Clarividência",
@@ -5180,12 +5038,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-145",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao beber, você recebe o efeito de Vidência, permitindo observar à distância uma criatura ou local conhecido por até 10 minutos. O alvo pode resistir com salvaguarda e a poção exige concentração durante a observação.",
+    "uso": ""
   },
   {
     "n": "Poção de Escalada",
@@ -5195,12 +5052,11 @@ const MAGIC_ITEMS = [
     "raridade": "Comum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-146",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao beber, você recebe deslocamento de escalada igual ao seu deslocamento de caminhada por 1 hora. Durante esse tempo, escalar não custa movimento extra e você mantém a aderência em superfícies difíceis.",
+    "uso": ""
   },
   {
     "n": "Poção de Redução",
@@ -5210,12 +5066,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-147",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao beber, você diminui de tamanho por 1d4 horas, como na magia Reduzir. Seu equipamento acompanha a transformação; você recebe os efeitos de uma criatura menor, inclusive redução de dano e vantagem em certas situações de furtividade.",
+    "uso": ""
   },
   {
     "n": "Poção de Voo",
@@ -5225,12 +5080,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-148",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao beber, você recebe deslocamento de voo de 18 metros por 1 hora. Se estiver voando quando o efeito terminar, desce suavemente até o chão em vez de cair.",
+    "uso": ""
   },
   {
     "n": "Poção de Forma Gasosa",
@@ -5240,12 +5094,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-149",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao beber, seu corpo se transforma em névoa por 1 hora. Você não pode falar, manipular objetos ou atacar normalmente, mas pode atravessar aberturas estreitas e tem resistência a dano não mágico enquanto estiver na forma gasosa.",
+    "uso": ""
   },
   {
     "n": "Poção de Força de Gigante",
@@ -5255,12 +5108,11 @@ const MAGIC_ITEMS = [
     "raridade": "Varia",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-150",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A poção aumenta sua Força para o valor associado ao tipo de gigante por 1 hora. O resultado varia de gigante da colina a gigante da tempestade; se sua Força já for maior, o valor não é reduzido.",
+    "uso": ""
   },
   {
     "n": "Poção de Crescimento",
@@ -5270,12 +5122,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-151",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao beber, você cresce uma categoria de tamanho por 1d4 horas. Seus ataques com armas causam dano adicional e você tem vantagem em testes de Força e salvaguardas de Força enquanto estiver aumentado.",
+    "uso": ""
   },
   {
     "n": "Poções de Cura",
@@ -5285,12 +5136,11 @@ const MAGIC_ITEMS = [
     "raridade": "Varia",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-152",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A poção restaura pontos de vida conforme sua potência: cura básica, maior, superior ou suprema. O número de dados de cura varia com a raridade; beber ou administrar a dose exige a ação apropriada e a poção desaparece após o uso.",
+    "uso": ""
   },
   {
     "n": "Poção de Heroísmo",
@@ -5300,12 +5150,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-153",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao beber, você ganha 10 pontos de vida temporários e fica sob o efeito de Abençoar por 1 hora, sem precisar manter concentração. O efeito melhora seus ataques e salvaguardas enquanto durar.",
+    "uso": ""
   },
   {
     "n": "Poção de Invisibilidade",
@@ -5315,12 +5164,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-154",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao beber, você fica invisível por 1 hora. O efeito termina antes se você atacar ou conjurar uma magia, e seus objetos carregados também ficam invisíveis enquanto estiverem em contato com você.",
+    "uso": ""
   },
   {
     "n": "Poção de Invulnerabilidade",
@@ -5330,12 +5178,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-155",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao beber, você ganha resistência a todo dano por 1 minuto. O efeito reduz o dano recebido, mas não impede condições, agarrões ou efeitos que não sejam dano.",
+    "uso": ""
   },
   {
     "n": "Poção de Longevidade",
@@ -5345,12 +5192,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-156",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao beber, sua idade aparente é reduzida em 1d6 + 6 anos, até o mínimo de 13 anos. A poção também pode reverter efeitos de envelhecimento mágico, mas o uso repetido pode provocar consequências.",
+    "uso": ""
   },
   {
     "n": "Poção de Leitura Mental",
@@ -5360,12 +5206,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-157",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao beber, você recebe o efeito de Detectar Pensamentos por 10 minutos. Pode perceber pensamentos superficiais de criaturas próximas e tentar aprofundar a leitura; o alvo pode resistir com salvaguarda de Sabedoria.",
+    "uso": ""
   },
   {
     "n": "Poção de Veneno",
@@ -5375,12 +5220,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-158",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta poção é venenosa. Quem a beber sofre dano de veneno e pode ficar envenenado; a aparência e o sabor são semelhantes aos de uma poção comum, exigindo identificação ou cautela para evitar o efeito.",
+    "uso": ""
   },
   {
     "n": "Poção de Resistência",
@@ -5390,12 +5234,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-159",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao beber, você ganha resistência a um tipo de dano por 1 hora. O tipo depende da poção e deve ser identificado antes do consumo; o efeito não protege contra condições ou efeitos que não causem dano.",
+    "uso": ""
   },
   {
     "n": "Poção de Velocidade",
@@ -5405,12 +5248,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-160",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao beber, você recebe o efeito da magia Velocidade por 1 minuto: deslocamento dobrado, bônus na CA, vantagem em salvaguardas de Destreza e uma ação adicional limitada. Quando termina, você fica sem poder se mover ou agir até o fim do seu próximo turno.",
+    "uso": ""
   },
   {
     "n": "Poção de Vitalidade",
@@ -5420,12 +5262,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-161",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao beber, você remove exaustão, doenças e venenos que o afetem e recupera 4d4 + 4 pontos de vida. Além disso, recupera dados de vida gastos conforme a regra da poção; o efeito não remove maldições nem restaura membros perdidos.",
+    "uso": ""
   },
   {
     "n": "Poção de Respiração Aquática",
@@ -5435,12 +5276,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-162",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao beber, você pode respirar debaixo d'água por 1 hora. A poção não concede deslocamento de natação, mas permite permanecer submerso sem sufocar.",
+    "uso": ""
   },
   {
     "n": "Bordão do Acrobata",
@@ -5450,12 +5290,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-163",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Este bordão mágico aumenta a capacidade acrobática do portador e melhora ataques e movimentos que envolvam saltos, equilíbrio e manobras. Suas propriedades funcionam enquanto estiver empunhado e sintonizado pelo usuário.",
+    "uso": ""
   },
   {
     "n": "Anel de Influência Animal",
@@ -5465,12 +5304,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-164",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O anel permite conjurar magias que influenciam animais, como Amizade Animal, Medo ou Falar com Animais, gastando suas cargas. As criaturas afetadas fazem as salvaguardas previstas pela magia; as cargas retornam diariamente.",
+    "uso": ""
   },
   {
     "n": "Anel de Invocação de Djinni",
@@ -5480,12 +5318,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-165",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O anel possui três cargas e pode invocar um djinni que aparece em espaço desocupado próximo e serve por até 1 hora. Ele obedece às ordens do portador, mas não concede desejos; o anel recupera cargas ao amanhecer.",
+    "uso": ""
   },
   {
     "n": "Anel de Comando Elemental",
@@ -5495,12 +5332,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-166",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O anel concede benefícios ligados a um elemento e pode invocar ou comandar elementais. Sua versão e os feitos realizados determinam quais magias e resistências oferece; a sintonização exige cumprir as condições elementais do artefato.",
+    "uso": ""
   },
   {
     "n": "Anel de Evasão",
@@ -5510,12 +5346,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-167",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O anel possui três cargas. Quando você falha em uma salvaguarda de Destreza, pode usar sua reação e gastar uma carga para transformar a falha em sucesso. O anel recupera 1d3 cargas gastas ao amanhecer.",
+    "uso": ""
   },
   {
     "n": "Anel de Queda Suave",
@@ -5525,12 +5360,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-168",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O anel permite que você e tudo que estiver vestindo ou carregando caiam lentamente, como sob o efeito de Queda Suave. O efeito ativa automaticamente quando você começa a cair e dura até aterrissar.",
+    "uso": ""
   },
   {
     "n": "Anel de Liberdade de Movimento",
@@ -5540,12 +5374,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-169",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O anel impede que magia reduza seu deslocamento ou o paralise, e permite mover-se normalmente em terreno difícil. Também ajuda a escapar de efeitos que restrinjam seus movimentos.",
+    "uso": ""
   },
   {
     "n": "Anel da Invisibilidade",
@@ -5555,12 +5388,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-170",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O anel permite ficar invisível com uma ação. O efeito dura enquanto você mantiver concentração, até 1 minuto; termina imediatamente se você atacar ou conjurar uma magia.",
+    "uso": ""
   },
   {
     "n": "Anel de Salto",
@@ -5570,12 +5402,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-171",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O anel triplica a distância de seus saltos. Ele não aumenta seu deslocamento e não elimina o custo de movimento necessário para saltar, mas amplia o alcance de saltos longos e altos.",
+    "uso": ""
   },
   {
     "n": "Anel de Proteção Mental",
@@ -5585,12 +5416,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-172",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O anel protege sua mente contra telepatia e leitura de pensamentos; você pode escolher não compartilhar pensamentos, e outras criaturas não conseguem determinar seu alinhamento por meios mágicos. Se você morrer enquanto o usa, sua alma pode permanecer no anel, comunicando-se telepaticamente com quem o vestir.",
+    "uso": ""
   },
   {
     "n": "Anel de Proteção",
@@ -5600,12 +5430,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-173",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Enquanto usar o anel, você recebe +1 na Classe de Armadura e em todos os testes de resistência. O bônus funciona continuamente enquanto o item estiver no dedo.",
+    "uso": ""
   },
   {
     "n": "Anel de Regeneração",
@@ -5615,12 +5444,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-174",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O anel regenera 1d6 pontos de vida a cada 10 minutos enquanto você estiver vivo. Se perder uma parte do corpo, o anel pode regenerá-la após período prolongado; não funciona se você morrer.",
+    "uso": ""
   },
   {
     "n": "Anel de Resistência",
@@ -5630,12 +5458,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-175",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O anel concede resistência a um tipo de dano determinado quando é encontrado. Enquanto estiver usando-o, você sofre apenas metade do dano daquele tipo, após aplicar outras reduções.",
+    "uso": ""
   },
   {
     "n": "Anel de Estrelas Cadentes",
@@ -5645,12 +5472,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-176",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O anel possui cargas que podem criar pequenas estrelas cadentes explosivas ou esferas de luz. Algumas funções só podem ser usadas à noite ou sob céu aberto; cargas são recuperadas ao anoitecer.",
+    "uso": ""
   },
   {
     "n": "Anel de Armazenar Magias",
@@ -5660,12 +5486,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-177",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O anel pode armazenar até cinco círculos de magia. Um conjurador lança a magia no anel, que guarda o efeito; qualquer criatura sintonizada pode conjurá-la depois, usando o nível, CD e modificador do conjurador original.",
+    "uso": ""
   },
   {
     "n": "Anel de Reversão de Magias",
@@ -5675,12 +5500,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-178",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Enquanto usar o anel, você tem vantagem em salvaguardas contra magias que tenham você como alvo único. Se obtiver 20 natural na salvaguarda contra uma magia de 7º círculo ou inferior, o efeito é refletido ao conjurador, respeitando as limitações do item.",
+    "uso": ""
   },
   {
     "n": "Anel de Natação",
@@ -5690,12 +5514,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-179",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O anel concede deslocamento de natação igual ao seu deslocamento de caminhada. Você pode nadar sem gastar movimento adicional, mantendo a capacidade de respirar conforme suas próprias características.",
+    "uso": ""
   },
   {
     "n": "Anel de Telecinese",
@@ -5705,12 +5528,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-180",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O anel permite conjurar Telecinese à vontade, usando a força mágica do item. Você pode mover objetos ou criaturas dentro dos limites da magia, mantendo concentração e respeitando o peso e a resistência do alvo.",
+    "uso": ""
   },
   {
     "n": "Anel do Aríete",
@@ -5720,12 +5542,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-181",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O anel possui cargas que geram uma força de impacto contra um alvo. Você pode empurrar criaturas, causar dano de força ou derrubar um alvo; a potência depende do número de cargas gastas e elas se recuperam diariamente.",
+    "uso": ""
   },
   {
     "n": "Anel dos Três Desejos",
@@ -5735,12 +5556,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-182",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O anel contém três desejos. Cada desejo pode reproduzir o efeito da magia Desejo, mas cada utilização consome uma carga e pode causar efeitos adversos ao usuário; depois do terceiro desejo, o anel perde a magia.",
+    "uso": ""
   },
   {
     "n": "Anel do Calor",
@@ -5750,12 +5570,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-183",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O anel concede resistência a dano de frio e permite suportar temperaturas de até −45 °C sem proteção adicional. Também protege objetos e equipamentos carregados contra os efeitos normais de frio extremo.",
+    "uso": ""
   },
   {
     "n": "Anel de Caminhar sobre as Águas",
@@ -5765,12 +5584,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-184",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Enquanto usar o anel, você pode caminhar sobre qualquer líquido como se fosse uma superfície sólida. O efeito funciona sobre água, ácido, lama, neve, areia movediça e outros fluidos, desde que haja espaço para pisar.",
+    "uso": ""
   },
   {
     "n": "Anel de Visão de Raios X",
@@ -5780,12 +5598,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-185",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O anel possui cargas que permitem enxergar através de matéria sólida. A visão atravessa uma espessura limitada de pedra, madeira ou metal, mas chumbo e certos materiais mágicos bloqueiam o efeito; cada ativação consome cargas.",
+    "uso": ""
   },
   {
     "n": "Manto dos Olhos",
@@ -5795,12 +5612,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-186",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O manto permite enxergar em todas as direções e detectar criaturas invisíveis ou escondidas próximas. Também concede vantagem em testes de Sabedoria (Percepção) baseados na visão; o excesso de estímulos pode causar desvantagem em outros testes de percepção.",
+    "uso": ""
   },
   {
     "n": "Manto de Cores Cintilantes",
@@ -5810,12 +5626,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-187",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O robe pode liberar cores cintilantes que desorientam criaturas próximas. Ao ativá-lo, criaturas que puderem vê-lo fazem salvaguarda de Sabedoria ou ficam atordoadas/impedidas de reagir por um curto período; o efeito possui usos limitados.",
+    "uso": ""
   },
   {
     "n": "Manto das Estrelas",
@@ -5825,12 +5640,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-188",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O manto contém estrelas que podem ser removidas e lançadas para produzir explosões de força. Enquanto usar o robe, você recebe bônus em testes de resistência; ele também pode permitir viajar para o Plano Astral conforme as cargas restantes.",
+    "uso": ""
   },
   {
     "n": "Manto do Arquimago",
@@ -5840,12 +5654,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-189",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O robe concede bônus à CA, testes de resistência e jogadas de ataque mágico. Ele também melhora a CD das magias e concede vantagem em testes de resistência contra magias; a sintonização é restrita a conjuradores arcanos.",
+    "uso": ""
   },
   {
     "n": "Manto de Itens Úteis",
@@ -5855,12 +5668,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-190",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O robe possui bolsos costurados que se transformam em objetos úteis quando removidos. Cada bolso contém um item determinado, como corda, escada, saco ou animal; os itens são reais e desaparecem ou permanecem conforme sua natureza.",
+    "uso": ""
   },
   {
     "n": "Bastão de Absorção",
@@ -5870,12 +5682,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-191",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O bastão absorve magias que tenham você como alvo único e armazena sua energia em cargas. Você pode gastar cargas para conjurar magias absorvidas; a capacidade total é limitada e o bastão pode se sobrecarregar se armazenar energia demais.",
+    "uso": ""
   },
   {
     "n": "Bastão de Alerta",
@@ -5885,12 +5696,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-192",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O bastão concede bônus à iniciativa e percepção de perigo. Com suas cargas, pode detectar magia, iluminar a área, localizar criaturas ou proteger o portador com uma aura; as cargas são recuperadas diariamente.",
+    "uso": ""
   },
   {
     "n": "Bastão do Poder Senhorial",
@@ -5900,12 +5710,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-193",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O bastão muda de forma e pode funcionar como arma, escada, aríete ou outros instrumentos de comando. Ele também possui cargas para conjurar efeitos mágicos; as transformações são acionadas por palavras de comando e podem incluir uma lança ou machado.",
+    "uso": ""
   },
   {
     "n": "Bastão da Ressurreição",
@@ -5915,12 +5724,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-194",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O bastão possui cargas usadas para curar criaturas ou restaurar a vida de mortos. Pode lançar Curar Ferimentos, Cura em Massa e Ressurreição; cada efeito consome cargas conforme seu poder e a energia retorna parcialmente ao amanhecer.",
+    "uso": ""
   },
   {
     "n": "Bastão de Domínio",
@@ -5930,12 +5738,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-195",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O bastão permite comandar humanoides por meio de uma aura de autoridade. Criaturas próximas fazem salvaguarda de Sabedoria ou ficam enfeitiçadas e obedecem às ordens do portador por período limitado; o efeito não obriga a cometer suicídio evidente.",
+    "uso": ""
   },
   {
     "n": "Bastão da Segurança",
@@ -5945,12 +5752,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-196",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O bastão cria um refúgio extradimensional seguro para você e um grupo de criaturas voluntárias. O grupo permanece no espaço pelo tempo indicado; ao sair, aparece no local de onde entrou ou em local seguro determinado pelo efeito.",
+    "uso": ""
   },
   {
     "n": "Corda de Escalada",
@@ -5960,12 +5766,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-197",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A corda pode se mover e se amarrar a um objeto por comando. Ela se estica, se recolhe e suporta peso elevado; o usuário pode ordenar que suba, desça ou prenda uma criatura, facilitando escaladas e resgates.",
+    "uso": ""
   },
   {
     "n": "Corda de Enredamento",
@@ -5975,12 +5780,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-198",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A corda se anima e tenta envolver uma criatura Grande ou menor. O alvo faz salvaguarda de Destreza; em falha, fica contido e pode repetir o teste para escapar, enquanto o portador usa uma ação para comandar a corda.",
+    "uso": ""
   },
   {
     "n": "Escaravelho de Proteção",
@@ -5990,12 +5794,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-199",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O escaravelho protege contra certas magias e ataques de mortos-vivos. Ele possui cargas que podem absorver energia necrótica ou impedir efeitos de morte; quando as cargas acabam, o escaravelho se desfaz ou perde suas propriedades.",
+    "uso": ""
   },
   {
     "n": "Cimitarra da Velocidade",
@@ -6005,12 +5808,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-200",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta cimitarra concede +2 nas jogadas de ataque e dano. Em cada um dos seus turnos, você pode fazer um ataque adicional com ela usando uma ação bônus.",
+    "uso": ""
   },
   {
     "n": "Pedras de Mensagem",
@@ -6020,12 +5822,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-201",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "As pedras vêm em pares. Uma criatura pode tocar uma pedra e enviar uma mensagem curta para a outra; quem estiver segurando a pedra correspondente pode responder. Cada pedra só pode transmitir uma mensagem por dia.",
+    "uso": ""
   },
   {
     "n": "Escudo Sentinela",
@@ -6035,12 +5836,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-202",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O escudo concede vantagem em testes de Sabedoria (Percepção) e jogadas de iniciativa. Seu equilíbrio e reflexos mágicos ajudam a perceber ameaças antes que elas ataquem.",
+    "uso": ""
   },
   {
     "n": "Escudo +1, +2 ou +3",
@@ -6050,12 +5850,11 @@ const MAGIC_ITEMS = [
     "raridade": "Varia",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-203",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Escudo mágico que concede bônus à CA conforme sua versão: +1 (incomum), +2 (rara) ou +3 (muito rara). O bônus soma-se ao benefício normal de empunhar um escudo.",
+    "uso": ""
   },
   {
     "n": "Escudo de Atração de Projéteis",
@@ -6065,12 +5864,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-204",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Este escudo atrai ataques de armas à distância para seu portador. Você recebe bônus defensivo contra esses ataques, mas projéteis direcionados a criaturas próximas podem passar a ter você como alvo; a maldição permanece enquanto estiver usando o escudo.",
+    "uso": ""
   },
   {
     "n": "Escudo do Cavaleiro",
@@ -6080,12 +5878,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-205",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O escudo aumenta sua proteção e ajuda a defender aliados próximos. Enquanto estiver empunhando-o, você pode usar sua reação para proteger uma criatura adjacente contra um ataque, impondo desvantagem ou absorvendo parte do dano conforme o item.",
+    "uso": ""
   },
   {
     "n": "Chinelos de Escalada Aracnídea",
@@ -6095,12 +5892,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-206",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Os chinelos permitem escalar paredes e tetos como uma aranha, deixando as mãos livres. O efeito funciona enquanto você os estiver usando e não exige testes para permanecer agarrado a superfícies verticais.",
+    "uso": ""
   },
   {
     "n": "Cola Soberana",
@@ -6110,12 +5906,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-207",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A cola une permanentemente duas superfícies que entrem em contato com ela. Uma vez aplicada, a ligação só pode ser rompida por solvente universal, força extrema ou magia capaz de desfazer a aderência; cada frasco contém uma quantidade limitada.",
+    "uso": ""
   },
   {
     "n": "Escudo Guardião de Magias",
@@ -6125,12 +5920,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-208",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Este escudo concede vantagem em salvaguardas contra magias e ataques mágicos. Enquanto o empunha, você também pode usar uma reação para impor desvantagem em um ataque mágico direcionado a você.",
+    "uso": ""
   },
   {
     "n": "Pergaminho de Magia",
@@ -6140,12 +5934,11 @@ const MAGIC_ITEMS = [
     "raridade": "Varia",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-209",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O pergaminho contém uma única magia escrita. Uma criatura que tenha a magia em sua lista pode lançá-la sem componentes materiais, seguindo o nível e a CD indicados; magias acima do nível que o usuário pode conjurar exigem teste de atributo e podem falhar, consumindo o pergaminho.",
+    "uso": ""
   },
   {
     "n": "Esfera da Aniquilação",
@@ -6155,12 +5948,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-210",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A esfera é um vazio mágico que destrói matéria que toca sua superfície. Ela pode ser movida por controle mental, mas é difícil de dominar; criaturas e objetos que entram em contato são desintegrados, salvo proteções específicas.",
+    "uso": ""
   },
   {
     "n": "Cajado do Encantamento",
@@ -6170,12 +5962,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-211",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O cajado possui cargas para lançar magias de encantamento e proteção, como Enfeitiçar Pessoa e Comando. Você pode gastar cargas para conjurar os efeitos com a CD do item; algumas funções também permitem influenciar criaturas que já estejam sob seu encanto.",
+    "uso": ""
   },
   {
     "n": "Cajado do Fogo",
@@ -6185,12 +5976,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-212",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O cajado possui cargas que permitem lançar Bola de Fogo e Mãos Flamejantes. Também pode absorver dano de fogo e proteger o portador; as cargas são recuperadas diariamente conforme o poder consumido.",
+    "uso": ""
   },
   {
     "n": "Cajado do Gelo",
@@ -6200,12 +5990,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-213",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O cajado permite lançar Tempestade de Gelo, Cone de Frio e outras magias frias. Você pode gastar cargas para conjurar os efeitos e o item pode absorver dano de frio, protegendo o portador.",
+    "uso": ""
   },
   {
     "n": "Cajado da Cura",
@@ -6215,12 +6004,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-214",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O cajado possui cargas para conjurar Curar Ferimentos, Curar Ferimentos em Massa e outras magias de cura. O portador pode restaurar pontos de vida de aliados, gastando cargas de acordo com o nível da magia.",
+    "uso": ""
   },
   {
     "n": "Cajado do Poder",
@@ -6230,12 +6018,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-215",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Este cajado concede bônus à CA, testes de resistência e jogadas de ataque mágico. Possui cargas para lançar várias magias ofensivas e defensivas, como Bola de Fogo, Raio Relampejante e Muralha de Força; também pode absorver energia mágica.",
+    "uso": ""
   },
   {
     "n": "Cajado do Golpe",
@@ -6245,12 +6032,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-216",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O cajado pode gastar cargas para adicionar dano de força aos ataques corpo a corpo. Cada golpe consome uma ou mais cargas e causa dano adicional; as cargas são recuperadas diariamente.",
+    "uso": ""
   },
   {
     "n": "Cajado do Enxame de Insetos",
@@ -6260,12 +6046,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-217",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O cajado pode criar nuvens de insetos que obscurecem a visão e atacam criaturas próximas. Também permite lançar pragas e efeitos relacionados a enxames; as cargas são recuperadas ao amanhecer.",
+    "uso": ""
   },
   {
     "n": "Cajado dos Magos",
@@ -6275,12 +6060,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-218",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O cajado possui uma grande reserva de cargas e permite lançar magias arcanas poderosas. Pode absorver energia mágica dirigida ao portador, conjurar magias de alto nível e liberar uma explosão destrutiva quando sobrecarregado.",
+    "uso": ""
   },
   {
     "n": "Cajado da Píton",
@@ -6290,12 +6074,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-219",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O cajado se transforma em uma píton gigante quando você pronuncia sua palavra de comando. A serpente obedece a ordens simples e pode lutar ou servir como montaria; quando reduzida a 0 PV, volta à forma de cajado e não pode ser usada até se recuperar.",
+    "uso": ""
   },
   {
     "n": "Cajado das Florestas",
@@ -6305,12 +6088,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-220",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O cajado permite conjurar magias ligadas à natureza, como Passos sem Pegadas, Casca de Árvore e Despertar. Também pode se transformar em uma árvore robusta e fornecer proteção ou abrigo.",
+    "uso": ""
   },
   {
     "n": "Cajado do Trovão e Relâmpago",
@@ -6320,12 +6102,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-221",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O cajado possui cargas para criar relâmpagos e trovões. Seus ataques podem causar dano elétrico e trovejante em linha ou em área, empurrando criaturas; as cargas retornam ao amanhecer.",
+    "uso": ""
   },
   {
     "n": "Cajado da Murcha",
@@ -6335,12 +6116,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-222",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O cajado causa dano necrótico adicional nos ataques e pode gastar cargas para enfraquecer criaturas. Um alvo atingido pode perder pontos de vida máximos ou sofrer penalidades físicas, conforme o efeito escolhido.",
+    "uso": ""
   },
   {
     "n": "Pedra de Controle de Elementais da Terra",
@@ -6350,12 +6130,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-223",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A pedra permite invocar um elemental da terra em um espaço próximo. O elemental obedece às ordens do usuário por até 1 hora ou até ser derrotado; a pedra se consome durante a invocação.",
+    "uso": ""
   },
   {
     "n": "Pedra da Boa Sorte",
@@ -6365,12 +6144,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-224",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A pedra concede +1 em testes de atributo e testes de resistência. O bônus é constante enquanto você a carregar ou sintonizar, ajudando em testes físicos e mentais.",
+    "uso": ""
   },
   {
     "n": "Lâmina Solar",
@@ -6380,12 +6158,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-225",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A lâmina solar é uma espada mágica de luz que concede bônus de ataque e dano radiante. Ela emite luz intensa, pode ser recolhida para um punho e causa dano radiante extra contra mortos-vivos; sua lâmina pode ser ajustada ao tamanho do portador.",
+    "uso": ""
   },
   {
     "n": "Espada Sugadora de Vida",
@@ -6395,12 +6172,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-226",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta espada concede bônus mágico de ataque e dano. Quando você obtém um acerto crítico contra uma criatura que não seja construto nem morto-vivo, o alvo sofre 10 de dano necrótico adicional e você recebe 10 pontos de vida temporários.",
+    "uso": ""
   },
   {
     "n": "Espada Afiada",
@@ -6410,12 +6186,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-227",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A espada causa dano cortante adicional. Quando você obtém um acerto crítico, o alvo sofre 14 de dano cortante adicional; se o alvo for uma criatura e o resultado permitir, o golpe pode amputar uma extremidade. A lâmina também corta objetos não mágicos com facilidade.",
+    "uso": ""
   },
   {
     "n": "Espada das Feridas",
@@ -6425,12 +6200,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-228",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta espada causa feridas que continuam sangrando. Quando acerta, o alvo sofre dano adicional no início de seus turnos; feridas acumuladas aumentam o dano e podem ser encerradas por cura mágica ou teste apropriado.",
+    "uso": ""
   },
   {
     "n": "Talismã do Bem Puro",
@@ -6440,12 +6214,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-229",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O talismã é sagrado e pode destruir criaturas malignas que falhem em uma salvaguarda de Carisma quando o item é usado. Ele é especialmente eficaz contra ínferos e mortos-vivos; criaturas de alinhamento inadequado podem sofrer dano ao tocá-lo.",
+    "uso": ""
   },
   {
     "n": "Talismã da Esfera",
@@ -6455,12 +6228,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-230",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O talismã permite controlar uma esfera de aniquilação. Enquanto estiver sintonizado, você pode comandar a esfera com maior precisão, empurrá-la e resistir às tentativas de controle de outros usuários.",
+    "uso": ""
   },
   {
     "n": "Talismã do Mal Absoluto",
@@ -6470,12 +6242,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-231",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O talismã é profano e pode destruir criaturas bondosas que falhem em uma salvaguarda de Carisma quando o item é usado. Ele é especialmente perigoso contra celestiais e criaturas de alinhamento bom.",
+    "uso": ""
   },
   {
     "n": "Porrete Trovejante",
@@ -6485,12 +6256,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-232",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Este porrete mágico causa dano trovejante adicional quando acerta. O impacto produz uma onda sonora que pode empurrar ou atordoar criaturas próximas, dependendo da força do golpe.",
+    "uso": ""
   },
   {
     "n": "Tomo do Pensamento Claro",
@@ -6500,12 +6270,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-233",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao estudar o tomo durante 48 horas ao longo de seis dias, sua Inteligência aumenta em 2, até o máximo de 30, e seu máximo de Inteligência aumenta na mesma quantidade. Depois de usado, o livro perde a magia por um século.",
+    "uso": ""
   },
   {
     "n": "Tomo da Liderança e Influência",
@@ -6515,12 +6284,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-234",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao estudar o tomo durante 48 horas ao longo de seis dias, seu Carisma aumenta em 2, até o máximo de 30, e seu máximo de Carisma aumenta na mesma quantidade. Depois de usado, o livro perde a magia por um século.",
+    "uso": ""
   },
   {
     "n": "Tomo da Compreensão",
@@ -6530,12 +6298,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-235",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Ao estudar o tomo durante 48 horas ao longo de seis dias, sua Sabedoria aumenta em 2, até o máximo de 30, e seu máximo de Sabedoria aumenta na mesma quantidade. Depois de usado, o livro perde a magia por um século.",
+    "uso": ""
   },
   {
     "n": "Tridente de Comando de Peixes",
@@ -6545,12 +6312,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-236",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O tridente permite comandar peixes e outras criaturas aquáticas. Você pode gastar cargas para lançar magias de influência animal ou controlar cardumes; as criaturas afetadas obedecem a ordens simples dentro dos limites do efeito.",
+    "uso": ""
   },
   {
     "n": "Solvente Universal",
@@ -6560,12 +6326,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-237",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Este solvente dissolve cola, adesivos e substâncias pegajosas, inclusive a Cola Soberana. Uma pequena quantidade pode separar superfícies firmemente unidas; o líquido não corrói materiais comuns nem substitui solventes específicos para outras substâncias.",
+    "uso": ""
   },
   {
     "n": "Arma Cruel",
@@ -6575,12 +6340,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-238",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Quando você obtém um acerto crítico com esta arma, o alvo sofre 2d6 de dano adicional do tipo da arma. Ela não concede bônus fixo de ataque ou dano; seu efeito especial ocorre somente em acertos críticos.",
+    "uso": ""
   },
   {
     "n": "Espada Vorpal",
@@ -6590,12 +6354,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-239",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta espada concede +3 nas jogadas de ataque e dano. Quando você obtém um 20 natural no ataque contra uma criatura que tenha cabeça e seja vulnerável a decapitação, ela perde a cabeça e morre; se não puder ser decapitada, sofre 6d8 de dano cortante adicional.",
+    "uso": ""
   },
   {
     "n": "Varinha de Aprisionamento",
@@ -6605,12 +6368,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-240",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A varinha possui cargas que permitem conjurar magias de contenção, como Imobilizar Pessoa ou Imobilizar Monstro. O alvo faz a salvaguarda indicada pela magia; cargas são recuperadas diariamente e a varinha pode quebrar se for sobrecarregada.",
+    "uso": ""
   },
   {
     "n": "Varinha de Detecção de Inimigos",
@@ -6620,12 +6382,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-241",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A varinha possui cargas que permitem detectar a presença e a direção de inimigos próximos. Ao ativá-la, você percebe criaturas hostis dentro do alcance, mesmo que estejam escondidas, mas não descobre automaticamente sua identidade ou localização exata.",
+    "uso": ""
   },
   {
     "n": "Varinha do Medo",
@@ -6635,12 +6396,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-242",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A varinha possui cargas para lançar Medo. Criaturas em um cone fazem salvaguarda de Sabedoria; quem falhar fica amedrontado e pode largar o que estiver segurando, repetindo o teste para encerrar o efeito.",
+    "uso": ""
   },
   {
     "n": "Varinha de Bolas de Fogo",
@@ -6650,12 +6410,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-243",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A varinha possui cargas para conjurar Bola de Fogo. Cada uso consome uma carga e cria uma explosão de fogo na área escolhida; as cargas são recuperadas diariamente e a varinha pode se quebrar se for forçada além do limite.",
+    "uso": ""
   },
   {
     "n": "Varinha de Relâmpagos",
@@ -6665,12 +6424,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-244",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A varinha possui cargas para conjurar Relâmpago em linha. Criaturas no caminho fazem salvaguarda de Destreza e sofrem dano elétrico; as cargas retornam ao amanhecer e o item pode se quebrar por sobrecarga.",
+    "uso": ""
   },
   {
     "n": "Varinha de Detecção de Magia",
@@ -6680,12 +6438,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-245",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A varinha permite detectar a presença de magia em objetos, criaturas e áreas próximas, como na magia Detectar Magia. A ativação não identifica automaticamente a escola ou a função do efeito; é necessário examinar o alvo.",
+    "uso": ""
   },
   {
     "n": "Varinha de Mísseis Mágicos",
@@ -6695,12 +6452,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-246",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A varinha possui cargas para lançar Mísseis Mágicos. Cada carga cria um ou mais dardos de força que atingem automaticamente alvos escolhidos dentro do alcance; as cargas são recuperadas ao amanhecer.",
+    "uso": ""
   },
   {
     "n": "Varinha de Paralisia",
@@ -6710,12 +6466,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-247",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A varinha possui cargas para lançar Imobilizar Monstro. O alvo faz salvaguarda de Sabedoria ou fica paralisado; criaturas podem repetir a salvaguarda ao fim de seus turnos, e as cargas retornam diariamente.",
+    "uso": ""
   },
   {
     "n": "Varinha de Polimorfia",
@@ -6725,12 +6480,11 @@ const MAGIC_ITEMS = [
     "raridade": "Muito rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-248",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A varinha possui cargas para conjurar Polimorfia contra uma criatura visível. O alvo faz uma salvaguarda de Sabedoria CD 15; em falha, assume uma forma de Besta escolhida pelo efeito, mantendo os pontos de vida e as limitações da magia. A varinha recupera 1d6 + 1 cargas ao amanhecer.",
+    "uso": ""
   },
   {
     "n": "Varinha dos Segredos",
@@ -6740,12 +6494,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-249",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A varinha possui cargas para localizar portas secretas e armadilhas próximas. Ao ativá-la, ela aponta para o objeto oculto mais próximo dentro do alcance; a varinha recupera cargas ao amanhecer.",
+    "uso": ""
   },
   {
     "n": "Varinha do Mago de Guerra +1, +2 ou +3",
@@ -6755,12 +6508,11 @@ const MAGIC_ITEMS = [
     "raridade": "Varia",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-250",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A varinha concede bônus às jogadas de ataque mágico e à CD das magias conforme sua versão (+1, +2 ou +3). O bônus funciona enquanto um conjurador sintonizado empunhar a varinha.",
+    "uso": ""
   },
   {
     "n": "Varinha de Teia",
@@ -6770,12 +6522,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-251",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A varinha possui cargas para conjurar Teia. A magia cria uma massa de fios pegajosos que restringe criaturas e torna a área terreno difícil; alvos podem fazer salvaguardas ou testes de Força para escapar.",
+    "uso": ""
   },
   {
     "n": "Varinha das Maravilhas",
@@ -6785,12 +6536,11 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-252",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "A varinha possui cargas e produz um efeito mágico aleatório quando usada. O resultado pode ser ofensivo, defensivo ou cômico, como transformar alvos, criar fogo ou alterar gravidade; o efeito é determinado por uma tabela e as cargas retornam diariamente.",
+    "uso": ""
   },
   {
     "n": "Arma +1, +2 ou +3",
@@ -6800,12 +6550,11 @@ const MAGIC_ITEMS = [
     "raridade": "Varia",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-253",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Arma mágica que concede bônus às jogadas de ataque e dano conforme sua versão: +1 (incomum), +2 (rara) ou +3 (muito rara). O bônus se aplica aos ataques feitos com a arma e a seus danos.",
+    "uso": ""
   },
   {
     "n": "Arma de Alerta",
@@ -6815,12 +6564,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-254",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Esta arma alerta o portador sobre perigo iminente. Enquanto estiver empunhada, concede bônus à iniciativa e impede que você seja surpreendido, exceto quando estiver incapacitado por algo que não seja mágico.",
+    "uso": ""
   },
   {
     "n": "Poço de Muitos Mundos",
@@ -6830,12 +6578,11 @@ const MAGIC_ITEMS = [
     "raridade": "Lendária",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-255",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "Este tecido fino é um portal para um mundo ou plano aleatório. Ao abri-lo, você cria uma passagem circular; o destino não é controlado e pode mudar a cada uso. A passagem permanece aberta por tempo limitado e pode permitir a travessia de criaturas e objetos.",
+    "uso": ""
   },
   {
     "n": "Leque de Vento",
@@ -6845,12 +6592,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-256",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "O leque possui três cargas e pode criar uma rajada equivalente à magia Rajada de Vento por 1 minuto. O efeito empurra criaturas, dispersa gases e apaga chamas pequenas; o leque recupera 1d3 cargas gastas ao amanhecer.",
+    "uso": ""
   },
   {
     "n": "Botas Aladas",
@@ -6860,12 +6606,11 @@ const MAGIC_ITEMS = [
     "raridade": "Incomum",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-257",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
+    "descricao": "As botas concedem deslocamento de voo de 9 metros. Você pode voar por até 4 horas, divididas em períodos de pelo menos 1 minuto; depois disso, as botas ficam sem poder de voo até o próximo descanso longo.",
+    "uso": ""
   },
   {
     "n": "Asas Voadoras",
@@ -6875,3405 +6620,18 @@ const MAGIC_ITEMS = [
     "raridade": "Rara",
     "fonte": "SRD 5.2.1",
     "magico": true,
-    "nota": "Nome e raridade do catálogo aberto; consulte a fonte para regras e detalhes.",
     "id": "magic-258",
     "peso": "Não especificado no SRD",
     "preco": "Estimativa por raridade (ver detalhe)",
-    "descricao": "Descrição completa do item mágico será carregada do catálogo SRD 5.2.1 ao abrir este item.",
-    "uso": "Consulte os requisitos de sintonia, ativação, cargas e efeitos na descrição completa."
-  }
-];
-const DMG_2024_ONLY_ITEMS = [
-  {
-    "n": "Arma de Adamante",
-    "en": "Adamantine Weapon",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-259",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Vassoura Dançante de Baba Yaga",
-    "en": "Baba Yaga's Dancing Broom",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-260",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Cubo de Invocação",
-    "en": "Cube of Summoning",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-261",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Armadura Encantada",
-    "en": "Enspelled Armor",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-262",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Cajado Encantado",
-    "en": "Enspelled Staff",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-263",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Arma Encantada",
-    "en": "Enspelled Weapon",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-264",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Machado do Carrasco",
-    "en": "Executioner's Axe",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-265",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Olho de Bruxa",
-    "en": "Hag Eye",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-266",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Alaúde do Impacto Trovejante",
-    "en": "Lute of Thunderous Thumping",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-267",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Poção de Pugilismo",
-    "en": "Potion of Pugilism",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-268",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Moeda Rival",
-    "en": "Rival Coin",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-269",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Pergaminho de Invocação de Titã",
-    "en": "Scroll of Titan Summoning",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-270",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Arma Argentada",
-    "en": "Silvered Weapon",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-271",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Tabuleiro Espiritual",
-    "en": "Spirit Board",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-272",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Garra Silvestre",
-    "en": "Sylvan Talon",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-273",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Faixas de Poder Desarmado",
-    "en": "Wraps of Unarmed Power",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-274",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Jarro de Alquimia",
-    "en": "Alchemy Jug",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-275",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Machado dos Senhores Anões",
-    "en": "Axe of the Dwarvish Lords",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-276",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Lâmina Negra",
-    "en": "Blackrazor",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-277",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Livro dos Grandes Feitos",
-    "en": "Book of Exalted Deeds",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-278",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Livro da Escuridão Vil",
-    "en": "Book of Vile Darkness",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-279",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Botas de Rastros Falsos",
-    "en": "Boots of False Tracks",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-280",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Baralho de Muitas Coisas",
-    "en": "Deck of Many Things",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-281",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Olho e Mão de Vecna",
-    "en": "Eye and Hand of Vecna",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-282",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Mochila Prática de Heward",
-    "en": "Heward's Handy Haversack",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-283",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Chifre do Alarme Silencioso",
-    "en": "Horn of Silent Alarm",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-284",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Instrumento de Transcrição",
-    "en": "Instrument of Scribing",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-285",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Instrumento dos Bardos",
-    "en": "Instrument of the Bards",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-286",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Armadura do Marinheiro",
-    "en": "Mariner's Armor",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-287",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Lâmina Lunar",
-    "en": "Moonblade",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-288",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Espada Tocada pela Lua",
-    "en": "Moon-Touched Sword",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-289",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Pigmentos Maravilhosos de Nolzur",
-    "en": "Nolzur's Marvelous Pigments",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-290",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Orbe da Natureza Dracônica",
-    "en": "Orb of Dragonkind",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-291",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Poção de Invisibilidade Maior",
-    "en": "Potion of Greater Invisibility",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-292",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Pergaminho de Proteção",
-    "en": "Scroll of Protection",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-293",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Cajado da Víbora",
-    "en": "Staff of the Adder",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-294",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Varinha de Orcus",
-    "en": "Wand of Orcus",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-295",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Onda",
-    "en": "Wave",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-296",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Estrondo",
-    "en": "Whelm",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-297",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Aparelho de Kwalish",
-    "en": "Apparatus of Kwalish",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-298",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Armadura Cintilante",
-    "en": "Armor of Gleaming",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-299",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Gorro de Respiração Aquática",
-    "en": "Cap of Water Breathing",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-300",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Armadura Removível",
-    "en": "Cast-Off Armor",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-301",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Caldeirão do Renascimento",
-    "en": "Cauldron of Rebirth",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-302",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Fortaleza Instantânea de Daern",
-    "en": "Daern's Instant Fortress",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-303",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Amuleto da Lasca Negra",
-    "en": "Dark Shard Amulet",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-304",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Demonômicon de Iggwilv",
-    "en": "Demonomicon of Iggwilv",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-305",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Globo Flutuante",
-    "en": "Driftglobe",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-306",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Olho Artificial",
-    "en": "Ersatz Eye",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-307",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Chapéu de Feitiçaria",
-    "en": "Hat of Wizardry",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-308",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Bolsa de Especiarias Prática de Heward",
-    "en": "Heward's Handy Spice Pouch",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-309",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Instrumento de Ilusões",
-    "en": "Instrument of Illusions",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-310",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Faixas de Ferro de Bilarro",
-    "en": "Iron Bands of Bilarro",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-311",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Pomada de Keoghtom",
-    "en": "Keoghtom's Ointment",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-312",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Orbe de Direção",
-    "en": "Orb of Direction",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-313",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Orbe do Tempo",
-    "en": "Orb of Time",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-314",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Perfume de Enfeitiçamento",
-    "en": "Perfume of Bewitching",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-315",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Cachimbo de Monstros de Fumaça",
-    "en": "Pipe of Smoke Monsters",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-316",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Vara de Pesca",
-    "en": "Pole of Angling",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-317",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Vara Dobrável",
-    "en": "Pole of Collapsing",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-318",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Membro Protético",
-    "en": "Prosthetic Limb",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-319",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Ficha de Pena de Quaal",
-    "en": "Quaal's Feather Token",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-320",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Bastão do Guardião do Pacto",
-    "en": "Rod of the Pact Keeper",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-321",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Corda de Reparo",
-    "en": "Rope of Mending",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-322",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Rubi do Mago de Guerra",
-    "en": "Ruby of the War Mage",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-323",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Cajado de Chamados de Pássaros",
-    "en": "Staff of Birdcalls",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-324",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Cajado das Flores",
-    "en": "Staff of Flowers",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-325",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Espada de Kas",
-    "en": "Sword of Kas",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-326",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Bastão de Tentáculos",
-    "en": "Tentacle Rod",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-327",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Varinha de Regência",
-    "en": "Wand of Conducting",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-328",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  },
-  {
-    "n": "Varinha de Pirotecnia",
-    "en": "Wand of Pyrotechnics",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice.",
-    "id": "magic-329",
-    "preco": "Não publicado no índice aberto",
-    "peso": "Não publicado no índice aberto",
-    "descricao": "Este item aparece apenas no índice público de novidades/revisões do Livro do Mestre 2024. A descrição completa e as propriedades não estão no SRD aberto.",
-    "uso": "Requer consulta ao Livro do Mestre 2024."
-  }
-];
-const DMG_2024_INDEX = [
-  {
-    "n": "Arma de Adamante",
-    "en": "Adamantine Weapon",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Vassoura Dançante de Baba Yaga",
-    "en": "Baba Yaga's Dancing Broom",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Cubo de Invocação",
-    "en": "Cube of Summoning",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Arco de Energia",
-    "en": "Energy Bow",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Armadura Encantada",
-    "en": "Enspelled Armor",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Cajado Encantado",
-    "en": "Enspelled Staff",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Arma Encantada",
-    "en": "Enspelled Weapon",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Machado do Carrasco",
-    "en": "Executioner's Axe",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Olho de Bruxa",
-    "en": "Hag Eye",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Chapéu de Muitas Magias",
-    "en": "Hat of Many Spells",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Alaúde do Impacto Trovejante",
-    "en": "Lute of Thunderous Thumping",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Poção de Pugilismo",
-    "en": "Potion of Pugilism",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Bordão do Acrobata",
-    "en": "Quarterstaff of the Acrobat",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Moeda Rival",
-    "en": "Rival Coin",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Pergaminho de Invocação de Titã",
-    "en": "Scroll of Titan Summoning",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Escudo do Cavaleiro",
-    "en": "Shield of the Cavalier",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Arma Argentada",
-    "en": "Silvered Weapon",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Tabuleiro Espiritual",
-    "en": "Spirit Board",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Garra Silvestre",
-    "en": "Sylvan Talon",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Porrete Trovejante",
-    "en": "Thunderous Greatclub",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Faixas de Poder Desarmado",
-    "en": "Wraps of Unarmed Power",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Novo",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Jarro de Alquimia",
-    "en": "Alchemy Jug",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Munição de Extermínio",
-    "en": "Ammunition of Slaying",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Amuleto dos Planos",
-    "en": "Amulet of the Planes",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Armadura da Invulnerabilidade",
-    "en": "Armor of Invulnerability",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Machado dos Senhores Anões",
-    "en": "Axe of the Dwarvish Lords",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Lâmina Negra",
-    "en": "Blackrazor",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Livro dos Grandes Feitos",
-    "en": "Book of Exalted Deeds",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Livro da Escuridão Vil",
-    "en": "Book of Vile Darkness",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Botas de Rastros Falsos",
-    "en": "Boots of False Tracks",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Botas de Caminhar e Saltar",
-    "en": "Boots of Striding and Springing",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Tigela de Comando de Elementais da Água",
-    "en": "Bowl of Commanding Water Elementals",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Braseiro de Comando de Elementais do Fogo",
-    "en": "Brazier of Commanding Fire Elementals",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Vela de Invocação",
-    "en": "Candle of Invocation",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Incensário de Controle de Elementais do Ar",
-    "en": "Censer of Controlling Air Elementals",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Manto Élfico",
-    "en": "Cloak of Elvenkind",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Manto da Invisibilidade",
-    "en": "Cloak of Invisibility",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Manto da Raia Manta",
-    "en": "Cloak of the Manta Ray",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Cubo de Força",
-    "en": "Cube of Force",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Adaga Venenosa",
-    "en": "Dagger of Venom",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Baralho de Muitas Coisas",
-    "en": "Deck of Many Things",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Garrafa de Efreeti",
-    "en": "Efreeti Bottle",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Gema Elemental",
-    "en": "Elemental Gem",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Olho e Mão de Vecna",
-    "en": "Eye and Hand of Vecna",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Olhos do Encantamento",
-    "en": "Eyes of Charming",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Olhos da Visão Minuciosa",
-    "en": "Eyes of Minute Seeing",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Estatueta de Poder Maravilhoso",
-    "en": "Figurine of Wondrous Power",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Luvas de Aparar Projéteis",
-    "en": "Gloves of Missile Snaring",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Martelo dos Trovões",
-    "en": "Hammer of Thunderbolts",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Elmo da Telepatia",
-    "en": "Helm of Telepathy",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Mochila Prática de Heward",
-    "en": "Heward's Handy Haversack",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Buzina Explosiva",
-    "en": "Horn of Blasting",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Chifre do Alarme Silencioso",
-    "en": "Horn of Silent Alarm",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Instrumento de Transcrição",
-    "en": "Instrument of Scribing",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Instrumento dos Bardos",
-    "en": "Instrument of the Bards",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Pedra Ioun",
-    "en": "Ioun Stone",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Frasco de Ferro",
-    "en": "Iron Flask",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Azagaia Relampejante",
-    "en": "Javelin of Lightning",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Armadura do Marinheiro",
-    "en": "Mariner's Armor",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Espelho de Aprisionamento",
-    "en": "Mirror of Life Trapping",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Lâmina Lunar",
-    "en": "Moonblade",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Espada Tocada pela Lua",
-    "en": "Moon-Touched Sword",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Colar de Contas de Oração",
-    "en": "Necklace of Prayer Beads",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Pigmentos Maravilhosos de Nolzur",
-    "en": "Nolzur's Marvelous Pigments",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Óleo do Fio Afiado",
-    "en": "Oil of Sharpness",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Orbe da Natureza Dracônica",
-    "en": "Orb of Dragonkind",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Pérola do Poder",
-    "en": "Pearl of Power",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Periapto da Saúde",
-    "en": "Periapt of Health",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Periapto de Fechamento de Feridas",
-    "en": "Periapt of Wound Closure",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Filtro do Amor",
-    "en": "Philter of Love",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Flautas dos Esgotos",
-    "en": "Pipes of the Sewers",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Buraco Portátil",
-    "en": "Portable Hole",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Poção de Amizade Animal",
-    "en": "Potion of Animal Friendship",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Poção de Invisibilidade Maior",
-    "en": "Potion of Greater Invisibility",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Poção de Veneno",
-    "en": "Potion of Poison",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Poção de Velocidade",
-    "en": "Potion of Speed",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Poção de Respiração Aquática",
-    "en": "Potion of Water Breathing",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Anel de Influência Animal",
-    "en": "Ring of Animal Influence",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Anel de Comando Elemental",
-    "en": "Ring of Elemental Command",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Anel da Invisibilidade",
-    "en": "Ring of Invisibility",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Anel de Reversão de Magias",
-    "en": "Ring of Spell Turning",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Anel de Telecinese",
-    "en": "Ring of Telekinesis",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Anel do Calor",
-    "en": "Ring of Warmth",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Bastão do Poder Senhorial",
-    "en": "Rod of Lordly Might",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Corda de Escalada",
-    "en": "Rope of Climbing",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Escaravelho de Proteção",
-    "en": "Scarab of Protection",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Pergaminho de Proteção",
-    "en": "Scroll of Protection",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Esfera da Aniquilação",
-    "en": "Sphere of Annihilation",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Cajado do Encantamento",
-    "en": "Staff of Charming",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Cajado do Poder",
-    "en": "Staff of Power",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Cajado da Víbora",
-    "en": "Staff of the Adder",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Cajado dos Magos",
-    "en": "Staff of the Magi",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Pedra de Controle de Elementais da Terra",
-    "en": "Stone of Controlling Earth Elementals",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Espada Sugadora de Vida",
-    "en": "Sword of Life Stealing",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Espada Afiada",
-    "en": "Sword of Sharpness",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Espada das Feridas",
-    "en": "Sword of Wounding",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Talismã do Bem Puro",
-    "en": "Talisman of Pure Good",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Solvente Universal",
-    "en": "Universal Solvent",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Arma Cruel",
-    "en": "Vicious Weapon",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Espada Vorpal",
-    "en": "Vorpal Sword",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Varinha de Aprisionamento",
-    "en": "Wand of Binding",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Varinha do Medo",
-    "en": "Wand of Fear",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Varinha de Orcus",
-    "en": "Wand of Orcus",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Varinha de Teia",
-    "en": "Wand of Web",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Varinha das Maravilhas",
-    "en": "Wand of Wonder",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Onda",
-    "en": "Wave",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Arma de Alerta",
-    "en": "Weapon of Warning",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Estrondo",
-    "en": "Whelm",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Botas Aladas",
-    "en": "Winged Boots",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Redesenhado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Aparelho de Kwalish",
-    "en": "Apparatus of Kwalish",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Armadura Cintilante",
-    "en": "Armor of Gleaming",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Bolsa de Feijões",
-    "en": "Bag of Beans",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Bolsa de Carga",
-    "en": "Bag of Holding",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Bolsa de Truques",
-    "en": "Bag of Tricks",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Conta de Força",
-    "en": "Bead of Force",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Vassoura Voadora",
-    "en": "Broom of Flying",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Capa do Charlatão",
-    "en": "Cape of the Mountebank",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Gorro de Respiração Aquática",
-    "en": "Cap of Water Breathing",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Tapete Voador",
-    "en": "Carpet of Flying",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Armadura Removível",
-    "en": "Cast-Off Armor",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Caldeirão do Renascimento",
-    "en": "Cauldron of Rebirth",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Carrilhão de Abertura",
-    "en": "Chime of Opening",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Manto de Deslocamento",
-    "en": "Cloak of Displacement",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Portal Cúbico",
-    "en": "Cubic Gate",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Fortaleza Instantânea de Daern",
-    "en": "Daern's Instant Fortress",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Amuleto da Lasca Negra",
-    "en": "Dark Shard Amulet",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Jarra de Água Infinita",
-    "en": "Decanter of Endless Water",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Baralho de Ilusões",
-    "en": "Deck of Illusions",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Defensora",
-    "en": "Defender",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Armadura Demoníaca",
-    "en": "Demon Armor",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Demonômicon de Iggwilv",
-    "en": "Demonomicon of Iggwilv",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Algemas Dimensionais",
-    "en": "Dimensional Shackles",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Cota de Escamas de Dragão",
-    "en": "Dragon Scale Mail",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Matadora de Dragões",
-    "en": "Dragon Slayer",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Globo Flutuante",
-    "en": "Driftglobe",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Pó do Desaparecimento",
-    "en": "Dust of Disappearance",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Pó da Secura",
-    "en": "Dust of Dryness",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Pó de Espirros e Sufocamento",
-    "en": "Dust of Sneezing and Choking",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Olho Artificial",
-    "en": "Ersatz Eye",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Garrafa de Fumaça Infinita",
-    "en": "Eversmoking Bottle",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Barco Dobrável",
-    "en": "Folding Boat",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Gema do Brilho",
-    "en": "Gem of Brightness",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Gema da Visão",
-    "en": "Gem of Seeing",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Chapéu de Feitiçaria",
-    "en": "Hat of Wizardry",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Elmo do Brilho",
-    "en": "Helm of Brilliance",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Bolsa de Especiarias Prática de Heward",
-    "en": "Heward's Handy Spice Pouch",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Vingadora Sagrada",
-    "en": "Holy Avenger",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Chifre de Valhala",
-    "en": "Horn of Valhalla",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Ferraduras de Zéfiro",
-    "en": "Horseshoes of a Zephyr",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Ferraduras da Velocidade",
-    "en": "Horseshoes of Speed",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Bastão Imóvel",
-    "en": "Immovable Rod",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Instrumento de Ilusões",
-    "en": "Instrument of Illusions",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Faixas de Ferro de Bilarro",
-    "en": "Iron Bands of Bilarro",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Pomada de Keoghtom",
-    "en": "Keoghtom's Ointment",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Lanterna Reveladora",
-    "en": "Lantern of Revealing",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Lâmina da Sorte",
-    "en": "Luck Blade",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Maça do Terror",
-    "en": "Mace of Terror",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Colar de Bolas de Fogo",
-    "en": "Necklace of Fireballs",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Óleo da Escorregadela",
-    "en": "Oil of Slipperiness",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Orbe de Direção",
-    "en": "Orb of Direction",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Orbe do Tempo",
-    "en": "Orb of Time",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Perfume de Enfeitiçamento",
-    "en": "Perfume of Bewitching",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Cachimbo de Monstros de Fumaça",
-    "en": "Pipe of Smoke Monsters",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Flautas Assombradoras",
-    "en": "Pipes of Haunting",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Armadura de Placas Etérea",
-    "en": "Plate Armor of Etherealness",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Vara de Pesca",
-    "en": "Pole of Angling",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Vara Dobrável",
-    "en": "Pole of Collapsing",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Poção de Invisibilidade",
-    "en": "Potion of Invisibility",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Membro Protético",
-    "en": "Prosthetic Limb",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Ficha de Pena de Quaal",
-    "en": "Quaal's Feather Token",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Anel de Proteção Mental",
-    "en": "Ring of Mind Shielding",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Anel de Estrelas Cadentes",
-    "en": "Ring of Shooting Stars",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Anel do Aríete",
-    "en": "Ring of the Ram",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Anel de Visão de Raios X",
-    "en": "Ring of X-ray Vision",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Manto dos Olhos",
-    "en": "Robe of Eyes",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Manto de Cores Cintilantes",
-    "en": "Robe of Scintillating Colors",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Manto das Estrelas",
-    "en": "Robe of Stars",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Manto de Itens Úteis",
-    "en": "Robe of Useful Items",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Bastão de Alerta",
-    "en": "Rod of Alertness",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Bastão de Domínio",
-    "en": "Rod of Rulership",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Bastão da Segurança",
-    "en": "Rod of Security",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Bastão do Guardião do Pacto",
-    "en": "Rod of the Pact Keeper",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Corda de Enredamento",
-    "en": "Rope of Entanglement",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Corda de Reparo",
-    "en": "Rope of Mending",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Rubi do Mago de Guerra",
-    "en": "Ruby of the War Mage",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Cola Soberana",
-    "en": "Sovereign Glue",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Cajado de Chamados de Pássaros",
-    "en": "Staff of Birdcalls",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Cajado das Flores",
-    "en": "Staff of Flowers",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Cajado do Enxame de Insetos",
-    "en": "Staff of Swarming Insects",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Cajado da Píton",
-    "en": "Staff of the Python",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Cajado das Florestas",
-    "en": "Staff of the Woodlands",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Cajado do Trovão e Relâmpago",
-    "en": "Staff of Thunder and Lightning",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Lâmina Solar",
-    "en": "Sun Blade",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Espada de Kas",
-    "en": "Sword of Kas",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Talismã da Esfera",
-    "en": "Talisman of the Sphere",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Talismã do Mal Absoluto",
-    "en": "Talisman of Ultimate Evil",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Bastão de Tentáculos",
-    "en": "Tentacle Rod",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Varinha de Regência",
-    "en": "Wand of Conducting",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Varinha de Detecção de Inimigos",
-    "en": "Wand of Enemy Detection",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Varinha de Paralisia",
-    "en": "Wand of Paralysis",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Varinha de Pirotecnia",
-    "en": "Wand of Pyrotechnics",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Varinha dos Segredos",
-    "en": "Wand of Secrets",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Poço de Muitos Mundos",
-    "en": "Well of Many Worlds",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
-  },
-  {
-    "n": "Asas Voadoras",
-    "en": "Wings of Flying",
-    "categoria": "Índice DMG 2024",
-    "tipo": "não detalhado no índice público",
-    "raridade": null,
-    "fonte": "DMG 2024 — índice oficial de alterações",
-    "magico": true,
-    "statusDMG2024": "Revisado",
-    "nota": "A Wizards lista este nome como item novo/retrabalhado/revisado; propriedades completas não estão incluídas neste índice."
+    "descricao": "Estas asas artificiais podem ser ativadas para conceder deslocamento de voo. O voo dura até 1 hora por ativação ou até ser encerrado; quando o efeito termina, você desce lentamente em segurança se não estiver sobre uma superfície sólida.",
+    "uso": ""
   }
 ];
 
-const ALL_ITEMS = EQUIPMENT.concat(MAGIC_ITEMS, DMG_2024_ONLY_ITEMS);
+const ALL_ITEMS = EQUIPMENT.concat(MAGIC_ITEMS);
 window.EQUIPMENT = EQUIPMENT;
 window.MAGIC_ITEMS = MAGIC_ITEMS;
 window.SRD_MAGIC_ITEMS = MAGIC_ITEMS;
-window.DMG_2024_ONLY_ITEMS = DMG_2024_ONLY_ITEMS;
-window.DMG_2024_ITEM_INDEX = DMG_2024_INDEX;
 window.ITEMS = ALL_ITEMS;
 window.findItem = function (query) {
   const q = String(query || '').trim().toLocaleLowerCase('pt-BR');
@@ -10293,5 +6651,5 @@ window.getItems = function (filters) {
     return true;
   });
 };
-window.ITEMS_META={ruleset:'D&D 5e revisado (2024)',srd:'5.2.1',equipmentCount:EQUIPMENT.length,magicCount:MAGIC_ITEMS.length,dmgIndexExtraCount:DMG_2024_ONLY_ITEMS.length,totalCount:ALL_ITEMS.length,translations:'PT-BR de referência; nomes originais preservados em en'};
+window.ITEMS_META={ruleset:'D&D 5e revisado (2024)',srd:'5.2.1',equipmentCount:EQUIPMENT.length,magicCount:MAGIC_ITEMS.length,totalCount:ALL_ITEMS.length,translations:'PT-BR de referência; nomes originais preservados em en'};
 })();
