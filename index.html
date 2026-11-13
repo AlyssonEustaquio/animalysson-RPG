@@ -146,7 +146,7 @@ input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:
 <script>
 /* Carrega os catálogos sempre com um parâmetro novo na URL, para o navegador
    nunca reaproveitar uma versão antiga dos .js em cache. */
-['especies.js','classes.js','antecedentes.js','spells.js','itens.js'].forEach(function(f){
+['especies.js','classes.js','antecedentes.js','spells.js','itens.js','monsters.js'].forEach(function(f){
   document.write('<script src="'+f+'?v='+Date.now()+'"><\/script>');
 });
 </script>
