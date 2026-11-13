@@ -138,7 +138,7 @@ input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:
 /* Main section navigation and visual catalogs */
 .site-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 14px}
 .site-head h1{margin:0}.subtitle{color:var(--mute);margin:2px 0 0;font-size:.9rem}.head-actions{display:flex;gap:8px}
-.section-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 18px;position:sticky;top:0;z-index:20;padding:8px 0;background:var(--bg)}
+.section-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 18px;position:sticky;top:0;z-index:20;padding:8px 0;background:var(--bg)}
 .section-tab{border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--mute);font:inherit;font-weight:700;padding:12px 10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;transition:.15s}
 .section-tab span{font-size:1.2rem}.section-tab.on{background:var(--red);border-color:var(--red);color:#fff}.section-tab:hover{border-color:var(--red);color:var(--ink)}.section-tab.on:hover{color:#fff}
 .catalog-head{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:14px}
@@ -167,18 +167,41 @@ input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:
 
 
 .item-description{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}.item-description h3{margin:0 0 10px;font-size:1rem}.item-description p{line-height:1.55}.detail-hint{color:var(--mute);font-size:.82rem}.rules-copy{line-height:1.55;overflow-wrap:anywhere}.rules-copy h3,.rules-copy h4,.rules-copy h5{margin:14px 0 6px}.rules-copy ul{padding-left:20px}.rules-copy li{margin:4px 0}.rules-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.88rem}.rules-table td{border:1px solid var(--line);padding:6px;vertical-align:top}.original-details{margin-top:12px}.original-details pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.75rem;background:var(--panel2);padding:10px;border-radius:8px}.catalog-card .card-stats{flex-wrap:wrap;gap:6px}.catalog-card .card-stats span{font-size:.76rem}
+
+/* Aba Mapas */
+.mp{display:flex;flex-direction:column;gap:8px}
+.mp-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.mp button,.mp select,.mp input:not([type=checkbox]){font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 9px}
+.mp button{cursor:pointer}.mp button.on{background:var(--red);border-color:var(--red);font-weight:700}
+.mp-wrap{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;height:calc(100vh - 230px);min-height:420px}
+.mp-side{width:250px;flex:none;overflow:auto;background:var(--card);border-right:1px solid var(--line);padding:8px;display:flex;flex-direction:column;gap:10px;font-size:.88rem}
+.mp-side h4{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:0 0 4px}
+.mp-side small,.mp small{color:var(--mute)}
+.mp-g{display:flex;flex-wrap:wrap;gap:4px}.mp-g button{flex:1 1 auto}
+#mp-pal button{display:flex;align-items:center;gap:6px;width:100%;text-align:left;margin-bottom:3px}
+#mp-pal i{width:16px;height:16px;border-radius:3px;border:1px solid #000;flex:none}
+#mp-pal small,#mp-ml small{margin-left:auto}
+#mp-ml{display:flex;flex-direction:column;gap:3px;max-height:200px;overflow:auto}#mp-ml button{text-align:left;display:flex;gap:6px}
+.mp-main{flex:1;position:relative;min-width:0;background:#0b0b0c}
+#mp-cv{width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
+#mp-hud{position:absolute;left:8px;top:8px;background:rgba(18,18,18,.88);border:1px solid var(--line);border-radius:6px;padding:6px 10px;display:none;font-size:.85rem}
+#mp-st{position:absolute;left:8px;bottom:8px;background:rgba(18,18,18,.85);border-radius:6px;padding:3px 8px;color:var(--mute);font-size:.8rem}
+.mp-play #mp-edit{display:none}.mp-play #mp-hud{display:block}
+@media(max-width:700px){.mp-wrap{flex-direction:column-reverse;height:auto}.mp-side{width:100%;max-height:38vh;border-right:0;border-top:1px solid var(--line)}.mp-main{height:58vh}}
+@media print{.mp{display:none}}
 </style>
 </head>
 <body>
 <main>
 <header class="site-head">
-  <div><h1>animalysson RPG</h1><p class="subtitle">Personagem · Itens · Monstros</p></div>
+  <div><h1>animalysson RPG</h1><p class="subtitle">Personagem · Itens · Monstros · Mapas</p></div>
   
 </header>
 <nav class="section-tabs" aria-label="Seções principais">
   <button id="tab-character" class="section-tab on" onclick="switchView('character')"><span>♙</span> Personagem</button>
   <button id="tab-items" class="section-tab" onclick="switchView('items')"><span>⚒</span> Itens</button>
   <button id="tab-monsters" class="section-tab" onclick="switchView('monsters')"><span>♜</span> Monstros</button>
+  <button id="tab-maps" class="section-tab" onclick="switchView('maps')"><span>▦</span> Mapas</button>
 </nav>
 <div class="steps" id="steps" style="display:none"></div>
 <div id="app"></div>
@@ -187,7 +210,7 @@ input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:
 <script>
 /* Carrega os catálogos sempre com um parâmetro novo na URL, para o navegador
    nunca reaproveitar uma versão antiga dos .js em cache. */
-['especies.js','classes.js','antecedentes.js','spells.js','itens.js','monsters.js'].forEach(function(f){
+['especies.js','classes.js','antecedentes.js','spells.js','itens.js','monsters.js','mapa.js'].forEach(function(f){
   document.write('<script src="'+f+'?v='+Date.now()+'"><\/script>');
 });
 </script>
@@ -474,7 +497,7 @@ function switchView(view){
  render();
 }
 function updateTabs(){
- ['character','items','monsters'].forEach(function(v){
+ ['character','items','monsters','maps'].forEach(function(v){
   const el=document.getElementById('tab-'+v);
   if(el)el.classList.toggle('on',ACTIVE_VIEW===v);
  });
@@ -704,6 +727,8 @@ async function renderMonstersPage(){
 function render(){
  const steps=document.getElementById('steps');if(steps)steps.innerHTML='';
  updateTabs();
+ if(ACTIVE_VIEW!=='maps'&&window.MapEditor)window.MapEditor.unmount();
+ if(ACTIVE_VIEW==='maps'){document.getElementById('app').innerHTML='';window.MapEditor?window.MapEditor.mount(document.getElementById('app')):document.getElementById('app').innerHTML='<div class="empty-state">mapa.js não encontrado.</div>';return}
  if(ACTIVE_VIEW==='character')renderCharacterPage();
  else if(ACTIVE_VIEW==='items')renderItemsPage();
  else renderMonstersPage();
