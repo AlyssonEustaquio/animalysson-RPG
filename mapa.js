@@ -34,7 +34,7 @@ var MAPS = {
       ],
       hexagons: {
         large: { miles: 30, referenceWidthPixels: 240 },
-        small: { miles: 12, referenceWidthPixels: 96 }
+        small: { miles: 6, referenceWidthPixels: 48 }
       }
     },
     detail: { src: 'mapas/flanaess_mapa/detalhe/d_{r}_{c}.webp', n: 8, minZoom: 1.1 },
@@ -52,8 +52,10 @@ var mapId = 'tumba', MAPINFO = null;
 var hexSize = 'small';
 var KEY, CELL, COLS, ROWS, MAP_W, MAP_H, PARTS;
 try { mapId = localStorage.getItem(MAP_ID_KEY) || 'tumba'; } catch (e) {}
-// Flanaess usa exclusivamente hexágonos pequenos (12 milhas / 96 px de referência).
+// Flanaess usa exclusivamente hexágonos pequenos de 6 milhas (48 px de referência).
 // Ignora preferências antigas de tamanho para impedir retorno à grade grande.
+var FLANAESS_GRID_MODE = 'hex-small-6mi';
+var FLANAESS_ZOOM = 3; // Zoom fixo em 300%.
 
 function isHexMap() { return !!(MAPINFO && MAPINFO.scale && mapId === 'flanaess'); }
 function hexMetrics() {
@@ -119,19 +121,22 @@ function migrateFlanaessState(s) {
       t.x = migrated.x; t.y = migrated.y;
     });
     delete s._legacySquareTokens;
-  } else if (s.gridMode && s.gridMode !== ('hex-' + hexSize)) {
-    var oldMode = s.gridMode === 'hex-small' ? 'small' : 'large';
-    var oldCfg = MAPINFO.scale.hexagons[oldMode];
-    var oldWidth = oldCfg.referenceWidthPixels / MAPINFO.scale.referencePixelsPerLogicalPixel;
-    var oldHeight = oldWidth * 2 / Math.sqrt(3), oldStep = oldHeight * 0.75;
-    (s.tokens || []).forEach(function (t) {
-      var oldWorldX = oldWidth / 2 + t.x * oldWidth + (t.y & 1) * oldWidth / 2;
-      var oldWorldY = oldHeight / 2 + t.y * oldStep;
-      var migrated = worldToCell(oldWorldX, oldWorldY);
-      t.x = migrated.x; t.y = migrated.y;
-    });
+  } else if (s.gridMode && s.gridMode !== FLANAESS_GRID_MODE) {
+    var oldMode = s.gridMode === 'hex-small' ? 'small' : (s.gridMode === 'hex-large' ? 'large' : null);
+    if (oldMode) {
+      // Dimensões da grade anterior: pequeno=96 px e grande=240 px de referência.
+      var oldReferenceWidth = oldMode === 'small' ? 96 : 240;
+      var oldWidth = oldReferenceWidth / MAPINFO.scale.referencePixelsPerLogicalPixel;
+      var oldHeight = oldWidth * 2 / Math.sqrt(3), oldStep = oldHeight * 0.75;
+      (s.tokens || []).forEach(function (t) {
+        var oldWorldX = oldWidth / 2 + t.x * oldWidth + (t.y & 1) * oldWidth / 2;
+        var oldWorldY = oldHeight / 2 + t.y * oldStep;
+        var migrated = worldToCell(oldWorldX, oldWorldY);
+        t.x = migrated.x; t.y = migrated.y;
+      });
+    }
   }
-  s.gridMode = 'hex-' + hexSize;
+  s.gridMode = FLANAESS_GRID_MODE;
   s.fog = []; s.walls = []; s.hEdges = []; s.vEdges = [];
   state = s;
   save();
@@ -146,7 +151,7 @@ function defaultState() {
   return {
     v: 4,
     nome: MAPINFO.nome,
-    gridMode: isHexMap() ? ('hex-' + hexSize) : 'square',
+    gridMode: isHexMap() ? FLANAESS_GRID_MODE : 'square',
     tokens: [
       { id: 'p1', nome: 'Aventureiro', tipo: 'player', x: isHexMap() ? worldToCell(MAP_W / 2, MAP_H / 2).x : MAPINFO.spawn.x, y: isHexMap() ? worldToCell(MAP_W / 2, MAP_H / 2).y : MAPINFO.spawn.y, cor: '#4fc3f7', raio: 1, luz: 6, hp: null, hpMax: null }
     ],
@@ -190,7 +195,7 @@ function load() {
 function save() {
   try {
     if (isHexMap()) {
-      state.gridMode = 'hex-' + hexSize;
+      state.gridMode = FLANAESS_GRID_MODE;
       localStorage.setItem(KEY, JSON.stringify({ v: 4, nome: MAPINFO.nome, gridMode: state.gridMode, tokens: state.tokens || [] }));
     } else {
       localStorage.setItem(KEY, JSON.stringify(state));
@@ -593,7 +598,7 @@ function drawScaleBars(viewW, viewH) {
 
 function focusCameraOnPlayer(viewW, viewH) {
   if (!isHexMap() || !cv) return;
-  zoom = 2; // Flanaess fixo em 200% (dobro do zoom anterior).
+  zoom = FLANAESS_ZOOM; // Flanaess fixo em 300%.
   var player = currentPlayer();
   if (!player) return;
   var center = cellCenter(player.x, player.y);
@@ -727,7 +732,7 @@ function draw() {
       for (var hy = gridBounds.y0; hy <= gridBounds.y1; hy++) {
         for (var hx = gridBounds.x0; hx <= gridBounds.x1; hx++) appendHexPath(cx, cellCenter(hx, hy), hmGrid);
       }
-      cx.strokeStyle = 'rgba(255,255,255,0.50)'; cx.lineWidth = 1 / zoom; cx.stroke();
+      cx.strokeStyle = 'rgba(255,255,255,0.90)'; cx.lineWidth = 1 / zoom; cx.stroke();
     } else {
       cx.beginPath();
       for (var gx = 0; gx <= COLS; gx++) { cx.moveTo(gx * CELL, 0); cx.lineTo(gx * CELL, ROWS * CELL); }
@@ -1146,12 +1151,12 @@ function updateHud() {
     : (pendingMonster ? 'Coloque: <b>' + esc(pendingMonster.nome) + '</b>' : 'Nenhum token selecionado');
   var hm = hexMetrics();
   var scaleInfo = hm
-    ? 'Grade hexagonal pequena: 12 mi / 96 px · 1 mi = 8 px'
+    ? 'Grade hexagonal: 6 mi / 48 px · 1 mi = 8 px'
     : 'Medição em quadrículas';
   if (isHexMap()) {
     var travelInfo = worldTravelPath.length ? ' · ' + worldTravelPath.length + ' hexágonos restantes' : ' · Clique no mapa para viajar';
     h.innerHTML = '<b>' + esc((currentPlayer() || {}).nome || 'Aventureiro') + '</b> · Câmera presa ao personagem' +
-      '<br><small>Zoom 200% · Resolução máxima · 1 movimento a cada 2 segundos' + travelInfo + ' · ' + scaleInfo + '</small>';
+      '<br><small>Zoom 300% · Resolução máxima · 1 movimento a cada 2 segundos' + travelInfo + ' · ' + scaleInfo + '</small>';
   } else {
     h.innerHTML = info + '<br><small>' + toolLabel(tool) + ' · Zoom ' + Math.round(zoom * 100) + '% · ' + scaleInfo + '</small>';
   }
@@ -1517,7 +1522,7 @@ function onPointerLeave() {
 
 function onWheel(e) {
   e.preventDefault();
-  if (isHexMap()) { zoom = 2; draw(); return; }
+  if (isHexMap()) { zoom = FLANAESS_ZOOM; draw(); return; }
   var rect = cv.getBoundingClientRect();
   var sx = e.clientX - rect.left, sy = e.clientY - rect.top;
   var before = screenToWorld(sx, sy);
@@ -1585,7 +1590,7 @@ function mount(el) {
     '<div class="mp vtt" id="mp-root">' +
     '<div class="mp-bar">' +
     '<select id="mp-map" class="mp-title" title="Trocar de mapa">' + mapOptions() + '</select>' +
-    '<label id="mp-hex-wrap" class="mp-luz" style="display:none">Hexágono <select id="mp-hex-size" disabled><option value="small" selected>Pequeno · 12 mi</option></select></label>' +
+    '<label id="mp-hex-wrap" class="mp-luz" style="display:none">Hexágono <select id="mp-hex-size" disabled><option value="small" selected>Pequeno · 6 mi</option></select></label>' +
     '<label id="mp-speed-wrap" class="mp-luz" style="display:none">Velocidade <input id="mp-speed" type="number" min="0.1" step="0.1" placeholder="mi/dia" style="width:62px"></label>' +
     '<div class="mp-g" id="mp-tools">' +
     '<button data-t="select" class="on" title="Selecionar / Mover · clique na porta para abrir/fechar">↖ Selecionar</button>' +
@@ -1684,9 +1689,9 @@ function mount(el) {
     var radiusInput = $('#mp-lr'); if (radiusInput && radiusInput.parentElement) radiusInput.parentElement.style.display = 'none';
     var speedWrap = $('#mp-speed-wrap'); if (speedWrap) speedWrap.style.display = 'none';
     showFog = false; dynLight = false; showWalls = false; showGrid = true;
-    zoom = 2;
+    zoom = FLANAESS_ZOOM;
     var status = $('#mp-st');
-    if (status) status.textContent = 'Clique no mapa para viajar · Hexágono pequeno (12 milhas) · 1 movimento a cada 2 segundos · Câmera presa ao personagem · Zoom 200% · Resolução máxima';
+    if (status) status.textContent = 'Clique no mapa para viajar · Hexágono de 6 milhas (48 px de referência) · 1 movimento a cada 2 segundos · Câmera presa ao personagem · Zoom 300% · Resolução máxima';
   }
   // O Flanaess não oferece mais seletor: o tamanho pequeno é fixo.
   if ($('#mp-speed')) $('#mp-speed').oninput = function () {
@@ -1731,8 +1736,8 @@ function mount(el) {
       save(); draw();
     }
   };
-  $('#mp-zo').onclick = function () { if (isHexMap()) { zoom = 2; } else { zoom = Math.max(0.04, zoom / 1.2); } draw(); };
-  $('#mp-zi').onclick = function () { if (isHexMap()) { zoom = 2; } else { zoom = Math.min(MAPINFO.maxZoom || 2.5, zoom * 1.2); } draw(); };
+  $('#mp-zo').onclick = function () { if (isHexMap()) { zoom = FLANAESS_ZOOM; } else { zoom = Math.max(0.04, zoom / 1.2); } draw(); };
+  $('#mp-zi').onclick = function () { if (isHexMap()) { zoom = FLANAESS_ZOOM; } else { zoom = Math.min(MAPINFO.maxZoom || 2.5, zoom * 1.2); } draw(); };
 
   $('#mp-q').oninput = function () { renderMonsterList(this.value); };
   $('#mp-ml').onclick = function (e) {
@@ -1768,7 +1773,7 @@ function mount(el) {
   loadBackgrounds(function () {
     if (!cv) return;
     if (isHexMap()) {
-      zoom = 2;
+      zoom = FLANAESS_ZOOM;
       focusCameraOnPlayer();
     } else if (MAPINFO.fit) {
       zoom = Math.max(0.04, Math.min((cv.clientWidth - 160) / MAP_W, (cv.clientHeight - 160) / MAP_H));
