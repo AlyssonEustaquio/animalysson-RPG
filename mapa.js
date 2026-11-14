@@ -25,10 +25,10 @@ var MAPS = {
     spawn: { x: 110, y: 131 },
     fit: true,                            // abre mostrando o mapa inteiro
     parts: [
-      { src: 'mapas/flanaess/hi_part1.webp', x: 0,    y: 0,     w: 4400, h: 5240 },
-      { src: 'mapas/flanaess/hi_part2.webp', x: 4400, y: 0,     w: 4400, h: 5240 },
-      { src: 'mapas/flanaess/hi_part3.webp', x: 0,    y: 5240,  w: 4400, h: 5240 },
-      { src: 'mapas/flanaess/hi_part4.webp', x: 4400, y: 5240,  w: 4400, h: 5240 }
+      { src: 'mapas/flanaess_mapa/hi_part1.webp', x: 0,    y: 0,     w: 4400, h: 5240 },
+      { src: 'mapas/flanaess_mapa/hi_part2.webp', x: 4400, y: 0,     w: 4400, h: 5240 },
+      { src: 'mapas/flanaess_mapa/hi_part3.webp', x: 0,    y: 5240,  w: 4400, h: 5240 },
+      { src: 'mapas/flanaess_mapa/hi_part4.webp', x: 4400, y: 5240,  w: 4400, h: 5240 }
     ]
   }
 };
