@@ -732,7 +732,7 @@ function draw() {
       for (var hy = gridBounds.y0; hy <= gridBounds.y1; hy++) {
         for (var hx = gridBounds.x0; hx <= gridBounds.x1; hx++) appendHexPath(cx, cellCenter(hx, hy), hmGrid);
       }
-      cx.strokeStyle = 'rgba(255,255,255,0.90)'; cx.lineWidth = 1 / zoom; cx.stroke();
+      cx.strokeStyle = 'rgba(0,0,0,0.10)'; cx.lineWidth = 1 / zoom; cx.stroke(); // Flanaess: grid preto com 10% de opacidade
     } else {
       cx.beginPath();
       for (var gx = 0; gx <= COLS; gx++) { cx.moveTo(gx * CELL, 0); cx.lineTo(gx * CELL, ROWS * CELL); }
