@@ -1,14 +1,10 @@
-/* mapa.js — VTT estilo Roll20
- * Parede (quadrado) + Muro/Porta (linha do grid) + fog 100%/50% + luz com LOS
- */
 (function () {
 'use strict';
 
-// ---- Mapas disponíveis (para adicionar outro, copie um bloco e ajuste) ----
 var MAPS = {
   tumba: {
     nome: 'Tumba dos Horrores', icone: '☠',
-    key: 'animalysson-vtt-v4',            // mantém o estado já salvo
+    key: 'animalysson-vtt-v4',
     cell: 36, cols: 72, rows: 95, w: 2592, h: 3420,
     spawn: { x: 35, y: 88 },
     parts: [
@@ -23,7 +19,9 @@ var MAPS = {
     key: 'animalysson-vtt-flanaess-v1',
     cell: 40, cols: 220, rows: 262, w: 8800, h: 10480,
     spawn: { x: 110, y: 131 },
-    fit: true,                            // abre mostrando o mapa inteiro
+    fit: true,
+    maxZoom: 4,
+    detail: { src: 'mapas/flanaess_mapa/detalhe/d_{r}_{c}.webp', n: 8, minZoom: 1.1 },
     parts: [
       { src: 'mapas/flanaess_mapa/hi_part1.webp', x: 0,    y: 0,     w: 4400, h: 5240 },
       { src: 'mapas/flanaess_mapa/hi_part2.webp', x: 4400, y: 0,     w: 4400, h: 5240 },
@@ -50,9 +48,7 @@ function mapOptions() {
 }
 applyMap(mapId);
 
-// Arestas: 0=livre, 1=muro, 2=porta fechada, 3=porta aberta
 var EDGE_NONE = 0, EDGE_MURO = 1, EDGE_DOOR_C = 2, EDGE_DOOR_O = 3;
-
 
 var SIZE_SQ = {
   Tiny:1, Small:1, Medium:1, Large:2, Huge:3, Gargantuan:4,
@@ -69,7 +65,6 @@ var selected = null;
 var measurePts = null;
 var pendingMonster = null;
 var blockMove = true;
-// Posição do cursor usada para desenhar a prévia da ferramenta antes do clique.
 var previewPointer = null;
 
 var state = load() || defaultState();
@@ -85,8 +80,8 @@ function defaultState() {
     ],
     fog: makeGrid(1),
     walls: makeGrid(0),
-    hEdges: makeArr(COLS * (ROWS + 1), 0), // aresta horizontal acima da célula (x, yEdge)
-    vEdges: makeArr((COLS + 1) * ROWS, 0)  // aresta vertical à esquerda da célula (xEdge, y)
+    hEdges: makeArr(COLS * (ROWS + 1), 0),
+    vEdges: makeArr((COLS + 1) * ROWS, 0)
   };
 }
 
@@ -156,22 +151,17 @@ function edgeBlocks(val) {
   return val === EDGE_MURO || val === EDGE_DOOR_C;
 }
 
-// Bloqueio ao cruzar de célula A para B
 function blocksBetween(x0, y0, x1, y1) {
   if (x0 === x1 && y0 === y1) return false;
   if (isCellWall(x1, y1)) return true;
   if (y0 === y1) {
-    // movimento horizontal
     if (x1 > x0) return edgeBlocks(getV(x1, y0));
     return edgeBlocks(getV(x0, y0));
   }
   if (x0 === x1) {
-    // movimento vertical
     if (y1 > y0) return edgeBlocks(getH(x0, y1));
     return edgeBlocks(getH(x0, y0));
   }
-  // diagonal: bloqueia se QUALQUER aresta do canto estiver fechada
-  // (impede passar/luz na união das linhas)
   return blocksBetween(x0, y0, x1, y0) || blocksBetween(x0, y0, x0, y1);
 }
 
@@ -196,8 +186,6 @@ function colorForMonster(m) {
   return '#e57373';
 }
 
-// LOS: Bresenham + bloqueio por célula e por aresta
-// Diagonais usam OR (não AND) para não vazar luz na união/canto das linhas
 function hasLOS(x0, y0, x1, y1) {
   if (x0 === x1 && y0 === y1) return true;
   if (isCellWall(x1, y1) && !(x1 === x0 && y1 === y0)) return false;
@@ -214,8 +202,6 @@ function hasLOS(x0, y0, x1, y1) {
     if (stepY) { err += dx; ny = y + sy; }
 
     if (nx !== x && ny !== y) {
-      // passo diagonal: bloqueia se QUALQUER lado do canto tiver muro/porta fechada
-      // (evita luz passando na união das linhas)
       if (blocksBetween(x, y, nx, y) || blocksBetween(x, y, x, ny)) return false;
       if (blocksBetween(nx, y, nx, ny) || blocksBetween(x, ny, nx, ny)) return false;
       if (isCellWall(nx, y) || isCellWall(x, ny)) return false;
@@ -249,7 +235,6 @@ function worldToCell(wx, wy) {
 }
 function cellCenter(cx, cy) { return { x: (cx + 0.5) * CELL, y: (cy + 0.5) * CELL }; }
 
-// Encontra a aresta mais próxima do ponto no mundo
 function nearestEdge(wx, wy) {
   var gx = wx / CELL, gy = wy / CELL;
   var cx = Math.floor(gx), cy = Math.floor(gy);
@@ -282,8 +267,6 @@ function isDoorEdge(val) {
   return val === EDGE_DOOR_C || val === EDGE_DOOR_O;
 }
 
-// Retorna todas as partes de uma porta contínua na mesma linha.
-// Portas que apenas se tocam pelas pontas formam um único conjunto.
 function getDoorRun(edge) {
   if (!edge || !isDoorEdge(getEdgeVal(edge))) return edge ? [edge] : [];
   var run = [];
@@ -310,7 +293,41 @@ function doorRunIsClosed(edge) {
   return run.every(function (part) { return getEdgeVal(part) === EDGE_DOOR_C; });
 }
 
-// ---------- Draw ----------
+var detailCache = {};
+var DETAIL_MAX = 6;
+
+function drawDetail(W, H) {
+  var d = MAPINFO && MAPINFO.detail;
+  if (!d || zoom < d.minZoom) return;
+  var tw = MAP_W / d.n, th = MAP_H / d.n;
+  var c0 = Math.max(0, Math.floor((-ox / zoom) / tw));
+  var c1 = Math.min(d.n - 1, Math.floor(((W - ox) / zoom) / tw));
+  var r0 = Math.max(0, Math.floor((-oy / zoom) / th));
+  var r1 = Math.min(d.n - 1, Math.floor(((H - oy) / zoom) / th));
+  var now = Date.now(), visible = {};
+  for (var r = r0; r <= r1; r++) {
+    for (var c = c0; c <= c1; c++) {
+      var k = r + '_' + c;
+      visible[k] = 1;
+      var t = detailCache[k];
+      if (!t) {
+        t = detailCache[k] = { img: new Image(), t: now };
+        t.img.onload = function () { draw(); };
+        t.img.src = d.src.replace('{r}', r).replace('{c}', c);
+      }
+      t.t = now;
+      if (t.img.complete && t.img.naturalWidth) cx.drawImage(t.img, c * tw, r * th, tw + 0.5, th + 0.5);
+    }
+  }
+  var keys = Object.keys(detailCache);
+  if (keys.length > DETAIL_MAX) {
+    keys.filter(function (k) { return !visible[k]; })
+      .sort(function (a, b) { return detailCache[a].t - detailCache[b].t; })
+      .slice(0, keys.length - DETAIL_MAX)
+      .forEach(function (k) { detailCache[k].img.onload = null; detailCache[k].img.src = ''; delete detailCache[k]; });
+  }
+}
+
 function draw() {
   if (!cv || !cx) return;
   var dpr = window.devicePixelRatio || 1;
@@ -332,8 +349,8 @@ function draw() {
     if (img && img.complete && img.naturalWidth) cx.drawImage(img, p.x, p.y, p.w, p.h);
     else { cx.fillStyle = '#1a1a1c'; cx.fillRect(p.x, p.y, p.w, p.h); }
   });
+  drawDetail(W, H);
 
-  // paredes de célula (preenchimento)
   if (showWalls) {
     cx.fillStyle = 'rgba(180, 40, 40, 0.45)';
     for (var y = 0; y < ROWS; y++) {
@@ -345,7 +362,6 @@ function draw() {
     }
   }
 
-  // muros e portas nas arestas
   if (showWalls) {
     drawEdges();
   }
@@ -361,8 +377,6 @@ function draw() {
 
   if (showFog) drawFogAndLight();
 
-  // Um token só aparece quando TODA a sua área ocupada está visível.
-  // Assim, criaturas fora do alcance de luz ou atrás de paredes não vazam pela névoa.
   if (selected && !isTokenVisible(selected)) selected = null;
   state.tokens.forEach(function (t) {
     if (isTokenVisible(t)) drawToken(t, t === selected);
@@ -393,7 +407,6 @@ function draw() {
 
 function drawEdges() {
   var lw = Math.max(2.5, 3.5 / zoom);
-  // Horizontais: muros continuam individuais; portas encostadas viram um único vão.
   for (var ye = 0; ye <= ROWS; ye++) {
     for (var x = 0; x < COLS; x++) {
       var v = getH(x, ye);
@@ -419,7 +432,6 @@ function drawEdges() {
     }
   }
 
-  // Verticais: mesma regra para portas encostadas na mesma coluna.
   for (var y = 0; y < ROWS; y++) {
     for (var xe = 0; xe <= COLS; xe++) {
       var vv = getV(xe, y);
@@ -458,13 +470,11 @@ function isCurrentlyVisible(x, y, px, py, r) {
 
 function isTokenVisible(t) {
   if (!t) return false;
-  // O marcador do jogador é sempre mostrado para orientar a exploração.
   if (t.tipo === 'player') return true;
   var player = currentPlayer();
   if (!player) return false;
   var sq = t.raio || 1;
   var radius = player.luz || lightRadius;
-  // Só revela o token quando toda a sua área ocupada está dentro da visão.
   for (var dy = 0; dy < sq; dy++) {
     for (var dx = 0; dx < sq; dx++) {
       if (!isCurrentlyVisible(t.x + dx, t.y + dy, player.x, player.y, radius)) return false;
@@ -589,7 +599,7 @@ function drawToolPreview() {
   else if (tool === 'erasewall') drawPreviewCell(cell, 'rgba(102,187,106,0.28)', '#81c784');
   else if (tool === 'muro') drawEdgePreview(edge, '#ff5252', false);
   else if (tool === 'porta') drawEdgePreview(edge, '#ffb74d', true);
-  else if (tool === 'eraseedge') drawEdgePreview(edge, '#80deea', isDoorEdge(getEdgeVal(edge))); 
+  else if (tool === 'eraseedge') drawEdgePreview(edge, '#80deea', isDoorEdge(getEdgeVal(edge)));
   else if (tool === 'reveal' || tool === 'hide') {
     cx.save();
     cx.fillStyle = tool === 'reveal' ? 'rgba(255,235,59,0.22)' : 'rgba(0,0,0,0.5)';
@@ -838,14 +848,12 @@ function canOccupy(x, y, token) {
       if (isCellWall(x + dx, y + dy)) return false;
     }
   }
-  // se veio de posição anterior, checa arestas no caminho (só ortho step-by-step feito no move)
   return true;
 }
 
 function canStep(fromX, fromY, toX, toY, token) {
   if (!canOccupy(toX, toY, token)) return false;
   if (!blockMove) return true;
-  // movimento em um passo: se não for adjacente, permite (drag livre) mas checa destino
   if (Math.abs(toX - fromX) <= 1 && Math.abs(toY - fromY) <= 1) {
     if (blocksBetween(fromX, fromY, toX, toY)) return false;
   }
@@ -883,7 +891,6 @@ function revealAround(cx, cy, radius) {
   }
 }
 
-// ---------- Input ----------
 function onPointerDown(e) {
   cv.setPointerCapture(e.pointerId);
   var previewRect = cv.getBoundingClientRect();
@@ -897,7 +904,6 @@ function onPointerDown(e) {
     return;
   }
 
-  // Muro / Porta / Apagar aresta — trabalha na linha mais próxima
   if (tool === 'muro' || tool === 'porta' || tool === 'eraseedge') {
     var edge = nearestEdge(world.x, world.y);
     var cur = getEdgeVal(edge);
@@ -905,12 +911,10 @@ function onPointerDown(e) {
       setEdgeVal(edge, EDGE_MURO);
       drag = { edgePaint: true, mode: 'muro' };
     } else if (tool === 'porta') {
-      // Uma sequência de portas encostadas abre/fecha como uma única porta.
       if (isDoorEdge(cur)) setDoorRunValue(edge, doorRunIsClosed(edge) ? EDGE_DOOR_O : EDGE_DOOR_C);
       else setEdgeVal(edge, EDGE_DOOR_C);
       drag = { edgePaint: true, mode: 'porta' };
     } else {
-      // Apagar qualquer trecho de uma porta agrupada remove o conjunto inteiro.
       if (isDoorEdge(cur)) setDoorRunValue(edge, EDGE_NONE);
       else setEdgeVal(edge, EDGE_NONE);
       drag = { edgePaint: true, mode: 'erase' };
@@ -959,10 +963,8 @@ function onPointerDown(e) {
   }
 
   if (tool === 'select') {
-    // clique em porta para abrir/fechar rapidamente (atalho)
     var edge2 = nearestEdge(world.x, world.y);
     var ev = getEdgeVal(edge2);
-    // só se clicou bem perto da linha
     var gx = world.x / CELL, gy = world.y / CELL;
     var fx = Math.abs(gx - Math.round(gx)), fy = Math.abs(gy - Math.round(gy));
     var nearLine = Math.min(fx, fy) < 0.12;
@@ -1088,7 +1090,7 @@ function onWheel(e) {
   var sx = e.clientX - rect.left, sy = e.clientY - rect.top;
   var before = screenToWorld(sx, sy);
   var factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
-  zoom = Math.max(0.04, Math.min(2.5, zoom * factor));
+  zoom = Math.max(0.04, Math.min(MAPINFO.maxZoom || 2.5, zoom * factor));
   var after = screenToWorld(sx, sy);
   ox += (after.x - before.x) * zoom;
   oy += (after.y - before.y) * zoom;
@@ -1252,7 +1254,7 @@ function mount(el) {
     }
   };
   $('#mp-zo').onclick = function () { zoom = Math.max(0.04, zoom / 1.2); draw(); };
-  $('#mp-zi').onclick = function () { zoom = Math.min(2.5, zoom * 1.2); draw(); };
+  $('#mp-zi').onclick = function () { zoom = Math.min(MAPINFO.maxZoom || 2.5, zoom * 1.2); draw(); };
 
   $('#mp-q').oninput = function () { renderMonsterList(this.value); };
   $('#mp-ml').onclick = function (e) {
@@ -1298,7 +1300,7 @@ function unmount() {
   document.removeEventListener('keydown', onKey);
   document.removeEventListener('keyup', onKeyUp);
   window.removeEventListener('resize', draw);
-  R = null; cv = null; cx = null; bgImages = []; previewPointer = null;
+  R = null; cv = null; cx = null; bgImages = []; detailCache = {}; previewPointer = null;
 }
 
 window.MapEditor = { mount: mount, unmount: unmount };
