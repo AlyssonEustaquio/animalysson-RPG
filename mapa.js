@@ -21,6 +21,22 @@ var MAPS = {
     spawn: { x: 110, y: 131 },
     fit: true,
     maxZoom: 4,
+    // Esta escala se aplica exclusivamente ao mapa Flanaess.
+    // A imagem lógica é 1/4 da resolução cartográfica de referência.
+    scale: {
+      referenceWidth: 35200,
+      referenceHeight: 41920,
+      referencePixelsPerLogicalPixel: 4,
+      pixelsPerMile: 8,
+      bars: [
+        { miles: 50, referencePixels: 400 },
+        { miles: 100, referencePixels: 800 }
+      ],
+      hexagons: {
+        large: { miles: 30, referenceWidthPixels: 240, logicalWidthPixels: 60 },
+        small: { miles: 12, referenceWidthPixels: 96, logicalWidthPixels: 24 }
+      }
+    },
     detail: { src: 'mapas/flanaess_mapa/detalhe/d_{r}_{c}.webp', n: 8, minZoom: 1.1 },
     parts: [
       { src: 'mapas/flanaess_mapa/hi_part1.webp', x: 0,    y: 0,     w: 4400, h: 5240 },
@@ -235,6 +251,35 @@ function worldToCell(wx, wy) {
 }
 function cellCenter(cx, cy) { return { x: (cx + 0.5) * CELL, y: (cy + 0.5) * CELL }; }
 
+// A conversão para milhas só existe quando o mapa ativo declara uma escala.
+// No momento, apenas Flanaess usa 4 px lógicos = 8 px de referência = 1 milha.
+function mapDistanceMiles(a, b) {
+  var scale = MAPINFO && MAPINFO.scale;
+  if (!scale) return null;
+  var factor = scale.referencePixelsPerLogicalPixel;
+  var dx = (b.x - a.x) * factor;
+  var dy = (b.y - a.y) * factor;
+  return Math.sqrt(dx * dx + dy * dy) / scale.pixelsPerMile;
+}
+
+function formatMapDistance(a, b) {
+  var miles = mapDistanceMiles(a, b);
+  if (miles !== null) {
+    return miles.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) + ' milhas';
+  }
+  // Nos demais mapas, não aplica a escala de Flanaess: mede em quadrículas.
+  var dx = (b.x - a.x) / CELL;
+  var dy = (b.y - a.y) / CELL;
+  var squares = Math.sqrt(dx * dx + dy * dy);
+  return squares.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) + ' quadrículas';
+}
+
+// Tempo em horas, disponível apenas quando o mapa ativo possui escala em milhas.
+function mapTravelHours(distanceMiles, speedMilesPerHour) {
+  if (!(MAPINFO && MAPINFO.scale) || !(speedMilesPerHour > 0)) return null;
+  return distanceMiles / speedMilesPerHour;
+}
+
 function nearestEdge(wx, wy) {
   var gx = wx / CELL, gy = wy / CELL;
   var cx = Math.floor(gx), cy = Math.floor(gy);
@@ -392,12 +437,12 @@ function draw() {
     cx.setLineDash([6 / zoom, 4 / zoom]);
     cx.beginPath(); cx.moveTo(a.x, a.y); cx.lineTo(b.x, b.y); cx.stroke();
     cx.setLineDash([]);
-    var dist = Math.max(Math.abs(measurePts[0].x - measurePts[1].x), Math.abs(measurePts[0].y - measurePts[1].y));
+    var distanceLabel = formatMapDistance(a, b);
     var mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
     cx.fillStyle = 'rgba(0,0,0,0.75)';
     cx.font = (14 / zoom) + 'px sans-serif';
     cx.textAlign = 'center';
-    cx.fillText(dist + ' quad. (' + (dist * 1.5).toFixed(1) + ' m)', mid.x, mid.y - 8 / zoom);
+    cx.fillText(distanceLabel, mid.x, mid.y - 8 / zoom);
   }
 
   cx.restore();
@@ -543,8 +588,9 @@ function previewDescription(cell) {
   }
   if (tool === 'measure') {
     if (measurePts && measurePts.length === 1) {
-      var d = Math.max(Math.abs(cell.x - measurePts[0].x), Math.abs(cell.y - measurePts[0].y));
-      return 'Finalizar a medição: ' + d + ' quadrado(s) · ' + (d * 1.5).toFixed(1) + ' m.';
+      var startPoint = cellCenter(measurePts[0].x, measurePts[0].y);
+      var endPoint = cellCenter(cell.x, cell.y);
+      return 'Finalizar a medição: ' + formatMapDistance(startPoint, endPoint) + '.';
     }
     if (measurePts && measurePts.length === 2) return 'Medição concluída. Clique para iniciar outra distância.';
     return 'Marcar o ponto inicial da medição em' + pos + '.';
@@ -632,7 +678,7 @@ function drawToolPreview() {
   } else if (tool === 'measure') {
     if (measurePts && measurePts.length === 1) {
       var start = cellCenter(measurePts[0].x, measurePts[0].y);
-      var dist = Math.max(Math.abs(cell.x - measurePts[0].x), Math.abs(cell.y - measurePts[0].y));
+      var distanceLabel = formatMapDistance(start, center);
       cx.save();
       cx.strokeStyle = '#ffeb3b'; cx.lineWidth = 2 / zoom;
       cx.setLineDash([6 / zoom, 4 / zoom]);
@@ -640,7 +686,7 @@ function drawToolPreview() {
       cx.setLineDash([]);
       cx.fillStyle = 'rgba(0,0,0,0.8)';
       cx.font = (14 / zoom) + 'px sans-serif'; cx.textAlign = 'center';
-      cx.fillText(dist + ' quad. (' + (dist * 1.5).toFixed(1) + ' m)', (start.x + center.x) / 2, (start.y + center.y) / 2 - 8 / zoom);
+      cx.fillText(distanceLabel, (start.x + center.x) / 2, (start.y + center.y) / 2 - 8 / zoom);
       cx.restore();
     } else drawPreviewCell(cell, 'rgba(255,235,59,0.14)', '#ffeb3b');
   } else if (tool === 'select') {
@@ -736,7 +782,10 @@ function updateHud() {
       (t.nd != null ? ' · ND ' + esc(t.nd) : '') +
       (t.tipo === 'player' ? ' · Luz ' + (t.luz || lightRadius) : '')
     : (pendingMonster ? 'Coloque: <b>' + esc(pendingMonster.nome) + '</b>' : 'Nenhum token selecionado');
-  h.innerHTML = info + '<br><small>' + toolLabel(tool) + ' · Zoom ' + Math.round(zoom * 100) + '%</small>';
+  var scaleInfo = MAPINFO && MAPINFO.scale
+    ? 'Escala Flanaess: 1 milha = 8 px (referência)'
+    : 'Medição em quadrículas';
+  h.innerHTML = info + '<br><small>' + toolLabel(tool) + ' · Zoom ' + Math.round(zoom * 100) + '% · ' + scaleInfo + '</small>';
 }
 
 function toolLabel(t) {
