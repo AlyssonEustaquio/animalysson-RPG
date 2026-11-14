@@ -4,20 +4,55 @@
 (function () {
 'use strict';
 
-var KEY = 'animalysson-vtt-v4';
-var CELL = 36;
-var COLS = 72, ROWS = 95;
-var MAP_W = 2592, MAP_H = 3420;
+// ---- Mapas disponíveis (para adicionar outro, copie um bloco e ajuste) ----
+var MAPS = {
+  tumba: {
+    nome: 'Tumba dos Horrores', icone: '☠',
+    key: 'animalysson-vtt-v4',            // mantém o estado já salvo
+    cell: 36, cols: 72, rows: 95, w: 2592, h: 3420,
+    spawn: { x: 35, y: 88 },
+    parts: [
+      { src: 'mapas/tumba-dos-horrores/hi_part1.webp', x: 0,    y: 0,    w: 1332, h: 1692 },
+      { src: 'mapas/tumba-dos-horrores/hi_part2.webp', x: 1332, y: 0,    w: 1260, h: 1692 },
+      { src: 'mapas/tumba-dos-horrores/hi_part3.webp', x: 0,    y: 1692, w: 1332, h: 1728 },
+      { src: 'mapas/tumba-dos-horrores/hi_part4.webp', x: 1332, y: 1692, w: 1260, h: 1728 }
+    ]
+  },
+  flanaess: {
+    nome: 'Flanaess 598 CY', icone: '🌍',
+    key: 'animalysson-vtt-flanaess-v1',
+    cell: 40, cols: 220, rows: 262, w: 8800, h: 10480,
+    spawn: { x: 110, y: 131 },
+    fit: true,                            // abre mostrando o mapa inteiro
+    parts: [
+      { src: 'mapas/flanaess/hi_part1.webp', x: 0,    y: 0,     w: 4400, h: 5240 },
+      { src: 'mapas/flanaess/hi_part2.webp', x: 4400, y: 0,     w: 4400, h: 5240 },
+      { src: 'mapas/flanaess/hi_part3.webp', x: 0,    y: 5240,  w: 4400, h: 5240 },
+      { src: 'mapas/flanaess/hi_part4.webp', x: 4400, y: 5240,  w: 4400, h: 5240 }
+    ]
+  }
+};
+var MAP_ID_KEY = 'animalysson-vtt-mapa-atual';
+var mapId = 'tumba', MAPINFO = null;
+var KEY, CELL, COLS, ROWS, MAP_W, MAP_H, PARTS;
+try { mapId = localStorage.getItem(MAP_ID_KEY) || 'tumba'; } catch (e) {}
+
+function applyMap(id) {
+  if (!MAPS[id]) id = 'tumba';
+  mapId = id; MAPINFO = MAPS[id];
+  KEY = MAPINFO.key; CELL = MAPINFO.cell; COLS = MAPINFO.cols; ROWS = MAPINFO.rows;
+  MAP_W = MAPINFO.w; MAP_H = MAPINFO.h; PARTS = MAPINFO.parts;
+}
+function mapOptions() {
+  return Object.keys(MAPS).map(function (id) {
+    return '<option value="' + id + '"' + (id === mapId ? ' selected' : '') + '>' + MAPS[id].icone + ' ' + MAPS[id].nome + '</option>';
+  }).join('');
+}
+applyMap(mapId);
 
 // Arestas: 0=livre, 1=muro, 2=porta fechada, 3=porta aberta
 var EDGE_NONE = 0, EDGE_MURO = 1, EDGE_DOOR_C = 2, EDGE_DOOR_O = 3;
 
-var PARTS = [
-  { src: 'mapas/tumba-dos-horrores/hi_part1.webp', x: 0,    y: 0,    w: 1332, h: 1692 },
-  { src: 'mapas/tumba-dos-horrores/hi_part2.webp', x: 1332, y: 0,    w: 1260, h: 1692 },
-  { src: 'mapas/tumba-dos-horrores/hi_part3.webp', x: 0,    y: 1692, w: 1332, h: 1728 },
-  { src: 'mapas/tumba-dos-horrores/hi_part4.webp', x: 1332, y: 1692, w: 1260, h: 1728 }
-];
 
 var SIZE_SQ = {
   Tiny:1, Small:1, Medium:1, Large:2, Huge:3, Gargantuan:4,
@@ -44,9 +79,9 @@ var bgReady = 0;
 function defaultState() {
   return {
     v: 4,
-    nome: 'Tumba dos Horrores',
+    nome: MAPINFO.nome,
     tokens: [
-      { id: 'p1', nome: 'Aventureiro', tipo: 'player', x: 35, y: 88, cor: '#4fc3f7', raio: 1, luz: 6, hp: null, hpMax: null }
+      { id: 'p1', nome: 'Aventureiro', tipo: 'player', x: MAPINFO.spawn.x, y: MAPINFO.spawn.y, cor: '#4fc3f7', raio: 1, luz: 6, hp: null, hpMax: null }
     ],
     fog: makeGrid(1),
     walls: makeGrid(0),
@@ -1053,7 +1088,7 @@ function onWheel(e) {
   var sx = e.clientX - rect.left, sy = e.clientY - rect.top;
   var before = screenToWorld(sx, sy);
   var factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
-  zoom = Math.max(0.12, Math.min(2.5, zoom * factor));
+  zoom = Math.max(0.04, Math.min(2.5, zoom * factor));
   var after = screenToWorld(sx, sy);
   ox += (after.x - before.x) * zoom;
   oy += (after.y - before.y) * zoom;
@@ -1111,7 +1146,7 @@ function mount(el) {
   R.innerHTML =
     '<div class="mp vtt" id="mp-root">' +
     '<div class="mp-bar">' +
-    '<span class="mp-title">☠ Tumba dos Horrores</span>' +
+    '<select id="mp-map" class="mp-title" title="Trocar de mapa">' + mapOptions() + '</select>' +
     '<div class="mp-g" id="mp-tools">' +
     '<button data-t="select" class="on" title="Selecionar / Mover · clique na porta para abrir/fechar">↖ Selecionar</button>' +
     '<button data-t="pan" title="Mover vista">✋ Mover</button>' +
@@ -1168,6 +1203,17 @@ function mount(el) {
   cv.addEventListener('wheel', onWheel, { passive: false });
   cv.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 
+  $('#mp-map').onchange = function () {
+    var host = R, id = this.value;
+    save();
+    try { localStorage.setItem(MAP_ID_KEY, id); } catch (e) {}
+    unmount();
+    applyMap(id);
+    state = load() || defaultState();
+    selected = null; pendingMonster = null; measurePts = null; drag = null;
+    mount(host);
+  };
+
   $('#mp-tools').onclick = function (e) {
     var b = e.target.closest('button');
     if (b) setTool(b.dataset.t);
@@ -1205,7 +1251,7 @@ function mount(el) {
       save(); draw();
     }
   };
-  $('#mp-zo').onclick = function () { zoom = Math.max(0.12, zoom / 1.2); draw(); };
+  $('#mp-zo').onclick = function () { zoom = Math.max(0.04, zoom / 1.2); draw(); };
   $('#mp-zi').onclick = function () { zoom = Math.min(2.5, zoom * 1.2); draw(); };
 
   $('#mp-q').oninput = function () { renderMonsterList(this.value); };
@@ -1234,9 +1280,15 @@ function mount(el) {
   if (window.MONSTERS_READY) window.MONSTERS_READY.then(tryMonsters);
 
   loadBackgrounds(function () {
-    zoom = 0.4;
-    ox = 80;
-    oy = -MAP_H * zoom + (cv.clientHeight || 500) - 80;
+    if (!cv) return;
+    if (MAPINFO.fit) {
+      zoom = Math.max(0.04, Math.min((cv.clientWidth - 160) / MAP_W, (cv.clientHeight - 160) / MAP_H));
+      ox = 80; oy = 80;
+    } else {
+      zoom = 0.4;
+      ox = 80;
+      oy = -MAP_H * zoom + (cv.clientHeight || 500) - 80;
+    }
     draw();
   });
   draw();
