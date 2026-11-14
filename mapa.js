@@ -597,8 +597,12 @@ function focusCameraOnPlayer(viewW, viewH) {
   var player = currentPlayer();
   if (!player) return;
   var center = cellCenter(player.x, player.y);
-  ox = (viewW == null ? cv.clientWidth : viewW) / 2 - center.x;
-  oy = (viewH == null ? cv.clientHeight : viewH) / 2 - center.y;
+  // O canvas aplica translate(ox, oy) antes de scale(zoom, zoom).
+  // Portanto, o deslocamento precisa compensar a coordenada já multiplicada pelo zoom.
+  var width = viewW == null ? cv.clientWidth : viewW;
+  var height = viewH == null ? cv.clientHeight : viewH;
+  ox = width / 2 - center.x * zoom;
+  oy = height / 2 - center.y * zoom;
 }
 
 function stopWorldTravel(shouldSave) {
@@ -715,7 +719,7 @@ function draw() {
   }
 
   if (showGrid) {
-    cx.strokeStyle = 'rgba(255,255,255,0.28)';
+    cx.strokeStyle = 'rgba(255,255,255,0.50)';
     cx.lineWidth = 1 / zoom;
     if (isHexMap()) {
       var gridBounds = visibleCellBounds(W, H), hmGrid = hexMetrics();
@@ -723,7 +727,7 @@ function draw() {
       for (var hy = gridBounds.y0; hy <= gridBounds.y1; hy++) {
         for (var hx = gridBounds.x0; hx <= gridBounds.x1; hx++) appendHexPath(cx, cellCenter(hx, hy), hmGrid);
       }
-      cx.strokeStyle = 'rgba(255,255,255,0.28)'; cx.lineWidth = 1 / zoom; cx.stroke();
+      cx.strokeStyle = 'rgba(255,255,255,0.50)'; cx.lineWidth = 1 / zoom; cx.stroke();
     } else {
       cx.beginPath();
       for (var gx = 0; gx <= COLS; gx++) { cx.moveTo(gx * CELL, 0); cx.lineTo(gx * CELL, ROWS * CELL); }
