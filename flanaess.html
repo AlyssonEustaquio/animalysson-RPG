@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flanaess 598 CY — animalysson RPG</title>
+<style>
+:root{color-scheme:dark;--bg:#121212;--card:#1e1e20;--ink:#f2f2f2;--mute:#a0a0a6;--line:#3a3a3f;--red:#c53131}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:16px/1.45 Roboto,system-ui,sans-serif;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:12px;padding:8px 14px;background:var(--card);border-bottom:1px solid var(--line)}
+header a{color:var(--ink);text-decoration:none;border:1px solid var(--line);padding:6px 12px;border-radius:6px}
+header a:hover{border-color:var(--red)}
+header h1{font-size:18px;margin:0;font-weight:700}
+#mapa{flex:1;min-height:0;background:#0b0b0c}
+footer{padding:6px 14px;font-size:12px;color:var(--mute);background:var(--card);border-top:1px solid var(--line)}
+footer a{color:var(--mute)}
+</style>
+</head>
+<body>
+<header>
+  <a href="index.html">← Voltar</a>
+  <h1>Flanaess — 598 CY</h1>
+</header>
+
+<div id="mapa"></div>
+
+<footer>
+  Mapa de Anna B. Meyer (<a href="https://www.annabmeyer.com" target="_blank" rel="noopener">annabmeyer.com</a>).
+  Conteúdo de fã não oficial do mundo de Greyhawk.
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/openseadragon@4.1.1/build/openseadragon/openseadragon.min.js"></script>
+<script>
+// Os tiles ficam em mapas/flanaess/flanaess.dzi + mapas/flanaess/flanaess_files/
+var viewer = OpenSeadragon({
+  id: 'mapa',
+  tileSources: 'mapas/flanaess/flanaess.dzi',
+  prefixUrl: 'https://cdn.jsdelivr.net/npm/openseadragon@4.1.1/build/openseadragon/images/',
+  showNavigator: true,
+  navigatorPosition: 'BOTTOM_RIGHT',
+  maxZoomPixelRatio: 2,
+  visibilityRatio: 0.5,
+  gestureSettingsMouse: { clickToZoom: false }
+});
+viewer.addHandler('open-failed', function () {
+  document.getElementById('mapa').innerHTML =
+    '<p style="padding:24px;color:#a0a0a6">Tiles não encontrados em <code>mapas/flanaess/</code>.</p>';
+});
+</script>
+</body>
+</html>
