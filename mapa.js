@@ -102,6 +102,10 @@ var measurePts = null;
 var pendingMonster = null;
 var blockMove = true;
 var previewPointer = null;
+var worldTravelTimer = null;
+var worldTravelPath = [];
+var worldTravelTarget = null;
+var WORLD_TRAVEL_STEP_MS = 2000;
 
 var state = load() || defaultState();
 // Migra tokens salvos na antiga grade quadrada sem perder as áreas de névoa já reveladas.
@@ -115,12 +119,7 @@ function migrateFlanaessState(s) {
       t.x = migrated.x; t.y = migrated.y;
     });
     delete s._legacySquareTokens;
-    s.gridMode = 'hex-' + hexSize;
-    s.hEdges = makeArr(COLS * (ROWS + 1), 0);
-    s.vEdges = makeArr((COLS + 1) * ROWS, 0);
-    state = s;
-    save();
-  } else if (s.gridMode !== ('hex-' + hexSize)) {
+  } else if (s.gridMode && s.gridMode !== ('hex-' + hexSize)) {
     var oldMode = s.gridMode === 'hex-small' ? 'small' : 'large';
     var oldCfg = MAPINFO.scale.hexagons[oldMode];
     var oldWidth = oldCfg.referenceWidthPixels / MAPINFO.scale.referencePixelsPerLogicalPixel;
@@ -131,12 +130,11 @@ function migrateFlanaessState(s) {
       var migrated = worldToCell(oldWorldX, oldWorldY);
       t.x = migrated.x; t.y = migrated.y;
     });
-    s.fog = makeGrid(1); s.walls = makeGrid(0);
-    s.hEdges = makeArr(COLS * (ROWS + 1), 0);
-    s.vEdges = makeArr((COLS + 1) * ROWS, 0);
-    s.gridMode = 'hex-' + hexSize;
-    state = s; save();
   }
+  s.gridMode = 'hex-' + hexSize;
+  s.fog = []; s.walls = []; s.hEdges = []; s.vEdges = [];
+  state = s;
+  save();
   return s;
 }
 state = migrateFlanaessState(state);
@@ -152,10 +150,10 @@ function defaultState() {
     tokens: [
       { id: 'p1', nome: 'Aventureiro', tipo: 'player', x: isHexMap() ? worldToCell(MAP_W / 2, MAP_H / 2).x : MAPINFO.spawn.x, y: isHexMap() ? worldToCell(MAP_W / 2, MAP_H / 2).y : MAPINFO.spawn.y, cor: '#4fc3f7', raio: 1, luz: 6, hp: null, hpMax: null }
     ],
-    fog: makeGrid(1),
-    walls: makeGrid(0),
-    hEdges: makeArr(COLS * (ROWS + 1), 0),
-    vEdges: makeArr((COLS + 1) * ROWS, 0)
+    fog: isHexMap() ? [] : makeGrid(1),
+    walls: isHexMap() ? [] : makeGrid(0),
+    hEdges: isHexMap() ? [] : makeArr(COLS * (ROWS + 1), 0),
+    vEdges: isHexMap() ? [] : makeArr((COLS + 1) * ROWS, 0)
   };
 }
 
@@ -176,20 +174,10 @@ function load() {
     if (!raw) return null;
     var s = JSON.parse(raw);
     if (!s || !s.tokens) return null;
-    if (isHexMap() && !s.gridMode && s.fog && s.fog.length === MAPS.flanaess.cols * MAPS.flanaess.rows) {
-      var oldFog = s.fog, oldWalls = s.walls || [];
-      var migratedFog = makeGrid(1), migratedWalls = makeGrid(0);
-      for (var my = 0; my < ROWS; my++) for (var mx = 0; mx < COLS; mx++) {
-        var mc = cellCenter(mx, my), oldX = Math.floor(mc.x / MAPS.flanaess.cell), oldY = Math.floor(mc.y / MAPS.flanaess.cell);
-        if (oldX >= 0 && oldY >= 0 && oldX < MAPS.flanaess.cols && oldY < MAPS.flanaess.rows) {
-          var oldI = oldY * MAPS.flanaess.cols + oldX, newI = idx(mx, my);
-          migratedFog[newI] = oldFog[oldI] == null ? 1 : oldFog[oldI];
-          migratedWalls[newI] = oldWalls[oldI] ? 1 : 0;
-        }
-      }
-      s.fog = migratedFog; s.walls = migratedWalls;
-      s._legacySquareTokens = true;
-      s.gridMode = 'hex-' + hexSize;
+    if (isHexMap()) {
+      if (!s.gridMode && s.fog && s.fog.length === MAPS.flanaess.cols * MAPS.flanaess.rows) s._legacySquareTokens = true;
+      s.fog = []; s.walls = []; s.hEdges = []; s.vEdges = [];
+      return s;
     }
     if (!s.fog || s.fog.length !== COLS * ROWS) s.fog = makeGrid(1);
     if (!s.walls || s.walls.length !== COLS * ROWS) s.walls = makeGrid(0);
@@ -201,8 +189,12 @@ function load() {
 
 function save() {
   try {
-    if (isHexMap()) state.gridMode = 'hex-' + hexSize;
-    localStorage.setItem(KEY, JSON.stringify(state));
+    if (isHexMap()) {
+      state.gridMode = 'hex-' + hexSize;
+      localStorage.setItem(KEY, JSON.stringify({ v: 4, nome: MAPINFO.nome, gridMode: state.gridMode, tokens: state.tokens || [] }));
+    } else {
+      localStorage.setItem(KEY, JSON.stringify(state));
+    }
   } catch (e) {}
 }
 
@@ -219,6 +211,7 @@ function vIdx(xEdge, y) { return y * (COLS + 1) + xEdge; }
 
 function isCellWall(x, y) {
   if (x < 0 || y < 0 || x >= COLS || y >= ROWS) return true;
+  if (isHexMap()) return false;
   return !!state.walls[idx(x, y)];
 }
 
@@ -390,46 +383,7 @@ function heapPop(heap) {
 }
 function hexRoute(start, end) {
   if (!isHexMap()) return [start, end];
-  if (isCellWall(end.x, end.y)) return null;
-  var direct = hexLine(start, end), clear = true;
-  for (var di = 1; di < direct.length; di++) {
-    if (isCellWall(direct[di].x, direct[di].y)) { clear = false; break; }
-  }
-  if (clear) return direct;
-
-  var count = COLS * ROWS, startIndex = idx(start.x, start.y), endIndex = idx(end.x, end.y);
-  var gScore = new Float64Array(count); gScore.fill(Infinity);
-  var cameFrom = new Int32Array(count); cameFrom.fill(-1);
-  var closed = new Uint8Array(count), open = [];
-  gScore[startIndex] = 0;
-  heapPush(open, { i: startIndex, f: hexDistance(start, end), g: 0 });
-  var iterations = 0, maxIterations = Math.min(count, 120000);
-  while (open.length && iterations++ < maxIterations) {
-    var current = heapPop(open), ci = current.i;
-    if (closed[ci] || current.g !== gScore[ci]) continue;
-    if (ci === endIndex) {
-      var route = [], walk = endIndex;
-      while (walk !== -1) {
-        route.push({ x: walk % COLS, y: Math.floor(walk / COLS) });
-        if (walk === startIndex) break;
-        walk = cameFrom[walk];
-      }
-      return route.reverse();
-    }
-    closed[ci] = 1;
-    var cell = { x: ci % COLS, y: Math.floor(ci / COLS) };
-    hexNeighbors(cell).forEach(function (next) {
-      if (next.x < 0 || next.y < 0 || next.x >= COLS || next.y >= ROWS || isCellWall(next.x, next.y)) return;
-      var ni = idx(next.x, next.y);
-      if (closed[ni]) return;
-      var tentative = gScore[ci] + 1;
-      if (tentative < gScore[ni]) {
-        cameFrom[ni] = ci; gScore[ni] = tentative;
-        heapPush(open, { i: ni, g: tentative, f: tentative + hexDistance(next, end) });
-      }
-    });
-  }
-  return null;
+  return hexLine(start, end);
 }
 
 function appendHexPath(ctx, center, hm) {
@@ -636,6 +590,84 @@ function drawScaleBars(viewW, viewH) {
   cx.restore();
 }
 
+
+function focusCameraOnPlayer(viewW, viewH) {
+  if (!isHexMap() || !cv) return;
+  zoom = 1;
+  var player = currentPlayer();
+  if (!player) return;
+  var center = cellCenter(player.x, player.y);
+  ox = (viewW == null ? cv.clientWidth : viewW) / 2 - center.x;
+  oy = (viewH == null ? cv.clientHeight : viewH) / 2 - center.y;
+}
+
+function stopWorldTravel(shouldSave) {
+  if (worldTravelTimer != null) {
+    window.clearInterval(worldTravelTimer);
+    worldTravelTimer = null;
+  }
+  worldTravelPath = [];
+  worldTravelTarget = null;
+  if (shouldSave && isHexMap()) save();
+}
+
+function startWorldTravel(destination) {
+  var player = currentPlayer();
+  if (!isHexMap() || !player || !destination) return;
+  stopWorldTravel(false);
+  if (destination.x === player.x && destination.y === player.y) { draw(); return; }
+  var path = hexLine({ x: player.x, y: player.y }, destination);
+  worldTravelPath = path.slice(1);
+  worldTravelTarget = { x: destination.x, y: destination.y };
+  if (!worldTravelPath.length) { draw(); return; }
+
+  worldTravelTimer = window.setInterval(function () {
+    var activePlayer = currentPlayer();
+    if (!activePlayer || !isHexMap() || !cv) {
+      stopWorldTravel(false);
+      return;
+    }
+    var next = worldTravelPath.shift();
+    if (next) {
+      activePlayer.x = next.x;
+      activePlayer.y = next.y;
+      selected = activePlayer;
+      save();
+    }
+    if (!worldTravelPath.length) {
+      window.clearInterval(worldTravelTimer);
+      worldTravelTimer = null;
+      worldTravelTarget = null;
+      save();
+    }
+    draw();
+  }, WORLD_TRAVEL_STEP_MS);
+  draw();
+}
+
+function drawWorldTravelPath() {
+  if (!isHexMap() || !worldTravelPath.length) return;
+  var player = currentPlayer();
+  if (!player) return;
+  cx.save();
+  cx.strokeStyle = 'rgba(255, 215, 75, 0.9)';
+  cx.fillStyle = 'rgba(255, 215, 75, 0.95)';
+  cx.lineWidth = 3 / zoom;
+  cx.setLineDash([7 / zoom, 5 / zoom]);
+  cx.beginPath();
+  var start = cellCenter(player.x, player.y);
+  cx.moveTo(start.x, start.y);
+  worldTravelPath.forEach(function (cell) {
+    var point = cellCenter(cell.x, cell.y);
+    cx.lineTo(point.x, point.y);
+  });
+  cx.stroke();
+  var end = cellCenter(worldTravelPath[worldTravelPath.length - 1].x, worldTravelPath[worldTravelPath.length - 1].y);
+  cx.setLineDash([]);
+  cx.beginPath(); cx.arc(end.x, end.y, 9 / zoom, 0, Math.PI * 2); cx.stroke();
+  cx.restore();
+}
+
 function draw() {
   if (!cv || !cx) return;
   var dpr = window.devicePixelRatio || 1;
@@ -645,6 +677,7 @@ function draw() {
     cv.height = Math.round(H * dpr);
   }
   cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  if (isHexMap()) focusCameraOnPlayer(W, H);
   cx.fillStyle = '#0a0a0b';
   cx.fillRect(0, 0, W, H);
 
@@ -657,9 +690,9 @@ function draw() {
     if (img && img.complete && img.naturalWidth) cx.drawImage(img, p.x, p.y, p.w, p.h);
     else { cx.fillStyle = '#1a1a1c'; cx.fillRect(p.x, p.y, p.w, p.h); }
   });
-  drawDetail(W, H);
+  if (!isHexMap()) drawDetail(W, H);
 
-  if (showWalls) {
+  if (showWalls && !isHexMap()) {
     var wallBounds = visibleCellBounds(W, H);
     if (isHexMap()) {
       var hmWalls = hexMetrics();
@@ -698,14 +731,15 @@ function draw() {
     }
   }
 
-  if (showFog) drawFogAndLight(W, H);
+  if (showFog && !isHexMap()) drawFogAndLight(W, H);
 
   if (selected && !isTokenVisible(selected)) selected = null;
   state.tokens.forEach(function (t) {
     if (isTokenVisible(t)) drawToken(t, t === selected);
   });
 
-  drawToolPreview();
+  if (!isHexMap()) drawToolPreview();
+  else drawWorldTravelPath();
 
   if (measurePts && measurePts.length === 2) {
     var a = cellCenter(measurePts[0].x, measurePts[0].y);
@@ -795,6 +829,7 @@ function drawEdges() {
 
 function isCurrentlyVisible(x, y, px, py, r) {
   if (x < 0 || y < 0 || x >= COLS || y >= ROWS) return false;
+  if (isHexMap()) return true;
   if (!dynLight) return !state.fog[idx(x, y)];
   if (px < 0) return false;
   var dist;
@@ -806,7 +841,7 @@ function isCurrentlyVisible(x, y, px, py, r) {
 
 function isTokenVisible(t) {
   if (!t) return false;
-  if (t.tipo === 'player') return true;
+  if (isHexMap() || t.tipo === 'player') return true;
   var player = currentPlayer();
   if (!player) return false;
   var sq = t.raio || 1;
@@ -1102,13 +1137,19 @@ function updateHud() {
   var info = t
     ? '<b>' + esc(t.nome) + '</b> (' + t.x + ',' + t.y + ')' +
       (t.nd != null ? ' · ND ' + esc(t.nd) : '') +
-      (t.tipo === 'player' ? ' · Luz ' + (t.luz || lightRadius) : '')
+      (!isHexMap() && t.tipo === 'player' ? ' · Luz ' + (t.luz || lightRadius) : '')
     : (pendingMonster ? 'Coloque: <b>' + esc(pendingMonster.nome) + '</b>' : 'Nenhum token selecionado');
   var hm = hexMetrics();
   var scaleInfo = hm
     ? 'Grade hexagonal ' + (hexSize === 'large' ? 'grande: 30 mi / 240 px' : 'pequena: 12 mi / 96 px') + ' · 1 mi = 8 px'
     : 'Medição em quadrículas';
-  h.innerHTML = info + '<br><small>' + toolLabel(tool) + ' · Zoom ' + Math.round(zoom * 100) + '% · ' + scaleInfo + '</small>';
+  if (isHexMap()) {
+    var travelInfo = worldTravelPath.length ? ' · ' + worldTravelPath.length + ' hexágonos restantes' : ' · Clique no mapa para viajar';
+    h.innerHTML = '<b>' + esc((currentPlayer() || {}).nome || 'Aventureiro') + '</b> · Câmera presa ao personagem' +
+      '<br><small>Zoom 100% · 1 movimento a cada 2 segundos' + travelInfo + ' · ' + scaleInfo + '</small>';
+  } else {
+    h.innerHTML = info + '<br><small>' + toolLabel(tool) + ' · Zoom ' + Math.round(zoom * 100) + '% · ' + scaleInfo + '</small>';
+  }
 }
 
 function toolLabel(t) {
@@ -1267,6 +1308,14 @@ function revealAround(cx, cy, radius) {
 }
 
 function onPointerDown(e) {
+  if (isHexMap()) {
+    e.preventDefault();
+    var worldRect = cv.getBoundingClientRect();
+    var worldPoint = screenToWorld(e.clientX - worldRect.left, e.clientY - worldRect.top);
+    if (worldPoint.x < 0 || worldPoint.y < 0 || worldPoint.x > MAP_W || worldPoint.y > MAP_H) return;
+    startWorldTravel(worldToCell(worldPoint.x, worldPoint.y));
+    return;
+  }
   cv.setPointerCapture(e.pointerId);
   var previewRect = cv.getBoundingClientRect();
   previewPointer = screenToWorld(e.clientX - previewRect.left, e.clientY - previewRect.top);
@@ -1396,6 +1445,7 @@ function onPointerDown(e) {
 }
 
 function onPointerMove(e) {
+  if (isHexMap()) return;
   var previewRect = cv.getBoundingClientRect();
   previewPointer = screenToWorld(e.clientX - previewRect.left, e.clientY - previewRect.top);
   if (!drag) { draw(); return; }
@@ -1456,11 +1506,13 @@ function onPointerUp() {
 }
 
 function onPointerLeave() {
+  if (isHexMap()) return;
   if (!drag) { previewPointer = null; draw(); }
 }
 
 function onWheel(e) {
   e.preventDefault();
+  if (isHexMap()) { zoom = 1; draw(); return; }
   var rect = cv.getBoundingClientRect();
   var sx = e.clientX - rect.left, sy = e.clientY - rect.top;
   var before = screenToWorld(sx, sy);
@@ -1473,6 +1525,10 @@ function onWheel(e) {
 }
 
 function onKey(e) {
+  if (isHexMap()) {
+    if (e.key === 'Escape') { stopWorldTravel(true); draw(); }
+    return;
+  }
   if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
   if (e.code === 'Space') { space = true; e.preventDefault(); return; }
   if ((e.key === 'Delete' || e.key === 'Backspace') && selected && selected.tipo !== 'player') {
@@ -1582,6 +1638,7 @@ function mount(el) {
 
   $('#mp-map').onchange = function () {
     var host = R, id = this.value;
+    stopWorldTravel(false);
     save();
     try { localStorage.setItem(MAP_ID_KEY, id); } catch (e) {}
     unmount();
@@ -1593,41 +1650,61 @@ function mount(el) {
   };
   if ($('#mp-hex-wrap')) $('#mp-hex-wrap').style.display = isHexMap() ? 'inline-flex' : 'none';
   if ($('#mp-speed-wrap')) $('#mp-speed-wrap').style.display = isHexMap() ? 'inline-flex' : 'none';
+  if (isHexMap()) {
+    var worldRoot = $('#mp-root');
+    worldRoot.classList.add('mp-world-map');
+    var worldStyle = document.createElement('style');
+    worldStyle.textContent =
+      '#mp-root.mp-world-map .mp-g,' +
+      '#mp-root.mp-world-map #mp-grid,' +
+      '#mp-root.mp-world-map #mp-fog,' +
+      '#mp-root.mp-world-map #mp-light,' +
+      '#mp-root.mp-world-map #mp-walls-vis,' +
+      '#mp-root.mp-world-map #mp-speed-wrap,' +
+      '#mp-root.mp-world-map #mp-reset-fog,' +
+      '#mp-root.mp-world-map #mp-clear-fog,' +
+      '#mp-root.mp-world-map #mp-clear-walls,' +
+      '#mp-root.mp-world-map #mp-clear-edges,' +
+      '#mp-root.mp-world-map #mp-zo,' +
+      '#mp-root.mp-world-map #mp-zi,'+
+      '#mp-root.mp-world-map .mp-side,'+
+      '#mp-root.mp-world-map #mp-preview {display:none !important;}' +
+      '#mp-root.mp-world-map .mp-wrap {display:block !important;height:calc(100vh - 150px) !important;min-height:420px !important;}' +
+      '#mp-root.mp-world-map .mp-main {display:block !important;width:100% !important;height:100% !important;min-width:0 !important;position:relative !important;}' +
+      '#mp-root.mp-world-map #mp-cv {display:block;width:100%;height:100%;cursor:crosshair;touch-action:manipulation;}' +
+      '#mp-root.mp-world-map #mp-hex-wrap {display:inline-flex !important;}';
+    worldRoot.appendChild(worldStyle);
+    var blockLabel = $('#mp-block'); if (blockLabel && blockLabel.parentElement) blockLabel.parentElement.style.display = 'none';
+    var radiusInput = $('#mp-lr'); if (radiusInput && radiusInput.parentElement) radiusInput.parentElement.style.display = 'none';
+    var speedWrap = $('#mp-speed-wrap'); if (speedWrap) speedWrap.style.display = 'none';
+    showFog = false; dynLight = false; showWalls = false; showGrid = true;
+    zoom = 1;
+    var status = $('#mp-st');
+    if (status) status.textContent = 'Clique no mapa para viajar · 1 hexágono a cada 2 segundos · Câmera presa ao personagem · Zoom 100%';
+  }
   if ($('#mp-hex-size')) {
     $('#mp-hex-size').value = hexSize;
     $('#mp-hex-size').onchange = function () {
-      var oldMetrics = hexMetrics(), oldCols = COLS, oldRows = ROWS;
-      var oldFog = (state.fog || []).slice(), oldWalls = (state.walls || []).slice();
+      var oldMetrics = hexMetrics();
       var oldTokens = (state.tokens || []).map(function (t) {
         var cp = Object.assign({}, t), center = cellCenter(t.x, t.y);
         return { token: cp, world: center };
       });
+      stopWorldTravel(false);
       save();
       hexSize = this.value === 'small' ? 'small' : 'large';
       try { localStorage.setItem(HEX_SIZE_KEY, hexSize); } catch (e) {}
       applyMap('flanaess');
-      var fresh = load() || defaultState();
+      var fresh = { v: 4, nome: MAPINFO.nome, gridMode: 'hex-' + hexSize, tokens: [] };
       fresh.tokens = oldTokens.map(function (item) {
         var pos = worldToCell(item.world.x, item.world.y);
         item.token.x = pos.x; item.token.y = pos.y;
         return item.token;
       });
-      fresh.fog = makeGrid(1); fresh.walls = makeGrid(0);
-      for (var ny = 0; ny < ROWS; ny++) for (var nx = 0; nx < COLS; nx++) {
-        var worldCenter = cellCenter(nx, ny);
-        var oldRow = Math.round((worldCenter.y - oldMetrics.height / 2) / oldMetrics.rowStep);
-        var oldCol = Math.round((worldCenter.x - oldMetrics.width / 2 - (oldRow & 1) * oldMetrics.width / 2) / oldMetrics.width);
-        if (oldCol >= 0 && oldRow >= 0 && oldCol < oldCols && oldRow < oldRows) {
-          var oldIndex = oldRow * oldCols + oldCol, newIndex = idx(nx, ny);
-          fresh.fog[newIndex] = oldFog[oldIndex] == null ? 1 : oldFog[oldIndex];
-          fresh.walls[newIndex] = oldWalls[oldIndex] ? 1 : 0;
-        }
-      }
-      fresh.hEdges = makeArr(COLS * (ROWS + 1), 0);
-      fresh.vEdges = makeArr((COLS + 1) * ROWS, 0);
-      fresh.gridMode = 'hex-' + hexSize;
+      if (!fresh.tokens.length) fresh.tokens = defaultState().tokens;
+      fresh.fog = []; fresh.walls = []; fresh.hEdges = []; fresh.vEdges = [];
       state = fresh; selected = null; measurePts = null; drag = null;
-      save(); draw();
+      save(); focusCameraOnPlayer(); draw();
     };
   }
   if ($('#mp-speed')) $('#mp-speed').oninput = function () {
@@ -1708,7 +1785,10 @@ function mount(el) {
 
   loadBackgrounds(function () {
     if (!cv) return;
-    if (MAPINFO.fit) {
+    if (isHexMap()) {
+      zoom = 1;
+      focusCameraOnPlayer();
+    } else if (MAPINFO.fit) {
       zoom = Math.max(0.04, Math.min((cv.clientWidth - 160) / MAP_W, (cv.clientHeight - 160) / MAP_H));
       ox = 80; oy = 80;
     } else {
@@ -1722,6 +1802,7 @@ function mount(el) {
 }
 
 function unmount() {
+  stopWorldTravel(false);
   document.removeEventListener('keydown', onKey);
   document.removeEventListener('keyup', onKeyUp);
   window.removeEventListener('resize', draw);
