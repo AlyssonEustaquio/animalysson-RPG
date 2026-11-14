@@ -49,11 +49,11 @@ var MAPS = {
 var MAP_ID_KEY = 'animalysson-vtt-mapa-atual';
 var HEX_SIZE_KEY = 'animalysson-vtt-flanaess-hex-size';
 var mapId = 'tumba', MAPINFO = null;
-var hexSize = 'large';
+var hexSize = 'small';
 var KEY, CELL, COLS, ROWS, MAP_W, MAP_H, PARTS;
 try { mapId = localStorage.getItem(MAP_ID_KEY) || 'tumba'; } catch (e) {}
-try { hexSize = localStorage.getItem(HEX_SIZE_KEY) || 'large'; } catch (e) {}
-if (hexSize !== 'large' && hexSize !== 'small') hexSize = 'large';
+// Flanaess usa exclusivamente hexágonos pequenos (12 milhas / 96 px de referência).
+// Ignora preferências antigas de tamanho para impedir retorno à grade grande.
 
 function isHexMap() { return !!(MAPINFO && MAPINFO.scale && mapId === 'flanaess'); }
 function hexMetrics() {
@@ -593,7 +593,7 @@ function drawScaleBars(viewW, viewH) {
 
 function focusCameraOnPlayer(viewW, viewH) {
   if (!isHexMap() || !cv) return;
-  zoom = 1;
+  zoom = 2; // Flanaess fixo em 200% (dobro do zoom anterior).
   var player = currentPlayer();
   if (!player) return;
   var center = cellCenter(player.x, player.y);
@@ -690,7 +690,8 @@ function draw() {
     if (img && img.complete && img.naturalWidth) cx.drawImage(img, p.x, p.y, p.w, p.h);
     else { cx.fillStyle = '#1a1a1c'; cx.fillRect(p.x, p.y, p.w, p.h); }
   });
-  if (!isHexMap()) drawDetail(W, H);
+  // No Flanaess, sobrepõe os tiles detalhados para usar a resolução máxima.
+  if (isHexMap()) drawDetail(W, H);
 
   if (showWalls && !isHexMap()) {
     var wallBounds = visibleCellBounds(W, H);
@@ -1141,12 +1142,12 @@ function updateHud() {
     : (pendingMonster ? 'Coloque: <b>' + esc(pendingMonster.nome) + '</b>' : 'Nenhum token selecionado');
   var hm = hexMetrics();
   var scaleInfo = hm
-    ? 'Grade hexagonal ' + (hexSize === 'large' ? 'grande: 30 mi / 240 px' : 'pequena: 12 mi / 96 px') + ' · 1 mi = 8 px'
+    ? 'Grade hexagonal pequena: 12 mi / 96 px · 1 mi = 8 px'
     : 'Medição em quadrículas';
   if (isHexMap()) {
     var travelInfo = worldTravelPath.length ? ' · ' + worldTravelPath.length + ' hexágonos restantes' : ' · Clique no mapa para viajar';
     h.innerHTML = '<b>' + esc((currentPlayer() || {}).nome || 'Aventureiro') + '</b> · Câmera presa ao personagem' +
-      '<br><small>Zoom 100% · 1 movimento a cada 2 segundos' + travelInfo + ' · ' + scaleInfo + '</small>';
+      '<br><small>Zoom 200% · Resolução máxima · 1 movimento a cada 2 segundos' + travelInfo + ' · ' + scaleInfo + '</small>';
   } else {
     h.innerHTML = info + '<br><small>' + toolLabel(tool) + ' · Zoom ' + Math.round(zoom * 100) + '% · ' + scaleInfo + '</small>';
   }
@@ -1512,7 +1513,7 @@ function onPointerLeave() {
 
 function onWheel(e) {
   e.preventDefault();
-  if (isHexMap()) { zoom = 1; draw(); return; }
+  if (isHexMap()) { zoom = 2; draw(); return; }
   var rect = cv.getBoundingClientRect();
   var sx = e.clientX - rect.left, sy = e.clientY - rect.top;
   var before = screenToWorld(sx, sy);
@@ -1580,7 +1581,7 @@ function mount(el) {
     '<div class="mp vtt" id="mp-root">' +
     '<div class="mp-bar">' +
     '<select id="mp-map" class="mp-title" title="Trocar de mapa">' + mapOptions() + '</select>' +
-    '<label id="mp-hex-wrap" class="mp-luz" style="display:none">Hexágono <select id="mp-hex-size"><option value="large">Grande · 30 mi</option><option value="small">Pequeno · 12 mi</option></select></label>' +
+    '<label id="mp-hex-wrap" class="mp-luz" style="display:none">Hexágono <select id="mp-hex-size" disabled><option value="small" selected>Pequeno · 12 mi</option></select></label>' +
     '<label id="mp-speed-wrap" class="mp-luz" style="display:none">Velocidade <input id="mp-speed" type="number" min="0.1" step="0.1" placeholder="mi/dia" style="width:62px"></label>' +
     '<div class="mp-g" id="mp-tools">' +
     '<button data-t="select" class="on" title="Selecionar / Mover · clique na porta para abrir/fechar">↖ Selecionar</button>' +
@@ -1627,6 +1628,7 @@ function mount(el) {
 
   cv = $('#mp-cv');
   cx = cv.getContext('2d');
+  if ('imageSmoothingQuality' in cx) cx.imageSmoothingQuality = 'high';
 
   cv.addEventListener('pointerdown', onPointerDown);
   cv.addEventListener('pointermove', onPointerMove);
@@ -1648,7 +1650,7 @@ function mount(el) {
     selected = null; pendingMonster = null; measurePts = null; drag = null;
     mount(host);
   };
-  if ($('#mp-hex-wrap')) $('#mp-hex-wrap').style.display = isHexMap() ? 'inline-flex' : 'none';
+  if ($('#mp-hex-wrap')) $('#mp-hex-wrap').style.display = 'none';
   if ($('#mp-speed-wrap')) $('#mp-speed-wrap').style.display = isHexMap() ? 'inline-flex' : 'none';
   if (isHexMap()) {
     var worldRoot = $('#mp-root');
@@ -1672,41 +1674,17 @@ function mount(el) {
       '#mp-root.mp-world-map .mp-wrap {display:block !important;height:calc(100vh - 150px) !important;min-height:420px !important;}' +
       '#mp-root.mp-world-map .mp-main {display:block !important;width:100% !important;height:100% !important;min-width:0 !important;position:relative !important;}' +
       '#mp-root.mp-world-map #mp-cv {display:block;width:100%;height:100%;cursor:crosshair;touch-action:manipulation;}' +
-      '#mp-root.mp-world-map #mp-hex-wrap {display:inline-flex !important;}';
+      '#mp-root.mp-world-map #mp-hex-wrap {display:none !important;}';
     worldRoot.appendChild(worldStyle);
     var blockLabel = $('#mp-block'); if (blockLabel && blockLabel.parentElement) blockLabel.parentElement.style.display = 'none';
     var radiusInput = $('#mp-lr'); if (radiusInput && radiusInput.parentElement) radiusInput.parentElement.style.display = 'none';
     var speedWrap = $('#mp-speed-wrap'); if (speedWrap) speedWrap.style.display = 'none';
     showFog = false; dynLight = false; showWalls = false; showGrid = true;
-    zoom = 1;
+    zoom = 2;
     var status = $('#mp-st');
-    if (status) status.textContent = 'Clique no mapa para viajar · 1 hexágono a cada 2 segundos · Câmera presa ao personagem · Zoom 100%';
+    if (status) status.textContent = 'Clique no mapa para viajar · Hexágono pequeno (12 milhas) · 1 movimento a cada 2 segundos · Câmera presa ao personagem · Zoom 200% · Resolução máxima';
   }
-  if ($('#mp-hex-size')) {
-    $('#mp-hex-size').value = hexSize;
-    $('#mp-hex-size').onchange = function () {
-      var oldMetrics = hexMetrics();
-      var oldTokens = (state.tokens || []).map(function (t) {
-        var cp = Object.assign({}, t), center = cellCenter(t.x, t.y);
-        return { token: cp, world: center };
-      });
-      stopWorldTravel(false);
-      save();
-      hexSize = this.value === 'small' ? 'small' : 'large';
-      try { localStorage.setItem(HEX_SIZE_KEY, hexSize); } catch (e) {}
-      applyMap('flanaess');
-      var fresh = { v: 4, nome: MAPINFO.nome, gridMode: 'hex-' + hexSize, tokens: [] };
-      fresh.tokens = oldTokens.map(function (item) {
-        var pos = worldToCell(item.world.x, item.world.y);
-        item.token.x = pos.x; item.token.y = pos.y;
-        return item.token;
-      });
-      if (!fresh.tokens.length) fresh.tokens = defaultState().tokens;
-      fresh.fog = []; fresh.walls = []; fresh.hEdges = []; fresh.vEdges = [];
-      state = fresh; selected = null; measurePts = null; drag = null;
-      save(); focusCameraOnPlayer(); draw();
-    };
-  }
+  // O Flanaess não oferece mais seletor: o tamanho pequeno é fixo.
   if ($('#mp-speed')) $('#mp-speed').oninput = function () {
     travelSpeedMilesPerDay = Math.max(0, Number(this.value) || 0);
     draw();
@@ -1749,8 +1727,8 @@ function mount(el) {
       save(); draw();
     }
   };
-  $('#mp-zo').onclick = function () { zoom = Math.max(0.04, zoom / 1.2); draw(); };
-  $('#mp-zi').onclick = function () { zoom = Math.min(MAPINFO.maxZoom || 2.5, zoom * 1.2); draw(); };
+  $('#mp-zo').onclick = function () { if (isHexMap()) { zoom = 2; } else { zoom = Math.max(0.04, zoom / 1.2); } draw(); };
+  $('#mp-zi').onclick = function () { if (isHexMap()) { zoom = 2; } else { zoom = Math.min(MAPINFO.maxZoom || 2.5, zoom * 1.2); } draw(); };
 
   $('#mp-q').oninput = function () { renderMonsterList(this.value); };
   $('#mp-ml').onclick = function (e) {
@@ -1786,7 +1764,7 @@ function mount(el) {
   loadBackgrounds(function () {
     if (!cv) return;
     if (isHexMap()) {
-      zoom = 1;
+      zoom = 2;
       focusCameraOnPlayer();
     } else if (MAPINFO.fit) {
       zoom = Math.max(0.04, Math.min((cv.clientWidth - 160) / MAP_W, (cv.clientHeight - 160) / MAP_H));
