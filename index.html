@@ -265,19 +265,20 @@ main{flex:1 1 auto;min-width:0;min-height:0;max-width:none;margin:0;padding:10px
 @media(max-width:820px){#app .catalog-layout{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,3fr) minmax(0,2fr)}}
 @media(max-height:560px){.catalog-head{margin-bottom:6px}.catalog-head p{display:none}.catalog-tools{margin:8px 0}.catalog-count{margin:0 0 6px}}
 
-/* Seletores de seção (Personagem, Itens, Monstros, Mapas): painel lateral que recolhe com < e > */
-.rail-slot{position:relative;z-index:40;flex:none;width:172px;background:var(--bg);border-right:1px solid var(--line);transition:width .2s ease}
-.rail-slot.collapsed{width:42px}
-.section-tabs{position:absolute;top:0;left:0;bottom:0;width:100%;margin:0;padding:8px;display:flex;flex-direction:column;gap:8px;overflow-x:hidden;overflow-y:auto;background:var(--bg);transition:width .2s ease}
-.rail-slot.collapsed .section-tabs{padding:8px 4px}
+/* Seletores de seção (Personagem, Itens, Monstros, Mapas): flutuam por cima de tudo, no topo direito.
+   Fechado = só a setinha; aberto = painel sobre o conteúdo. */
+.rail-slot{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));right:18px;z-index:90;width:auto;border:0;background:none}
+.section-tabs{position:static;width:auto;min-width:184px;max-width:calc(100vw - 36px);max-height:calc(100vh - 20px);max-height:calc(100dvh - 20px);margin:0;padding:8px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;background:rgba(24,24,27,.97);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.55)}
+.rail-slot.collapsed .section-tabs{min-width:0;padding:0;background:none;border:0;box-shadow:none;overflow:visible}
 .rail-toggle{flex:none;height:34px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:700 1.1rem/1 "Roboto Condensed",system-ui,sans-serif;cursor:pointer}
 .rail-toggle:hover{border-color:var(--red)}
+.rail-slot.collapsed .rail-toggle{width:38px;height:38px;border-radius:10px;background:rgba(15,15,18,.85)}
 .rail-items{display:flex;flex-direction:column;gap:8px}
 .rail-slot.collapsed .rail-items{display:none}
 .section-tab{justify-content:flex-start;padding:11px 12px;white-space:nowrap}
+/* o botão flutuante não cobre os títulos/botões do canto superior direito */
+#app .catalog-head,#app .character-toolbar{padding-right:48px}
 @media(max-width:700px){
-  .rail-slot,.rail-slot.collapsed{width:42px}
-  .rail-slot:not(.collapsed) .section-tabs{width:min(210px,72vw);box-shadow:6px 0 20px rgba(0,0,0,.55);border-right:1px solid var(--line)}
   main{padding:8px}
   .detail-stat b{font-size:1.05rem;overflow-wrap:anywhere}
 }
@@ -292,9 +293,9 @@ main{flex:1 1 auto;min-width:0;min-height:0;max-width:none;margin:0;padding:10px
 </head>
 <body>
 <div class="shell">
-<div class="rail-slot" id="rail-slot">
+<div class="rail-slot collapsed" id="rail-slot">
 <nav class="section-tabs" aria-label="Seções principais">
-  <button type="button" class="rail-toggle" id="rail-toggle" onclick="toggleRail()" aria-expanded="true" aria-controls="rail-items" aria-label="Esconder seções" title="Esconder seções">&lt;</button>
+  <button type="button" class="rail-toggle" id="rail-toggle" onclick="toggleRail()" aria-expanded="false" aria-controls="rail-items" aria-label="Mostrar seções" title="Mostrar seções">&lt;</button>
   <div class="rail-items" id="rail-items">
   <button id="tab-character" class="section-tab on" onclick="switchView('character')"><span>♙</span> Personagem</button>
   <button id="tab-items" class="section-tab" onclick="switchView('items')"><span>⚒</span> Itens</button>
@@ -592,28 +593,24 @@ function rand(){const f=[rSp,rCls,rBg,rAtr,rPer,rDet];f.forEach(g=>g());render()
 function escHtml(value){
  return String(value===undefined||value===null?'':value).replace(/[&<>"']/g,function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]});
 }
-function isNarrowScreen(){return !!(window.matchMedia&&window.matchMedia('(max-width:700px)').matches)}
-function setRail(open,persist){
+function setRail(open){
  const slot=document.getElementById('rail-slot'),btn=document.getElementById('rail-toggle');
  if(!slot||!btn)return;
  slot.classList.toggle('collapsed',!open);
- btn.textContent=open?'<':'>';
+ btn.textContent=open?'>':'<';
  btn.title=open?'Esconder seções':'Mostrar seções';
  btn.setAttribute('aria-label',btn.title);
  btn.setAttribute('aria-expanded',open?'true':'false');
- if(persist){try{localStorage.setItem('animalysson-rail-open',open?'1':'0')}catch(e){}}
- // O mapa precisa recalcular o tamanho depois da animação.
- setTimeout(function(){window.dispatchEvent(new Event('resize'))},230);
 }
 function toggleRail(){
  const slot=document.getElementById('rail-slot');
- setRail(!!(slot&&slot.classList.contains('collapsed')),true);
+ setRail(!!(slot&&slot.classList.contains('collapsed')));
 }
 function switchView(view){
  ACTIVE_VIEW=view;
  S.modal=null;
  ITEM_QUERY=''; MONSTER_QUERY='';
- if(isNarrowScreen())setRail(false,false);
+ setRail(false);
  render();
 }
 function updateTabs(){
@@ -860,12 +857,7 @@ function render(){
  else if(ACTIVE_VIEW==='items')renderItemsPage();
  else renderMonstersPage();
 }
-(function(){
- let open=true;
- try{if(localStorage.getItem('animalysson-rail-open')==='0')open=false}catch(e){}
- if(isNarrowScreen())open=false;
- setRail(open,false);
-})();
+setRail(false);
 render();
 </script>
 </body>
