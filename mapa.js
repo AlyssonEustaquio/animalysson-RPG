@@ -203,6 +203,36 @@ function load() {
   } catch (e) { return null; }
 }
 
+function exportMapFile() {
+  // Exporta o estado atual em um JSON versionado, pronto para ser guardado
+  // na mesma pasta das imagens do mapa no repositório.
+  var mapFolder = mapId === 'flanaess' ? 'mapas/flanaess_mapa/' : 'mapas/tumba-dos-horrores/';
+  var assets = (MAPINFO.parts || []).map(function (part) { return part.src; });
+  if (MAPINFO.detail) assets.push(MAPINFO.detail.src);
+  var payload = {
+    format: 'animalysson-rpg-map',
+    version: 1,
+    mapId: mapId,
+    mapName: MAPINFO.nome,
+    exportedAt: new Date().toISOString(),
+    dimensions: { width: MAP_W, height: MAP_H, columns: COLS, rows: ROWS },
+    imageFolder: mapFolder,
+    images: assets,
+    state: isHexMap()
+      ? { v: 4, nome: MAPINFO.nome, gridMode: FLANAESS_GRID_MODE, tokens: state.tokens || [] }
+      : JSON.parse(JSON.stringify(state))
+  };
+  var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'estado-' + mapId + '.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+}
+
 function save() {
   try {
     if (isHexMap()) {
@@ -1631,6 +1661,7 @@ function mount(el) {
     '<div id="mp-drawer" class="mp-drawer" aria-hidden="true">' +
     '<div class="mp-bar">' +
     '<select id="mp-map" class="mp-title" title="Trocar de mapa">' + mapOptions() + '</select>' +
+    '<button type="button" id="mp-export" title="Baixar o estado atual do mapa em JSON">⬇ Salvar mapa</button>' +
     '<label id="mp-hex-wrap" class="mp-luz" style="display:none">Hexágono <select id="mp-hex-size" disabled><option value="small" selected>Pequeno · 6 mi</option></select></label>' +
     '<label id="mp-speed-wrap" class="mp-luz" style="display:none">Velocidade <input id="mp-speed" type="number" min="0.1" step="0.1" placeholder="mi/dia" style="width:62px"></label>' +
     '<div class="mp-g" id="mp-tools">' +
@@ -1709,6 +1740,10 @@ function mount(el) {
     if (menuIsOpen()) { e.preventDefault(); e.stopImmediatePropagation(); setMenu(false); }
   });
   $('#mp-burger').onclick = function () { setMenu(!menuIsOpen()); };
+  $('#mp-export').onclick = function () {
+    save();
+    exportMapFile();
+  };
   cv.addEventListener('pointerdown', onPointerDown);
   cv.addEventListener('pointermove', onPointerMove);
   cv.addEventListener('pointerleave', onPointerLeave);
