@@ -104,10 +104,13 @@ var measurePts = null;
 var pendingMonster = null;
 var blockMove = true;
 var previewPointer = null;
-var worldTravelTimer = null;
+var worldTravelRaf = null;   // id do requestAnimationFrame da viagem
+var worldTravelStep = null;  // passo em andamento: { from, to, toPt, t0 }
+var worldTravelPos = null;   // posição visual (px do mapa) do personagem durante a viagem
+var worldTravelCarry = null; // instante em que o passo anterior terminou (evita engasgo entre hexágonos)
 var worldTravelPath = [];
 var worldTravelTarget = null;
-var WORLD_TRAVEL_STEP_MS = 2000;
+var WORLD_TRAVEL_STEP_MS = 2000; // tempo para atravessar 1 hexágono (velocidade constante, sem pulos)
 
 var state = load() || defaultState();
 // Migra tokens salvos na antiga grade quadrada sem perder as áreas de névoa já reveladas.
@@ -571,37 +574,12 @@ function drawDetail(W, H) {
   }
 }
 
-function drawScaleBars(viewW, viewH) {
-  if (!isHexMap()) return;
-  var scale = MAPINFO.scale;
-  var factor = scale.referencePixelsPerLogicalPixel;
-  var w50 = 400 / factor * zoom;
-  var w100 = 800 / factor * zoom;
-  var x = viewW - Math.max(w100, 72) - 18;
-  var y = viewH - 48;
-  cx.save();
-  cx.font = '11px sans-serif';
-  cx.textAlign = 'left';
-  cx.textBaseline = 'bottom';
-  cx.fillStyle = 'rgba(0,0,0,0.68)';
-  cx.fillRect(x - 8, y - 36, Math.max(w100, 72) + 16, 42);
-  cx.strokeStyle = '#fff'; cx.fillStyle = '#fff'; cx.lineWidth = 2;
-  cx.beginPath(); cx.moveTo(x, y - 20); cx.lineTo(x + w100, y - 20); cx.stroke();
-  cx.beginPath(); cx.moveTo(x, y - 24); cx.lineTo(x, y - 16); cx.moveTo(x + w100, y - 24); cx.lineTo(x + w100, y - 16); cx.stroke();
-  cx.fillText('100 milhas', x, y - 22);
-  cx.beginPath(); cx.moveTo(x, y - 4); cx.lineTo(x + w50, y - 4); cx.stroke();
-  cx.beginPath(); cx.moveTo(x, y - 8); cx.lineTo(x, y); cx.moveTo(x + w50, y - 8); cx.lineTo(x + w50, y); cx.stroke();
-  cx.fillText('50 milhas', x, y + 12);
-  cx.restore();
-}
-
-
 function focusCameraOnPlayer(viewW, viewH) {
   if (!isHexMap() || !cv) return;
   zoom = FLANAESS_ZOOM; // Flanaess fixo em 300%.
   var player = currentPlayer();
   if (!player) return;
-  var center = cellCenter(player.x, player.y);
+  var center = worldTravelPos || cellCenter(player.x, player.y);
   // O canvas aplica translate(ox, oy) antes de scale(zoom, zoom).
   // Portanto, o deslocamento precisa compensar a coordenada já multiplicada pelo zoom.
   var width = viewW == null ? cv.clientWidth : viewW;
@@ -611,67 +589,105 @@ function focusCameraOnPlayer(viewW, viewH) {
 }
 
 function stopWorldTravel(shouldSave) {
-  if (worldTravelTimer != null) {
-    window.clearInterval(worldTravelTimer);
-    worldTravelTimer = null;
+  if (worldTravelRaf != null) {
+    window.cancelAnimationFrame(worldTravelRaf);
+    worldTravelRaf = null;
   }
   worldTravelPath = [];
   worldTravelTarget = null;
+  worldTravelStep = null;
+  worldTravelPos = null;
+  worldTravelCarry = null;
   if (shouldSave && isHexMap()) save();
+}
+
+// Para a viagem de forma suave: termina o hexágono atual e não continua o resto do caminho.
+function haltWorldTravel() {
+  worldTravelPath = [];
+  worldTravelTarget = null;
+  if (!worldTravelStep) stopWorldTravel(true);
+  draw();
+}
+
+function worldTravelFrame(now) {
+  worldTravelRaf = null;
+  var player = currentPlayer();
+  if (!player || !isHexMap() || !cv) { stopWorldTravel(false); return; }
+
+  while (true) {
+    if (!worldTravelStep) {
+      var next = worldTravelPath.shift();
+      if (!next) break;
+      var toPt = cellCenter(next.x, next.y);
+      worldTravelStep = {
+        from: cellCenter(player.x, player.y), to: next, toPt: toPt,
+        t0: worldTravelCarry != null ? worldTravelCarry : now
+      };
+      worldTravelCarry = null;
+    }
+    var st = worldTravelStep;
+    var p = (now - st.t0) / WORLD_TRAVEL_STEP_MS;
+    if (p >= 1) {
+      // Chegou ao hexágono: grava a posição lógica e segue para o próximo sem pausa.
+      player.x = st.to.x; player.y = st.to.y;
+      selected = player;
+      save();
+      worldTravelCarry = st.t0 + WORLD_TRAVEL_STEP_MS;
+      worldTravelStep = null;
+      continue;
+    }
+    worldTravelPos = {
+      x: st.from.x + (st.toPt.x - st.from.x) * p,
+      y: st.from.y + (st.toPt.y - st.from.y) * p
+    };
+    draw();
+    worldTravelRaf = window.requestAnimationFrame(worldTravelFrame);
+    return;
+  }
+
+  worldTravelPos = null;
+  worldTravelCarry = null;
+  worldTravelTarget = null;
+  save();
+  draw();
 }
 
 function startWorldTravel(destination) {
   var player = currentPlayer();
   if (!isHexMap() || !player || !destination) return;
-  stopWorldTravel(false);
-  if (destination.x === player.x && destination.y === player.y) { draw(); return; }
-  var path = hexLine({ x: player.x, y: player.y }, destination);
-  worldTravelPath = path.slice(1);
-  worldTravelTarget = { x: destination.x, y: destination.y };
-  if (!worldTravelPath.length) { draw(); return; }
-
-  worldTravelTimer = window.setInterval(function () {
-    var activePlayer = currentPlayer();
-    if (!activePlayer || !isHexMap() || !cv) {
-      stopWorldTravel(false);
-      return;
-    }
-    var next = worldTravelPath.shift();
-    if (next) {
-      activePlayer.x = next.x;
-      activePlayer.y = next.y;
-      selected = activePlayer;
-      save();
-    }
-    if (!worldTravelPath.length) {
-      window.clearInterval(worldTravelTimer);
-      worldTravelTimer = null;
-      worldTravelTarget = null;
-      save();
-    }
+  // Se já está andando, o novo caminho parte do hexágono para onde ele está indo agora.
+  var origin = worldTravelStep ? worldTravelStep.to : { x: player.x, y: player.y };
+  if (destination.x === origin.x && destination.y === origin.y) {
+    worldTravelPath = [];
+    worldTravelTarget = null;
     draw();
-  }, WORLD_TRAVEL_STEP_MS);
+    return;
+  }
+  worldTravelPath = hexLine(origin, destination).slice(1);
+  worldTravelTarget = { x: destination.x, y: destination.y };
+  if (worldTravelRaf == null) worldTravelRaf = window.requestAnimationFrame(worldTravelFrame);
   draw();
 }
 
 function drawWorldTravelPath() {
-  if (!isHexMap() || !worldTravelPath.length) return;
+  if (!isHexMap()) return;
   var player = currentPlayer();
-  if (!player) return;
+  if (!player || (!worldTravelPath.length && !worldTravelStep)) return;
+  var points = [];
+  if (worldTravelStep) points.push(worldTravelStep.toPt);
+  worldTravelPath.forEach(function (cell) { points.push(cellCenter(cell.x, cell.y)); });
+  if (!points.length) return;
+  var start = worldTravelPos || cellCenter(player.x, player.y);
   cx.save();
   cx.strokeStyle = 'rgba(255, 215, 75, 0.9)';
   cx.fillStyle = 'rgba(255, 215, 75, 0.95)';
   cx.lineWidth = 3 / zoom;
   cx.setLineDash([7 / zoom, 5 / zoom]);
   cx.beginPath();
-  var start = cellCenter(player.x, player.y);
   cx.moveTo(start.x, start.y);
-  worldTravelPath.forEach(function (cell) {
-    var point = cellCenter(cell.x, cell.y);
-    cx.lineTo(point.x, point.y);
-  });
+  points.forEach(function (pt) { cx.lineTo(pt.x, pt.y); });
   cx.stroke();
-  var end = cellCenter(worldTravelPath[worldTravelPath.length - 1].x, worldTravelPath[worldTravelPath.length - 1].y);
+  var end = points[points.length - 1];
   cx.setLineDash([]);
   cx.beginPath(); cx.arc(end.x, end.y, 9 / zoom, 0, Math.PI * 2); cx.stroke();
   cx.restore();
@@ -779,8 +795,6 @@ function draw() {
   }
 
   cx.restore();
-  drawScaleBars(W, H);
-  updateHud();
   updateDetailPanel();
 }
 
@@ -896,43 +910,6 @@ function previewDoorEdge() {
   if (Math.min(fx, fy) >= 0.12) return null;
   var edge = previewEdge(), value = edge ? getEdgeVal(edge) : EDGE_NONE;
   return value === EDGE_DOOR_C || value === EDGE_DOOR_O ? edge : null;
-}
-
-function previewDescription(cell) {
-  if (tool === 'pan') return 'Arraste para deslocar a câmera sem alterar o mapa.';
-  if (!cell) return 'Mova o cursor sobre o mapa para visualizar a ação.';
-  var pos = ' (' + (cell.x + 1) + ', ' + (cell.y + 1) + ')';
-  if (tool === 'select') {
-    var hit = previewHoveredToken(cell);
-    if (hit) return 'Selecionar/mover ' + hit.nome + pos + '. Clique e arraste.';
-    if (previewDoorEdge()) return 'Alternar esta porta entre aberta e fechada.';
-    return 'Selecionar um token visível ou clicar em uma porta para alterná-la.';
-  }
-  if (tool === 'wall') return 'Adicionar uma parede no ' + (isHexMap() ? 'hexágono' : 'quadrado') + pos + '. Bloqueia passagem e visão.';
-  if (tool === 'erasewall') return 'Apagar a parede do ' + (isHexMap() ? 'hexágono' : 'quadrado') + pos + ', se houver.';
-  if (tool === 'muro') return 'Adicionar um muro na borda mais próxima deste quadrado.';
-  if (tool === 'porta') {
-    var pe = previewEdge(), pv = pe ? getEdgeVal(pe) : 0;
-    return pv === EDGE_DOOR_C ? 'A porta será aberta.' : pv === EDGE_DOOR_O ? 'A porta será fechada.' : 'Criar uma porta fechada nesta borda.';
-  }
-  if (tool === 'eraseedge') return 'Apagar o muro ou a porta na borda mais próxima.';
-  if (tool === 'spawn') return 'Mover o início do jogador para' + pos + ' e recalcular a área iluminada.';
-  if (tool === 'reveal') return 'Revelar ' + (isHexMap() ? 'o hexágono e seus 6 vizinhos' : 'um pincel de 3 × 3 quadrados') + ' ao redor de' + pos + '.';
-  if (tool === 'hide') return 'Cobrir com névoa ' + (isHexMap() ? 'o hexágono e seus 6 vizinhos' : 'um pincel de 3 × 3 quadrados') + ' ao redor de' + pos + '.';
-  if (tool === 'token') {
-    if (pendingMonster) return 'Colocar ' + pendingMonster.nome + ' (ND ' + pendingMonster.nd + ')' + pos + '.';
-    return 'Criar um token livre em' + pos + '. Ao clicar, você poderá definir o nome.';
-  }
-  if (tool === 'measure') {
-    if (measurePts && measurePts.length === 1) {
-      var startPoint = cellCenter(measurePts[0].x, measurePts[0].y);
-      var endPoint = cellCenter(cell.x, cell.y);
-      return 'Finalizar a medição: ' + formatMapDistance(measurePts[0], cell) + '.';
-    }
-    if (measurePts && measurePts.length === 2) return 'Medição concluída. Clique para iniciar outra distância.';
-    return 'Marcar o ponto inicial da medição em' + pos + '.';
-  }
-  return 'Prévia da ferramenta ' + toolLabel(tool) + '.';
 }
 
 function drawPreviewCell(cell, fill, stroke) {
@@ -1059,8 +1036,6 @@ function drawToolPreview() {
     } else drawPreviewCell(cell, 'rgba(255,255,255,0.05)', 'rgba(255,255,255,0.65)');
   }
 
-  var info = $('#mp-preview');
-  if (info) info.textContent = previewDescription(cell);
 }
 
 function drawFogAndLight(viewW, viewH) {
@@ -1108,7 +1083,9 @@ function drawFogAndLight(viewW, viewH) {
 
 function drawToken(t, sel) {
   var sq = t.raio || 1;
-  var c = isHexMap() ? cellCenter(t.x, t.y) : cellCenter(t.x + (sq - 1) / 2, t.y + (sq - 1) / 2);
+  var c = isHexMap()
+    ? ((worldTravelPos && t === currentPlayer()) ? worldTravelPos : cellCenter(t.x, t.y))
+    : cellCenter(t.x + (sq - 1) / 2, t.y + (sq - 1) / 2);
   var r = isHexMap() ? CELL * 0.31 * Math.max(1, Math.sqrt(sq)) : sq * CELL * 0.42;
   cx.beginPath();
   cx.arc(c.x, c.y, r, 0, Math.PI * 2);
@@ -1138,38 +1115,6 @@ function drawToken(t, sel) {
     cx.fillStyle = pct > 0.5 ? '#66bb6a' : pct > 0.25 ? '#ffb74d' : '#ef5350';
     cx.fillRect(bx, by, bw * pct, bh);
   }
-}
-
-function updateHud() {
-  var h = $('#mp-hud');
-  if (!h) return;
-  var t = selected;
-  var info = t
-    ? '<b>' + esc(t.nome) + '</b> (' + t.x + ',' + t.y + ')' +
-      (t.nd != null ? ' · ND ' + esc(t.nd) : '') +
-      (!isHexMap() && t.tipo === 'player' ? ' · Luz ' + (t.luz || lightRadius) : '')
-    : (pendingMonster ? 'Coloque: <b>' + esc(pendingMonster.nome) + '</b>' : 'Nenhum token selecionado');
-  var hm = hexMetrics();
-  var scaleInfo = hm
-    ? 'Grade hexagonal: 6 mi / 48 px · 1 mi = 8 px'
-    : 'Medição em quadrículas';
-  if (isHexMap()) {
-    var travelInfo = worldTravelPath.length ? ' · ' + worldTravelPath.length + ' hexágonos restantes' : ' · Clique no mapa para viajar';
-    h.innerHTML = '<b>' + esc((currentPlayer() || {}).nome || 'Aventureiro') + '</b> · Câmera presa ao personagem' +
-      '<br><small>Zoom 300% · Resolução máxima · 1 movimento a cada 2 segundos' + travelInfo + ' · ' + scaleInfo + '</small>';
-  } else {
-    h.innerHTML = info + '<br><small>' + toolLabel(tool) + ' · Zoom ' + Math.round(zoom * 100) + '% · ' + scaleInfo + '</small>';
-  }
-}
-
-function toolLabel(t) {
-  return ({
-    select: 'Selecionar/Mover', pan: 'Mover vista',
-    wall: 'Parede', erasewall: 'Apagar parede',
-    muro: 'Muro (linha)', porta: 'Porta (linha)', eraseedge: 'Apagar muro/porta',
-    reveal: 'Revelar névoa', hide: 'Ocultar névoa',
-    token: 'Colocar token', spawn: 'Início do jogador', measure: 'Medir'
-  })[t] || t;
 }
 
 function updateDetailPanel() {
@@ -1535,8 +1480,9 @@ function onWheel(e) {
 }
 
 function onKey(e) {
+  if (e.key === 'Escape' && menuIsOpen()) { setMenu(false); return; }
   if (isHexMap()) {
-    if (e.key === 'Escape') { stopWorldTravel(true); draw(); }
+    if (e.key === 'Escape') haltWorldTravel();
     return;
   }
   if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
@@ -1561,33 +1507,35 @@ function setTool(t) {
   R.querySelectorAll('#mp-tools button').forEach(function (b) {
     b.classList.toggle('on', b.dataset.t === t);
   });
-  var info = $('#mp-preview');
-  if (info) info.textContent = toolPreviewHelp(t);
   if (cv) cv.style.cursor = t === 'pan' ? 'grab' : t === 'select' ? 'pointer' : 'crosshair';
   draw();
 }
 
-function toolPreviewHelp(t) {
-  return ({
-    select: 'Selecionar: passe sobre um token visível para destacá-lo; clique e arraste para mover.',
-    pan: 'Mover vista: arraste o mapa para mudar a área da câmera.',
-    wall: 'Parede: o espaço destacado ficará bloqueado para movimento e visão.',
-    erasewall: 'Apagar parede: o espaço destacado ficará livre.',
-    muro: 'Muro: a linha destacada bloqueará passagem e linha de visão.',
-    porta: 'Porta: a linha destacada receberá uma porta; clique novamente para alternar aberta/fechada.',
-    eraseedge: 'Apagar linha: o muro ou a porta destacados serão removidos.',
-    spawn: 'Início: o marcador e o círculo mostram a nova posição e o alcance de luz.',
-    reveal: 'Revelar: a área destacada perderá a névoa.',
-    hide: 'Ocultar: a área destacada ficará coberta pela névoa.',
-    token: 'Token: a silhueta mostra onde a criatura selecionada será colocada.',
-    measure: 'Medir: marque início e destino para ver a rota hexagonal, a distância e o tempo conforme a velocidade informada.'
-  })[t] || 'A prévia acompanha o cursor.';
+function menuIsOpen() {
+  var d = R && R.querySelector('#mp-drawer');
+  return !!(d && d.classList.contains('open'));
+}
+
+function setMenu(open) {
+  if (!R) return;
+  var d = R.querySelector('#mp-drawer'), b = R.querySelector('#mp-burger');
+  if (!d || !b) return;
+  d.classList.toggle('open', open);
+  b.classList.toggle('open', open);
+  b.setAttribute('aria-expanded', open ? 'true' : 'false');
+  b.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+  d.setAttribute('aria-hidden', open ? 'false' : 'true');
 }
 
 function mount(el) {
   R = el;
   R.innerHTML =
     '<div class="mp vtt" id="mp-root">' +
+    '<div class="mp-wrap vtt-wrap">' +
+    '<div class="mp-main">' +
+    '<canvas id="mp-cv"></canvas>' +
+    '<button type="button" id="mp-burger" class="mp-burger" title="Menu" aria-label="Abrir menu" aria-expanded="false" aria-controls="mp-drawer"><span></span><span></span><span></span></button>' +
+    '<div id="mp-drawer" class="mp-drawer" aria-hidden="true">' +
     '<div class="mp-bar">' +
     '<select id="mp-map" class="mp-title" title="Trocar de mapa">' + mapOptions() + '</select>' +
     '<label id="mp-hex-wrap" class="mp-luz" style="display:none">Hexágono <select id="mp-hex-size" disabled><option value="small" selected>Pequeno · 6 mi</option></select></label>' +
@@ -1618,7 +1566,6 @@ function mount(el) {
     '<button id="mp-clear-edges" title="Remover todos os muros e portas das linhas (pede confirmação)">Limpar muros/portas</button>' +
     '<button id="mp-zo">−</button><button id="mp-zi">+</button>' +
     '</div>' +
-    '<div class="mp-wrap vtt-wrap">' +
     '<aside class="mp-side" id="mp-side">' +
     '<h4>Bestiário</h4>' +
     '<input id="mp-q" type="search" placeholder="Buscar monstro…" style="width:100%;margin-bottom:6px">' +
@@ -1628,17 +1575,46 @@ function mount(el) {
     '<small style="display:block;margin-top:10px;color:var(--mute)">' +
     (isHexMap() ? '<b>Parede</b> = hexágono bloqueado.<br><b>Flanaess</b> usa deslocamento e medição em hexágonos; muros e portas lineares ficam desativados.' : '<b>Parede</b> = quadrado inteiro.<br><b>Muro</b> = linha do grid (bloqueia luz 100%).<br><b>Porta</b> = linha; laranja=fechada, verde=aberta. Clique de novo ou use Selecionar na porta para abrir/fechar.') + '</small>' +
     '</aside>' +
-    '<div class="mp-main">' +
-    '<canvas id="mp-cv"></canvas>' +
-    '<div id="mp-hud"></div>' +
-    '<div id="mp-preview" class="mp-preview">Selecione uma ferramenta para ver a prévia da ação.</div>' +
-    '<div id="mp-st">Roda=zoom · Espaço=pan · G grid · F névoa · L luz · W muros</div>' +
+    '</div>' + // fim do menu lateral (drawer)
     '</div></div></div>';
+
+  var menuStyle = document.createElement('style');
+  menuStyle.textContent =
+    '#mp-root .mp-wrap{display:block !important;height:calc(100vh - 150px) !important;min-height:420px !important;}' +
+    '#mp-root .mp-main{display:block !important;position:relative !important;width:100% !important;height:100% !important;min-width:0 !important;overflow:hidden;}' +
+    '#mp-root #mp-cv{display:block;width:100%;height:100%;}' +
+    '#mp-root .mp-burger{position:absolute;top:10px;left:10px;z-index:30;width:44px;height:44px;padding:0;border-radius:10px;' +
+      'border:1px solid rgba(255,255,255,.28);background:rgba(15,15,18,.82);cursor:pointer;display:flex;flex-direction:column;' +
+      'justify-content:center;align-items:center;gap:5px;}' +
+    '#mp-root .mp-burger:hover{background:rgba(40,40,46,.92);}' +
+    '#mp-root .mp-burger span{display:block;width:22px;height:2px;border-radius:2px;background:#fff;transition:transform .2s,opacity .2s;}' +
+    '#mp-root .mp-burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}' +
+    '#mp-root .mp-burger.open span:nth-child(2){opacity:0;}' +
+    '#mp-root .mp-burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}' +
+    '#mp-root .mp-drawer{position:absolute;top:0;left:0;bottom:0;z-index:25;box-sizing:border-box;width:min(330px,88vw);' +
+      'padding:64px 12px 16px;overflow-y:auto;background:rgba(14,14,17,.97);border-right:1px solid rgba(255,255,255,.14);' +
+      'box-shadow:4px 0 18px rgba(0,0,0,.45);transform:translateX(-104%);visibility:hidden;' +
+      'transition:transform .22s ease,visibility 0s linear .22s;}' +
+    '#mp-root .mp-drawer.open{transform:none;visibility:visible;transition:transform .22s ease,visibility 0s;}' +
+    '#mp-root .mp-drawer .mp-bar{display:flex !important;flex-direction:column !important;flex-wrap:nowrap !important;align-items:stretch !important;' +
+      'gap:8px !important;position:static !important;width:auto !important;height:auto !important;margin:0 !important;padding:0 !important;' +
+      'background:none !important;border:0 !important;}' +
+    '#mp-root .mp-drawer .mp-bar > button,#mp-root .mp-drawer .mp-bar > select,#mp-root .mp-drawer .mp-bar > label{width:100%;box-sizing:border-box;}' +
+    '#mp-root:not(.mp-world-map) .mp-drawer .mp-g{display:grid !important;grid-template-columns:1fr 1fr;gap:6px;}' +
+    '#mp-root .mp-drawer .mp-g button{width:100%;box-sizing:border-box;}' +
+    '#mp-root .mp-drawer .mp-side{position:static !important;width:auto !important;height:auto !important;max-height:none !important;' +
+      'overflow:visible !important;margin:14px 0 0 !important;padding:12px 0 0 !important;border:0 !important;border-top:1px solid rgba(255,255,255,.14) !important;}';
+  R.querySelector('#mp-root').appendChild(menuStyle);
 
   cv = $('#mp-cv');
   cx = cv.getContext('2d');
   if ('imageSmoothingQuality' in cx) cx.imageSmoothingQuality = 'high';
 
+  // Se o menu estiver aberto, o primeiro toque no mapa só fecha o menu (não pinta/move nada).
+  cv.addEventListener('pointerdown', function (e) {
+    if (menuIsOpen()) { e.preventDefault(); e.stopImmediatePropagation(); setMenu(false); }
+  });
+  $('#mp-burger').onclick = function () { setMenu(!menuIsOpen()); };
   cv.addEventListener('pointerdown', onPointerDown);
   cv.addEventListener('pointermove', onPointerMove);
   cv.addEventListener('pointerleave', onPointerLeave);
@@ -1678,8 +1654,7 @@ function mount(el) {
       '#mp-root.mp-world-map #mp-clear-edges,' +
       '#mp-root.mp-world-map #mp-zo,' +
       '#mp-root.mp-world-map #mp-zi,'+
-      '#mp-root.mp-world-map .mp-side,'+
-      '#mp-root.mp-world-map #mp-preview {display:none !important;}' +
+      '#mp-root.mp-world-map .mp-side {display:none !important;}' +
       '#mp-root.mp-world-map .mp-wrap {display:block !important;height:calc(100vh - 150px) !important;min-height:420px !important;}' +
       '#mp-root.mp-world-map .mp-main {display:block !important;width:100% !important;height:100% !important;min-width:0 !important;position:relative !important;}' +
       '#mp-root.mp-world-map #mp-cv {display:block;width:100%;height:100%;cursor:crosshair;touch-action:manipulation;}' +
@@ -1690,8 +1665,6 @@ function mount(el) {
     var speedWrap = $('#mp-speed-wrap'); if (speedWrap) speedWrap.style.display = 'none';
     showFog = false; dynLight = false; showWalls = false; showGrid = true;
     zoom = FLANAESS_ZOOM;
-    var status = $('#mp-st');
-    if (status) status.textContent = 'Clique no mapa para viajar · Hexágono de 6 milhas (48 px de referência) · 1 movimento a cada 2 segundos · Câmera presa ao personagem · Zoom 300% · Resolução máxima';
   }
   // O Flanaess não oferece mais seletor: o tamanho pequeno é fixo.
   if ($('#mp-speed')) $('#mp-speed').oninput = function () {
@@ -1701,7 +1674,7 @@ function mount(el) {
 
   $('#mp-tools').onclick = function (e) {
     var b = e.target.closest('button');
-    if (b) setTool(b.dataset.t);
+    if (b) { setTool(b.dataset.t); setMenu(false); }
   };
   $('#mp-grid').onclick = function () { showGrid = !showGrid; this.classList.toggle('on', showGrid); draw(); };
   $('#mp-fog').onclick = function () { showFog = !showFog; this.classList.toggle('on', showFog); draw(); };
@@ -1748,6 +1721,7 @@ function mount(el) {
     pendingMonster = m;
     setTool('token');
     R.querySelectorAll('#mp-ml button').forEach(function (btn) { btn.classList.toggle('on', btn === b); });
+    setMenu(false);
   };
 
   document.addEventListener('keydown', onKey);
@@ -1764,7 +1738,6 @@ function mount(el) {
   $('#mp-fog').classList.toggle('on', showFog);
   $('#mp-light').classList.toggle('on', dynLight);
   $('#mp-walls-vis').classList.toggle('on', showWalls);
-  if ($('#mp-preview')) $('#mp-preview').textContent = toolPreviewHelp(tool);
 
   function tryMonsters() { renderMonsterList($('#mp-q') ? $('#mp-q').value : ''); }
   tryMonsters();
