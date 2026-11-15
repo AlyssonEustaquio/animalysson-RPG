@@ -5,6 +5,7 @@ var MAPS = {
   tumba: {
     nome: 'Tumba dos Horrores', icone: '☠',
     key: 'animalysson-vtt-v4',
+    stateFile: 'mapas/tumba-dos-horrores/Tumba dos Horrores.json',
     cell: 36, cols: 72, rows: 95, w: 2592, h: 3420,
     spawn: { x: 35, y: 88 },
     parts: [
@@ -17,6 +18,7 @@ var MAPS = {
   flanaess: {
     nome: 'Flanaess 598 CY', icone: '🌍',
     key: 'animalysson-vtt-flanaess-v1',
+    stateFile: 'mapas/flanaess_mapa/Flanaess 598 CY.json',
     cell: 40, cols: 220, rows: 262, w: 8800, h: 10480,
     spawn: { x: 110, y: 131 },
     fit: true,
@@ -150,7 +152,8 @@ function migrateFlanaessState(s) {
   s.gridMode = FLANAESS_GRID_MODE;
   s.fog = []; s.walls = []; s.hEdges = []; s.vEdges = [];
   state = s;
-  save();
+  // Não grava a migração automaticamente. Primeiro precisamos comparar o
+  // salvamento local com o JSON versionado no GitHub, se ele existir.
   return s;
 }
 state = migrateFlanaessState(state);
@@ -184,23 +187,53 @@ function makeArr(n, val) {
   return a;
 }
 
+function normalizeMapState(s) {
+  if (!s || !Array.isArray(s.tokens)) return null;
+  if (isHexMap()) {
+    if (!s.gridMode && s.fog && s.fog.length === MAPS.flanaess.cols * MAPS.flanaess.rows) s._legacySquareTokens = true;
+    s.fog = []; s.walls = []; s.hEdges = []; s.vEdges = [];
+    return s;
+  }
+  if (!s.fog || s.fog.length !== COLS * ROWS) s.fog = makeGrid(1);
+  if (!s.walls || s.walls.length !== COLS * ROWS) s.walls = makeGrid(0);
+  if (!s.hEdges || s.hEdges.length !== COLS * (ROWS + 1)) s.hEdges = makeArr(COLS * (ROWS + 1), 0);
+  if (!s.vEdges || s.vEdges.length !== (COLS + 1) * ROWS) s.vEdges = makeArr((COLS + 1) * ROWS, 0);
+  return s;
+}
+
 function load() {
   try {
     var raw = localStorage.getItem(KEY);
     if (!raw) return null;
-    var s = JSON.parse(raw);
-    if (!s || !s.tokens) return null;
-    if (isHexMap()) {
-      if (!s.gridMode && s.fog && s.fog.length === MAPS.flanaess.cols * MAPS.flanaess.rows) s._legacySquareTokens = true;
-      s.fog = []; s.walls = []; s.hEdges = []; s.vEdges = [];
-      return s;
-    }
-    if (!s.fog || s.fog.length !== COLS * ROWS) s.fog = makeGrid(1);
-    if (!s.walls || s.walls.length !== COLS * ROWS) s.walls = makeGrid(0);
-    if (!s.hEdges || s.hEdges.length !== COLS * (ROWS + 1)) s.hEdges = makeArr(COLS * (ROWS + 1), 0);
-    if (!s.vEdges || s.vEdges.length !== (COLS + 1) * ROWS) s.vEdges = makeArr((COLS + 1) * ROWS, 0);
-    return s;
+    return normalizeMapState(JSON.parse(raw));
   } catch (e) { return null; }
+}
+
+function loadRepositoryMapState(done) {
+  var requestedMapId = mapId;
+  var file = MAPINFO && MAPINFO.stateFile;
+  if (!file || typeof window.fetch !== 'function') { done(); return; }
+
+  var localSavedAt = Number(state && state._savedAt) || 0;
+  fetch(encodeURI(file) + '?v=' + Date.now(), { cache: 'no-store' })
+    .then(function (response) {
+      if (!response.ok) return null;
+      return response.json();
+    })
+    .then(function (payload) {
+      if (mapId !== requestedMapId || !payload) return;
+      if (payload.format !== 'animalysson-rpg-map' || payload.mapId !== requestedMapId || !payload.state) return;
+      var remoteSavedAt = Date.parse(payload.exportedAt) || 0;
+      if (remoteSavedAt <= localSavedAt) return;
+      var remoteState = normalizeMapState(payload.state);
+      if (!remoteState) return;
+      remoteState._savedAt = remoteSavedAt;
+      state = migrateFlanaessState(remoteState);
+    })
+    .catch(function () {
+      // JSON ainda não publicado (ou execução local sem servidor): segue com o estado local.
+    })
+    .then(function () { done(); });
 }
 
 function exportMapFile() {
@@ -209,6 +242,10 @@ function exportMapFile() {
   var mapFolder = mapId === 'flanaess' ? 'mapas/flanaess_mapa/' : 'mapas/tumba-dos-horrores/';
   var assets = (MAPINFO.parts || []).map(function (part) { return part.src; });
   if (MAPINFO.detail) assets.push(MAPINFO.detail.src);
+  var exportedState = isHexMap()
+    ? { v: 4, nome: MAPINFO.nome, gridMode: FLANAESS_GRID_MODE, tokens: state.tokens || [] }
+    : JSON.parse(JSON.stringify(state));
+  if (exportedState && Object.prototype.hasOwnProperty.call(exportedState, '_savedAt')) delete exportedState._savedAt;
   var payload = {
     format: 'animalysson-rpg-map',
     version: 1,
@@ -218,15 +255,13 @@ function exportMapFile() {
     dimensions: { width: MAP_W, height: MAP_H, columns: COLS, rows: ROWS },
     imageFolder: mapFolder,
     images: assets,
-    state: isHexMap()
-      ? { v: 4, nome: MAPINFO.nome, gridMode: FLANAESS_GRID_MODE, tokens: state.tokens || [] }
-      : JSON.parse(JSON.stringify(state))
+    state: exportedState
   };
   var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url;
-  a.download = 'estado-' + mapId + '.json';
+  a.download = MAPINFO.nome + '.json';
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -235,9 +270,13 @@ function exportMapFile() {
 
 function save() {
   try {
+    state._savedAt = Date.now();
     if (isHexMap()) {
       state.gridMode = FLANAESS_GRID_MODE;
-      localStorage.setItem(KEY, JSON.stringify({ v: 4, nome: MAPINFO.nome, gridMode: state.gridMode, tokens: state.tokens || [] }));
+      localStorage.setItem(KEY, JSON.stringify({
+        v: 4, nome: MAPINFO.nome, gridMode: state.gridMode,
+        tokens: state.tokens || [], _savedAt: state._savedAt
+      }));
     } else {
       localStorage.setItem(KEY, JSON.stringify(state));
     }
@@ -1650,7 +1689,17 @@ function setMenu(open) {
   d.setAttribute('aria-hidden', open ? 'false' : 'true');
 }
 
+var mountRequestId = 0;
 function mount(el) {
+  var requestId = ++mountRequestId;
+  if (el) el.innerHTML = '<div class="empty-state" style="padding:24px">Carregando dados salvos do mapa…</div>';
+  loadRepositoryMapState(function () {
+    if (requestId !== mountRequestId) return;
+    mountNow(el);
+  });
+}
+
+function mountNow(el) {
   R = el;
   R.innerHTML =
     '<div class="mp vtt" id="mp-root">' +
@@ -1658,10 +1707,10 @@ function mount(el) {
     '<div class="mp-main">' +
     '<canvas id="mp-cv"></canvas>' +
     '<button type="button" id="mp-burger" class="mp-burger" title="Menu" aria-label="Abrir menu" aria-expanded="false" aria-controls="mp-drawer"><span></span><span></span><span></span></button>' +
+    '<button type="button" id="mp-export" class="mp-export-float" title="Baixar o mapa em JSON com o nome do mapa">⬇ Salvar mapa</button>' +
     '<div id="mp-drawer" class="mp-drawer" aria-hidden="true">' +
     '<div class="mp-bar">' +
     '<select id="mp-map" class="mp-title" title="Trocar de mapa">' + mapOptions() + '</select>' +
-    '<button type="button" id="mp-export" title="Baixar o estado atual do mapa em JSON">⬇ Salvar mapa</button>' +
     '<label id="mp-hex-wrap" class="mp-luz" style="display:none">Hexágono <select id="mp-hex-size" disabled><option value="small" selected>Pequeno · 6 mi</option></select></label>' +
     '<label id="mp-speed-wrap" class="mp-luz" style="display:none">Velocidade <input id="mp-speed" type="number" min="0.1" step="0.1" placeholder="mi/dia" style="width:62px"></label>' +
     '<div class="mp-g" id="mp-tools">' +
@@ -1712,6 +1761,9 @@ function mount(el) {
       'border:1px solid rgba(255,255,255,.28);background:rgba(15,15,18,.82);cursor:pointer;display:flex;flex-direction:column;' +
       'justify-content:center;align-items:center;gap:5px;}' +
     '#mp-root .mp-burger:hover{background:rgba(40,40,46,.92);}' +
+    '#mp-root .mp-export-float{position:absolute;top:10px;right:10px;z-index:30;padding:10px 14px;border:1px solid rgba(255,255,255,.28);' +
+      'border-radius:10px;background:rgba(15,15,18,.88);color:#fff;font:inherit;font-weight:600;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.25);}' +
+    '#mp-root .mp-export-float:hover{background:rgba(40,40,46,.96);border-color:rgba(255,255,255,.5);}' +
     '#mp-root .mp-burger span{display:block;width:22px;height:2px;border-radius:2px;background:#fff;transition:transform .2s,opacity .2s;}' +
     '#mp-root .mp-burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}' +
     '#mp-root .mp-burger.open span:nth-child(2){opacity:0;}' +
@@ -1890,6 +1942,7 @@ function mount(el) {
 }
 
 function unmount() {
+  mountRequestId++;
   stopWorldTravel(false);
   stopKeyMove();
   document.removeEventListener('keydown', onKey);
