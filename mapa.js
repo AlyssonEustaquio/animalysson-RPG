@@ -110,6 +110,14 @@ var worldTravelPos = null;   // posição visual (px do mapa) do personagem dura
 var worldTravelCarry = null; // instante em que o passo anterior terminou (evita engasgo entre hexágonos)
 var worldTravelPath = [];
 var worldTravelTarget = null;
+var KEY_STEP_MS = 140;       // tempo para andar 1 quadrado com as setas (velocidade constante)
+var MOVE_KEYS = { ArrowLeft: 1, ArrowRight: 1, ArrowUp: 1, ArrowDown: 1 };
+var keysHeld = {};           // setas atualmente pressionadas
+var keyMoveRaf = null;       // requestAnimationFrame do movimento por teclado
+var keyMoveStep = null;      // passo em andamento: { from, to, dur, t0 }
+var keyMoveVis = null;       // posição visual (px do mapa) do personagem enquanto desliza
+var keyMoveCarry = null;     // instante em que o passo anterior terminou (sem engasgo entre quadrados)
+var keyMoveLastSave = 0;
 var WORLD_TRAVEL_STEP_MS = 2000; // tempo para atravessar 1 hexágono (velocidade constante, sem pulos)
 
 var state = load() || defaultState();
@@ -1068,7 +1076,7 @@ function drawFogAndLight(viewW, viewH) {
   }
 
   if (dynLight && player) {
-    var c = cellCenter(px, py);
+    var c = (!isHexMap() && keyMoveVis && player === currentPlayer()) ? keyMoveVis : cellCenter(px, py);
     var rPx = r * CELL;
     var grd = cx.createRadialGradient(c.x, c.y, rPx * 0.12, c.x, c.y, rPx);
     grd.addColorStop(0, 'rgba(255,220,140,0.16)');
@@ -1085,7 +1093,7 @@ function drawToken(t, sel) {
   var sq = t.raio || 1;
   var c = isHexMap()
     ? ((worldTravelPos && t === currentPlayer()) ? worldTravelPos : cellCenter(t.x, t.y))
-    : cellCenter(t.x + (sq - 1) / 2, t.y + (sq - 1) / 2);
+    : ((keyMoveVis && t === currentPlayer()) ? keyMoveVis : cellCenter(t.x + (sq - 1) / 2, t.y + (sq - 1) / 2));
   var r = isHexMap() ? CELL * 0.31 * Math.max(1, Math.sqrt(sq)) : sq * CELL * 0.42;
   cx.beginPath();
   cx.arc(c.x, c.y, r, 0, Math.PI * 2);
@@ -1479,6 +1487,80 @@ function onWheel(e) {
   draw();
 }
 
+// ---------- Movimento do personagem com as setas (mapas de quadrados, ex.: Tumba) ----------
+function tokenAnchor(t, x, y) {
+  var sq = t.raio || 1;
+  return cellCenter(x + (sq - 1) / 2, y + (sq - 1) / 2);
+}
+
+function heldDirection() {
+  var dx = (keysHeld.ArrowRight ? 1 : 0) - (keysHeld.ArrowLeft ? 1 : 0);
+  var dy = (keysHeld.ArrowDown ? 1 : 0) - (keysHeld.ArrowUp ? 1 : 0);
+  return (dx || dy) ? { dx: dx, dy: dy } : null;
+}
+
+// Diagonal bloqueada? Tenta deslizar só na horizontal ou só na vertical.
+function pickKeyStep(pl, dir) {
+  var cands = [];
+  if (dir.dx && dir.dy) cands.push({ x: pl.x + dir.dx, y: pl.y + dir.dy }, { x: pl.x + dir.dx, y: pl.y }, { x: pl.x, y: pl.y + dir.dy });
+  else cands.push({ x: pl.x + dir.dx, y: pl.y + dir.dy });
+  for (var i = 0; i < cands.length; i++) {
+    if (canStep(pl.x, pl.y, cands[i].x, cands[i].y, pl)) return cands[i];
+  }
+  return null;
+}
+
+// A câmera acompanha o personagem suavemente quando ele se aproxima das bordas da tela.
+function followKeyMove() {
+  if (!keyMoveVis || !cv) return;
+  var W = cv.clientWidth, H = cv.clientHeight;
+  var sx = keyMoveVis.x * zoom + ox, sy = keyMoveVis.y * zoom + oy;
+  var mx = W * 0.3, my = H * 0.3;
+  var tx = sx < mx ? mx - sx : (sx > W - mx ? (W - mx) - sx : 0);
+  var ty = sy < my ? my - sy : (sy > H - my ? (H - my) - sy : 0);
+  ox += tx * 0.25;
+  oy += ty * 0.25;
+}
+
+function stopKeyMove() {
+  if (keyMoveRaf != null) { window.cancelAnimationFrame(keyMoveRaf); keyMoveRaf = null; }
+  keyMoveStep = null; keyMoveVis = null; keyMoveCarry = null; keysHeld = {};
+}
+
+function keyMoveFrame(now) {
+  keyMoveRaf = null;
+  var pl = currentPlayer();
+  if (!pl || isHexMap() || !cv) { stopKeyMove(); return; }
+
+  while (true) {
+    if (!keyMoveStep) {
+      var dir = heldDirection();
+      var next = dir ? pickKeyStep(pl, dir) : null;
+      if (!next) break;
+      var from = tokenAnchor(pl, pl.x, pl.y), to = tokenAnchor(pl, next.x, next.y);
+      var cells = Math.sqrt(Math.pow(next.x - pl.x, 2) + Math.pow(next.y - pl.y, 2));
+      keyMoveStep = { from: from, to: to, dur: KEY_STEP_MS * cells, t0: keyMoveCarry != null ? keyMoveCarry : now };
+      keyMoveCarry = null;
+      // A posição lógica (luz, névoa, colisão) avança na hora; só o desenho desliza até lá.
+      pl.x = next.x; pl.y = next.y;
+      if (dynLight) revealAround(pl.x, pl.y, pl.luz || lightRadius);
+    }
+    var st = keyMoveStep;
+    var p = (now - st.t0) / st.dur;
+    if (p >= 1) { keyMoveCarry = st.t0 + st.dur; keyMoveStep = null; continue; }
+    keyMoveVis = { x: st.from.x + (st.to.x - st.from.x) * p, y: st.from.y + (st.to.y - st.from.y) * p };
+    followKeyMove();
+    if (now - keyMoveLastSave > 1000) { save(); keyMoveLastSave = now; }
+    draw();
+    keyMoveRaf = window.requestAnimationFrame(keyMoveFrame);
+    return;
+  }
+
+  keyMoveVis = null; keyMoveCarry = null;
+  save();
+  draw();
+}
+
 function onKey(e) {
   if (e.key === 'Escape' && menuIsOpen()) { setMenu(false); return; }
   if (isHexMap()) {
@@ -1486,6 +1568,13 @@ function onKey(e) {
     return;
   }
   if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+  if (MOVE_KEYS[e.code] && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    e.preventDefault();
+    if (drag || !currentPlayer()) return;
+    keysHeld[e.code] = true;
+    if (keyMoveRaf == null) keyMoveRaf = window.requestAnimationFrame(keyMoveFrame);
+    return;
+  }
   if (e.code === 'Space') { space = true; e.preventDefault(); return; }
   if ((e.key === 'Delete' || e.key === 'Backspace') && selected && selected.tipo !== 'player') {
     state.tokens = state.tokens.filter(function (t) { return t !== selected; });
@@ -1498,7 +1587,11 @@ function onKey(e) {
   if (e.key === 'Escape') { pendingMonster = null; selected = null; measurePts = null; draw(); }
 }
 
-function onKeyUp(e) { if (e.code === 'Space') space = false; }
+function onKeyUp(e) {
+  if (e.code === 'Space') space = false;
+  if (MOVE_KEYS[e.code]) delete keysHeld[e.code];
+}
+function onWindowBlur() { keysHeld = {}; }
 
 function setTool(t) {
   tool = t;
@@ -1725,6 +1818,7 @@ function mount(el) {
 
   document.addEventListener('keydown', onKey);
   document.addEventListener('keyup', onKeyUp);
+  window.addEventListener('blur', onWindowBlur);
   window.addEventListener('resize', draw);
 
   ['muro', 'porta', 'eraseedge'].forEach(function (name) {
@@ -1762,8 +1856,10 @@ function mount(el) {
 
 function unmount() {
   stopWorldTravel(false);
+  stopKeyMove();
   document.removeEventListener('keydown', onKey);
   document.removeEventListener('keyup', onKeyUp);
+  window.removeEventListener('blur', onWindowBlur);
   window.removeEventListener('resize', draw);
   R = null; cv = null; cx = null; bgImages = []; detailCache = {}; previewPointer = null;
 }
