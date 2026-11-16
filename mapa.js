@@ -23,6 +23,8 @@ var MAPS = {
     spawn: { x: 110, y: 131 },
     fit: true,
     maxZoom: 4,
+    // Escala exclusiva de Flanaess. A imagem lógica tem 1/4 da resolução de referência.
+    // Grade pointy-top: a distância entre centros de hexágonos vizinhos é igual à largura.
     scale: {
       referenceWidth: 35200,
       referenceHeight: 41920,
@@ -1912,8 +1914,11 @@ function placeMonsterFromId(id, cell) {
 }
 
 function canOccupy(x, y, token) {
-  if (!blockMove) return true;
+  // Os limites do mapa sempre bloqueiam a passagem; desativar colisões
+  // permite atravessar paredes, mas não sair da área física do mapa.
   var sq = (token && token.raio) || 1;
+  if (x < 0 || y < 0 || x + sq > COLS || y + sq > ROWS) return false;
+  if (!blockMove) return true;
   for (var dy = 0; dy < sq; dy++) {
     for (var dx = 0; dx < sq; dx++) {
       if (isCellWall(x + dx, y + dy)) return false;
@@ -1985,7 +1990,7 @@ function onPointerDown(e) {
       draw();
       return;
     }
-    startWorldTravel(worldCell);
+    if (tool === 'select') startWorldTravel(worldCell);
     return;
   }
   cv.setPointerCapture(e.pointerId);
@@ -2220,6 +2225,33 @@ function pickKeyStep(pl, dir) {
   return null;
 }
 
+function keyMoveWouldExitMap(pl, dir) {
+  if (!pl || !dir || isHexMap()) return false;
+  var sq = (pl.raio || 1);
+  var nx = pl.x + dir.dx, ny = pl.y + dir.dy;
+  return nx < 0 || ny < 0 || nx + sq > COLS || ny + sq > ROWS;
+}
+
+// Ao sair pela borda de um mapa de aventura, retorna ao Flanaess na
+// última posição salva (normalmente o hexágono de onde o portal foi usado).
+function returnToWorldMapFromExit() {
+  if (isHexMap() || !MAPS.flanaess) return false;
+  var host = R;
+  save();
+  stopKeyMove();
+  stopWorldTravel(false);
+  selected = null;
+  pendingMonster = null;
+  measurePts = null;
+  drag = null;
+  tool = 'select';
+  preferredMapId = 'flanaess';
+  try { localStorage.setItem(MAP_ID_KEY, 'flanaess'); } catch (e) {}
+  unmount();
+  mount(host);
+  return true;
+}
+
 // A câmera acompanha o personagem suavemente quando ele se aproxima das bordas da tela.
 function followKeyMove() {
   if (!keyMoveVis || !cv) return;
@@ -2246,7 +2278,10 @@ function keyMoveFrame(now) {
     if (!keyMoveStep) {
       var dir = heldDirection();
       var next = dir ? pickKeyStep(pl, dir) : null;
-      if (!next) break;
+      if (!next) {
+        if (keyMoveWouldExitMap(pl, dir) && returnToWorldMapFromExit()) return;
+        break;
+      }
       var from = tokenAnchor(pl, pl.x, pl.y), to = tokenAnchor(pl, next.x, next.y);
       var cells = Math.sqrt(Math.pow(next.x - pl.x, 2) + Math.pow(next.y - pl.y, 2));
       keyMoveStep = { from: from, to: to, dur: KEY_STEP_MS * cells, t0: keyMoveCarry != null ? keyMoveCarry : now };
@@ -2274,7 +2309,10 @@ function keyMoveFrame(now) {
 function onKey(e) {
   if (e.key === 'Escape' && menuIsOpen()) { setMenu(false); return; }
   if (isHexMap()) {
-    if (e.key === 'Escape') haltWorldTravel();
+    if (e.key === 'Escape') {
+      if (tool === 'portal' || tool === 'spawn') setTool('select');
+      else haltWorldTravel();
+    }
     return;
   }
   if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
@@ -2312,8 +2350,10 @@ function setTool(t) {
   });
   var worldSpawnButton = R.querySelector('#mp-world-spawn');
   var worldPortalButton = R.querySelector('#mp-world-portal');
+  var worldMoveButton = R.querySelector('#mp-world-move');
   if (worldSpawnButton) worldSpawnButton.classList.toggle('active', t === 'spawn');
   if (worldPortalButton) worldPortalButton.classList.toggle('active', t === 'portal');
+  if (worldMoveButton) worldMoveButton.classList.toggle('active', t === 'select');
   if (cv) cv.style.cursor = t === 'pan' ? 'grab' : t === 'select' ? 'pointer' : 'crosshair';
   draw();
 }
@@ -2368,6 +2408,7 @@ function mountNow(el) {
     '<button type="button" id="mp-export-catalog" title="Baixar o catálogo para publicar os mapas adicionados">🗂 Baixar catálogo de mapas</button>' +
     '<label id="mp-hex-wrap" class="mp-luz" style="display:none">Hexágono <select id="mp-hex-size" disabled><option value="small" selected>Pequeno · 6 mi</option></select></label>' +
     '<label id="mp-speed-wrap" class="mp-luz" style="display:none">Velocidade <input id="mp-speed" type="number" min="0.1" step="0.1" placeholder="mi/dia" style="width:62px"></label>' +
+    '<button type="button" id="mp-world-move" class="mp-world-action active" title="Desativa os modos de início e teleporte; clique no mapa para mover o personagem">🧭 Desativar ferramentas</button>' +
     '<button type="button" id="mp-world-spawn" class="mp-world-action" title="Definir o ponto de início deste mapa">📍 Definir início</button>' +
     '<button type="button" id="mp-world-portal" class="mp-world-action" title="Adicionar um teleporte para outro mapa">🌀 Adicionar teleporte</button>' +
     '<div class="mp-g" id="mp-tools">' +
@@ -2489,6 +2530,10 @@ function mountNow(el) {
     this.value = '';
     if (file) createCustomMapFromFile(file);
   };
+  $('#mp-world-move').onclick = function () {
+    if (!isHexMap()) return;
+    setTool('select'); setMenu(false);
+  };
   $('#mp-world-spawn').onclick = function () {
     if (!isHexMap()) return;
     setTool('spawn'); setMenu(false);
@@ -2539,6 +2584,7 @@ function mountNow(el) {
       '#mp-root.mp-world-map #mp-zi,'+
       '#mp-root.mp-world-map .mp-side {display:none !important;}' +
       '#mp-root.mp-world-map .mp-world-action {display:block !important;}' +
+      '#mp-root.mp-world-map #mp-world-move.active{background:rgba(35,155,100,.32);border-color:#70d6a2;}' +
       '#mp-root.mp-world-map #mp-cv {display:block;width:100%;height:100%;cursor:crosshair;touch-action:manipulation;}' +
       '#mp-root.mp-world-map #mp-hex-wrap {display:none !important;}';
     worldRoot.appendChild(worldStyle);
