@@ -23,8 +23,6 @@ var MAPS = {
     spawn: { x: 110, y: 131 },
     fit: true,
     maxZoom: 4,
-    // Escala exclusiva de Flanaess. A imagem lógica tem 1/4 da resolução de referência.
-    // Grade pointy-top: a distância entre centros de hexágonos vizinhos é igual à largura.
     scale: {
       referenceWidth: 35200,
       referenceHeight: 41920,
