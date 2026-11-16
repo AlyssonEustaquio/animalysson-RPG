@@ -1179,11 +1179,10 @@ function drawWorldPortals() {
     var center = cellCenter(portal.x, portal.y);
     var color = /^#[0-9a-f]{6}$/i.test(String(portal.color || '')) ? portal.color : '#36a9e1';
     cx.save();
-    // O teleporte é indicado somente pela cor do próprio hexágono, sem ícone ou imagem.
-    cx.globalAlpha = 0.48;
-    hexPath(cx, center, color, null);
-    cx.globalAlpha = 0.95;
-    hexPath(cx, center, null, color, 2 / zoom);
+    // Destaque discreto: apenas o contorno do tile, com 20% de opacidade
+    // e a mesma espessura da linha normal da grade.
+    cx.globalAlpha = 0.20;
+    hexPath(cx, center, null, color, 1 / zoom);
     cx.restore();
   });
 }
@@ -1446,7 +1445,7 @@ function createPortalDialog(titleText, descriptionText) {
 }
 
 function showPortalColorPicker(initialColor, onApply) {
-  var dialog = createPortalDialog('Cor do teleporte', 'Escolha a cor que vai preencher o hexágono onde o teleporte foi colocado.');
+  var dialog = createPortalDialog('Cor do teleporte', 'Escolha uma cor para o contorno discreto do hexágono.');
   if (!dialog) return;
   var colorInput = document.createElement('input');
   colorInput.type = 'color';
@@ -1547,7 +1546,6 @@ function placeWorldPortal(cell) {
       color: color
     });
     save(); draw();
-    alert('Teleporte criado para ' + MAPS[destination].nome + '. O hexágono foi marcado com a cor escolhida.');
   });
 }
 
@@ -1587,7 +1585,6 @@ function teleportThroughWorldPortal(portal) {
     selected = player;
     save();
     mountNow(host);
-    alert('Você chegou a ' + MAPINFO.nome + ', no ponto de início definido desse mapa.');
   });
 }
 
