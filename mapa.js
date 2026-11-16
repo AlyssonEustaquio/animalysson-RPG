@@ -1179,9 +1179,9 @@ function drawWorldPortals() {
     var center = cellCenter(portal.x, portal.y);
     var color = /^#[0-9a-f]{6}$/i.test(String(portal.color || '')) ? portal.color : '#36a9e1';
     cx.save();
-    // Destaque discreto: apenas o contorno do tile, com 20% de opacidade
+    // Destaque discreto: apenas o contorno do tile, com 40% de opacidade
     // e a mesma espessura da linha normal da grade.
-    cx.globalAlpha = 0.20;
+    cx.globalAlpha = 0.40;
     hexPath(cx, center, null, color, 1 / zoom);
     cx.restore();
   });
