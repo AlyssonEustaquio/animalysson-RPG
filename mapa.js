@@ -50,10 +50,49 @@ var MAPS = {
 };
 var MAP_ID_KEY = 'animalysson-vtt-mapa-atual';
 var HEX_SIZE_KEY = 'animalysson-vtt-flanaess-hex-size';
+var CUSTOM_MAPS_KEY = 'animalysson-vtt-mapas-customizados-v1';
+var MAP_CATALOG_FILE = 'mapas/mapas.json';
 var mapId = 'tumba', MAPINFO = null;
+var preferredMapId = 'tumba';
 var hexSize = 'small';
 var KEY, CELL, COLS, ROWS, MAP_W, MAP_H, PARTS;
-try { mapId = localStorage.getItem(MAP_ID_KEY) || 'tumba'; } catch (e) {}
+try { preferredMapId = localStorage.getItem(MAP_ID_KEY) || 'tumba'; mapId = preferredMapId; } catch (e) {}
+
+function serializableMapConfig(info) {
+  var copy = JSON.parse(JSON.stringify(info || {}));
+  (copy.parts || []).forEach(function (part) { delete part.localSrc; });
+  if (copy.detail) delete copy.detail.runtimeTiles;
+  return copy;
+}
+function customMapEntries() {
+  return Object.keys(MAPS).filter(function (id) { return !!MAPS[id].custom; }).map(function (id) {
+    return { id: id, config: serializableMapConfig(MAPS[id]) };
+  });
+}
+function persistCustomMaps() {
+  try { localStorage.setItem(CUSTOM_MAPS_KEY, JSON.stringify(customMapEntries())); } catch (e) {}
+}
+function registerCustomMap(id, config, runtimeImageSrc) {
+  if (!id || !config || !config.nome || !config.w || !config.h || !config.parts || !config.parts.length) return false;
+  var saved = serializableMapConfig(config);
+  saved.custom = true;
+  if (runtimeImageSrc && saved.parts[0]) saved.parts[0].localSrc = runtimeImageSrc;
+  if (config.detail && config.detail.runtimeTiles && saved.detail) {
+    saved.detail.runtimeTiles = config.detail.runtimeTiles;
+  }
+  MAPS[id] = saved;
+  return true;
+}
+function loadStoredCustomMaps() {
+  try {
+    var entries = JSON.parse(localStorage.getItem(CUSTOM_MAPS_KEY) || '[]');
+    if (!Array.isArray(entries)) return;
+    entries.forEach(function (entry) {
+      if (entry && entry.id && !MAPS[entry.id]) registerCustomMap(entry.id, entry.config);
+    });
+  } catch (e) {}
+}
+loadStoredCustomMaps();
 // Flanaess usa exclusivamente hexágonos pequenos de 6 milhas (48 px de referência).
 // Ignora preferências antigas de tamanho para impedir retorno à grade grande.
 var FLANAESS_GRID_MODE = 'hex-small-6mi';
@@ -83,7 +122,7 @@ function applyMap(id) {
 }
 function mapOptions() {
   return Object.keys(MAPS).map(function (id) {
-    return '<option value="' + id + '"' + (id === mapId ? ' selected' : '') + '>' + MAPS[id].icone + ' ' + MAPS[id].nome + '</option>';
+    return '<option value="' + esc(id) + '"' + (id === mapId ? ' selected' : '') + '>' + esc(MAPS[id].icone + ' ' + MAPS[id].nome) + '</option>';
   }).join('');
 }
 applyMap(mapId);
@@ -209,6 +248,26 @@ function load() {
   } catch (e) { return null; }
 }
 
+function loadRepositoryMapCatalog(done) {
+  if (typeof window.fetch !== 'function') { done(); return; }
+  fetch(MAP_CATALOG_FILE + '?v=' + Date.now(), { cache: 'no-store' })
+    .then(function (response) { if (!response.ok) return null; return response.json(); })
+    .then(function (payload) {
+      if (!payload || payload.format !== 'animalysson-rpg-map-catalog' || !Array.isArray(payload.maps)) return;
+      payload.maps.forEach(function (entry) {
+        if (!entry || !entry.id || !entry.config || MAPS[entry.id] && !MAPS[entry.id].custom) return;
+        var localInfo = MAPS[entry.id];
+        var runtimeSrc = localInfo && localInfo.parts && localInfo.parts[0] ? localInfo.parts[0].localSrc : null;
+        registerCustomMap(entry.id, entry.config, runtimeSrc);
+      });
+      persistCustomMaps();
+    })
+    .catch(function () {
+      // O catálogo ainda não foi publicado. Os mapas locais continuam disponíveis.
+    })
+    .then(function () { done(); });
+}
+
 function loadRepositoryMapState(done) {
   var requestedMapId = mapId;
   var file = MAPINFO && MAPINFO.stateFile;
@@ -236,12 +295,42 @@ function loadRepositoryMapState(done) {
     .then(function () { done(); });
 }
 
+function downloadBlob(blob, filename) {
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+}
+
+function exportMapCatalog() {
+  var entries = customMapEntries();
+  if (!entries.length) {
+    alert('Ainda não há mapas adicionados pelo botão +.');
+    return;
+  }
+  var payload = {
+    format: 'animalysson-rpg-map-catalog',
+    version: 1,
+    updatedAt: new Date().toISOString(),
+    maps: entries
+  };
+  downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' }), 'mapas.json');
+}
+
 function exportMapFile() {
-  // Exporta o estado atual em um JSON versionado, pronto para ser guardado
-  // na mesma pasta das imagens do mapa no repositório.
-  var mapFolder = mapId === 'flanaess' ? 'mapas/flanaess_mapa/' : 'mapas/tumba-dos-horrores/';
+  var mapFolder = MAPINFO.folder || (MAPINFO.stateFile ? MAPINFO.stateFile.substring(0, MAPINFO.stateFile.lastIndexOf('/') + 1) : 'mapas/');
   var assets = (MAPINFO.parts || []).map(function (part) { return part.src; });
-  if (MAPINFO.detail) assets.push(MAPINFO.detail.src);
+  if (MAPINFO.detail) {
+    for (var detailRow = 0; detailRow < MAPINFO.detail.n; detailRow++) {
+      for (var detailCol = 0; detailCol < MAPINFO.detail.n; detailCol++) {
+        assets.push(MAPINFO.detail.src.replace('{r}', detailRow).replace('{c}', detailCol));
+      }
+    }
+  }
   var exportedState = isHexMap()
     ? { v: 4, nome: MAPINFO.nome, gridMode: FLANAESS_GRID_MODE, tokens: state.tokens || [] }
     : JSON.parse(JSON.stringify(state));
@@ -255,17 +344,247 @@ function exportMapFile() {
     dimensions: { width: MAP_W, height: MAP_H, columns: COLS, rows: ROWS },
     imageFolder: mapFolder,
     images: assets,
+    mapConfig: serializableMapConfig(MAPINFO),
+    catalogFile: MAPINFO.custom ? MAP_CATALOG_FILE : null,
     state: exportedState
   };
-  var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = MAPINFO.nome + '.json';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' }), safeMapFileName(MAPINFO.nome) + '.json');
+}
+
+function canvasToWebp(canvas, quality) {
+  return new Promise(function (resolve, reject) {
+    if (!canvas.toBlob) { reject(new Error('Este navegador não oferece conversão WebP pelo canvas.')); return; }
+    canvas.toBlob(function (blob) {
+      if (!blob) { reject(new Error('Não foi possível gerar a imagem WebP.')); return; }
+      if (blob.type !== 'image/webp') { reject(new Error('O navegador não conseguiu exportar WebP. Use uma versão atualizada do Chrome, Edge ou Firefox.')); return; }
+      resolve(blob);
+    }, 'image/webp', quality);
+  });
+}
+
+function imageRegionToWebp(image, sx, sy, sw, sh, outW, outH, quality) {
+  var canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(outW));
+  canvas.height = Math.max(1, Math.round(outH));
+  var context = canvas.getContext('2d', { alpha: false });
+  if (!context) return Promise.reject(new Error('Não foi possível preparar o canvas de otimização.'));
+  context.imageSmoothingEnabled = true;
+  if ('imageSmoothingQuality' in context) context.imageSmoothingQuality = 'high';
+  context.drawImage(image, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+  return canvasToWebp(canvas, quality).then(function (blob) {
+    canvas.width = 1; canvas.height = 1;
+    return blob;
+  }, function (error) {
+    canvas.width = 1; canvas.height = 1;
+    throw error;
+  });
+}
+
+function crc32Bytes(bytes) {
+  var crc = 0xFFFFFFFF;
+  for (var i = 0; i < bytes.length; i++) {
+    crc ^= bytes[i];
+    for (var bit = 0; bit < 8; bit++) crc = (crc >>> 1) ^ ((crc & 1) ? 0xEDB88320 : 0);
+  }
+  return (crc ^ 0xFFFFFFFF) >>> 0;
+}
+
+// ZIP sem compressão adicional: os WebP já chegam comprimidos pelo encoder.
+function createImagesZip(entries) {
+  return Promise.all(entries.map(function (entry) {
+    return entry.blob.arrayBuffer().then(function (buffer) {
+      var bytes = new Uint8Array(buffer);
+      return { name: entry.name, nameBytes: new TextEncoder().encode(entry.name), bytes: bytes, crc: crc32Bytes(bytes) };
+    });
+  })).then(function (files) {
+    var localParts = [], centralParts = [], offset = 0, centralSize = 0;
+    var now = new Date();
+    var dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | Math.floor(now.getSeconds() / 2);
+    var dosDate = ((Math.max(1980, now.getFullYear()) - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+    files.forEach(function (file) {
+      var local = new Uint8Array(30 + file.nameBytes.length);
+      var lv = new DataView(local.buffer);
+      lv.setUint32(0, 0x04034B50, true); lv.setUint16(4, 20, true);
+      lv.setUint16(6, 0x0800, true); lv.setUint16(8, 0, true);
+      lv.setUint16(10, dosTime, true); lv.setUint16(12, dosDate, true);
+      lv.setUint32(14, file.crc, true); lv.setUint32(18, file.bytes.length, true);
+      lv.setUint32(22, file.bytes.length, true); lv.setUint16(26, file.nameBytes.length, true);
+      lv.setUint16(28, 0, true); local.set(file.nameBytes, 30);
+      localParts.push(local, file.bytes);
+
+      var central = new Uint8Array(46 + file.nameBytes.length);
+      var cv = new DataView(central.buffer);
+      cv.setUint32(0, 0x02014B50, true); cv.setUint16(4, 20, true); cv.setUint16(6, 20, true);
+      cv.setUint16(8, 0x0800, true); cv.setUint16(10, 0, true);
+      cv.setUint16(12, dosTime, true); cv.setUint16(14, dosDate, true);
+      cv.setUint32(16, file.crc, true); cv.setUint32(20, file.bytes.length, true);
+      cv.setUint32(24, file.bytes.length, true); cv.setUint16(28, file.nameBytes.length, true);
+      cv.setUint16(30, 0, true); cv.setUint16(32, 0, true); cv.setUint16(34, 0, true);
+      cv.setUint32(36, 0, true); cv.setUint32(38, 0, true); cv.setUint32(42, offset, true);
+      central.set(file.nameBytes, 46);
+      centralParts.push(central);
+      offset += local.length + file.bytes.length;
+      centralSize += central.length;
+    });
+    var end = new Uint8Array(22), ev = new DataView(end.buffer);
+    ev.setUint32(0, 0x06054B50, true); ev.setUint16(4, 0, true); ev.setUint16(6, 0, true);
+    ev.setUint16(8, files.length, true); ev.setUint16(10, files.length, true);
+    ev.setUint32(12, centralSize, true); ev.setUint32(16, offset, true); ev.setUint16(20, 0, true);
+    return new Blob(localParts.concat(centralParts, [end]), { type: 'application/zip' });
+  });
+}
+
+function optimizeMapImage(image, width, height) {
+  var maxEdge = Math.max(width, height);
+  var baseMaxEdge = 3000;
+  var baseScale = Math.min(1, baseMaxEdge / maxEdge);
+  var baseW = Math.max(1, Math.round(width * baseScale));
+  var baseH = Math.max(1, Math.round(height * baseScale));
+  var tasks = [{ name: 'imagem.webp', sx: 0, sy: 0, sw: width, sh: height, outW: baseW, outH: baseH, quality: 0.84 }];
+  var detailN = maxEdge > baseMaxEdge ? Math.ceil(maxEdge / 4096) : 0;
+  if (detailN) {
+    var tileW = width / detailN, tileH = height / detailN;
+    for (var r = 0; r < detailN; r++) {
+      for (var c = 0; c < detailN; c++) {
+        var sx = c * tileW, sy = r * tileH;
+        var sw = Math.min(tileW, width - sx), sh = Math.min(tileH, height - sy);
+        tasks.push({
+          name: 'detalhe/d_' + r + '_' + c + '.webp',
+          sx: sx, sy: sy, sw: sw, sh: sh,
+          outW: Math.ceil(sw), outH: Math.ceil(sh), quality: 0.86
+        });
+      }
+    }
+  }
+  var files = [], chain = Promise.resolve();
+  // Processa um canvas por vez para não manter vários mapas gigantes na memória.
+  tasks.forEach(function (task) {
+    chain = chain.then(function () {
+      return imageRegionToWebp(image, task.sx, task.sy, task.sw, task.sh, task.outW, task.outH, task.quality)
+        .then(function (blob) { files.push({ name: task.name, blob: blob }); });
+    });
+  });
+  return chain.then(function () {
+    return { baseBlob: files[0].blob, files: files, detailN: detailN };
+  });
+}
+
+function slugifyMapName(value) {
+  return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'novo-mapa';
+}
+function safeMapFileName(value) {
+  return String(value || '').replace(/[\\/:*?"<>|]/g, '-').replace(/[\r\n]+/g, ' ').trim() || 'mapa';
+}
+
+function createCustomMapFromFile(file) {
+  if (!file || !file.type || file.type.indexOf('image/') !== 0) {
+    alert('Selecione um arquivo de imagem válido.');
+    return;
+  }
+  var suggestedName = file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim() || 'Novo mapa';
+  var name = window.prompt('Nome do novo mapa:', suggestedName);
+  if (!name || !name.trim()) return;
+  name = name.trim();
+  var cellInput = window.prompt('Tamanho da célula da grade em pixels:', '36');
+  if (cellInput == null) return;
+  var cell = Number(cellInput);
+  if (!isFinite(cell) || cell < 8 || cell > 512) {
+    alert('Informe um tamanho de célula entre 8 e 512 pixels.');
+    return;
+  }
+
+  var imageUrl = URL.createObjectURL(file);
+  var image = new Image();
+  image.onload = function () {
+    (async function () {
+      var runtimeUrls = [];
+      try {
+        var width = image.naturalWidth || image.width;
+        var height = image.naturalHeight || image.height;
+        if (!width || !height) throw new Error('Não foi possível identificar as dimensões da imagem.');
+        if (width * height > 160000000) throw new Error('A imagem ultrapassa o limite de 160 megapixels para otimização segura no navegador. Reduza a imagem antes de importar.');
+        var optimized = await optimizeMapImage(image, width, height);
+        var zipBlob = await createImagesZip(optimized.files);
+        var id = slugifyMapName(name);
+        var suffix = 2;
+        while (MAPS[id]) { id = slugifyMapName(name) + '-' + suffix; suffix++; }
+        var cols = Math.ceil(width / cell), rows = Math.ceil(height / cell);
+        if (cols * rows > 500000) throw new Error('A grade ficaria grande demais. Escolha um tamanho de célula maior.');
+
+        var folder = 'mapas/' + id + '/';
+        var stateFileName = safeMapFileName(name) + '.json';
+        var baseUrl = URL.createObjectURL(optimized.baseBlob);
+        runtimeUrls.push(baseUrl);
+        var runtimeTiles = {};
+        optimized.files.forEach(function (entry) {
+          if (entry.name.indexOf('detalhe/') !== 0) return;
+          var tileMatch = entry.name.match(/d_(\d+)_(\d+)\.webp$/);
+          if (!tileMatch) return;
+          var tileUrl = URL.createObjectURL(entry.blob);
+          runtimeUrls.push(tileUrl);
+          runtimeTiles[tileMatch[1] + '_' + tileMatch[2]] = tileUrl;
+        });
+        var config = {
+          nome: name,
+          icone: '🗺️',
+          key: 'animalysson-vtt-custom-' + id,
+          custom: true,
+          folder: folder,
+          stateFile: folder + stateFileName,
+          cell: cell,
+          cols: cols,
+          rows: rows,
+          w: width,
+          h: height,
+          spawn: { x: Math.floor(cols / 2), y: Math.floor(rows / 2) },
+          fit: true,
+          maxZoom: 4,
+          parts: [{ src: folder + 'imagem.webp', x: 0, y: 0, w: width, h: height }]
+        };
+        config.parts[0].localSrc = baseUrl;
+        if (optimized.detailN) {
+          config.detail = {
+            src: folder + 'detalhe/d_{r}_{c}.webp',
+            n: optimized.detailN,
+            minZoom: 1.1,
+            runtimeTiles: runtimeTiles
+          };
+        }
+        if (!registerCustomMap(id, config, baseUrl)) throw new Error('Não foi possível adicionar este mapa.');
+        persistCustomMaps();
+
+        var zipName = safeMapFileName(name) + '-imagens-webp.zip';
+        downloadBlob(zipBlob, zipName);
+
+        var host = R;
+        stopWorldTravel(false);
+        save();
+        unmount();
+        applyMap(id);
+        try { localStorage.setItem(MAP_ID_KEY, id); } catch (e) {}
+        state = defaultState();
+        showGrid = true; showFog = true; dynLight = true; showWalls = true;
+        selected = null; pendingMonster = null; measurePts = null; drag = null;
+        save();
+        mount(host);
+        var detailMessage = optimized.detailN
+          ? 'O ZIP contém imagem.webp e ' + (optimized.detailN * optimized.detailN) + ' blocos WebP de detalhe, carregados conforme o zoom.'
+          : 'O ZIP contém imagem.webp otimizada em WebP.';
+        alert('Mapa adicionado e otimizado! ' + detailMessage + '\n\nExtraia o ZIP dentro de "' + folder + '". Depois baixe o catálogo mapas.json pelo menu e coloque-o em "mapas/mapas.json". Use Salvar mapa para baixar "' + stateFileName + '" na mesma pasta.');
+      } catch (error) {
+        runtimeUrls.forEach(function (url) { try { URL.revokeObjectURL(url); } catch (e) {} });
+        alert(error && error.message ? error.message : 'Não foi possível otimizar a imagem do mapa.');
+      } finally {
+        URL.revokeObjectURL(imageUrl);
+      }
+    })();
+  };
+  image.onerror = function () {
+    URL.revokeObjectURL(imageUrl);
+    alert('Não foi possível abrir essa imagem.');
+  };
+  image.src = imageUrl;
 }
 
 function save() {
@@ -398,7 +717,7 @@ function loadBackgrounds(cb) {
     var img = new Image();
     img.onload = function () { bgReady++; if (bgReady === PARTS.length && cb) cb(); draw(); };
     img.onerror = function () { bgReady++; draw(); };
-    img.src = p.src;
+    img.src = p.localSrc || p.src;
     bgImages[i] = img;
   });
 }
@@ -636,7 +955,8 @@ function drawDetail(W, H) {
       if (!t) {
         t = detailCache[k] = { img: new Image(), t: now };
         t.img.onload = function () { draw(); };
-        t.img.src = d.src.replace('{r}', r).replace('{c}', c);
+        var runtimeTile = d.runtimeTiles && d.runtimeTiles[k];
+        t.img.src = runtimeTile || d.src.replace('{r}', r).replace('{c}', c);
       }
       t.t = now;
       if (t.img.complete && t.img.naturalWidth) cx.drawImage(t.img, c * tw, r * th, tw + 0.5, th + 0.5);
@@ -1692,10 +2012,17 @@ function setMenu(open) {
 var mountRequestId = 0;
 function mount(el) {
   var requestId = ++mountRequestId;
-  if (el) el.innerHTML = '<div class="empty-state" style="padding:24px">Carregando dados salvos do mapa…</div>';
-  loadRepositoryMapState(function () {
+  if (el) el.innerHTML = '<div class="empty-state" style="padding:24px">Carregando mapas e dados salvos…</div>';
+  loadRepositoryMapCatalog(function () {
     if (requestId !== mountRequestId) return;
-    mountNow(el);
+    var desiredMap = preferredMapId;
+    try { desiredMap = localStorage.getItem(MAP_ID_KEY) || preferredMapId; } catch (e) {}
+    applyMap(MAPS[desiredMap] ? desiredMap : 'tumba');
+    state = migrateFlanaessState(load() || defaultState());
+    loadRepositoryMapState(function () {
+      if (requestId !== mountRequestId) return;
+      mountNow(el);
+    });
   });
 }
 
@@ -1707,10 +2034,13 @@ function mountNow(el) {
     '<div class="mp-main">' +
     '<canvas id="mp-cv"></canvas>' +
     '<button type="button" id="mp-burger" class="mp-burger" title="Menu" aria-label="Abrir menu" aria-expanded="false" aria-controls="mp-drawer"><span></span><span></span><span></span></button>' +
-    '<button type="button" id="mp-export" class="mp-export-float" title="Baixar o mapa em JSON com o nome do mapa">⬇ Salvar mapa</button>' +
     '<div id="mp-drawer" class="mp-drawer" aria-hidden="true">' +
     '<div class="mp-bar">' +
-    '<select id="mp-map" class="mp-title" title="Trocar de mapa">' + mapOptions() + '</select>' +
+    '<div class="mp-map-selector"><select id="mp-map" class="mp-title" title="Trocar de mapa">' + mapOptions() + '</select>' +
+    '<button type="button" id="mp-add-map" class="mp-map-add" title="Adicionar mapa" aria-label="Adicionar mapa">＋</button></div>' +
+    '<input type="file" id="mp-add-map-file" accept="image/*" style="display:none">' +
+    '<button type="button" id="mp-export" title="Baixar os dados deste mapa em JSON">⬇ Salvar mapa</button>' +
+    '<button type="button" id="mp-export-catalog" title="Baixar o catálogo para publicar os mapas adicionados">🗂 Baixar catálogo de mapas</button>' +
     '<label id="mp-hex-wrap" class="mp-luz" style="display:none">Hexágono <select id="mp-hex-size" disabled><option value="small" selected>Pequeno · 6 mi</option></select></label>' +
     '<label id="mp-speed-wrap" class="mp-luz" style="display:none">Velocidade <input id="mp-speed" type="number" min="0.1" step="0.1" placeholder="mi/dia" style="width:62px"></label>' +
     '<div class="mp-g" id="mp-tools">' +
@@ -1761,9 +2091,12 @@ function mountNow(el) {
       'border:1px solid rgba(255,255,255,.28);background:rgba(15,15,18,.82);cursor:pointer;display:flex;flex-direction:column;' +
       'justify-content:center;align-items:center;gap:5px;}' +
     '#mp-root .mp-burger:hover{background:rgba(40,40,46,.92);}' +
-    '#mp-root .mp-export-float{position:absolute;top:10px;right:10px;z-index:30;padding:10px 14px;border:1px solid rgba(255,255,255,.28);' +
-      'border-radius:10px;background:rgba(15,15,18,.88);color:#fff;font:inherit;font-weight:600;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.25);}' +
-    '#mp-root .mp-export-float:hover{background:rgba(40,40,46,.96);border-color:rgba(255,255,255,.5);}' +
+    '#mp-root .mp-map-selector{display:flex;align-items:stretch;gap:6px;width:100%;}' +
+    '#mp-root .mp-map-selector select{flex:1 1 auto;min-width:0;width:auto !important;}' +
+    '#mp-root .mp-map-selector .mp-map-add{flex:0 0 44px;width:44px !important;min-width:44px;height:42px;padding:0;font-size:24px;line-height:1;' +
+      'border:1px solid rgba(255,255,255,.25);border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;}' +
+    '#mp-root .mp-map-selector .mp-map-add:hover{background:rgba(255,255,255,.17);}' +
+    '#mp-root #mp-export,#mp-root #mp-export-catalog{width:100%;box-sizing:border-box;}' +
     '#mp-root .mp-burger span{display:block;width:22px;height:2px;border-radius:2px;background:#fff;transition:transform .2s,opacity .2s;}' +
     '#mp-root .mp-burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}' +
     '#mp-root .mp-burger.open span:nth-child(2){opacity:0;}' +
@@ -1795,6 +2128,14 @@ function mountNow(el) {
   $('#mp-export').onclick = function () {
     save();
     exportMapFile();
+  };
+  $('#mp-export-catalog').style.display = customMapEntries().length ? '' : 'none';
+  $('#mp-export-catalog').onclick = function () { exportMapCatalog(); };
+  $('#mp-add-map').onclick = function () { $('#mp-add-map-file').click(); };
+  $('#mp-add-map-file').onchange = function () {
+    var file = this.files && this.files[0];
+    this.value = '';
+    if (file) createCustomMapFromFile(file);
   };
   cv.addEventListener('pointerdown', onPointerDown);
   cv.addEventListener('pointermove', onPointerMove);
