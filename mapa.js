@@ -51,6 +51,7 @@ var MAPS = {
 var MAP_ID_KEY = 'animalysson-vtt-mapa-atual';
 var HEX_SIZE_KEY = 'animalysson-vtt-flanaess-hex-size';
 var CUSTOM_MAPS_KEY = 'animalysson-vtt-mapas-customizados-v1';
+var DELETED_CUSTOM_MAPS_KEY = 'animalysson-vtt-mapas-excluidos-v1';
 var MAP_CATALOG_FILE = 'mapas/mapas.json';
 var mapId = 'tumba', MAPINFO = null;
 var preferredMapId = 'tumba';
@@ -72,6 +73,24 @@ function customMapEntries() {
 function persistCustomMaps() {
   try { localStorage.setItem(CUSTOM_MAPS_KEY, JSON.stringify(customMapEntries())); } catch (e) {}
 }
+function deletedCustomMapIds() {
+  try {
+    var ids = JSON.parse(localStorage.getItem(DELETED_CUSTOM_MAPS_KEY) || '[]');
+    return Array.isArray(ids) ? ids : [];
+  } catch (e) { return []; }
+}
+function isCustomMapDeleted(id) {
+  return deletedCustomMapIds().indexOf(id) >= 0;
+}
+function rememberDeletedCustomMap(id) {
+  var ids = deletedCustomMapIds();
+  if (ids.indexOf(id) < 0) ids.push(id);
+  try { localStorage.setItem(DELETED_CUSTOM_MAPS_KEY, JSON.stringify(ids)); } catch (e) {}
+}
+function clearDeletedCustomMap(id) {
+  var ids = deletedCustomMapIds().filter(function (savedId) { return savedId !== id; });
+  try { localStorage.setItem(DELETED_CUSTOM_MAPS_KEY, JSON.stringify(ids)); } catch (e) {}
+}
 function registerCustomMap(id, config, runtimeImageSrc) {
   if (!id || !config || !config.nome || !config.w || !config.h || !config.parts || !config.parts.length) return false;
   var saved = serializableMapConfig(config);
@@ -88,7 +107,7 @@ function loadStoredCustomMaps() {
     var entries = JSON.parse(localStorage.getItem(CUSTOM_MAPS_KEY) || '[]');
     if (!Array.isArray(entries)) return;
     entries.forEach(function (entry) {
-      if (entry && entry.id && !MAPS[entry.id]) registerCustomMap(entry.id, entry.config);
+      if (entry && entry.id && !MAPS[entry.id] && !isCustomMapDeleted(entry.id)) registerCustomMap(entry.id, entry.config);
     });
   } catch (e) {}
 }
@@ -255,7 +274,7 @@ function loadRepositoryMapCatalog(done) {
     .then(function (payload) {
       if (!payload || payload.format !== 'animalysson-rpg-map-catalog' || !Array.isArray(payload.maps)) return;
       payload.maps.forEach(function (entry) {
-        if (!entry || !entry.id || !entry.config || MAPS[entry.id] && !MAPS[entry.id].custom) return;
+        if (!entry || !entry.id || !entry.config || isCustomMapDeleted(entry.id) || MAPS[entry.id] && !MAPS[entry.id].custom) return;
         var localInfo = MAPS[entry.id];
         var runtimeSrc = localInfo && localInfo.parts && localInfo.parts[0] ? localInfo.parts[0].localSrc : null;
         registerCustomMap(entry.id, entry.config, runtimeSrc);
@@ -306,9 +325,9 @@ function downloadBlob(blob, filename) {
   setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
 }
 
-function exportMapCatalog() {
+function exportMapCatalog(allowEmpty) {
   var entries = customMapEntries();
-  if (!entries.length) {
+  if (!entries.length && !allowEmpty) {
     alert('Ainda não há mapas adicionados pelo botão +.');
     return;
   }
@@ -349,6 +368,57 @@ function exportMapFile() {
     state: exportedState
   };
   downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' }), safeMapFileName(MAPINFO.nome) + '.json');
+}
+
+function revokeMapRuntimeUrls(info) {
+  if (!info) return;
+  (info.parts || []).forEach(function (part) {
+    if (part.localSrc && String(part.localSrc).indexOf('blob:') === 0) {
+      try { URL.revokeObjectURL(part.localSrc); } catch (e) {}
+    }
+  });
+  var tiles = info.detail && info.detail.runtimeTiles;
+  if (tiles) Object.keys(tiles).forEach(function (key) {
+    if (String(tiles[key]).indexOf('blob:') === 0) {
+      try { URL.revokeObjectURL(tiles[key]); } catch (e) {}
+    }
+  });
+}
+
+function deleteCurrentCustomMap() {
+  if (!MAPINFO || !MAPINFO.custom) {
+    alert('Os mapas originais do projeto não podem ser excluídos. Este botão remove somente mapas adicionados pelo botão +.');
+    return;
+  }
+
+  var deletedId = mapId;
+  var deletedInfo = MAPINFO;
+  var host = R;
+  var confirmed = window.confirm(
+    'Excluir o mapa "' + deletedInfo.nome + '"?\n\n' +
+    'Ele será removido do seletor e os dados salvos deste mapa serão apagados deste navegador.\n\n' +
+    'Um novo mapas.json será baixado para atualizar o catálogo no GitHub. Os arquivos já publicados na pasta mapas/' + deletedId + '/ não são apagados automaticamente; remova essa pasta do GitHub se também quiser excluir as imagens e o JSON.'
+  );
+  if (!confirmed) return;
+
+  save();
+  try { localStorage.removeItem(deletedInfo.key); } catch (e) {}
+  rememberDeletedCustomMap(deletedId);
+  revokeMapRuntimeUrls(deletedInfo);
+  delete MAPS[deletedId];
+  persistCustomMaps();
+
+  preferredMapId = 'tumba';
+  try { localStorage.setItem(MAP_ID_KEY, 'tumba'); } catch (e) {}
+  exportMapCatalog(true);
+
+  stopWorldTravel(false);
+  unmount();
+  applyMap('tumba');
+  state = migrateFlanaessState(load() || defaultState());
+  selected = null; pendingMonster = null; measurePts = null; drag = null;
+  mount(host);
+  alert('Mapa excluído do seletor neste navegador. O catálogo mapas.json atualizado foi baixado. Publique esse arquivo em mapas/mapas.json no GitHub e, se desejar apagar também as imagens e dados antigos, exclua a pasta mapas/' + deletedId + '/ do repositório.');
 }
 
 function canvasToWebp(canvas, quality) {
@@ -512,6 +582,7 @@ function createCustomMapFromFile(file) {
         var cols = Math.ceil(width / cell), rows = Math.ceil(height / cell);
         if (cols * rows > 500000) throw new Error('A grade ficaria grande demais. Escolha um tamanho de célula maior.');
 
+        clearDeletedCustomMap(id);
         var folder = 'mapas/' + id + '/';
         var stateFileName = safeMapFileName(name) + '.json';
         var baseUrl = URL.createObjectURL(optimized.baseBlob);
@@ -2078,6 +2149,7 @@ function mountNow(el) {
     '<small style="display:block;margin-top:10px;color:var(--mute)">' +
     (isHexMap() ? '<b>Parede</b> = hexágono bloqueado.<br><b>Flanaess</b> usa deslocamento e medição em hexágonos; muros e portas lineares ficam desativados.' : '<b>Parede</b> = quadrado inteiro.<br><b>Muro</b> = linha do grid (bloqueia luz 100%).<br><b>Porta</b> = linha; laranja=fechada, verde=aberta. Clique de novo ou use Selecionar na porta para abrir/fechar.') + '</small>' +
     '</aside>' +
+    '<div class="mp-menu-footer"><button type="button" id="mp-delete-map" class="mp-delete-map" title="Excluir somente mapas adicionados pelo botão +">🗑 Excluir mapa</button></div>' +
     '</div>' + // fim do menu lateral (drawer)
     '</div></div></div>';
 
@@ -2113,7 +2185,12 @@ function mountNow(el) {
     '#mp-root:not(.mp-world-map) .mp-drawer .mp-g{display:grid !important;grid-template-columns:1fr 1fr;gap:6px;}' +
     '#mp-root .mp-drawer .mp-g button{width:100%;box-sizing:border-box;}' +
     '#mp-root .mp-drawer .mp-side{position:static !important;width:auto !important;height:auto !important;max-height:none !important;' +
-      'overflow:visible !important;margin:14px 0 0 !important;padding:12px 0 0 !important;border:0 !important;border-top:1px solid rgba(255,255,255,.14) !important;}';
+      'overflow:visible !important;margin:14px 0 0 !important;padding:12px 0 0 !important;border:0 !important;border-top:1px solid rgba(255,255,255,.14) !important;}' +
+    '#mp-root .mp-menu-footer{margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,.14);}' +
+    '#mp-root .mp-delete-map{display:block;width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid rgba(220,70,70,.65);border-radius:8px;' +
+      'background:rgba(150,35,35,.2);color:#ffb6b6;font-weight:600;cursor:pointer;}' +
+    '#mp-root .mp-delete-map:hover:not(:disabled){background:rgba(180,45,45,.38);}' +
+    '#mp-root .mp-delete-map:disabled{opacity:.42;cursor:not-allowed;}';
   R.querySelector('#mp-root').appendChild(menuStyle);
 
   cv = $('#mp-cv');
@@ -2131,6 +2208,12 @@ function mountNow(el) {
   };
   $('#mp-export-catalog').style.display = customMapEntries().length ? '' : 'none';
   $('#mp-export-catalog').onclick = function () { exportMapCatalog(); };
+  var deleteMapButton = $('#mp-delete-map');
+  deleteMapButton.disabled = !MAPINFO.custom;
+  deleteMapButton.title = MAPINFO.custom
+    ? 'Excluir este mapa personalizado do seletor'
+    : 'Os mapas originais do projeto não podem ser excluídos';
+  deleteMapButton.onclick = function () { deleteCurrentCustomMap(); };
   $('#mp-add-map').onclick = function () { $('#mp-add-map-file').click(); };
   $('#mp-add-map-file').onchange = function () {
     var file = this.files && this.files[0];
