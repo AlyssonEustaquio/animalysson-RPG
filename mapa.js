@@ -178,7 +178,9 @@ var keyMoveStep = null;      // passo em andamento: { from, to, dur, t0 }
 var keyMoveVis = null;       // posição visual (px do mapa) do personagem enquanto desliza
 var keyMoveCarry = null;     // instante em que o passo anterior terminou (sem engasgo entre quadrados)
 var keyMoveLastSave = 0;
-var WORLD_TRAVEL_STEP_MS = 2000; // tempo para atravessar 1 hexágono (velocidade constante, sem pulos)
+var clickMovePath = [];      // caminho calculado ao clicar em um tile iluminado
+var HEX_KEY_STEP_MS = 260;   // duração de cada passo nas setas do mapa-múndi
+var WORLD_TRAVEL_STEP_MS = 2000; // tempo para atravessar 1 hexágono ao clicar no mapa-múndi
 
 var state = load() || defaultState();
 // Migra tokens salvos na antiga grade quadrada sem perder as áreas de névoa já reveladas.
@@ -1157,6 +1159,7 @@ function worldTravelFrame(now) {
 function startWorldTravel(destination) {
   var player = currentPlayer();
   if (!isHexMap() || !player || !destination) return;
+  stopKeyMove();
   // Se já está andando, o novo caminho parte do hexágono para onde ele está indo agora.
   var origin = worldTravelStep ? worldTravelStep.to : { x: player.x, y: player.y };
   if (destination.x === origin.x && destination.y === origin.y) {
@@ -2087,7 +2090,16 @@ function onPointerDown(e) {
       }
     }
     selected = hit;
-    if (hit) drag = { moveToken: hit, fromX: hit.x, fromY: hit.y };
+    if (hit) {
+      drag = { moveToken: hit, fromX: hit.x, fromY: hit.y };
+    } else {
+      // Em mapas de aventura, clicar em um espaço vazio iluminado traça uma rota
+      // até ele. Áreas fora da luz atual não aceitam destino de movimento.
+      var movingPlayer = currentPlayer();
+      if (movingPlayer && isCurrentlyVisible(cell.x, cell.y, movingPlayer.x, movingPlayer.y, movingPlayer.luz || lightRadius)) {
+        startClickMove(cell);
+      }
+    }
     draw();
     return;
   }
@@ -2202,7 +2214,77 @@ function onWheel(e) {
   draw();
 }
 
-// ---------- Movimento do personagem com as setas (mapas de quadrados, ex.: Tumba) ----------
+// ---------- Movimento por clique em tiles visíveis (mapas de quadrados) ----------
+function findVisiblePath(start, goal, token) {
+  if (!start || !goal || isHexMap()) return null;
+  if (goal.x < 0 || goal.y < 0 || goal.x >= COLS || goal.y >= ROWS) return null;
+  var radius = (token && token.luz) || lightRadius;
+  if (!isCurrentlyVisible(goal.x, goal.y, start.x, start.y, radius)) return null;
+  if (start.x === goal.x && start.y === goal.y) return [start];
+
+  var dirs = [
+    [1, 0], [-1, 0], [0, 1], [0, -1],
+    [1, 1], [1, -1], [-1, 1], [-1, -1]
+  ];
+  function key(x, y) { return x + ',' + y; }
+  function heuristic(x, y) {
+    var dx = Math.abs(goal.x - x), dy = Math.abs(goal.y - y);
+    return Math.max(dx, dy) + (Math.SQRT2 - 1) * Math.min(dx, dy);
+  }
+
+  var open = [], cameFrom = {}, gScore = {}, closed = {};
+  var startKey = key(start.x, start.y), goalKey = key(goal.x, goal.y);
+  gScore[startKey] = 0;
+  heapPush(open, { x: start.x, y: start.y, g: 0, f: heuristic(start.x, start.y) });
+  var visited = 0, maxVisited = Math.min(COLS * ROWS, 12000);
+
+  while (open.length && visited < maxVisited) {
+    var current = heapPop(open);
+    var currentKey = key(current.x, current.y);
+    if (closed[currentKey]) continue;
+    if (currentKey === goalKey) {
+      var path = [{ x: goal.x, y: goal.y }];
+      var cursor = goalKey;
+      while (cursor !== startKey) {
+        cursor = cameFrom[cursor];
+        if (!cursor) return null;
+        var parts = cursor.split(',');
+        path.push({ x: Number(parts[0]), y: Number(parts[1]) });
+      }
+      path.reverse();
+      return path;
+    }
+    closed[currentKey] = true;
+    visited++;
+
+    for (var i = 0; i < dirs.length; i++) {
+      var nx = current.x + dirs[i][0], ny = current.y + dirs[i][1];
+      var nextKey = key(nx, ny);
+      if (closed[nextKey]) continue;
+      if (!isCurrentlyVisible(nx, ny, start.x, start.y, radius)) continue;
+      if (!canStep(current.x, current.y, nx, ny, token)) continue;
+      var tentative = current.g + (dirs[i][0] && dirs[i][1] ? Math.SQRT2 : 1);
+      if (gScore[nextKey] != null && tentative >= gScore[nextKey]) continue;
+      cameFrom[nextKey] = currentKey;
+      gScore[nextKey] = tentative;
+      heapPush(open, { x: nx, y: ny, g: tentative, f: tentative + heuristic(nx, ny) });
+    }
+  }
+  return null;
+}
+
+function startClickMove(destination) {
+  var player = currentPlayer();
+  if (!player || isHexMap() || !destination) return false;
+  var path = findVisiblePath({ x: player.x, y: player.y }, destination, player);
+  if (!path || path.length < 2) return false;
+  stopKeyMove();
+  clickMovePath = path.slice(1);
+  if (keyMoveRaf == null) keyMoveRaf = window.requestAnimationFrame(keyMoveFrame);
+  return true;
+}
+
+// ---------- Movimento do personagem com setas ----------
 function tokenAnchor(t, x, y) {
   var sq = t.raio || 1;
   return cellCenter(x + (sq - 1) / 2, y + (sq - 1) / 2);
@@ -2223,6 +2305,17 @@ function pickKeyStep(pl, dir) {
     if (canStep(pl.x, pl.y, cands[i].x, cands[i].y, pl)) return cands[i];
   }
   return null;
+}
+
+// As setas escolhem quatro direções estáveis na grade pointy-top:
+// esquerda/direita são horizontais; cima/baixo seguem o mesmo eixo diagonal.
+function pickHexKeyStep(pl) {
+  var next = null, odd = pl.y & 1;
+  if (keysHeld.ArrowLeft) next = { x: pl.x - 1, y: pl.y };
+  else if (keysHeld.ArrowRight) next = { x: pl.x + 1, y: pl.y };
+  else if (keysHeld.ArrowUp) next = { x: pl.x + (odd ? 1 : 0), y: pl.y - 1 };
+  else if (keysHeld.ArrowDown) next = { x: pl.x + (odd ? 0 : -1), y: pl.y + 1 };
+  return next && canStep(pl.x, pl.y, next.x, next.y, pl) ? next : null;
 }
 
 function keyMoveWouldExitMap(pl, dir) {
@@ -2254,9 +2347,10 @@ function returnToWorldMapFromExit() {
 
 // A câmera acompanha o personagem suavemente quando ele se aproxima das bordas da tela.
 function followKeyMove() {
-  if (!keyMoveVis || !cv) return;
+  var visual = isHexMap() ? worldTravelPos : keyMoveVis;
+  if (!visual || !cv) return;
   var W = cv.clientWidth, H = cv.clientHeight;
-  var sx = keyMoveVis.x * zoom + ox, sy = keyMoveVis.y * zoom + oy;
+  var sx = visual.x * zoom + ox, sy = visual.y * zoom + oy;
   var mx = W * 0.3, my = H * 0.3;
   var tx = sx < mx ? mx - sx : (sx > W - mx ? (W - mx) - sx : 0);
   var ty = sy < my ? my - sy : (sy > H - my ? (H - my) - sy : 0);
@@ -2266,34 +2360,56 @@ function followKeyMove() {
 
 function stopKeyMove() {
   if (keyMoveRaf != null) { window.cancelAnimationFrame(keyMoveRaf); keyMoveRaf = null; }
-  keyMoveStep = null; keyMoveVis = null; keyMoveCarry = null; keysHeld = {};
+  keyMoveStep = null; keyMoveVis = null; keyMoveCarry = null; clickMovePath = []; keysHeld = {};
+  worldTravelPos = null;
 }
 
 function keyMoveFrame(now) {
   keyMoveRaf = null;
   var pl = currentPlayer();
-  if (!pl || isHexMap() || !cv) { stopKeyMove(); return; }
+  var hexMode = isHexMap();
+  if (!pl || !cv) { stopKeyMove(); return; }
 
   while (true) {
     if (!keyMoveStep) {
       var dir = heldDirection();
-      var next = dir ? pickKeyStep(pl, dir) : null;
+      var next = hexMode
+        ? pickHexKeyStep(pl)
+        : (dir ? pickKeyStep(pl, dir) : (clickMovePath.length ? clickMovePath.shift() : null));
       if (!next) {
-        if (keyMoveWouldExitMap(pl, dir) && returnToWorldMapFromExit()) return;
+        if (!hexMode && keyMoveWouldExitMap(pl, dir) && returnToWorldMapFromExit()) return;
+        break;
+      }
+      if (!canStep(pl.x, pl.y, next.x, next.y, pl)) {
+        if (!hexMode) clickMovePath = [];
         break;
       }
       var from = tokenAnchor(pl, pl.x, pl.y), to = tokenAnchor(pl, next.x, next.y);
       var cells = Math.sqrt(Math.pow(next.x - pl.x, 2) + Math.pow(next.y - pl.y, 2));
-      keyMoveStep = { from: from, to: to, dur: KEY_STEP_MS * cells, t0: keyMoveCarry != null ? keyMoveCarry : now };
+      keyMoveStep = { from: from, to: to, dur: (hexMode ? HEX_KEY_STEP_MS : KEY_STEP_MS) * cells, t0: keyMoveCarry != null ? keyMoveCarry : now };
       keyMoveCarry = null;
-      // A posição lógica (luz, névoa, colisão) avança na hora; só o desenho desliza até lá.
-      pl.x = next.x; pl.y = next.y;
-      if (dynLight) revealAround(pl.x, pl.y, pl.luz || lightRadius);
+      // A posição lógica avança no início do passo; a posição visual desliza até o centro.
+      pl.x = next.x; pl.y = next.y; selected = pl;
+      if (dynLight && !hexMode) revealAround(pl.x, pl.y, pl.luz || lightRadius);
     }
     var st = keyMoveStep;
     var p = (now - st.t0) / st.dur;
-    if (p >= 1) { keyMoveCarry = st.t0 + st.dur; keyMoveStep = null; continue; }
+    if (p >= 1) {
+      keyMoveCarry = st.t0 + st.dur;
+      keyMoveStep = null;
+      if (hexMode) {
+        worldTravelPos = null;
+        var reachedPortal = findWorldPortalAt(pl.x, pl.y);
+        if (reachedPortal) {
+          stopKeyMove();
+          teleportThroughWorldPortal(reachedPortal);
+          return;
+        }
+      }
+      continue;
+    }
     keyMoveVis = { x: st.from.x + (st.to.x - st.from.x) * p, y: st.from.y + (st.to.y - st.from.y) * p };
+    if (hexMode) worldTravelPos = keyMoveVis;
     followKeyMove();
     if (now - keyMoveLastSave > 1000) { save(); keyMoveLastSave = now; }
     draw();
@@ -2302,25 +2418,34 @@ function keyMoveFrame(now) {
   }
 
   keyMoveVis = null; keyMoveCarry = null;
+  if (hexMode) worldTravelPos = null;
   save();
   draw();
 }
 
 function onKey(e) {
   if (e.key === 'Escape' && menuIsOpen()) { setMenu(false); return; }
+  if (e.target && /INPUT|SELECT|TEXTAREA/.test(e.target.tagName || '')) return;
+  if (MOVE_KEYS[e.code] && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    if (isHexMap()) {
+      e.preventDefault();
+      // No mapa-múndi, as setas só movem o personagem quando as ferramentas estão desativadas.
+      if (tool !== 'select' || drag || !currentPlayer()) return;
+      if (keyMoveRaf == null) stopWorldTravel(false);
+    } else {
+      e.preventDefault();
+      if (drag || !currentPlayer()) return;
+      clickMovePath = [];
+    }
+    keysHeld[e.code] = true;
+    if (keyMoveRaf == null) keyMoveRaf = window.requestAnimationFrame(keyMoveFrame);
+    return;
+  }
   if (isHexMap()) {
     if (e.key === 'Escape') {
       if (tool === 'portal' || tool === 'spawn') setTool('select');
       else haltWorldTravel();
     }
-    return;
-  }
-  if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
-  if (MOVE_KEYS[e.code] && !e.ctrlKey && !e.metaKey && !e.altKey) {
-    e.preventDefault();
-    if (drag || !currentPlayer()) return;
-    keysHeld[e.code] = true;
-    if (keyMoveRaf == null) keyMoveRaf = window.requestAnimationFrame(keyMoveFrame);
     return;
   }
   if (e.code === 'Space') { space = true; e.preventDefault(); return; }
@@ -2408,7 +2533,7 @@ function mountNow(el) {
     '<button type="button" id="mp-export-catalog" title="Baixar o catálogo para publicar os mapas adicionados">🗂 Baixar catálogo de mapas</button>' +
     '<label id="mp-hex-wrap" class="mp-luz" style="display:none">Hexágono <select id="mp-hex-size" disabled><option value="small" selected>Pequeno · 6 mi</option></select></label>' +
     '<label id="mp-speed-wrap" class="mp-luz" style="display:none">Velocidade <input id="mp-speed" type="number" min="0.1" step="0.1" placeholder="mi/dia" style="width:62px"></label>' +
-    '<button type="button" id="mp-world-move" class="mp-world-action active" title="Desativa os modos de início e teleporte; clique no mapa para mover o personagem">🧭 Desativar ferramentas</button>' +
+    '<button type="button" id="mp-world-move" class="mp-world-action active" title="Desativa os modos de início e teleporte; use as setas ou clique para mover o personagem">🧭 Desativar ferramentas</button>' +
     '<button type="button" id="mp-world-spawn" class="mp-world-action" title="Definir o ponto de início deste mapa">📍 Definir início</button>' +
     '<button type="button" id="mp-world-portal" class="mp-world-action" title="Adicionar um teleporte para outro mapa">🌀 Adicionar teleporte</button>' +
     '<div class="mp-g" id="mp-tools">' +
