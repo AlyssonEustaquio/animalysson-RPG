@@ -177,6 +177,7 @@ var keyMoveRaf = null;       // requestAnimationFrame do movimento por teclado
 var keyMoveStep = null;      // passo em andamento: { from, to, dur, t0 }
 var keyMoveVis = null;       // posição visual (px do mapa) do personagem enquanto desliza
 var keyMoveCarry = null;     // instante em que o passo anterior terminou (sem engasgo entre quadrados)
+var clickMoveExitPending = false; // sai para o mapa-múndi somente depois de alcançar a borda
 var keyMoveLastSave = 0;
 var clickMovePath = [];      // caminho calculado ao clicar em um tile iluminado
 var WORLD_TRAVEL_STEP_MS = 2000; // tempo para atravessar 1 hexágono ao clicar no mapa-múndi
@@ -2008,12 +2009,12 @@ function onPointerDown(e) {
     return;
   }
 
-  // Nos mapas de aventura, clicar na área externa à imagem equivale a sair
-  // pela borda com as setas: volta ao mapa-múndi usando a posição de retorno salva.
+  // Clicar fora da imagem manda o personagem caminhar até a borda mais próxima
+  // na direção do clique. A troca para o mapa-múndi ocorre só depois do último passo.
   // O pan continua disponível porque é tratado antes desta condição.
   if (!isHexMap() && tool === 'select' && !pendingMonster && currentPlayer() &&
       (world.x < 0 || world.y < 0 || world.x >= MAP_W || world.y >= MAP_H)) {
-    returnToWorldMapFromExit();
+    startClickExit(world);
     return;
   }
 
@@ -2224,11 +2225,11 @@ function onWheel(e) {
 }
 
 // ---------- Movimento por clique em tiles visíveis (mapas de quadrados) ----------
-function findVisiblePath(start, goal, token) {
+function findVisiblePath(start, goal, token, allowUnseenForExit) {
   if (!start || !goal || isHexMap()) return null;
   if (goal.x < 0 || goal.y < 0 || goal.x >= COLS || goal.y >= ROWS) return null;
   var radius = (token && token.luz) || lightRadius;
-  if (!isCurrentlyVisible(goal.x, goal.y, start.x, start.y, radius)) return null;
+  if (!allowUnseenForExit && !isCurrentlyVisible(goal.x, goal.y, start.x, start.y, radius)) return null;
   if (start.x === goal.x && start.y === goal.y) return [start];
 
   var dirs = [
@@ -2270,7 +2271,7 @@ function findVisiblePath(start, goal, token) {
       var nx = current.x + dirs[i][0], ny = current.y + dirs[i][1];
       var nextKey = key(nx, ny);
       if (closed[nextKey]) continue;
-      if (!isCurrentlyVisible(nx, ny, start.x, start.y, radius)) continue;
+      if (!allowUnseenForExit && !isCurrentlyVisible(nx, ny, start.x, start.y, radius)) continue;
       if (!canStep(current.x, current.y, nx, ny, token)) continue;
       var tentative = current.g + (dirs[i][0] && dirs[i][1] ? Math.SQRT2 : 1);
       if (gScore[nextKey] != null && tentative >= gScore[nextKey]) continue;
@@ -2282,15 +2283,65 @@ function findVisiblePath(start, goal, token) {
   return null;
 }
 
-function startClickMove(destination) {
+function startClickMove(destination, exitAfterArrival) {
   var player = currentPlayer();
   if (!player || isHexMap() || !destination) return false;
-  var path = findVisiblePath({ x: player.x, y: player.y }, destination, player);
-  if (!path || path.length < 2) return false;
+  var path = findVisiblePath({ x: player.x, y: player.y }, destination, player, !!exitAfterArrival);
+  if (!path) return false;
   stopKeyMove();
+  if (path.length < 2) {
+    if (exitAfterArrival) return returnToWorldMapFromExit();
+    return false;
+  }
   clickMovePath = path.slice(1);
+  clickMoveExitPending = !!exitAfterArrival;
   if (keyMoveRaf == null) keyMoveRaf = window.requestAnimationFrame(keyMoveFrame);
   return true;
+}
+
+// Encontra onde a trajetória do clique externo cruza o limite do mapa,
+// considerando também o tamanho (raio) do token do jogador.
+function mapExitBorderCell(outsideWorldPoint, player) {
+  var sq = Math.max(1, player && player.raio || 1);
+  var maxX = Math.max(0, COLS - sq), maxY = Math.max(0, ROWS - sq);
+  var sx = player.x, sy = player.y;
+  var tx = outsideWorldPoint.x / CELL - 0.5 - (sq - 1) / 2;
+  var ty = outsideWorldPoint.y / CELL - 0.5 - (sq - 1) / 2;
+  var dx = tx - sx, dy = ty - sy;
+  var hitT = Infinity, hitSide = '';
+  var epsilon = 1e-9;
+  if (dx < -epsilon) {
+    var leftT = (0 - sx) / dx;
+    if (leftT >= 0 && leftT < hitT) { hitT = leftT; hitSide = 'left'; }
+  } else if (dx > epsilon) {
+    var rightT = (maxX - sx) / dx;
+    if (rightT >= 0 && rightT < hitT) { hitT = rightT; hitSide = 'right'; }
+  }
+  if (dy < -epsilon) {
+    var topT = (0 - sy) / dy;
+    if (topT >= 0 && topT < hitT) { hitT = topT; hitSide = 'top'; }
+  } else if (dy > epsilon) {
+    var bottomT = (maxY - sy) / dy;
+    if (bottomT >= 0 && bottomT < hitT) { hitT = bottomT; hitSide = 'bottom'; }
+  }
+  if (!isFinite(hitT)) return null;
+  var x = Math.max(0, Math.min(maxX, Math.round(sx + dx * hitT)));
+  var y = Math.max(0, Math.min(maxY, Math.round(sy + dy * hitT)));
+  if (hitSide === 'left') x = 0;
+  else if (hitSide === 'right') x = maxX;
+  else if (hitSide === 'top') y = 0;
+  else if (hitSide === 'bottom') y = maxY;
+  return { x: x, y: y };
+}
+
+function startClickExit(outsideWorldPoint) {
+  var player = currentPlayer();
+  if (!player || !outsideWorldPoint || isHexMap()) return false;
+  var borderCell = mapExitBorderCell(outsideWorldPoint, player);
+  if (!borderCell) return false;
+  // A rota de saída respeita paredes/portas e colisões, mas o comando explícito
+  // de sair pode atravessar trechos ainda escuros até alcançar a borda escolhida.
+  return startClickMove(borderCell, true);
 }
 
 // ---------- Movimento do personagem com setas ----------
@@ -2370,6 +2421,7 @@ function followKeyMove() {
 function stopKeyMove() {
   if (keyMoveRaf != null) { window.cancelAnimationFrame(keyMoveRaf); keyMoveRaf = null; }
   keyMoveStep = null; keyMoveVis = null; keyMoveCarry = null; clickMovePath = []; keysHeld = {};
+  clickMoveExitPending = false;
   worldTravelPos = null;
 }
 
@@ -2386,11 +2438,15 @@ function keyMoveFrame(now) {
         ? pickHexKeyStep(pl)
         : (dir ? pickKeyStep(pl, dir) : (clickMovePath.length ? clickMovePath.shift() : null));
       if (!next) {
+        if (!hexMode && clickMoveExitPending && clickMovePath.length === 0) {
+          clickMoveExitPending = false;
+          if (returnToWorldMapFromExit()) return;
+        }
         if (!hexMode && keyMoveWouldExitMap(pl, dir) && returnToWorldMapFromExit()) return;
         break;
       }
       if (!canStep(pl.x, pl.y, next.x, next.y, pl)) {
-        if (!hexMode) clickMovePath = [];
+        if (!hexMode) { clickMovePath = []; clickMoveExitPending = false; }
         break;
       }
       var from = tokenAnchor(pl, pl.x, pl.y), to = tokenAnchor(pl, next.x, next.y);
@@ -2445,6 +2501,7 @@ function onKey(e) {
       e.preventDefault();
       if (drag || !currentPlayer()) return;
       clickMovePath = [];
+      clickMoveExitPending = false;
     }
     keysHeld[e.code] = true;
     if (keyMoveRaf == null) keyMoveRaf = window.requestAnimationFrame(keyMoveFrame);
