@@ -224,6 +224,8 @@ function defaultState() {
     v: 4,
     nome: MAPINFO.nome,
     gridMode: isHexMap() ? FLANAESS_GRID_MODE : 'square',
+    spawn: { x: MAPINFO.spawn.x, y: MAPINFO.spawn.y },
+    portals: isHexMap() ? [] : undefined,
     tokens: [
       { id: 'p1', nome: 'Aventureiro', tipo: 'player', x: isHexMap() ? worldToCell(MAP_W / 2, MAP_H / 2).x : MAPINFO.spawn.x, y: isHexMap() ? worldToCell(MAP_W / 2, MAP_H / 2).y : MAPINFO.spawn.y, cor: '#4fc3f7', raio: 1, luz: 6, hp: null, hpMax: null }
     ],
@@ -247,8 +249,28 @@ function makeArr(n, val) {
 
 function normalizeMapState(s) {
   if (!s || !Array.isArray(s.tokens)) return null;
+  var fallbackSpawn = MAPINFO.spawn || { x: Math.floor(COLS / 2), y: Math.floor(ROWS / 2) };
+  if (!s.spawn || !isFinite(Number(s.spawn.x)) || !isFinite(Number(s.spawn.y))) {
+    s.spawn = { x: fallbackSpawn.x, y: fallbackSpawn.y };
+  }
+  s.spawn = {
+    x: Math.max(0, Math.min(COLS - 1, Math.round(Number(s.spawn.x)))),
+    y: Math.max(0, Math.min(ROWS - 1, Math.round(Number(s.spawn.y))))
+  };
+  MAPINFO.spawn = { x: s.spawn.x, y: s.spawn.y };
   if (isHexMap()) {
     if (!s.gridMode && s.fog && s.fog.length === MAPS.flanaess.cols * MAPS.flanaess.rows) s._legacySquareTokens = true;
+    if (!Array.isArray(s.portals)) s.portals = [];
+    s.portals = s.portals.filter(function (portal) {
+      return portal && isFinite(Number(portal.x)) && isFinite(Number(portal.y)) && portal.destMapId;
+    }).map(function (portal) {
+      return {
+        id: portal.id || ('portal-' + String(portal.x) + '-' + String(portal.y)),
+        x: Math.max(0, Math.min(COLS - 1, Math.round(Number(portal.x)))),
+        y: Math.max(0, Math.min(ROWS - 1, Math.round(Number(portal.y)))),
+        destMapId: String(portal.destMapId)
+      };
+    });
     s.fog = []; s.walls = []; s.hEdges = []; s.vEdges = [];
     return s;
   }
@@ -351,7 +373,7 @@ function exportMapFile() {
     }
   }
   var exportedState = isHexMap()
-    ? { v: 4, nome: MAPINFO.nome, gridMode: FLANAESS_GRID_MODE, tokens: state.tokens || [] }
+    ? { v: 4, nome: MAPINFO.nome, gridMode: FLANAESS_GRID_MODE, spawn: state.spawn || MAPINFO.spawn, portals: state.portals || [], tokens: state.tokens || [] }
     : JSON.parse(JSON.stringify(state));
   if (exportedState && Object.prototype.hasOwnProperty.call(exportedState, '_savedAt')) delete exportedState._savedAt;
   var payload = {
@@ -665,6 +687,8 @@ function save() {
       state.gridMode = FLANAESS_GRID_MODE;
       localStorage.setItem(KEY, JSON.stringify({
         v: 4, nome: MAPINFO.nome, gridMode: state.gridMode,
+        spawn: state.spawn || MAPINFO.spawn,
+        portals: state.portals || [],
         tokens: state.tokens || [], _savedAt: state._savedAt
       }));
     } else {
@@ -1100,6 +1124,13 @@ function worldTravelFrame(now) {
       player.x = st.to.x; player.y = st.to.y;
       selected = player;
       save();
+      var reachedPortal = findWorldPortalAt(player.x, player.y);
+      if (reachedPortal) {
+        worldTravelPath = []; worldTravelTarget = null;
+        worldTravelStep = null; worldTravelPos = null; worldTravelCarry = null;
+        teleportThroughWorldPortal(reachedPortal);
+        return;
+      }
       worldTravelCarry = st.t0 + WORLD_TRAVEL_STEP_MS;
       worldTravelStep = null;
       continue;
@@ -1126,6 +1157,8 @@ function startWorldTravel(destination) {
   // Se já está andando, o novo caminho parte do hexágono para onde ele está indo agora.
   var origin = worldTravelStep ? worldTravelStep.to : { x: player.x, y: player.y };
   if (destination.x === origin.x && destination.y === origin.y) {
+    var standingPortal = findWorldPortalAt(destination.x, destination.y);
+    if (standingPortal) { teleportThroughWorldPortal(standingPortal); return; }
     worldTravelPath = [];
     worldTravelTarget = null;
     draw();
@@ -1135,6 +1168,38 @@ function startWorldTravel(destination) {
   worldTravelTarget = { x: destination.x, y: destination.y };
   if (worldTravelRaf == null) worldTravelRaf = window.requestAnimationFrame(worldTravelFrame);
   draw();
+}
+
+function drawWorldPortals() {
+  if (!isHexMap() || !Array.isArray(state.portals)) return;
+  state.portals.forEach(function (portal) {
+    var center = cellCenter(portal.x, portal.y);
+    var destination = MAPS[portal.destMapId];
+    var label = destination ? destination.nome : 'Mapa indisponível';
+    cx.save();
+    cx.shadowColor = 'rgba(0, 220, 255, 0.9)';
+    cx.shadowBlur = 14 / zoom;
+    cx.strokeStyle = '#55e6ff';
+    cx.fillStyle = 'rgba(12, 45, 65, 0.72)';
+    cx.lineWidth = 3 / zoom;
+    cx.beginPath(); cx.arc(center.x, center.y, CELL * 0.34, 0, Math.PI * 2); cx.fill(); cx.stroke();
+    cx.shadowBlur = 0;
+    cx.strokeStyle = 'rgba(185, 250, 255, 0.95)';
+    cx.lineWidth = 1.5 / zoom;
+    cx.beginPath(); cx.ellipse(center.x, center.y, CELL * 0.20, CELL * 0.29, Math.PI / 4, 0, Math.PI * 2); cx.stroke();
+    cx.fillStyle = '#d9fbff';
+    cx.font = 'bold ' + (CELL * 0.34) + 'px sans-serif';
+    cx.textAlign = 'center'; cx.textBaseline = 'middle';
+    cx.fillText('↗', center.x, center.y + 1 / zoom);
+    cx.font = 'bold ' + (12 / zoom) + 'px sans-serif';
+    var textWidth = cx.measureText(label).width;
+    var labelY = center.y - CELL * 0.48;
+    cx.fillStyle = 'rgba(0,0,0,0.8)';
+    cx.fillRect(center.x - textWidth / 2 - 5 / zoom, labelY - 11 / zoom, textWidth + 10 / zoom, 16 / zoom);
+    cx.fillStyle = '#d9fbff';
+    cx.fillText(label, center.x, labelY - 3 / zoom);
+    cx.restore();
+  });
 }
 
 function drawWorldTravelPath() {
@@ -1233,7 +1298,10 @@ function draw() {
   });
 
   if (!isHexMap()) drawToolPreview();
-  else drawWorldTravelPath();
+  else {
+    drawWorldTravelPath();
+    drawWorldPortals();
+  }
 
   if (measurePts && measurePts.length === 2) {
     var a = cellCenter(measurePts[0].x, measurePts[0].y);
@@ -1349,6 +1417,92 @@ function isTokenVisible(t) {
 
 function currentPlayer() {
   return state.tokens.find(function (t) { return t.tipo === 'player'; }) || state.tokens[0] || null;
+}
+
+function setMapSpawn(cell, player) {
+  if (!cell) return;
+  var point = {
+    x: Math.max(0, Math.min(COLS - 1, Math.round(cell.x))),
+    y: Math.max(0, Math.min(ROWS - 1, Math.round(cell.y)))
+  };
+  state.spawn = point;
+  MAPINFO.spawn = { x: point.x, y: point.y };
+  if (MAPINFO.custom) persistCustomMaps();
+  if (player) { player.x = point.x; player.y = point.y; }
+  save();
+}
+
+function findWorldPortalAt(x, y) {
+  if (!isHexMap() || !Array.isArray(state.portals)) return null;
+  return state.portals.find(function (portal) { return portal.x === x && portal.y === y; }) || null;
+}
+
+function placeWorldPortal(cell) {
+  if (!isHexMap() || !cell) return;
+  if (!Array.isArray(state.portals)) state.portals = [];
+  var existing = findWorldPortalAt(cell.x, cell.y);
+  if (existing) {
+    if (window.confirm('Já existe um teleporte neste local para "' + ((MAPS[existing.destMapId] && MAPS[existing.destMapId].nome) || existing.destMapId) + '". Deseja removê-lo?')) {
+      state.portals = state.portals.filter(function (portal) { return portal !== existing; });
+      save(); draw();
+    }
+    return;
+  }
+  var options = Object.keys(MAPS).filter(function (id) { return id !== mapId; });
+  if (!options.length) { alert('Adicione outro mapa primeiro usando o botão + do seletor.'); return; }
+  var menu = options.map(function (id, index) { return (index + 1) + '. ' + MAPS[id].nome; }).join('\n');
+  var answer = window.prompt('Escolha o mapa de destino digitando o número:\n\n' + menu, '1');
+  if (answer == null || !String(answer).trim()) return;
+  var destination = options[Number(answer) - 1];
+  if (!destination) {
+    destination = options.find(function (id) {
+      return id.toLowerCase() === String(answer).trim().toLowerCase() || MAPS[id].nome.toLowerCase() === String(answer).trim().toLowerCase();
+    });
+  }
+  if (!destination) { alert('Destino inválido. Nenhum teleporte foi criado.'); return; }
+  state.portals.push({ id: 'portal-' + Date.now().toString(36), x: cell.x, y: cell.y, destMapId: destination });
+  save(); draw();
+  alert('Teleporte criado para ' + MAPS[destination].nome + '. Caminhe até o símbolo do portal para viajar.');
+}
+
+function teleportThroughWorldPortal(portal) {
+  if (!portal || !MAPS[portal.destMapId]) {
+    alert('O mapa de destino deste teleporte não está disponível. Atualize o catálogo mapas/mapas.json.');
+    draw();
+    return;
+  }
+  var destinationId = portal.destMapId;
+  var host = R;
+  save();
+  stopWorldTravel(false);
+  tool = 'select';
+  preferredMapId = destinationId;
+  try { localStorage.setItem(MAP_ID_KEY, destinationId); } catch (e) {}
+  unmount();
+  applyMap(destinationId);
+  state = migrateFlanaessState(load() || defaultState());
+  loadRepositoryMapState(function () {
+    if (!host || !MAPS[destinationId] || mapId !== destinationId) return;
+    var spawn = state.spawn || MAPINFO.spawn || { x: Math.floor(COLS / 2), y: Math.floor(ROWS / 2) };
+    spawn = {
+      x: Math.max(0, Math.min(COLS - 1, Math.round(Number(spawn.x) || 0))),
+      y: Math.max(0, Math.min(ROWS - 1, Math.round(Number(spawn.y) || 0)))
+    };
+    state.spawn = { x: spawn.x, y: spawn.y };
+    MAPINFO.spawn = { x: spawn.x, y: spawn.y };
+    var player = currentPlayer();
+    if (!player) {
+      player = { id: 'p1', nome: 'Aventureiro', tipo: 'player', x: spawn.x, y: spawn.y, cor: '#4fc3f7', raio: 1, luz: 6, hp: null, hpMax: null };
+      state.tokens.unshift(player);
+    } else {
+      player.x = spawn.x; player.y = spawn.y;
+      if (!player.tipo) player.tipo = 'player';
+    }
+    selected = player;
+    save();
+    mountNow(host);
+    alert('Você chegou a ' + MAPINFO.nome + ', no ponto de início definido desse mapa.');
+  });
 }
 
 function previewCell() {
@@ -1736,7 +1890,21 @@ function onPointerDown(e) {
     var worldRect = cv.getBoundingClientRect();
     var worldPoint = screenToWorld(e.clientX - worldRect.left, e.clientY - worldRect.top);
     if (worldPoint.x < 0 || worldPoint.y < 0 || worldPoint.x > MAP_W || worldPoint.y > MAP_H) return;
-    startWorldTravel(worldToCell(worldPoint.x, worldPoint.y));
+    var worldCell = worldToCell(worldPoint.x, worldPoint.y);
+    if (tool === 'portal') { placeWorldPortal(worldCell); return; }
+    if (tool === 'spawn') {
+      stopWorldTravel(false);
+      var worldPlayer = currentPlayer();
+      if (!worldPlayer) {
+        worldPlayer = { id: 'p1', nome: 'Aventureiro', tipo: 'player', x: worldCell.x, y: worldCell.y, cor: '#4fc3f7', raio: 1, luz: 6, hp: null, hpMax: null };
+        state.tokens.unshift(worldPlayer);
+      }
+      setMapSpawn(worldCell, worldPlayer);
+      selected = worldPlayer;
+      draw();
+      return;
+    }
+    startWorldTravel(worldCell);
     return;
   }
   cv.setPointerCapture(e.pointerId);
@@ -1798,6 +1966,7 @@ function onPointerDown(e) {
       player.y = cell.y;
     }
     selected = player;
+    setMapSpawn(cell, player);
     if (dynLight) revealAround(player.x, player.y, player.luz || lightRadius);
     save();
     draw();
@@ -2060,6 +2229,10 @@ function setTool(t) {
   R.querySelectorAll('#mp-tools button').forEach(function (b) {
     b.classList.toggle('on', b.dataset.t === t);
   });
+  var worldSpawnButton = R.querySelector('#mp-world-spawn');
+  var worldPortalButton = R.querySelector('#mp-world-portal');
+  if (worldSpawnButton) worldSpawnButton.classList.toggle('active', t === 'spawn');
+  if (worldPortalButton) worldPortalButton.classList.toggle('active', t === 'portal');
   if (cv) cv.style.cursor = t === 'pan' ? 'grab' : t === 'select' ? 'pointer' : 'crosshair';
   draw();
 }
@@ -2114,6 +2287,8 @@ function mountNow(el) {
     '<button type="button" id="mp-export-catalog" title="Baixar o catálogo para publicar os mapas adicionados">🗂 Baixar catálogo de mapas</button>' +
     '<label id="mp-hex-wrap" class="mp-luz" style="display:none">Hexágono <select id="mp-hex-size" disabled><option value="small" selected>Pequeno · 6 mi</option></select></label>' +
     '<label id="mp-speed-wrap" class="mp-luz" style="display:none">Velocidade <input id="mp-speed" type="number" min="0.1" step="0.1" placeholder="mi/dia" style="width:62px"></label>' +
+    '<button type="button" id="mp-world-spawn" class="mp-world-action" title="Definir o ponto de início deste mapa">📍 Definir início</button>' +
+    '<button type="button" id="mp-world-portal" class="mp-world-action" title="Adicionar um teleporte para outro mapa">🌀 Adicionar teleporte</button>' +
     '<div class="mp-g" id="mp-tools">' +
     '<button data-t="select" class="on" title="Selecionar / Mover · clique na porta para abrir/fechar">↖ Selecionar</button>' +
     '<button data-t="pan" title="Mover vista">✋ Mover</button>' +
@@ -2187,6 +2362,9 @@ function mountNow(el) {
     '#mp-root .mp-drawer .mp-side{position:static !important;width:auto !important;height:auto !important;max-height:none !important;' +
       'overflow:visible !important;margin:14px 0 0 !important;padding:12px 0 0 !important;border:0 !important;border-top:1px solid rgba(255,255,255,.14) !important;}' +
     '#mp-root .mp-menu-footer{margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,.14);}' +
+    '#mp-root .mp-world-action{display:none;width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid rgba(90,210,235,.45);border-radius:8px;background:rgba(35,125,150,.18);color:#d9fbff;font-weight:600;cursor:pointer;}' +
+    '#mp-root .mp-world-action:hover{background:rgba(35,155,180,.3);}' +
+    '#mp-root .mp-world-action.active{background:rgba(35,155,180,.48);border-color:#55e6ff;}' +
     '#mp-root .mp-delete-map{display:block;width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid rgba(220,70,70,.65);border-radius:8px;' +
       'background:rgba(150,35,35,.2);color:#ffb6b6;font-weight:600;cursor:pointer;}' +
     '#mp-root .mp-delete-map:hover:not(:disabled){background:rgba(180,45,45,.38);}' +
@@ -2220,6 +2398,14 @@ function mountNow(el) {
     this.value = '';
     if (file) createCustomMapFromFile(file);
   };
+  $('#mp-world-spawn').onclick = function () {
+    if (!isHexMap()) return;
+    setTool('spawn'); setMenu(false);
+  };
+  $('#mp-world-portal').onclick = function () {
+    if (!isHexMap()) return;
+    setTool('portal'); setMenu(false);
+  };
   cv.addEventListener('pointerdown', onPointerDown);
   cv.addEventListener('pointermove', onPointerMove);
   cv.addEventListener('pointerleave', onPointerLeave);
@@ -2232,6 +2418,7 @@ function mountNow(el) {
     var host = R, id = this.value;
     stopWorldTravel(false);
     save();
+    tool = 'select';
     try { localStorage.setItem(MAP_ID_KEY, id); } catch (e) {}
     unmount();
     applyMap(id);
@@ -2260,6 +2447,7 @@ function mountNow(el) {
       '#mp-root.mp-world-map #mp-zo,' +
       '#mp-root.mp-world-map #mp-zi,'+
       '#mp-root.mp-world-map .mp-side {display:none !important;}' +
+      '#mp-root.mp-world-map .mp-world-action {display:block !important;}' +
       '#mp-root.mp-world-map #mp-cv {display:block;width:100%;height:100%;cursor:crosshair;touch-action:manipulation;}' +
       '#mp-root.mp-world-map #mp-hex-wrap {display:none !important;}';
     worldRoot.appendChild(worldStyle);
