@@ -264,11 +264,14 @@ function normalizeMapState(s) {
     s.portals = s.portals.filter(function (portal) {
       return portal && isFinite(Number(portal.x)) && isFinite(Number(portal.y)) && portal.destMapId;
     }).map(function (portal) {
+      var portalColor = String(portal.color || '#36a9e1');
+      if (!/^#[0-9a-f]{6}$/i.test(portalColor)) portalColor = '#36a9e1';
       return {
         id: portal.id || ('portal-' + String(portal.x) + '-' + String(portal.y)),
         x: Math.max(0, Math.min(COLS - 1, Math.round(Number(portal.x)))),
         y: Math.max(0, Math.min(ROWS - 1, Math.round(Number(portal.y)))),
-        destMapId: String(portal.destMapId)
+        destMapId: String(portal.destMapId),
+        color: portalColor.toLowerCase()
       };
     });
     s.fog = []; s.walls = []; s.hEdges = []; s.vEdges = [];
@@ -1174,30 +1177,13 @@ function drawWorldPortals() {
   if (!isHexMap() || !Array.isArray(state.portals)) return;
   state.portals.forEach(function (portal) {
     var center = cellCenter(portal.x, portal.y);
-    var destination = MAPS[portal.destMapId];
-    var label = destination ? destination.nome : 'Mapa indisponível';
+    var color = /^#[0-9a-f]{6}$/i.test(String(portal.color || '')) ? portal.color : '#36a9e1';
     cx.save();
-    cx.shadowColor = 'rgba(0, 220, 255, 0.9)';
-    cx.shadowBlur = 14 / zoom;
-    cx.strokeStyle = '#55e6ff';
-    cx.fillStyle = 'rgba(12, 45, 65, 0.72)';
-    cx.lineWidth = 3 / zoom;
-    cx.beginPath(); cx.arc(center.x, center.y, CELL * 0.34, 0, Math.PI * 2); cx.fill(); cx.stroke();
-    cx.shadowBlur = 0;
-    cx.strokeStyle = 'rgba(185, 250, 255, 0.95)';
-    cx.lineWidth = 1.5 / zoom;
-    cx.beginPath(); cx.ellipse(center.x, center.y, CELL * 0.20, CELL * 0.29, Math.PI / 4, 0, Math.PI * 2); cx.stroke();
-    cx.fillStyle = '#d9fbff';
-    cx.font = 'bold ' + (CELL * 0.34) + 'px sans-serif';
-    cx.textAlign = 'center'; cx.textBaseline = 'middle';
-    cx.fillText('↗', center.x, center.y + 1 / zoom);
-    cx.font = 'bold ' + (12 / zoom) + 'px sans-serif';
-    var textWidth = cx.measureText(label).width;
-    var labelY = center.y - CELL * 0.48;
-    cx.fillStyle = 'rgba(0,0,0,0.8)';
-    cx.fillRect(center.x - textWidth / 2 - 5 / zoom, labelY - 11 / zoom, textWidth + 10 / zoom, 16 / zoom);
-    cx.fillStyle = '#d9fbff';
-    cx.fillText(label, center.x, labelY - 3 / zoom);
+    // O teleporte é indicado somente pela cor do próprio hexágono, sem ícone ou imagem.
+    cx.globalAlpha = 0.48;
+    hexPath(cx, center, color, null);
+    cx.globalAlpha = 0.95;
+    hexPath(cx, center, null, color, 2 / zoom);
     cx.restore();
   });
 }
@@ -1437,15 +1423,107 @@ function findWorldPortalAt(x, y) {
   return state.portals.find(function (portal) { return portal.x === x && portal.y === y; }) || null;
 }
 
+function closePortalDialog(overlay) {
+  if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+}
+
+function createPortalDialog(titleText, descriptionText) {
+  var root = R && R.querySelector('#mp-root');
+  if (!root) return null;
+  var overlay = document.createElement('div');
+  overlay.className = 'mp-portal-dialog-overlay';
+  var panel = document.createElement('div');
+  panel.className = 'mp-portal-dialog';
+  var title = document.createElement('h3');
+  title.textContent = titleText;
+  var description = document.createElement('p');
+  description.textContent = descriptionText;
+  panel.appendChild(title);
+  panel.appendChild(description);
+  overlay.appendChild(panel);
+  root.appendChild(overlay);
+  return { overlay: overlay, panel: panel };
+}
+
+function showPortalColorPicker(initialColor, onApply) {
+  var dialog = createPortalDialog('Cor do teleporte', 'Escolha a cor que vai preencher o hexágono onde o teleporte foi colocado.');
+  if (!dialog) return;
+  var colorInput = document.createElement('input');
+  colorInput.type = 'color';
+  colorInput.value = /^#[0-9a-f]{6}$/i.test(String(initialColor || '')) ? initialColor : '#36a9e1';
+  colorInput.className = 'mp-portal-color-input';
+  colorInput.setAttribute('aria-label', 'Escolher cor do hexágono do teleporte');
+  dialog.panel.appendChild(colorInput);
+
+  var actions = document.createElement('div');
+  actions.className = 'mp-portal-dialog-actions';
+  var cancel = document.createElement('button');
+  cancel.type = 'button';
+  cancel.textContent = 'Cancelar';
+  cancel.onclick = function () { closePortalDialog(dialog.overlay); };
+  var apply = document.createElement('button');
+  apply.type = 'button';
+  apply.className = 'primary';
+  apply.textContent = 'Confirmar cor';
+  apply.onclick = function () {
+    var chosenColor = colorInput.value;
+    closePortalDialog(dialog.overlay);
+    if (typeof onApply === 'function') onApply(chosenColor);
+  };
+  actions.appendChild(cancel);
+  actions.appendChild(apply);
+  dialog.panel.appendChild(actions);
+  colorInput.click();
+}
+
+function showExistingPortalActions(portal) {
+  var destinationName = (MAPS[portal.destMapId] && MAPS[portal.destMapId].nome) || portal.destMapId;
+  var dialog = createPortalDialog('Teleporte existente', 'Destino: ' + destinationName + '. Você pode mudar a cor deste hexágono ou remover o teleporte.');
+  if (!dialog) return;
+  var actions = document.createElement('div');
+  actions.className = 'mp-portal-dialog-actions mp-portal-dialog-actions-stack';
+
+  var recolor = document.createElement('button');
+  recolor.type = 'button';
+  recolor.className = 'primary';
+  recolor.textContent = '🎨 Mudar cor';
+  recolor.onclick = function () {
+    closePortalDialog(dialog.overlay);
+    showPortalColorPicker(portal.color || '#36a9e1', function (color) {
+      portal.color = color;
+      save(); draw();
+    });
+  };
+
+  var remove = document.createElement('button');
+  remove.type = 'button';
+  remove.className = 'danger';
+  remove.textContent = '🗑 Remover teleporte';
+  remove.onclick = function () {
+    closePortalDialog(dialog.overlay);
+    if (window.confirm('Remover o teleporte deste hexágono?')) {
+      state.portals = state.portals.filter(function (item) { return item !== portal; });
+      save(); draw();
+    }
+  };
+
+  var cancel = document.createElement('button');
+  cancel.type = 'button';
+  cancel.textContent = 'Cancelar';
+  cancel.onclick = function () { closePortalDialog(dialog.overlay); };
+
+  actions.appendChild(recolor);
+  actions.appendChild(remove);
+  actions.appendChild(cancel);
+  dialog.panel.appendChild(actions);
+}
+
 function placeWorldPortal(cell) {
   if (!isHexMap() || !cell) return;
   if (!Array.isArray(state.portals)) state.portals = [];
   var existing = findWorldPortalAt(cell.x, cell.y);
   if (existing) {
-    if (window.confirm('Já existe um teleporte neste local para "' + ((MAPS[existing.destMapId] && MAPS[existing.destMapId].nome) || existing.destMapId) + '". Deseja removê-lo?')) {
-      state.portals = state.portals.filter(function (portal) { return portal !== existing; });
-      save(); draw();
-    }
+    showExistingPortalActions(existing);
     return;
   }
   var options = Object.keys(MAPS).filter(function (id) { return id !== mapId; });
@@ -1460,9 +1538,17 @@ function placeWorldPortal(cell) {
     });
   }
   if (!destination) { alert('Destino inválido. Nenhum teleporte foi criado.'); return; }
-  state.portals.push({ id: 'portal-' + Date.now().toString(36), x: cell.x, y: cell.y, destMapId: destination });
-  save(); draw();
-  alert('Teleporte criado para ' + MAPS[destination].nome + '. Caminhe até o símbolo do portal para viajar.');
+  showPortalColorPicker('#36a9e1', function (color) {
+    state.portals.push({
+      id: 'portal-' + Date.now().toString(36),
+      x: cell.x,
+      y: cell.y,
+      destMapId: destination,
+      color: color
+    });
+    save(); draw();
+    alert('Teleporte criado para ' + MAPS[destination].nome + '. O hexágono foi marcado com a cor escolhida.');
+  });
 }
 
 function teleportThroughWorldPortal(portal) {
@@ -2368,7 +2454,17 @@ function mountNow(el) {
     '#mp-root .mp-delete-map{display:block;width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid rgba(220,70,70,.65);border-radius:8px;' +
       'background:rgba(150,35,35,.2);color:#ffb6b6;font-weight:600;cursor:pointer;}' +
     '#mp-root .mp-delete-map:hover:not(:disabled){background:rgba(180,45,45,.38);}' +
-    '#mp-root .mp-delete-map:disabled{opacity:.42;cursor:not-allowed;}';
+    '#mp-root .mp-delete-map:disabled{opacity:.42;cursor:not-allowed;}' +
+    '#mp-root .mp-portal-dialog-overlay{position:absolute;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;background:rgba(0,0,0,.72);}' +
+    '#mp-root .mp-portal-dialog{width:min(340px,100%);box-sizing:border-box;padding:18px;border:1px solid rgba(255,255,255,.2);border-radius:12px;background:#17191f;color:#f4f5f7;box-shadow:0 12px 40px rgba(0,0,0,.55);}' +
+    '#mp-root .mp-portal-dialog h3{margin:0 0 8px;font-size:17px;}' +
+    '#mp-root .mp-portal-dialog p{margin:0 0 14px;color:#c5c9d2;font-size:13px;line-height:1.45;}' +
+    '#mp-root .mp-portal-color-input{display:block;width:100%;height:48px;margin:4px 0 16px;padding:3px;border:1px solid rgba(255,255,255,.22);border-radius:8px;background:#252832;cursor:pointer;}' +
+    '#mp-root .mp-portal-dialog-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;}' +
+    '#mp-root .mp-portal-dialog-actions-stack{flex-direction:column;}' +
+    '#mp-root .mp-portal-dialog-actions button{min-height:38px;padding:8px 12px;border:1px solid rgba(255,255,255,.2);border-radius:7px;background:#30343e;color:#fff;cursor:pointer;}' +
+    '#mp-root .mp-portal-dialog-actions button.primary{border-color:#3c9bc7;background:#17688f;}' +
+    '#mp-root .mp-portal-dialog-actions button.danger{border-color:#9a3b3b;background:#742d35;}';
   R.querySelector('#mp-root').appendChild(menuStyle);
 
   cv = $('#mp-cv');
