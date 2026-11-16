@@ -179,8 +179,8 @@ var keyMoveVis = null;       // posição visual (px do mapa) do personagem enqu
 var keyMoveCarry = null;     // instante em que o passo anterior terminou (sem engasgo entre quadrados)
 var keyMoveLastSave = 0;
 var clickMovePath = [];      // caminho calculado ao clicar em um tile iluminado
-var HEX_KEY_STEP_MS = 260;   // duração de cada passo nas setas do mapa-múndi
 var WORLD_TRAVEL_STEP_MS = 2000; // tempo para atravessar 1 hexágono ao clicar no mapa-múndi
+var HEX_KEY_STEP_MS = WORLD_TRAVEL_STEP_MS; // setas usam exatamente a mesma velocidade do clique
 
 var state = load() || defaultState();
 // Migra tokens salvos na antiga grade quadrada sem perder as áreas de névoa já reveladas.
@@ -2005,6 +2005,15 @@ function onPointerDown(e) {
 
   if (tool === 'pan' || e.button === 1 || e.button === 2 || space) {
     drag = { pan: true, x: e.clientX, y: e.clientY, ox: ox, oy: oy };
+    return;
+  }
+
+  // Nos mapas de aventura, clicar na área externa à imagem equivale a sair
+  // pela borda com as setas: volta ao mapa-múndi usando a posição de retorno salva.
+  // O pan continua disponível porque é tratado antes desta condição.
+  if (!isHexMap() && tool === 'select' && !pendingMonster && currentPlayer() &&
+      (world.x < 0 || world.y < 0 || world.x >= MAP_W || world.y >= MAP_H)) {
+    returnToWorldMapFromExit();
     return;
   }
 
