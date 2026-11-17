@@ -159,7 +159,7 @@ var SIZE_SQ = {
 var R = null, cv = null, cx = null;
 var zoom = 0.35, ox = 40, oy = 40;
 var tool = 'select';
-var pendingDoorJoin = null; // primeira porta selecionada na ferramenta de união
+var pendingStructureStart = null; // primeiro canto ao desenhar parede/porta
 var drag = null, space = false;
 var showGrid = true, showFog = true, dynLight = true, showWalls = true;
 var showSecrets = false; // visão do Mestre: exibe estruturas secretas ainda não descobertas.
@@ -244,7 +244,8 @@ function defaultState() {
     hEdges: isHexMap() ? [] : makeArr(COLS * (ROWS + 1), 0),
     vEdges: isHexMap() ? [] : makeArr((COLS + 1) * ROWS, 0),
     hEdgeMeta: isHexMap() ? [] : makeArr(COLS * (ROWS + 1), null),
-    vEdgeMeta: isHexMap() ? [] : makeArr((COLS + 1) * ROWS, null)
+    vEdgeMeta: isHexMap() ? [] : makeArr((COLS + 1) * ROWS, null),
+    customEdges: []
   };
 }
 
@@ -305,6 +306,8 @@ function normalizeMapState(s) {
   if (!s.vEdges || s.vEdges.length !== (COLS + 1) * ROWS) s.vEdges = makeArr((COLS + 1) * ROWS, 0);
   if (!s.hEdgeMeta || s.hEdgeMeta.length !== COLS * (ROWS + 1)) s.hEdgeMeta = makeArr(COLS * (ROWS + 1), null);
   if (!s.vEdgeMeta || s.vEdgeMeta.length !== (COLS + 1) * ROWS) s.vEdgeMeta = makeArr((COLS + 1) * ROWS, null);
+  if (!Array.isArray(s.customEdges)) s.customEdges = [];
+  s.customEdges = s.customEdges.filter(function (e) { return !!e && [e.x1,e.y1,e.x2,e.y2].every(function(v){return isFinite(Number(v));}) && (Number(e.x1)!==Number(e.x2) || Number(e.y1)!==Number(e.y2)); });
   return s;
 }
 
@@ -755,11 +758,13 @@ function edgeMetaIndex(edge) {
 }
 function getEdgeMeta(edge) {
   if (!edge) return null;
+  if (edge.custom) return edge.custom.meta || null;
   var arr = edge.dir === 'h' ? state.hEdgeMeta : state.vEdgeMeta;
   return arr && arr[edgeMetaIndex(edge)] || null;
 }
 function setEdgeMeta(edge, meta) {
   if (!edge) return;
+  if (edge.custom) { edge.custom.meta = meta || null; return; }
   var arr = edge.dir === 'h' ? state.hEdgeMeta : state.vEdgeMeta;
   if (!arr) {
     if (edge.dir === 'h') state.hEdgeMeta = makeArr(COLS * (ROWS + 1), null);
@@ -791,6 +796,8 @@ function edgeBlocks(val, edge) {
 }
 function blocksBetween(x0, y0, x1, y1) {
   if (x0 === x1 && y0 === y1) return false;
+  var moveA={x:(x0+0.5)*CELL,y:(y0+0.5)*CELL}, moveB={x:(x1+0.5)*CELL,y:(y1+0.5)*CELL};
+  if ((state.customEdges || []).some(function(e){ return edgeBlocks(e.val,{custom:e}) && segmentCrosses(moveA,moveB,{x:e.x1,y:e.y1},{x:e.x2,y:e.y2}); })) return true;
   if (isCellWall(x1, y1)) return true;
   if (y0 === y1) {
     var vertical = { dir: 'v', xEdge: x1 > x0 ? x1 : x0, y: y0 };
@@ -814,6 +821,8 @@ function edgeBlocksVision(val, edge) {
 }
 function blocksVisionBetween(x0, y0, x1, y1) {
   if (x0 === x1 && y0 === y1) return false;
+  var sightA={x:(x0+0.5)*CELL,y:(y0+0.5)*CELL}, sightB={x:(x1+0.5)*CELL,y:(y1+0.5)*CELL};
+  if ((state.customEdges || []).some(function(e){ return edgeBlocksVision(e.val,{custom:e}) && segmentCrosses(sightA,sightB,{x:e.x1,y:e.y1},{x:e.x2,y:e.y2}); })) return true;
   if (isCellWall(x1, y1)) return true;
   if (y0 === y1) {
     var vertical = { dir: 'v', xEdge: x1 > x0 ? x1 : x0, y: y0 };
@@ -1049,6 +1058,40 @@ function formatMapDistance(a, b) {
   return squares.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) + ' quadrículas';
 }
 
+function snapGridPoint(wx, wy) {
+  return { x: Math.max(0, Math.min(COLS, Math.round(wx / CELL))) * CELL,
+    y: Math.max(0, Math.min(ROWS, Math.round(wy / CELL))) * CELL };
+}
+function customEdgeAt(wx, wy, tolerance) {
+  var list = state.customEdges || [], best = null, bestD = tolerance == null ? CELL * 0.22 : tolerance;
+  list.forEach(function (item) {
+    var ax=item.x1, ay=item.y1, bx=item.x2, by=item.y2;
+    var dx=bx-ax, dy=by-ay, len2=dx*dx+dy*dy;
+    var t=len2 ? Math.max(0,Math.min(1,((wx-ax)*dx+(wy-ay)*dy)/len2)) : 0;
+    var px=ax+t*dx, py=ay+t*dy, d=Math.sqrt((wx-px)*(wx-px)+(wy-py)*(wy-py));
+    if (d < bestD) { bestD=d; best={dir:'custom',custom:item}; }
+  });
+  return best;
+}
+function segmentCrosses(a,b,c,d) {
+  function orient(p,q,r){return (q.x-p.x)*(r.y-p.y)-(q.y-p.y)*(r.x-p.x);}
+  var o1=orient(a,b,c), o2=orient(a,b,d), o3=orient(c,d,a), o4=orient(c,d,b);
+  return ((o1===0 || o2===0 || (o1<0)!==(o2<0)) && (o3===0 || o4===0 || (o3<0)!==(o4<0)));
+}
+function createCustomStructure(a, b, kind) {
+  if (!a || !b || (Math.abs(a.x-b.x)<1 && Math.abs(a.y-b.y)<1)) { alert('Escolha dois cantos diferentes do grid.'); return; }
+  var val = kind === 'muro' ? EDGE_MURO : kind === 'porta' ? EDGE_DOOR_C : null;
+  if (kind !== 'muro' && kind !== 'porta') {
+    var map = {paredeSecreta:'secretWall',portaSecreta:'secretDoor',portaTrancada:'lockedDoor',portaEmperrada:'jammedDoor',paredeIlusoria:'illusionWall',muralhaForca:'forceWall',paredeMagica:'magicWall'};
+    var temp = {dir:'custom', custom:{x1:a.x,y1:a.y,x2:b.x,y2:b.y,val:0,meta:null}};
+    createSpecialEdge(temp, map[kind]);
+    if (temp.custom.val) { state.customEdges.push(temp.custom); save(); draw(); }
+    return;
+  }
+  var item = { id:'line-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7), x1:a.x,y1:a.y,x2:b.x,y2:b.y,val:val,meta:null };
+  state.customEdges.push(item); save(); draw();
+}
+
 function nearestEdge(wx, wy) {
   var gx = wx / CELL, gy = wy / CELL;
   var cx = Math.floor(gx), cy = Math.floor(gy);
@@ -1069,10 +1112,12 @@ function nearestEdge(wx, wy) {
 }
 
 function getEdgeVal(edge) {
+  if (edge && edge.custom) return edge.custom.val || 0;
   if (edge.dir === 'h') return getH(edge.x, edge.yEdge);
   return getV(edge.xEdge, edge.y);
 }
 function setEdgeVal(edge, val) {
+  if (edge && edge.custom) { edge.custom.val = val; if (!val && state.customEdges) { var ci = state.customEdges.indexOf(edge.custom); if (ci >= 0) state.customEdges.splice(ci, 1); } return; }
   if (edge.dir === 'h') setH(edge.x, edge.yEdge, val);
   else setV(edge.xEdge, edge.y, val);
 }
@@ -1112,29 +1157,6 @@ function setDoorRunValue(edge, val) {
     // Alterar aberto/fechado não deve apagar os dados nem o grupo da porta.
     if (meta) setEdgeMeta(part, meta);
   });
-}
-
-function joinDoorEdges(first, second) {
-  if (!first || !second || first.dir !== second.dir) return false;
-  var edges = [];
-  if (first.dir === 'h') {
-    if (first.yEdge !== second.yEdge) return false;
-    var lo = Math.min(first.x, second.x), hi = Math.max(first.x, second.x);
-    for (var x = lo; x <= hi; x++) edges.push({ dir: 'h', x: x, yEdge: first.yEdge });
-  } else {
-    if (first.xEdge !== second.xEdge) return false;
-    var top = Math.min(first.y, second.y), bottom = Math.max(first.y, second.y);
-    for (var y = top; y <= bottom; y++) edges.push({ dir: 'v', xEdge: first.xEdge, y: y });
-  }
-  // Só une segmentos que já sejam portas, sem atravessar parede, vão ou outra estrutura.
-  if (edges.length < 2 || !edges.every(function (part) { return isDoorEdge(getEdgeVal(part)); })) return false;
-  var id = 'door-group-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
-  edges.forEach(function (part) {
-    var meta = getEdgeMeta(part) || {};
-    meta.doorGroupId = id;
-    setEdgeMeta(part, meta);
-  });
-  return true;
 }
 
 function doorRunIsClosed(edge) {
@@ -1179,6 +1201,7 @@ function makeStructureMeta(material, kind, multiplier) {
   };
 }
 function edgeMidpoint(edge) {
+  if (edge.custom) return { x:(edge.custom.x1+edge.custom.x2)/2, y:(edge.custom.y1+edge.custom.y2)/2 };
   return edge.dir === 'h'
     ? { x: (edge.x + 0.5) * CELL, y: edge.yEdge * CELL }
     : { x: edge.xEdge * CELL, y: (edge.y + 0.5) * CELL };
@@ -1217,6 +1240,10 @@ function nearbyEdgesForCell(cell, radiusCells) {
       if (vdx * vdx + vdy * vdy <= limit2) found.push({ edge: vertical, val: vv });
     }
   }
+  (state.customEdges || []).forEach(function(item){
+    var mid={x:(item.x1+item.x2)/2,y:(item.y1+item.y2)/2}, dx=mid.x-center.x, dy=mid.y-center.y;
+    if(item.val && dx*dx+dy*dy<=limit2) found.push({edge:{dir:'custom',custom:item},val:item.val});
+  });
   return found;
 }
 function checkPassiveSecretDetection(player) {
@@ -1946,6 +1973,17 @@ function drawEdges() {
   }
   for (var ye = 0; ye <= ROWS; ye++) for (var x = 0; x < COLS; x++) drawOne({ dir: 'h', x: x, yEdge: ye }, getH(x, ye));
   for (var y = 0; y < ROWS; y++) for (var xe = 0; xe <= COLS; xe++) drawOne({ dir: 'v', xEdge: xe, y: y }, getV(xe, y));
+  (state.customEdges || []).forEach(function(item){
+    var val=item.val, meta=item.meta||{}; if(!val || edgeIsHidden({custom:item},val)) return;
+    if(val===EDGE_SECRET_WALL && meta.open) return;
+    var isDoor=isDoorEdge(val), opened=val===EDGE_DOOR_O || val===EDGE_SECRET_DOOR_O || !!meta.open;
+    var color=val===EDGE_MURO?'#c62828':val===EDGE_SECRET_WALL?'#ab47bc':val===EDGE_SECRET_DOOR_C||val===EDGE_SECRET_DOOR_O?'#8e24aa':val===EDGE_LOCKED_DOOR?'#42a5f5':val===EDGE_JAMMED_DOOR?'#ff8f00':val===EDGE_ILLUSION_WALL?'#26c6da':val===EDGE_FORCE_WALL?'#80deea':val===EDGE_MAGIC_WALL?'#7e57c2':(opened?'rgba(141,110,99,0.45)':'#8d6e63');
+    cx.save(); cx.strokeStyle=color; cx.lineWidth=Math.max(2.5,3.5/zoom);
+    if(val===EDGE_SECRET_WALL || val===EDGE_FORCE_WALL || val===EDGE_ILLUSION_WALL || opened) cx.setLineDash([6/zoom,4/zoom]);
+    cx.beginPath(); cx.moveTo(item.x1,item.y1); cx.lineTo(item.x2,item.y2); cx.stroke(); cx.setLineDash([]);
+    if(isDoor){cx.fillStyle=color;cx.beginPath();cx.arc((item.x1+item.x2)/2,(item.y1+item.y2)/2,4.5/zoom,0,Math.PI*2);cx.fill();}
+    cx.restore();
+  });
 }
 
 function isCurrentlyVisible(x, y, px, py, r) {
@@ -2378,16 +2416,19 @@ function drawToolPreview() {
   var edge = previewEdge();
   var center = cellCenter(cell.x, cell.y);
   var ghost;
+  var lineTools=['muro','porta','paredeSecreta','portaSecreta','portaTrancada','portaEmperrada','paredeIlusoria','muralhaForca','paredeMagica','eraseedge'];
+  if (lineTools.indexOf(tool)>=0) {
+    var target=snapGridPoint(previewPointer.x,previewPointer.y);
+    var start=pendingStructureStart || target;
+    var lineColor=tool==='porta'||tool.indexOf('porta')===0?'#ffb74d':tool==='paredeSecreta'?'#ab47bc':tool==='paredeIlusoria'?'#26c6da':tool==='muralhaForca'?'#80deea':tool==='paredeMagica'?'#7e57c2':tool==='eraseedge'?'#80deea':'#ff5252';
+    cx.save(); cx.strokeStyle=lineColor; cx.fillStyle=lineColor; cx.lineWidth=Math.max(4,5/zoom); cx.setLineDash([7/zoom,4/zoom]);
+    cx.beginPath(); cx.moveTo(start.x,start.y); cx.lineTo(target.x,target.y); cx.stroke(); cx.setLineDash([]);
+    cx.beginPath(); cx.arc(start.x,start.y,5/zoom,0,Math.PI*2); cx.fill(); cx.beginPath(); cx.arc(target.x,target.y,5/zoom,0,Math.PI*2); cx.fill(); cx.restore();
+    return;
+  }
 
   if (tool === 'wall') drawPreviewCell(cell, 'rgba(229,57,53,0.38)', '#ff5252');
   else if (tool === 'erasewall') drawPreviewCell(cell, 'rgba(102,187,106,0.28)', '#81c784');
-  else if (tool === 'muro') drawEdgePreview(edge, '#ff5252', false);
-  else if (tool === 'porta' || tool === 'portaSecreta' || tool === 'portaTrancada' || tool === 'portaEmperrada') drawEdgePreview(edge, '#ffb74d', true);
-  else if (tool === 'paredeSecreta') drawEdgePreview(edge, '#ab47bc', false);
-  else if (tool === 'paredeIlusoria') drawEdgePreview(edge, '#26c6da', false);
-  else if (tool === 'muralhaForca') drawEdgePreview(edge, '#80deea', false);
-  else if (tool === 'paredeMagica') drawEdgePreview(edge, '#7e57c2', false);
-  else if (tool === 'eraseedge') drawEdgePreview(edge, '#80deea', isDoorEdge(getEdgeVal(edge)));
   else if (tool === 'reveal' || tool === 'hide') {
     cx.save();
     cx.fillStyle = tool === 'reveal' ? 'rgba(255,235,59,0.22)' : 'rgba(0,0,0,0.5)';
@@ -2779,63 +2820,30 @@ function onPointerDown(e) {
     return;
   }
 
-  if (!isHexMap() && tool === 'joinDoors') {
-    var joinEdge = nearestEdge(world.x, world.y);
-    if (!isDoorEdge(getEdgeVal(joinEdge))) { alert('Clique sobre uma porta existente.'); return; }
-    if (!pendingDoorJoin) {
-      pendingDoorJoin = joinEdge;
-      alert('Primeira porta selecionada. Agora clique na porta contígua que deseja unir a ela.');
-      draw();
-      return;
-    }
-    var firstJoin = pendingDoorJoin;
-    pendingDoorJoin = null;
-    if (joinDoorEdges(firstJoin, joinEdge)) {
-      save();
-      alert('Portas unidas! Elas agora abrem e fecham como um único conjunto.');
-    } else {
-      alert('Não foi possível unir. Selecione duas portas na mesma linha, lado a lado e sem espaços ou obstáculos entre elas.');
-    }
-    draw();
-    return;
-  }
 
-  if (!isHexMap() && ['paredeSecreta', 'portaSecreta', 'portaTrancada', 'portaEmperrada', 'paredeIlusoria', 'muralhaForca', 'paredeMagica'].indexOf(tool) >= 0) {
-    var specialEdge = nearestEdge(world.x, world.y);
-    var specialKind = ({ paredeSecreta: 'secretWall', portaSecreta: 'secretDoor', portaTrancada: 'lockedDoor', portaEmperrada: 'jammedDoor', paredeIlusoria: 'illusionWall', muralhaForca: 'forceWall', paredeMagica: 'magicWall' })[tool];
-    createSpecialEdge(specialEdge, specialKind); return;
+  if (!isHexMap() && ['muro','porta','paredeSecreta','portaSecreta','portaTrancada','portaEmperrada','paredeIlusoria','muralhaForca','paredeMagica','eraseedge'].indexOf(tool) >= 0) {
+    var point = snapGridPoint(world.x, world.y);
+    if (!pendingStructureStart) { pendingStructureStart = point; draw(); return; }
+    var firstPoint = pendingStructureStart; pendingStructureStart = null;
+    if (tool === 'eraseedge') {
+      var hitCustom = customEdgeAt((firstPoint.x+point.x)/2,(firstPoint.y+point.y)/2,CELL*0.3);
+      if (hitCustom) setEdgeVal(hitCustom, EDGE_NONE);
+      else { var legacy=nearestEdge((firstPoint.x+point.x)/2,(firstPoint.y+point.y)/2); setEdgeVal(legacy,EDGE_NONE); }
+      save(); draw(); return;
+    }
+    createCustomStructure(firstPoint, point, tool); return;
   }
   if (!isHexMap() && tool === 'searchSecret') { performActiveSecretSearch(cell); setTool('select'); return; }
-  if (!isHexMap() && tool === 'investigateMechanism') { investigateEdgeMechanism(nearestEdge(world.x, world.y)); setTool('select'); return; }
+  if (!isHexMap() && tool === 'investigateMechanism') { investigateEdgeMechanism(customEdgeAt(world.x,world.y) || nearestEdge(world.x, world.y)); setTool('select'); return; }
   if (!isHexMap() && tool === 'damageStructure') {
-    var damageEdge = nearestEdge(world.x, world.y);
+    var damageEdge = customEdgeAt(world.x,world.y) || nearestEdge(world.x, world.y);
     var gxDamage = world.x / CELL, gyDamage = world.y / CELL;
     var nearDamageLine = Math.min(Math.abs(gxDamage - Math.round(gxDamage)), Math.abs(gyDamage - Math.round(gyDamage))) < 0.12;
-    if (nearDamageLine && getEdgeVal(damageEdge) !== EDGE_NONE) damageEdgeStructure(damageEdge);
+    if ((damageEdge && damageEdge.custom || nearDamageLine) && getEdgeVal(damageEdge) !== EDGE_NONE) damageEdgeStructure(damageEdge);
     else damageCellWall(cell);
     setTool('select'); return;
   }
 
-  if (!isHexMap() && (tool === 'muro' || tool === 'porta' || tool === 'eraseedge')) {
-    var edge = nearestEdge(world.x, world.y);
-    var cur = getEdgeVal(edge);
-    if (tool === 'muro') {
-      setEdgeVal(edge, EDGE_MURO);
-      drag = { edgePaint: true, mode: 'muro' };
-    } else if (tool === 'porta') {
-      if (cur === EDGE_DOOR_C || cur === EDGE_DOOR_O) setDoorRunValue(edge, doorRunIsClosed(edge) ? EDGE_DOOR_O : EDGE_DOOR_C);
-      else if (cur === EDGE_NONE) setEdgeVal(edge, EDGE_DOOR_C);
-      else { alert('Apague ou selecione outra linha antes de substituir esta estrutura.'); return; }
-      drag = { edgePaint: true, mode: 'porta' };
-    } else {
-      if (cur === EDGE_DOOR_C || cur === EDGE_DOOR_O) setDoorRunValue(edge, EDGE_NONE);
-      else setEdgeVal(edge, EDGE_NONE);
-      drag = { edgePaint: true, mode: 'erase' };
-    }
-    save();
-    draw();
-    return;
-  }
 
   if (tool === 'wall') {
     drag = { wall: true, val: 1 };
@@ -2877,8 +2885,9 @@ function onPointerDown(e) {
   }
 
   if (tool === 'select') {
-    var edge2 = isHexMap() ? null : nearestEdge(world.x, world.y);
+    var edge2 = isHexMap() ? null : (customEdgeAt(world.x,world.y) || nearestEdge(world.x, world.y));
     var ev = edge2 ? getEdgeVal(edge2) : EDGE_NONE;
+    if (edge2 && edge2.custom) { interactWithEdge(edge2); return; }
     var gx = world.x / CELL, gy = world.y / CELL;
     var fx = Math.abs(gx - Math.round(gx)), fy = Math.abs(gy - Math.round(gy));
     var nearLine = !isHexMap() && Math.min(fx, fy) < 0.12;
@@ -3336,6 +3345,7 @@ function onKey(e) {
     return;
   }
   if (e.code === 'Space') { space = true; e.preventDefault(); return; }
+  if (e.key === 'Escape' && pendingStructureStart) { pendingStructureStart = null; draw(); return; }
   if (e.key === 'Escape' && tool === 'localPortal') { pendingLocalPortal = null; setTool('select'); return; }
   if ((e.key === 'Delete' || e.key === 'Backspace') && selected && selected.tipo !== 'player') {
     state.tokens = state.tokens.filter(function (t) { return t !== selected; });
@@ -3356,7 +3366,7 @@ function onWindowBlur() { keysHeld = {}; }
 
 function setTool(t) {
   tool = t;
-  if (t !== 'joinDoors') pendingDoorJoin = null;
+  pendingStructureStart = null;
   measurePts = null;
   if (t !== 'token') pendingMonster = null;
   R.querySelectorAll('#mp-tools button').forEach(function (b) {
@@ -3434,9 +3444,8 @@ function mountNow(el) {
     '<button data-t="pan" title="Mover vista">✋ Mover</button>' +
     '<button data-t="wall" title="Parede no espaço atual (bloqueia tudo)">🧱 Parede</button>' +
     '<button data-t="erasewall" title="Apagar parede do espaço atual">🧹 Apagar parede</button>' +
-    '<button data-t="muro" title="Muro na linha do grid (bloqueia luz e passagem)">─ Muro</button>' +
-    '<button data-t="porta" title="Porta comum na linha">🚪 Porta</button>' +
-    '<button data-t="joinDoors" title="Unir portas: selecione esta ferramenta, clique na primeira porta e depois na porta contígua">🔗 Unir portas</button>' +
+    '<button data-t="muro" title="Desenhar muro: clique em um canto e depois em outro">─ Muro</button>' +
+    '<button data-t="porta" title="Desenhar porta: clique em um canto e depois em outro">🚪 Porta</button>' +
     '<button data-t="paredeSecreta" title="Parede secreta: Percepção para encontrar e Investigação para descobrir o mecanismo">🧱 Parede secreta</button>' +
     '<button data-t="portaSecreta" title="Porta secreta: encontrar, investigar o mecanismo e abrir">🚪 Porta secreta</button>' +
     '<button data-t="portaTrancada" title="Porta trancada: Ferramentas de Ladrão; pode ter Tranca Arcana">🔒 Porta trancada</button>' +
