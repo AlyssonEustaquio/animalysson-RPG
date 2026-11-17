@@ -1086,6 +1086,29 @@ function focusCameraOnPlayer(viewW, viewH) {
   oy = height / 2 - center.y * zoom;
 }
 
+function visionZoom(viewW, viewH) {
+  var p = currentPlayer();
+  var r = Math.max(1, (p && p.luz) || lightRadius);
+  var w = viewW == null ? cv.clientWidth : viewW;
+  var h = viewH == null ? cv.clientHeight : viewH;
+  return Math.max(0.04, Math.min(w, h) / ((r * 2 + 1) * CELL));
+}
+
+function centerCameraOnPlayer() {
+  if (isHexMap() || !cv) return;
+  var p = currentPlayer();
+  if (!p || !cv.clientWidth || !cv.clientHeight) return;
+  zoom = visionZoom();
+  var c = tokenAnchor(p, p.x, p.y);
+  ox = cv.clientWidth / 2 - c.x * zoom;
+  oy = cv.clientHeight / 2 - c.y * zoom;
+}
+
+function onWindowResize() {
+  centerCameraOnPlayer();
+  draw();
+}
+
 function stopWorldTravel(shouldSave) {
   if (worldTravelRaf != null) {
     window.cancelAnimationFrame(worldTravelRaf);
@@ -2213,15 +2236,6 @@ function onPointerLeave() {
 function onWheel(e) {
   e.preventDefault();
   if (isHexMap()) { zoom = FLANAESS_ZOOM; draw(); return; }
-  var rect = cv.getBoundingClientRect();
-  var sx = e.clientX - rect.left, sy = e.clientY - rect.top;
-  var before = screenToWorld(sx, sy);
-  var factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
-  zoom = Math.max(0.04, Math.min(MAPINFO.maxZoom || 2.5, zoom * factor));
-  var after = screenToWorld(sx, sy);
-  ox += (after.x - before.x) * zoom;
-  oy += (after.y - before.y) * zoom;
-  draw();
 }
 
 // ---------- Movimento por clique em tiles visíveis (mapas de quadrados) ----------
@@ -2804,6 +2818,7 @@ function mountNow(el) {
     lightRadius = +this.value || 0;
     var p = state.tokens.find(function (t) { return t.tipo === 'player'; });
     if (p) { p.luz = lightRadius; save(); }
+    centerCameraOnPlayer();
     draw();
   };
   $('#mp-reset-fog').onclick = function () {
@@ -2828,8 +2843,8 @@ function mountNow(el) {
       save(); draw();
     }
   };
-  $('#mp-zo').onclick = function () { if (isHexMap()) { zoom = FLANAESS_ZOOM; } else { zoom = Math.max(0.04, zoom / 1.2); } draw(); };
-  $('#mp-zi').onclick = function () { if (isHexMap()) { zoom = FLANAESS_ZOOM; } else { zoom = Math.min(MAPINFO.maxZoom || 2.5, zoom * 1.2); } draw(); };
+  $('#mp-zo').onclick = function () { if (isHexMap()) zoom = FLANAESS_ZOOM; else centerCameraOnPlayer(); draw(); };
+  $('#mp-zi').onclick = function () { if (isHexMap()) zoom = FLANAESS_ZOOM; else centerCameraOnPlayer(); draw(); };
 
   $('#mp-q').oninput = function () { renderMonsterList(this.value); };
   $('#mp-ml').onclick = function (e) {
@@ -2846,7 +2861,7 @@ function mountNow(el) {
   document.addEventListener('keydown', onKey);
   document.addEventListener('keyup', onKeyUp);
   window.addEventListener('blur', onWindowBlur);
-  window.addEventListener('resize', draw);
+  window.addEventListener('resize', onWindowResize);
 
   ['muro', 'porta', 'eraseedge'].forEach(function (name) {
     var btn = R.querySelector('#mp-tools button[data-t="' + name + '"]');
@@ -2868,16 +2883,15 @@ function mountNow(el) {
     if (isHexMap()) {
       zoom = FLANAESS_ZOOM;
       focusCameraOnPlayer();
-    } else if (MAPINFO.fit) {
-      zoom = Math.max(0.04, Math.min((cv.clientWidth - 160) / MAP_W, (cv.clientHeight - 160) / MAP_H));
-      ox = 80; oy = 80;
     } else {
-      zoom = 0.4;
-      ox = 80;
-      oy = -MAP_H * zoom + (cv.clientHeight || 500) - 80;
+      centerCameraOnPlayer();
     }
     draw();
   });
+  if (!isHexMap()) {
+    centerCameraOnPlayer();
+    window.requestAnimationFrame(function () { centerCameraOnPlayer(); draw(); });
+  }
   draw();
 }
 
@@ -2888,7 +2902,7 @@ function unmount() {
   document.removeEventListener('keydown', onKey);
   document.removeEventListener('keyup', onKeyUp);
   window.removeEventListener('blur', onWindowBlur);
-  window.removeEventListener('resize', draw);
+  window.removeEventListener('resize', onWindowResize);
   R = null; cv = null; cx = null; bgImages = []; detailCache = {}; previewPointer = null;
 }
 
