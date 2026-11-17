@@ -2416,7 +2416,7 @@ function drawToolPreview() {
   var edge = previewEdge();
   var center = cellCenter(cell.x, cell.y);
   var ghost;
-  var lineTools=['muro','porta','paredeSecreta','portaSecreta','portaTrancada','portaEmperrada','paredeIlusoria','muralhaForca','paredeMagica','eraseedge'];
+  var lineTools=['muro','porta','paredeSecreta','portaSecreta','portaTrancada','portaEmperrada','paredeIlusoria','muralhaForca','paredeMagica'];
   if (lineTools.indexOf(tool)>=0) {
     var target=snapGridPoint(previewPointer.x,previewPointer.y);
     var start=pendingStructureStart || target;
@@ -2812,6 +2812,31 @@ function onPointerDown(e) {
     return;
   }
 
+  // Apaga uma linha inteira com um único clique diretamente sobre ela.
+  // Linhas personalizadas são removidas como um único objeto; linhas antigas
+  // da grade são removidas somente quando o clique está próximo de uma borda.
+  if (tool === 'eraseedge') {
+    var eraseTolerance = Math.max(5 / zoom, 2);
+    var edgeToErase = customEdgeAt(world.x, world.y, eraseTolerance);
+    if (!edgeToErase) {
+      var gxErase = world.x / CELL, gyErase = world.y / CELL;
+      var distanceToGridEdge = Math.min(
+        Math.abs(gxErase - Math.round(gxErase)) * CELL,
+        Math.abs(gyErase - Math.round(gyErase)) * CELL
+      );
+      if (distanceToGridEdge <= eraseTolerance) {
+        var legacyEdge = nearestEdge(world.x, world.y);
+        if (getEdgeVal(legacyEdge) !== EDGE_NONE) edgeToErase = legacyEdge;
+      }
+    }
+    if (edgeToErase && getEdgeVal(edgeToErase) !== EDGE_NONE) {
+      setEdgeVal(edgeToErase, EDGE_NONE);
+      save();
+      draw();
+    }
+    return;
+  }
+
   // Clicar fora da imagem manda o personagem caminhar até a borda mais próxima
   // na direção do clique. A troca para o mapa-múndi ocorre só depois do último passo.
   if (!isHexMap() && tool === 'select' && !pendingMonster && currentPlayer() &&
@@ -2821,16 +2846,10 @@ function onPointerDown(e) {
   }
 
 
-  if (!isHexMap() && ['muro','porta','paredeSecreta','portaSecreta','portaTrancada','portaEmperrada','paredeIlusoria','muralhaForca','paredeMagica','eraseedge'].indexOf(tool) >= 0) {
+  if (!isHexMap() && ['muro','porta','paredeSecreta','portaSecreta','portaTrancada','portaEmperrada','paredeIlusoria','muralhaForca','paredeMagica'].indexOf(tool) >= 0) {
     var point = snapGridPoint(world.x, world.y);
     if (!pendingStructureStart) { pendingStructureStart = point; draw(); return; }
     var firstPoint = pendingStructureStart; pendingStructureStart = null;
-    if (tool === 'eraseedge') {
-      var hitCustom = customEdgeAt((firstPoint.x+point.x)/2,(firstPoint.y+point.y)/2,CELL*0.3);
-      if (hitCustom) setEdgeVal(hitCustom, EDGE_NONE);
-      else { var legacy=nearestEdge((firstPoint.x+point.x)/2,(firstPoint.y+point.y)/2); setEdgeVal(legacy,EDGE_NONE); }
-      save(); draw(); return;
-    }
     createCustomStructure(firstPoint, point, tool); return;
   }
   if (!isHexMap() && tool === 'searchSecret') { performActiveSecretSearch(cell); setTool('select'); return; }
@@ -3456,7 +3475,7 @@ function mountNow(el) {
     '<button data-t="searchSecret" title="Busca ativa em uma seção de parede de aproximadamente 3 m: Sabedoria (Percepção)">🔎 Buscar segredo</button>' +
     '<button data-t="investigateMechanism" title="Inteligência (Investigação) para descobrir mecanismo ou ilusão">🧠 Investigar mecanismo</button>' +
     '<button data-t="damageStructure" title="Atacar estrutura: informe ataque, dano e tipo de dano">⚔ Atacar estrutura</button>' +
-    '<button data-t="eraseedge" title="Apagar parede/porta desta linha">✂ Apagar linha</button>' +
+    '<button data-t="eraseedge" title="Clique diretamente sobre uma parede ou porta para apagar a linha inteira">✂ Apagar linha</button>' +
     '<button data-t="spawn" title="Definir início do jogador">📍 Início</button>' +
     '<button data-t="localPortal" title="Clique no ponto A e depois no ponto B para ligar os dois locais por teleporte">🌀 Teleporte</button>' +
     '<button data-t="reveal" title="Revelar névoa">☀ Revelar</button>' +
