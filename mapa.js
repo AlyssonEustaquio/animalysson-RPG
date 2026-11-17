@@ -1122,6 +1122,25 @@ function setEdgeVal(edge, val) {
   else setV(edge.xEdge, edge.y, val);
 }
 
+// Retorna exatamente a linha que seria apagada no clique, permitindo que a prévia
+// e a ação de apagar usem o mesmo critério de proximidade.
+function findEraseEdgeAt(wx, wy) {
+  var eraseTolerance = Math.max(5 / zoom, 2);
+  var edge = customEdgeAt(wx, wy, eraseTolerance);
+  if (!edge) {
+    var gx = wx / CELL, gy = wy / CELL;
+    var distanceToGridEdge = Math.min(
+      Math.abs(gx - Math.round(gx)) * CELL,
+      Math.abs(gy - Math.round(gy)) * CELL
+    );
+    if (distanceToGridEdge <= eraseTolerance) {
+      var legacyEdge = nearestEdge(wx, wy);
+      if (getEdgeVal(legacyEdge) !== EDGE_NONE) edge = legacyEdge;
+    }
+  }
+  return edge && getEdgeVal(edge) !== EDGE_NONE ? edge : null;
+}
+
 function isDoorEdge(val) {
   return val === EDGE_DOOR_C || val === EDGE_DOOR_O || val === EDGE_SECRET_DOOR_C ||
     val === EDGE_SECRET_DOOR_O || val === EDGE_LOCKED_DOOR || val === EDGE_JAMMED_DOOR;
@@ -2416,6 +2435,39 @@ function drawToolPreview() {
   var edge = previewEdge();
   var center = cellCenter(cell.x, cell.y);
   var ghost;
+
+  // Na ferramenta Apagar linha, destaca a linha inteira sob o cursor.
+  // O mesmo helper é usado no clique, então a prévia nunca aponta para outra linha.
+  if (tool === 'eraseedge') {
+    var erasePreviewEdge = findEraseEdgeAt(previewPointer.x, previewPointer.y);
+    if (erasePreviewEdge) {
+      if (erasePreviewEdge.custom) {
+        var eraseItem = erasePreviewEdge.custom;
+        cx.save();
+        cx.strokeStyle = '#ff1744';
+        cx.fillStyle = '#ff1744';
+        cx.lineWidth = Math.max(7, 9 / zoom);
+        cx.setLineDash([8 / zoom, 4 / zoom]);
+        cx.shadowColor = 'rgba(255, 23, 68, 0.95)';
+        cx.shadowBlur = 10 / zoom;
+        cx.beginPath();
+        cx.moveTo(eraseItem.x1, eraseItem.y1);
+        cx.lineTo(eraseItem.x2, eraseItem.y2);
+        cx.stroke();
+        cx.setLineDash([]);
+        var eraseMidX = (eraseItem.x1 + eraseItem.x2) / 2;
+        var eraseMidY = (eraseItem.y1 + eraseItem.y2) / 2;
+        cx.beginPath();
+        cx.arc(eraseMidX, eraseMidY, 5 / zoom, 0, Math.PI * 2);
+        cx.fill();
+        cx.restore();
+      } else {
+        drawEdgePreview(erasePreviewEdge, '#ff1744', false);
+      }
+    }
+    return;
+  }
+
   var lineTools=['muro','porta','paredeSecreta','portaSecreta','portaTrancada','portaEmperrada','paredeIlusoria','muralhaForca','paredeMagica'];
   if (lineTools.indexOf(tool)>=0) {
     var target=snapGridPoint(previewPointer.x,previewPointer.y);
@@ -2812,24 +2864,10 @@ function onPointerDown(e) {
     return;
   }
 
-  // Apaga uma linha inteira com um único clique diretamente sobre ela.
-  // Linhas personalizadas são removidas como um único objeto; linhas antigas
-  // da grade são removidas somente quando o clique está próximo de uma borda.
+  // Apaga a linha inteira com um único clique diretamente sobre ela.
   if (tool === 'eraseedge') {
-    var eraseTolerance = Math.max(5 / zoom, 2);
-    var edgeToErase = customEdgeAt(world.x, world.y, eraseTolerance);
-    if (!edgeToErase) {
-      var gxErase = world.x / CELL, gyErase = world.y / CELL;
-      var distanceToGridEdge = Math.min(
-        Math.abs(gxErase - Math.round(gxErase)) * CELL,
-        Math.abs(gyErase - Math.round(gyErase)) * CELL
-      );
-      if (distanceToGridEdge <= eraseTolerance) {
-        var legacyEdge = nearestEdge(world.x, world.y);
-        if (getEdgeVal(legacyEdge) !== EDGE_NONE) edgeToErase = legacyEdge;
-      }
-    }
-    if (edgeToErase && getEdgeVal(edgeToErase) !== EDGE_NONE) {
+    var edgeToErase = findEraseEdgeAt(world.x, world.y);
+    if (edgeToErase) {
       setEdgeVal(edgeToErase, EDGE_NONE);
       save();
       draw();
