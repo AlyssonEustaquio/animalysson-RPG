@@ -2027,14 +2027,13 @@ function onPointerDown(e) {
   var world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
   var cell = worldToCell(world.x, world.y);
 
+  // Pan da câmera com o mouse desativado.
   if (tool === 'pan' || e.button === 1 || e.button === 2 || space) {
-    drag = { pan: true, x: e.clientX, y: e.clientY, ox: ox, oy: oy };
     return;
   }
 
   // Clicar fora da imagem manda o personagem caminhar até a borda mais próxima
   // na direção do clique. A troca para o mapa-múndi ocorre só depois do último passo.
-  // O pan continua disponível porque é tratado antes desta condição.
   if (!isHexMap() && tool === 'select' && !pendingMonster && currentPlayer() &&
       (world.x < 0 || world.y < 0 || world.x >= MAP_W || world.y >= MAP_H)) {
     startClickExit(world);
@@ -2173,9 +2172,7 @@ function onPointerMove(e) {
   previewPointer = screenToWorld(e.clientX - previewRect.left, e.clientY - previewRect.top);
   if (!drag) { draw(); return; }
   if (drag.pan) {
-    ox = drag.ox + (e.clientX - drag.x);
-    oy = drag.oy + (e.clientY - drag.y);
-    draw();
+    // Pan da câmera com o mouse desativado.
     return;
   }
   if (drag.edgePaint && !isHexMap()) {
