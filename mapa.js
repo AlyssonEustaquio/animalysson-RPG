@@ -1101,9 +1101,10 @@ function centerCameraOnPlayer(viewW, viewH) {
   var height = viewH == null ? cv.clientHeight : viewH;
   if (!p || !width || !height) return;
 
-  // O zoom é livre para aproximar, mas nunca pode mostrar uma área menor
-  // que o raio de visão atual do personagem.
-  zoom = Math.max(0.04, Math.min(zoom, visionZoom(width, height)));
+  // Limita o afastamento: a câmera não pode mostrar uma área maior
+  // que o raio de visão atual do personagem. Aproximar continua permitido.
+  var minZoom = visionZoom(width, height);
+  zoom = Math.max(minZoom, zoom);
 
   // Durante a caminhada usa a posição interpolada para a câmera acompanhar
   // o personagem quadro a quadro, sem zona morta ou atraso.
@@ -1114,8 +1115,9 @@ function centerCameraOnPlayer(viewW, viewH) {
 
 function changeCameraZoom(factor) {
   if (isHexMap() || !cv) return;
-  var maxZoom = visionZoom();
-  zoom = Math.max(0.04, Math.min(maxZoom, zoom * factor));
+  var minZoom = visionZoom();
+  var maxZoom = 16; // Limite técnico de ampliação; o afastamento é limitado pela visão.
+  zoom = Math.max(minZoom, Math.min(maxZoom, zoom * factor));
   centerCameraOnPlayer();
   draw();
 }
@@ -2252,8 +2254,8 @@ function onWheel(e) {
   // O mapa-múndi mantém sua escala própria; o zoom manual é dos mapas de aventura.
   if (isHexMap()) { zoom = FLANAESS_ZOOM; draw(); return; }
   if (!e.deltaY) return;
-  // Sentido invertido para corresponder ao controle esperado: rolar para frente aproxima.
-  changeCameraZoom(Math.exp(e.deltaY * 0.0015));
+  // Mantém o sentido natural da rodinha: para frente aproxima, para trás afasta.
+  changeCameraZoom(Math.exp(-e.deltaY * 0.0015));
 }
 
 // ---------- Movimento por clique em tiles visíveis (mapas de quadrados) ----------
