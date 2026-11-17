@@ -1412,6 +1412,88 @@ function createSpecialEdge(edge, kind) {
   setEdgeVal(edge, type); setEdgeMeta(edge, meta); save(); draw();
   appAlertMessage('msg029', 'Estrutura criada: ' + ({ secretWall:'parede secreta', secretDoor:'porta secreta', lockedDoor:'porta trancada', jammedDoor:'porta emperrada', illusionWall:'parede ilusória', forceWall:'Muralha de Energia', magicWall:'parede mágica' })[kind] + '.');
 }
+function structureKindFromEdge(edge) {
+  var val = getEdgeVal(edge), meta = getEdgeMeta(edge) || {};
+  if (val === EDGE_MURO) return 'muro';
+  if (val === EDGE_DOOR_C || val === EDGE_DOOR_O) return 'porta';
+  if (val === EDGE_SECRET_WALL) return 'secretWall';
+  if (val === EDGE_SECRET_DOOR_C || val === EDGE_SECRET_DOOR_O) return 'secretDoor';
+  if (val === EDGE_LOCKED_DOOR) return 'lockedDoor';
+  if (val === EDGE_JAMMED_DOOR) return 'jammedDoor';
+  if (val === EDGE_ILLUSION_WALL) return 'illusionWall';
+  if (val === EDGE_FORCE_WALL) return 'forceWall';
+  if (val === EDGE_MAGIC_WALL) return 'magicWall';
+  return meta.kind || 'muro';
+}
+function openStructureEditor(edge) {
+  if (!edge || getEdgeVal(edge) === EDGE_NONE) { appAlertMessage('msg064', 'Não há parede ou porta nesta linha.'); return; }
+  var oldVal = getEdgeVal(edge), oldMeta = getEdgeMeta(edge) || {};
+  var kinds = [
+    ['muro','Muro comum'],['porta','Porta comum'],['secretWall','Parede secreta'],['secretDoor','Porta secreta'],
+    ['lockedDoor','Porta trancada'],['jammedDoor','Porta emperrada / barrada'],['illusionWall','Parede ilusória'],
+    ['forceWall','Muralha de Energia'],['magicWall','Parede mágica']
+  ];
+  var dlg = createPortalDialog('Editar estrutura', 'Edite somente esta parede ou porta. Escolha o tipo e ajuste suas propriedades individualmente.');
+  if (!dlg) return;
+  dlg.panel.style.width = 'min(620px,100%)';
+  dlg.panel.style.maxHeight = '88%'; dlg.panel.style.overflow = 'auto';
+  var form = document.createElement('div');
+  form.style.cssText = 'display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:10px 0 16px;';
+  function field(label, key, value, type) {
+    var wrap=document.createElement('label'); wrap.style.cssText='display:flex;flex-direction:column;gap:4px;font-size:12px;color:#d5d9e2;';
+    var span=document.createElement('span'); span.textContent=label; wrap.appendChild(span);
+    var input=document.createElement(type==='select'?'select':'input');
+    if(type!=='select') input.type=type||'text';
+    input.dataset.key=key;
+    input.style.cssText='width:100%;min-width:0;box-sizing:border-box;padding:8px;border:1px solid #555d6c;border-radius:6px;background:#252a34;color:#fff;';
+    if(type==='select' && key==='kind') kinds.forEach(function(k){var o=document.createElement('option');o.value=k[0];o.textContent=k[1];input.appendChild(o);});
+    if(type==='select' && key==='material') Object.keys(OBJECT_MATERIALS).forEach(function(k){var o=document.createElement('option');o.value=k;o.textContent=OBJECT_MATERIALS[k].label;input.appendChild(o);});
+    if(type==='checkbox') input.checked=!!value; else input.value=value==null?'':String(value);
+    wrap.appendChild(input); form.appendChild(wrap); return input;
+  }
+  var kind=field('Tipo da estrutura','kind',structureKindFromEdge(edge),'select');
+  var material=field('Material','material',oldMeta.material||'pedra','select');
+  var ac=field('Classe de Armadura (CA)','ac',oldMeta.ac==null?17:oldMeta.ac,'number');
+  var hp=field('Pontos de Vida (PV)','hp',oldMeta.hp==null?27:oldMeta.hp,'number');
+  var maxHp=field('PV máximo','maxHp',oldMeta.maxHp==null?(oldMeta.hp==null?27:oldMeta.hp):oldMeta.maxHp,'number');
+  var threshold=field('Limiar de dano','threshold',oldMeta.threshold==null?0:oldMeta.threshold,'number');
+  var dcDetection=field('CD para detectar / investigar','dcDetection',oldMeta.dcDetection==null?15:oldMeta.dcDetection,'number');
+  var dcMechanism=field('CD para descobrir mecanismo','dcMechanism',oldMeta.dcMechanism==null?15:oldMeta.dcMechanism,'number');
+  var mechanismHint=field('Dica do mecanismo','mechanismHint',oldMeta.mechanismHint||'','text');
+  var lockDC=field('CD das Ferramentas de Ladrão','lockDC',oldMeta.lockDC==null?15:oldMeta.lockDC,'number');
+  var dcForce=field('CD de Força / Atletismo','dcForce',oldMeta.dcForce==null?15:oldMeta.dcForce,'number');
+  var lockComplexity=field('Complexidade da fechadura','lockComplexity',oldMeta.lockComplexity||'simple','select');
+  ['simple','complex'].forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v==='simple'?'Simples (1 ação)':'Complexa (1 minuto)';lockComplexity.appendChild(o);});
+  var keyName=field('Nome da chave','keyName',oldMeta.keyName||'','text');
+  var barred=field('Barrada por dentro','barred',oldMeta.barred,'checkbox');
+  var arcane=field('Possui Tranca Arcana','arcaneLock',oldMeta.arcaneLock,'checkbox');
+  var detected=field('Segredo já detectado','detected',oldMeta.detected,'checkbox');
+  var mechanismKnown=field('Mecanismo descoberto','mechanismKnown',oldMeta.mechanismKnown,'checkbox');
+  var opened=field('Estrutura aberta','open',oldMeta.open,'checkbox');
+  dlg.panel.appendChild(form);
+  var note=document.createElement('p'); note.textContent='Os campos específicos de cada tipo são mantidos no mesmo registro; campos não aplicáveis são ignorados.'; dlg.panel.appendChild(note);
+  var actions=document.createElement('div'); actions.className='mp-portal-dialog-actions';
+  var cancel=document.createElement('button'); cancel.type='button'; cancel.textContent='Cancelar'; cancel.onclick=function(){closePortalDialog(dlg.overlay);};
+  var remove=document.createElement('button'); remove.type='button'; remove.className='danger'; remove.textContent='Remover estrutura'; remove.onclick=function(){setEdgeVal(edge,EDGE_NONE);setEdgeMeta(edge,null);save();draw();closePortalDialog(dlg.overlay);};
+  var saveBtn=document.createElement('button'); saveBtn.type='button'; saveBtn.className='primary'; saveBtn.textContent='Salvar alterações';
+  saveBtn.onclick=function(){
+    var k=kind.value, m=Object.assign({},oldMeta);
+    m.kind=k; m.material=material.value; m.ac=Math.max(0,Number(ac.value)||0); m.hp=Math.max(0,Number(hp.value)||0); m.maxHp=Math.max(0,Number(maxHp.value)||m.hp); m.threshold=Math.max(0,Number(threshold.value)||0);
+    m.dcDetection=Math.max(1,Number(dcDetection.value)||15); m.dcMechanism=Math.max(1,Number(dcMechanism.value)||15); m.mechanismHint=mechanismHint.value;
+    m.lockDC=Math.max(1,Number(lockDC.value)||15); m.dcForce=Math.max(1,Number(dcForce.value)||15); m.lockComplexity=lockComplexity.value; m.keyName=keyName.value;
+    m.barred=barred.checked; m.arcaneLock=arcane.checked; m.detected=detected.checked; m.mechanismKnown=mechanismKnown.checked; m.open=opened.checked;
+    var vals={muro:EDGE_MURO,porta:opened.checked?EDGE_DOOR_O:EDGE_DOOR_C,secretWall:EDGE_SECRET_WALL,secretDoor:opened.checked?EDGE_SECRET_DOOR_O:EDGE_SECRET_DOOR_C,lockedDoor:EDGE_LOCKED_DOOR,jammedDoor:EDGE_JAMMED_DOOR,illusionWall:EDGE_ILLUSION_WALL,forceWall:EDGE_FORCE_WALL,magicWall:EDGE_MAGIC_WALL};
+    if(k==='muro'||k==='porta'){m.kind=k; if(k==='muro'){m.material='pedra';} }
+    if(k==='secretWall'||k==='secretDoor'){m.detected=detected.checked;m.mechanismKnown=mechanismKnown.checked;}
+    if(k==='lockedDoor'||k==='jammedDoor')m.locked=true;
+    if(k==='illusionWall'){m.material='illusion';m.hp=null;m.maxHp=null;m.ac=null;m.threshold=0;}
+    if(k==='forceWall'){m.material='force';m.hp=null;m.maxHp=null;m.ac=null;m.threshold=999999;}
+    if(k==='magicWall'){m.material='pedraMagica';}
+    setEdgeVal(edge,vals[k]); setEdgeMeta(edge,m); save(); draw(); closePortalDialog(dlg.overlay);
+  };
+  actions.appendChild(remove); actions.appendChild(cancel); actions.appendChild(saveBtn); dlg.panel.appendChild(actions);
+}
+
 function edgeActionLabel(val, meta) {
   if (val === EDGE_SECRET_WALL || val === EDGE_SECRET_DOOR_C || val === EDGE_SECRET_DOOR_O) return meta && meta.kind === 'secretDoor' ? 'porta secreta' : 'parede secreta';
   if (val === EDGE_LOCKED_DOOR) return 'porta trancada';
@@ -2918,6 +3000,18 @@ function onPointerDown(e) {
   if (tool === 'localPortal') { placeLocalPortal(cell); return; }
 
 
+  // O modo Editar seleciona uma única estrutura e abre seu editor individual.
+  if (tool === 'editStructure') {
+    var structureEdge = customEdgeAt(world.x, world.y, Math.max(8 / zoom, CELL * 0.18));
+    if (!structureEdge) {
+      var nearGrid = Math.min(Math.abs(world.x / CELL - Math.round(world.x / CELL)), Math.abs(world.y / CELL - Math.round(world.y / CELL))) * CELL;
+      if (nearGrid <= Math.max(8 / zoom, CELL * 0.18)) structureEdge = nearestEdge(world.x, world.y);
+    }
+    if (structureEdge && getEdgeVal(structureEdge) !== EDGE_NONE) openStructureEditor(structureEdge);
+    else appAlertMessage('msg064', 'Não há parede ou porta nesta linha.');
+    return;
+  }
+
   // Apaga a linha inteira com um único clique diretamente sobre ela.
   if (tool === 'eraseedge') {
     var edgeToErase = findEraseEdgeAt(world.x, world.y);
@@ -3738,7 +3832,6 @@ function mountNow(el) {
     '<input type="file" id="mp-add-map-file" accept="image/*" style="display:none">' +
     '<button type="button" id="mp-export" title="Baixar os dados deste mapa em JSON">⬇ Salvar mapa</button>' +
     '<button type="button" id="mp-export-catalog" title="Baixar o catálogo para publicar os mapas adicionados">🗂 Baixar catálogo de mapas</button>' +
-    '<button type="button" id="mp-message-settings" title="Editar os textos de avisos, confirmações e perguntas">💬 Personalizar mensagens</button>' +
     '<label id="mp-hex-wrap" class="mp-luz" style="display:none">Hexágono <select id="mp-hex-size" disabled><option value="small" selected>Pequeno · 6 mi</option></select></label>' +
     '<label id="mp-speed-wrap" class="mp-luz" style="display:none">Velocidade <input id="mp-speed" type="number" min="0.1" step="0.1" placeholder="mi/dia" style="width:62px"></label>' +
     '<button type="button" id="mp-world-move" class="mp-world-action active" title="Desativa os modos de início e teleporte; use as setas ou clique para mover o personagem">🧭 Desativar ferramentas</button>' +
@@ -3746,29 +3839,10 @@ function mountNow(el) {
     '<button type="button" id="mp-world-portal" class="mp-world-action" title="Adicionar um teleporte para outro mapa">🌀 Teleporte para outro mapa</button>' +
     '<button type="button" id="mp-world-local-portal" class="mp-world-action" title="Clique no ponto A e depois no ponto B para criar um teleporte dentro deste mapa">🌀 Teleporte neste mapa</button>' +
     '<div class="mp-g" id="mp-tools">' +
-    '<button data-t="select" class="on" title="Selecionar / Mover · clique na porta para abrir/fechar">↖ Selecionar</button>' +
-    '<button data-t="pan" title="Mover vista">✋ Mover</button>' +
-    '<button data-t="wall" title="Parede no espaço atual (bloqueia tudo)">🧱 Parede</button>' +
-    '<button data-t="erasewall" title="Apagar parede do espaço atual">🧹 Apagar parede</button>' +
+    '<button data-t="wall" title="Posicionar parede em uma quadrícula">🧱 Parede</button>' +
     '<button data-t="muro" title="Desenhar muro: clique em um canto e depois em outro">─ Muro</button>' +
     '<button data-t="porta" title="Desenhar porta: clique em um canto e depois em outro">🚪 Porta</button>' +
-    '<button data-t="paredeSecreta" title="Parede secreta: Percepção para encontrar e Investigação para descobrir o mecanismo">🧱 Parede secreta</button>' +
-    '<button data-t="portaSecreta" title="Porta secreta: encontrar, investigar o mecanismo e abrir">🚪 Porta secreta</button>' +
-    '<button data-t="portaTrancada" title="Porta trancada: Ferramentas de Ladrão; pode ter Tranca Arcana">🔒 Porta trancada</button>' +
-    '<button data-t="portaEmperrada" title="Porta emperrada/barrada: Força (Atletismo) para forçar">🪵 Porta emperrada</button>' +
-    '<button data-t="paredeIlusoria" title="Parede ilusória: não bloqueia passagem; toque ou Investigação revela">🫥 Parede ilusória</button>' +
-    '<button data-t="muralhaForca" title="Muralha de Energia: invisível, imune a dano comum; Desintegrar a destrói">🔷 Muralha de Energia</button>' +
-    '<button data-t="paredeMagica" title="Parede mágica de pedra/metal, pode ser danificada">✨ Parede mágica</button>' +
-    '<button data-t="searchSecret" title="Busca ativa em uma seção de parede de aproximadamente 3 m: Sabedoria (Percepção)">🔎 Buscar segredo</button>' +
-    '<button data-t="investigateMechanism" title="Inteligência (Investigação) para descobrir mecanismo ou ilusão">🧠 Investigar mecanismo</button>' +
-    '<button data-t="damageStructure" title="Atacar estrutura: informe ataque, dano e tipo de dano">⚔ Atacar estrutura</button>' +
-    '<button data-t="eraseedge" title="Clique diretamente sobre uma parede ou porta para apagar a linha inteira">✂ Apagar linha</button>' +
-    '<button data-t="spawn" title="Definir início do jogador">📍 Início</button>' +
-    '<button data-t="localPortal" title="Clique no ponto A e depois no ponto B para ligar os dois locais por teleporte">🌀 Teleporte</button>' +
-    '<button data-t="reveal" title="Revelar névoa">☀ Revelar</button>' +
-    '<button data-t="hide" title="Ocultar névoa">🌑 Ocultar</button>' +
-    '<button data-t="token" title="Token livre">♟ Token</button>' +
-    '<button data-t="measure" title="Medir">📏 Medir</button>' +
+    '<button data-t="editStructure" title="Clique em uma parede, muro ou porta para editar somente aquela estrutura">⚙ Editar</button>' +
     '</div>' +
     '<button id="mp-grid" title="Grid (G)">Grid</button>' +
     '<button id="mp-fog" title="Névoa (F)">Névoa</button>' +
@@ -3878,7 +3952,7 @@ function mountNow(el) {
 
   // Tudo que altera o mapa ou seus dados fica disponível apenas no Editor.
   [
-    '#mp-add-map', '#mp-add-map-file', '#mp-export', '#mp-export-catalog', '#mp-message-settings',
+    '#mp-add-map', '#mp-add-map-file', '#mp-export', '#mp-export-catalog',
     '#mp-tools', '#mp-grid', '#mp-fog', '#mp-light', '#mp-walls-vis', '#mp-secret-view',
     '#mp-block', '#mp-lr', '#mp-reset-fog', '#mp-clear-fog', '#mp-clear-walls', '#mp-clear-edges',
     '#mp-zo', '#mp-zi', '#mp-side', '#mp-delete-map', '.mp-menu-footer',
@@ -3891,7 +3965,8 @@ function mountNow(el) {
   });
   var worldActionButtons = R.querySelectorAll('.mp-world-action');
   worldActionButtons.forEach(function (node) { node.classList.add('mp-editor-only'); });
-  $('#mp-message-settings').onclick = function () { openMessageEditor(); };
+  var editStructureButton = R.querySelector('#mp-tools button[data-t="editStructure"]');
+  if (editStructureButton) editStructureButton.onclick = function () { setTool('editStructure'); setMenu(false); };
   $('#mp-mode-player').onclick = function () { setMode('player'); setMenu(false); };
   $('#mp-mode-editor').onclick = function () { setMode('editor'); setMenu(false); };
 
@@ -4068,7 +4143,7 @@ function mountNow(el) {
   [
     'wall', 'erasewall', 'muro', 'porta', 'paredeSecreta', 'portaSecreta', 'portaTrancada',
     'portaEmperrada', 'paredeIlusoria', 'muralhaForca', 'paredeMagica', 'searchSecret',
-    'investigateMechanism', 'damageStructure', 'eraseedge', 'reveal', 'hide', 'token', 'measure',
+    'investigateMechanism', 'damageStructure', 'eraseedge', 'editStructure', 'reveal', 'hide', 'token', 'measure',
     'spawn', 'localPortal'
   ].forEach(function (name) {
     var btn = R.querySelector('#mp-tools button[data-t="' + name + '"]');
