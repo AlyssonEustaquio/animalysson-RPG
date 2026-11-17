@@ -1094,14 +1094,30 @@ function visionZoom(viewW, viewH) {
   return Math.max(0.04, Math.min(w, h) / ((r * 2 + 1) * CELL));
 }
 
-function centerCameraOnPlayer() {
+function centerCameraOnPlayer(viewW, viewH) {
   if (isHexMap() || !cv) return;
   var p = currentPlayer();
-  if (!p || !cv.clientWidth || !cv.clientHeight) return;
-  zoom = visionZoom();
-  var c = tokenAnchor(p, p.x, p.y);
-  ox = cv.clientWidth / 2 - c.x * zoom;
-  oy = cv.clientHeight / 2 - c.y * zoom;
+  var width = viewW == null ? cv.clientWidth : viewW;
+  var height = viewH == null ? cv.clientHeight : viewH;
+  if (!p || !width || !height) return;
+
+  // O zoom é livre para aproximar, mas nunca pode mostrar uma área menor
+  // que o raio de visão atual do personagem.
+  zoom = Math.max(0.04, Math.min(zoom, visionZoom(width, height)));
+
+  // Durante a caminhada usa a posição interpolada para a câmera acompanhar
+  // o personagem quadro a quadro, sem zona morta ou atraso.
+  var c = keyMoveVis || tokenAnchor(p, p.x, p.y);
+  ox = width / 2 - c.x * zoom;
+  oy = height / 2 - c.y * zoom;
+}
+
+function changeCameraZoom(factor) {
+  if (isHexMap() || !cv) return;
+  var maxZoom = visionZoom();
+  zoom = Math.max(0.04, Math.min(maxZoom, zoom * factor));
+  centerCameraOnPlayer();
+  draw();
 }
 
 function onWindowResize() {
@@ -1248,6 +1264,7 @@ function draw() {
   }
   cx.setTransform(dpr, 0, 0, dpr, 0, 0);
   if (isHexMap()) focusCameraOnPlayer(W, H);
+  else centerCameraOnPlayer(W, H);
   cx.fillStyle = '#0a0a0b';
   cx.fillRect(0, 0, W, H);
 
@@ -2232,7 +2249,10 @@ function onPointerLeave() {
 
 function onWheel(e) {
   e.preventDefault();
+  // O mapa-múndi mantém sua escala própria; o zoom manual é dos mapas de aventura.
   if (isHexMap()) { zoom = FLANAESS_ZOOM; draw(); return; }
+  if (!e.deltaY) return;
+  changeCameraZoom(Math.exp(-e.deltaY * 0.0015));
 }
 
 // ---------- Movimento por clique em tiles visíveis (mapas de quadrados) ----------
@@ -2416,17 +2436,12 @@ function returnToWorldMapFromExit() {
   return true;
 }
 
-// A câmera acompanha o personagem suavemente quando ele se aproxima das bordas da tela.
+// Mantém a câmera travada no personagem durante todo o deslocamento,
+// sem margem morta: qualquer movimento do personagem move a câmera junto.
 function followKeyMove() {
-  var visual = isHexMap() ? worldTravelPos : keyMoveVis;
-  if (!visual || !cv) return;
-  var tol = CELL * zoom;
-  var dx = visual.x * zoom + ox - cv.clientWidth / 2;
-  var dy = visual.y * zoom + oy - cv.clientHeight / 2;
-  if (dx > tol) ox -= dx - tol;
-  else if (dx < -tol) ox -= dx + tol;
-  if (dy > tol) oy -= dy - tol;
-  else if (dy < -tol) oy -= dy + tol;
+  if (!cv) return;
+  if (isHexMap()) focusCameraOnPlayer();
+  else centerCameraOnPlayer();
 }
 
 function stopKeyMove() {
@@ -2840,8 +2855,8 @@ function mountNow(el) {
       save(); draw();
     }
   };
-  $('#mp-zo').onclick = function () { if (isHexMap()) zoom = FLANAESS_ZOOM; else centerCameraOnPlayer(); draw(); };
-  $('#mp-zi').onclick = function () { if (isHexMap()) zoom = FLANAESS_ZOOM; else centerCameraOnPlayer(); draw(); };
+  $('#mp-zo').onclick = function () { if (isHexMap()) { zoom = FLANAESS_ZOOM; draw(); } else changeCameraZoom(1 / 1.2); };
+  $('#mp-zi').onclick = function () { if (isHexMap()) { zoom = FLANAESS_ZOOM; draw(); } else changeCameraZoom(1.2); };
 
   $('#mp-q').oninput = function () { renderMonsterList(this.value); };
   $('#mp-ml').onclick = function (e) {
