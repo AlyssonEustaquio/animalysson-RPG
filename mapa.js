@@ -159,9 +159,10 @@ var SIZE_SQ = {
 var R = null, cv = null, cx = null;
 var zoom = 0.35, ox = 40, oy = 40;
 var tool = 'select';
+var appMode = 'player'; // O aplicativo sempre inicia no modo Jogador.
 var pendingStructureStart = null; // primeiro canto ao desenhar parede/porta
 var drag = null, space = false;
-var showGrid = true, showFog = true, dynLight = true, showWalls = true;
+var showGrid = false, showFog = true, dynLight = true, showWalls = true;
 var showSecrets = false; // visão do Mestre: exibe estruturas secretas ainda não descobertas.
 var lightRadius = 6;
 var selected = null;
@@ -1595,8 +1596,8 @@ function drawDetail(W, H) {
   }
 }
 
-function focusCameraOnPlayer(viewW, viewH) {
-  if (!isHexMap() || !cv) return;
+function focusCameraOnPlayer(viewW, viewH, force) {
+  if (!isHexMap() || !cv || (appMode === 'editor' && !force)) return;
   zoom = FLANAESS_ZOOM; // Flanaess fixo em 300%.
   var player = currentPlayer();
   if (!player) return;
@@ -1617,8 +1618,8 @@ function visionZoom(viewW, viewH) {
   return Math.max(0.04, Math.min(w, h) / ((r * 2 + 1) * CELL));
 }
 
-function centerCameraOnPlayer(viewW, viewH) {
-  if (isHexMap() || !cv) return;
+function centerCameraOnPlayer(viewW, viewH, force) {
+  if (isHexMap() || !cv || (appMode === 'editor' && !force)) return;
   var p = currentPlayer();
   var width = viewW == null ? cv.clientWidth : viewW;
   var height = viewH == null ? cv.clientHeight : viewH;
@@ -1636,10 +1637,24 @@ function centerCameraOnPlayer(viewW, viewH) {
   oy = height / 2 - c.y * zoom;
 }
 
-function changeCameraZoom(factor) {
-  if (isHexMap() || !cv) return;
+function changeCameraZoom(factor, anchorX, anchorY) {
+  if (!cv) return;
+  if (appMode === 'editor') {
+    // Zoom livre, ancorado no cursor (ou no centro da tela pelos botões +/-).
+    var viewW = cv.clientWidth, viewH = cv.clientHeight;
+    var ax = anchorX == null ? viewW / 2 : anchorX;
+    var ay = anchorY == null ? viewH / 2 : anchorY;
+    var worldX = (ax - ox) / zoom, worldY = (ay - oy) / zoom;
+    zoom = Math.max(0.02, Math.min(32, zoom * factor));
+    ox = ax - worldX * zoom;
+    oy = ay - worldY * zoom;
+    draw();
+    return;
+  }
+  // No modo Jogador, o mapa-múndi mantém o enquadramento automático.
+  if (isHexMap()) return;
   var minZoom = visionZoom();
-  var maxZoom = 16; // Limite técnico de ampliação; o afastamento é limitado pela visão.
+  var maxZoom = 16;
   zoom = Math.max(minZoom, Math.min(maxZoom, zoom * factor));
   centerCameraOnPlayer();
   draw();
@@ -1839,8 +1854,10 @@ function draw() {
     cv.height = Math.round(H * dpr);
   }
   cx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  if (isHexMap()) focusCameraOnPlayer(W, H);
-  else centerCameraOnPlayer(W, H);
+  if (appMode !== 'editor') {
+    if (isHexMap()) focusCameraOnPlayer(W, H);
+    else centerCameraOnPlayer(W, H);
+  }
   cx.fillStyle = '#0a0a0b';
   cx.fillRect(0, 0, W, H);
 
@@ -2827,6 +2844,15 @@ function revealAround(cx, cy, radius) {
 }
 
 function onPointerDown(e) {
+  // No Editor, a câmera pode ser arrastada em qualquer tipo de mapa.
+  if (appMode === 'editor' && (tool === 'pan' || e.button === 1 || e.button === 2 || space)) {
+    e.preventDefault();
+    if (cv.setPointerCapture) cv.setPointerCapture(e.pointerId);
+    drag = { pan: true, startX: e.clientX, startY: e.clientY, originX: ox, originY: oy };
+    cv.style.cursor = 'grabbing';
+    return;
+  }
+  if (appMode !== 'editor') tool = 'select';
   if (isHexMap()) {
     e.preventDefault();
     var worldRect = cv.getBoundingClientRect();
@@ -2859,10 +2885,6 @@ function onPointerDown(e) {
 
   if (tool === 'localPortal') { placeLocalPortal(cell); return; }
 
-  // Pan da câmera com o mouse desativado.
-  if (tool === 'pan' || e.button === 1 || e.button === 2 || space) {
-    return;
-  }
 
   // Apaga a linha inteira com um único clique diretamente sobre ela.
   if (tool === 'eraseedge') {
@@ -2968,7 +2990,9 @@ function onPointerDown(e) {
     }
     selected = hit;
     if (hit) {
-      drag = { moveToken: hit, fromX: hit.x, fromY: hit.y };
+      if (appMode === 'editor' || hit.tipo === 'player') {
+        drag = { moveToken: hit, fromX: hit.x, fromY: hit.y };
+      }
     } else {
       // Em mapas de aventura, clicar em um espaço vazio iluminado traça uma rota
       // até ele. Áreas fora da luz atual não aceitam destino de movimento.
@@ -3012,6 +3036,12 @@ function onPointerDown(e) {
 }
 
 function onPointerMove(e) {
+  if (drag && drag.pan) {
+    ox = drag.originX + (e.clientX - drag.startX);
+    oy = drag.originY + (e.clientY - drag.startY);
+    draw();
+    return;
+  }
   if (isHexMap()) return;
   var previewRect = cv.getBoundingClientRect();
   previewPointer = screenToWorld(e.clientX - previewRect.left, e.clientY - previewRect.top);
@@ -3077,20 +3107,25 @@ function onPointerUp() {
   }
   if (drag && (drag.moveToken || drag.brush || drag.wall || drag.edgePaint)) save();
   drag = null;
+  if (cv) cv.style.cursor = tool === 'pan' && appMode === 'editor' ? 'grab' : (tool === 'select' ? 'pointer' : 'crosshair');
   if (teleported) draw();
 }
 
 function onPointerLeave() {
-  if (isHexMap()) return;
   if (!drag) { previewPointer = null; draw(); }
 }
 
 function onWheel(e) {
   e.preventDefault();
-  // O mapa-múndi mantém sua escala própria; o zoom manual é dos mapas de aventura.
-  if (isHexMap()) { zoom = FLANAESS_ZOOM; draw(); return; }
   if (!e.deltaY) return;
-  // Mantém o sentido natural da rodinha: para frente aproxima, para trás afasta.
+  // No Editor o zoom é livre nos dois mapas e acompanha a posição do cursor.
+  if (appMode === 'editor') {
+    var rect = cv.getBoundingClientRect();
+    changeCameraZoom(Math.exp(-e.deltaY * 0.0015), e.clientX - rect.left, e.clientY - rect.top);
+    return;
+  }
+  // No modo Jogador, o mapa-múndi mantém o zoom automático.
+  if (isHexMap()) { zoom = FLANAESS_ZOOM; draw(); return; }
   changeCameraZoom(Math.exp(-e.deltaY * 0.0015));
 }
 
@@ -3394,6 +3429,11 @@ function onKey(e) {
     if (keyMoveRaf == null) keyMoveRaf = window.requestAnimationFrame(keyMoveFrame);
     return;
   }
+  if (appMode === 'editor' && e.code === 'Space') { space = true; e.preventDefault(); return; }
+  if (appMode !== 'editor') {
+    if (e.key === 'Escape' && isHexMap()) haltWorldTravel();
+    return;
+  }
   if (isHexMap()) {
     if (e.key === 'Escape') {
       if (tool === 'portal' || tool === 'spawn' || tool === 'localPortal') setTool('select');
@@ -3401,7 +3441,6 @@ function onKey(e) {
     }
     return;
   }
-  if (e.code === 'Space') { space = true; e.preventDefault(); return; }
   if (e.key === 'Escape' && pendingStructureStart) { pendingStructureStart = null; draw(); return; }
   if (e.key === 'Escape' && tool === 'localPortal') { pendingLocalPortal = null; setTool('select'); return; }
   if ((e.key === 'Delete' || e.key === 'Backspace') && selected && selected.tipo !== 'player') {
@@ -3419,9 +3458,11 @@ function onKeyUp(e) {
   if (e.code === 'Space') space = false;
   if (MOVE_KEYS[e.code]) delete keysHeld[e.code];
 }
-function onWindowBlur() { keysHeld = {}; }
+function onWindowBlur() { keysHeld = {}; space = false; if (drag && drag.pan) drag = null; }
 
 function setTool(t) {
+  if (appMode !== 'editor' && t !== 'select') t = 'select';
+  if (isHexMap() && ['select', 'pan', 'spawn', 'portal', 'localPortal'].indexOf(t) < 0) t = 'select';
   tool = t;
   pendingStructureStart = null;
   measurePts = null;
@@ -3438,8 +3479,61 @@ function setTool(t) {
   if (worldPortalButton) worldPortalButton.classList.toggle('active', t === 'portal');
   if (worldLocalPortalButton) worldLocalPortalButton.classList.toggle('active', t === 'localPortal');
   if (worldMoveButton) worldMoveButton.classList.toggle('active', t === 'select');
-  if (cv) cv.style.cursor = t === 'pan' ? 'grab' : t === 'select' ? 'pointer' : 'crosshair';
+  if (cv) cv.style.cursor = t === 'pan' && appMode === 'editor' ? 'grab' : t === 'select' ? 'pointer' : 'crosshair';
   draw();
+}
+
+
+function updateModeUi() {
+  if (!R) return;
+  var root = R.querySelector('#mp-root');
+  if (root) {
+    root.classList.toggle('player-mode', appMode === 'player');
+    root.classList.toggle('editor-mode', appMode === 'editor');
+  }
+  var playerButton = R.querySelector('#mp-mode-player');
+  var editorButton = R.querySelector('#mp-mode-editor');
+  if (playerButton) playerButton.classList.toggle('active', appMode === 'player');
+  if (editorButton) editorButton.classList.toggle('active', appMode === 'editor');
+  var gridButton = R.querySelector('#mp-grid');
+  var fogButton = R.querySelector('#mp-fog');
+  var lightButton = R.querySelector('#mp-light');
+  var wallsButton = R.querySelector('#mp-walls-vis');
+  var secretsButton = R.querySelector('#mp-secret-view');
+  if (gridButton) gridButton.classList.toggle('on', showGrid);
+  if (fogButton) fogButton.classList.toggle('on', showFog);
+  if (lightButton) lightButton.classList.toggle('on', dynLight);
+  if (wallsButton) wallsButton.classList.toggle('on', showWalls);
+  if (secretsButton) secretsButton.classList.toggle('on', showSecrets);
+  var block = R.querySelector('#mp-block');
+  if (block) block.checked = blockMove;
+  var radius = R.querySelector('#mp-lr');
+  if (radius) radius.value = lightRadius;
+}
+
+function setMode(nextMode) {
+  appMode = nextMode === 'editor' ? 'editor' : 'player';
+  // Presets de visão pedidos: Jogador sem grade/segredos; Editor com visão completa.
+  showGrid = appMode === 'editor';
+  showSecrets = appMode === 'editor';
+  showFog = true;
+  dynLight = true;
+  showWalls = true;
+  blockMove = true;
+  pendingStructureStart = null;
+  pendingLocalPortal = null;
+  pendingMonster = null;
+  measurePts = null;
+  selected = null;
+  if (appMode === 'player') {
+    stopKeyMove();
+    stopWorldTravel(false);
+  }
+  if (R) {
+    setTool('select');
+    updateModeUi();
+    draw();
+  }
 }
 
 function menuIsOpen() {
@@ -3483,6 +3577,7 @@ function mountNow(el) {
     '<div class="mp-main">' +
     '<canvas id="mp-cv"></canvas>' +
     '<button type="button" id="mp-burger" class="mp-burger" title="Menu" aria-label="Abrir menu" aria-expanded="false" aria-controls="mp-drawer"><span></span><span></span><span></span></button>' +
+    '<div class="mp-mode-switch" role="group" aria-label="Modo do mapa"><button type="button" id="mp-mode-player" class="active" title="Modo Jogador: sem ferramentas de edição">♟ Jogador</button><button type="button" id="mp-mode-editor" title="Modo Editor: liberar ferramentas e câmera livre">✎ Editor</button></div>' +
     '<div id="mp-drawer" class="mp-drawer" aria-hidden="true">' +
     '<div class="mp-bar">' +
     '<div class="mp-map-selector"><select id="mp-map" class="mp-title" title="Trocar de mapa">' + mapOptions() + '</select>' +
@@ -3557,6 +3652,11 @@ function mountNow(el) {
       'border:1px solid rgba(255,255,255,.28);background:rgba(15,15,18,.82);cursor:pointer;display:flex;flex-direction:column;' +
       'justify-content:center;align-items:center;gap:5px;}' +
     '#mp-root .mp-burger:hover{background:rgba(40,40,46,.92);}' +
+    '#mp-root .mp-mode-switch{position:absolute;top:10px;right:10px;z-index:35;display:flex;gap:5px;padding:4px;border:1px solid rgba(255,255,255,.2);border-radius:11px;background:rgba(15,15,18,.88);backdrop-filter:blur(8px);}' +
+    '#mp-root .mp-mode-switch button{min-height:34px;padding:7px 11px;border:1px solid transparent;border-radius:7px;background:transparent;color:#e8eaf0;font-weight:600;cursor:pointer;}' +
+    '#mp-root .mp-mode-switch button.active{background:rgba(55,145,190,.38);border-color:#66c8ed;color:#fff;}' +
+    '#mp-root.player-mode .mp-editor-only{display:none !important;}' +
+    '#mp-root .mp-canvas-pan{cursor:grab;}' +
     '#mp-root .mp-map-selector{display:flex;align-items:stretch;gap:6px;width:100%;}' +
     '#mp-root .mp-map-selector select{flex:1 1 auto;min-width:0;width:auto !important;}' +
     '#mp-root .mp-map-selector .mp-map-add{flex:0 0 44px;width:44px !important;min-width:44px;height:42px;padding:0;font-size:24px;line-height:1;' +
@@ -3599,6 +3699,24 @@ function mountNow(el) {
     '#mp-root .mp-portal-dialog-actions button.primary{border-color:#3c9bc7;background:#17688f;}' +
     '#mp-root .mp-portal-dialog-actions button.danger{border-color:#9a3b3b;background:#742d35;}';
   R.querySelector('#mp-root').appendChild(menuStyle);
+
+  // Tudo que altera o mapa ou seus dados fica disponível apenas no Editor.
+  [
+    '#mp-add-map', '#mp-add-map-file', '#mp-export', '#mp-export-catalog',
+    '#mp-tools', '#mp-grid', '#mp-fog', '#mp-light', '#mp-walls-vis', '#mp-secret-view',
+    '#mp-block', '#mp-lr', '#mp-reset-fog', '#mp-clear-fog', '#mp-clear-walls', '#mp-clear-edges',
+    '#mp-zo', '#mp-zi', '#mp-side', '#mp-delete-map', '.mp-menu-footer',
+    '#mp-world-move', '#mp-world-spawn', '#mp-world-portal', '#mp-world-local-portal'
+  ].forEach(function (selector) {
+    var node = R.querySelector(selector);
+    if (!node) return;
+    if (selector === '#mp-block' || selector === '#mp-lr') node = node.parentElement;
+    if (node) node.classList.add('mp-editor-only');
+  });
+  var worldActionButtons = R.querySelectorAll('.mp-world-action');
+  worldActionButtons.forEach(function (node) { node.classList.add('mp-editor-only'); });
+  $('#mp-mode-player').onclick = function () { setMode('player'); setMenu(false); };
+  $('#mp-mode-editor').onclick = function () { setMode('editor'); setMenu(false); };
 
   cv = $('#mp-cv');
   cx = cv.getContext('2d');
@@ -3659,6 +3777,7 @@ function mountNow(el) {
     try { localStorage.setItem(MAP_ID_KEY, id); } catch (e) {}
     unmount();
     applyMap(id);
+    zoom = isHexMap() ? FLANAESS_ZOOM : 0.35; ox = 40; oy = 40;
     if (isHexMap() && ['muro', 'porta', 'eraseedge'].indexOf(tool) >= 0) tool = 'select';
     state = migrateFlanaessState(load() || defaultState());
     selected = null; pendingMonster = null; measurePts = null; drag = null;
@@ -3671,29 +3790,29 @@ function mountNow(el) {
     worldRoot.classList.add('mp-world-map');
     var worldStyle = document.createElement('style');
     worldStyle.textContent =
-      '#mp-root.mp-world-map .mp-g,' +
-      '#mp-root.mp-world-map #mp-grid,' +
       '#mp-root.mp-world-map #mp-fog,' +
       '#mp-root.mp-world-map #mp-light,' +
       '#mp-root.mp-world-map #mp-walls-vis,' +
+      '#mp-root.mp-world-map #mp-secret-view,' +
       '#mp-root.mp-world-map #mp-speed-wrap,' +
       '#mp-root.mp-world-map #mp-reset-fog,' +
       '#mp-root.mp-world-map #mp-clear-fog,' +
       '#mp-root.mp-world-map #mp-clear-walls,' +
       '#mp-root.mp-world-map #mp-clear-edges,' +
-      '#mp-root.mp-world-map #mp-zo,' +
-      '#mp-root.mp-world-map #mp-zi,'+
-      '#mp-root.mp-world-map .mp-side {display:none !important;}' +
-      '#mp-root.mp-world-map .mp-world-action {display:block !important;}' +
+      '#mp-root.mp-world-map #mp-block,' +
+      '#mp-root.mp-world-map #mp-lr,'+
+      '#mp-root.mp-world-map #mp-hex-wrap {display:none !important;}' +
+      '#mp-root.mp-world-map.editor-mode .mp-world-action {display:block !important;}' +
+      '#mp-root.mp-world-map.editor-mode #mp-tools {display:grid !important;grid-template-columns:1fr 1fr;gap:6px;}' +
+      '#mp-root.mp-world-map.editor-mode #mp-tools button {width:100%;box-sizing:border-box;}' +
+      '#mp-root.mp-world-map #mp-side {display:none !important;}' +
       '#mp-root.mp-world-map #mp-world-move.active{background:rgba(35,155,100,.32);border-color:#70d6a2;}' +
-      '#mp-root.mp-world-map #mp-cv {display:block;width:100%;height:100%;cursor:crosshair;touch-action:manipulation;}' +
-      '#mp-root.mp-world-map #mp-hex-wrap {display:none !important;}';
+      '#mp-root.mp-world-map #mp-cv {display:block;width:100%;height:100%;cursor:crosshair;touch-action:manipulation;}';
     worldRoot.appendChild(worldStyle);
     var blockLabel = $('#mp-block'); if (blockLabel && blockLabel.parentElement) blockLabel.parentElement.style.display = 'none';
     var radiusInput = $('#mp-lr'); if (radiusInput && radiusInput.parentElement) radiusInput.parentElement.style.display = 'none';
     var speedWrap = $('#mp-speed-wrap'); if (speedWrap) speedWrap.style.display = 'none';
-    showFog = false; dynLight = false; showWalls = false; showGrid = true;
-    zoom = FLANAESS_ZOOM;
+    if (appMode !== 'editor') zoom = FLANAESS_ZOOM;
   }
   // O Flanaess não oferece mais seletor: o tamanho pequeno é fixo.
   if ($('#mp-speed')) $('#mp-speed').oninput = function () {
@@ -3749,8 +3868,8 @@ function mountNow(el) {
     secretViewButton.classList.toggle('on', showSecrets);
     secretViewButton.onclick = function () { showSecrets = !showSecrets; this.classList.toggle('on', showSecrets); draw(); };
   }
-  $('#mp-zo').onclick = function () { if (isHexMap()) { zoom = FLANAESS_ZOOM; draw(); } else changeCameraZoom(1 / 1.2); };
-  $('#mp-zi').onclick = function () { if (isHexMap()) { zoom = FLANAESS_ZOOM; draw(); } else changeCameraZoom(1.2); };
+  $('#mp-zo').onclick = function () { if (appMode === 'editor') changeCameraZoom(1 / 1.2); else if (isHexMap()) { zoom = FLANAESS_ZOOM; draw(); } else changeCameraZoom(1 / 1.2); };
+  $('#mp-zi').onclick = function () { if (appMode === 'editor') changeCameraZoom(1.2); else if (isHexMap()) { zoom = FLANAESS_ZOOM; draw(); } else changeCameraZoom(1.2); };
 
   $('#mp-q').oninput = function () { renderMonsterList(this.value); };
   $('#mp-ml').onclick = function (e) {
@@ -3769,12 +3888,19 @@ function mountNow(el) {
   window.addEventListener('blur', onWindowBlur);
   window.addEventListener('resize', onWindowResize);
 
-  ['muro', 'porta', 'paredeSecreta', 'portaSecreta', 'portaTrancada', 'portaEmperrada', 'paredeIlusoria', 'muralhaForca', 'paredeMagica', 'searchSecret', 'investigateMechanism', 'damageStructure', 'eraseedge'].forEach(function (name) {
+  [
+    'wall', 'erasewall', 'muro', 'porta', 'paredeSecreta', 'portaSecreta', 'portaTrancada',
+    'portaEmperrada', 'paredeIlusoria', 'muralhaForca', 'paredeMagica', 'searchSecret',
+    'investigateMechanism', 'damageStructure', 'eraseedge', 'reveal', 'hide', 'token', 'measure',
+    'spawn', 'localPortal'
+  ].forEach(function (name) {
     var btn = R.querySelector('#mp-tools button[data-t="' + name + '"]');
     if (btn) btn.style.display = isHexMap() ? 'none' : '';
   });
   var clearEdgesButton = $('#mp-clear-edges');
   if (clearEdgesButton) clearEdgesButton.style.display = isHexMap() ? 'none' : '';
+  // A página abre em Jogador; ao trocar de mapa o modo atual é preservado.
+  setMode(appMode);
   $('#mp-grid').classList.toggle('on', showGrid);
   $('#mp-fog').classList.toggle('on', showFog);
   $('#mp-light').classList.toggle('on', dynLight);
@@ -3787,17 +3913,17 @@ function mountNow(el) {
   loadBackgrounds(function () {
     if (!cv) return;
     if (isHexMap()) {
-      zoom = FLANAESS_ZOOM;
-      focusCameraOnPlayer();
+      if (appMode !== 'editor') zoom = FLANAESS_ZOOM;
+      focusCameraOnPlayer(null, null, true);
     } else {
-      centerCameraOnPlayer();
+      centerCameraOnPlayer(null, null, true);
     }
     draw();
   });
   if (!isHexMap()) {
-    centerCameraOnPlayer();
+    centerCameraOnPlayer(null, null, true);
     checkPassiveSecretDetection(currentPlayer());
-    window.requestAnimationFrame(function () { centerCameraOnPlayer(); draw(); });
+    window.requestAnimationFrame(function () { centerCameraOnPlayer(null, null, true); draw(); });
   }
   draw();
 }
