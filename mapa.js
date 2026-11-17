@@ -2423,13 +2423,13 @@ function returnToWorldMapFromExit() {
 function followKeyMove() {
   var visual = isHexMap() ? worldTravelPos : keyMoveVis;
   if (!visual || !cv) return;
-  var W = cv.clientWidth, H = cv.clientHeight;
-  var sx = visual.x * zoom + ox, sy = visual.y * zoom + oy;
-  var mx = W * 0.3, my = H * 0.3;
-  var tx = sx < mx ? mx - sx : (sx > W - mx ? (W - mx) - sx : 0);
-  var ty = sy < my ? my - sy : (sy > H - my ? (H - my) - sy : 0);
-  ox += tx * 0.25;
-  oy += ty * 0.25;
+  var tol = CELL * zoom;
+  var dx = visual.x * zoom + ox - cv.clientWidth / 2;
+  var dy = visual.y * zoom + oy - cv.clientHeight / 2;
+  if (dx > tol) ox -= dx - tol;
+  else if (dx < -tol) ox -= dx + tol;
+  if (dy > tol) oy -= dy - tol;
+  else if (dy < -tol) oy -= dy + tol;
 }
 
 function stopKeyMove() {
