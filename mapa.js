@@ -162,6 +162,7 @@ var lightRadius = 6;
 var selected = null;
 var measurePts = null;
 var pendingMonster = null;
+var pendingLocalPortal = null; // primeiro ponto enquanto um par de teleporte é configurado
 var blockMove = true;
 var previewPointer = null;
 var worldTravelRaf = null;   // id do requestAnimationFrame da viagem
@@ -228,7 +229,7 @@ function defaultState() {
     nome: MAPINFO.nome,
     gridMode: isHexMap() ? FLANAESS_GRID_MODE : 'square',
     spawn: { x: MAPINFO.spawn.x, y: MAPINFO.spawn.y },
-    portals: isHexMap() ? [] : undefined,
+    portals: [],
     tokens: [
       { id: 'p1', nome: 'Aventureiro', tipo: 'player', x: isHexMap() ? worldToCell(MAP_W / 2, MAP_H / 2).x : MAPINFO.spawn.x, y: isHexMap() ? worldToCell(MAP_W / 2, MAP_H / 2).y : MAPINFO.spawn.y, cor: '#4fc3f7', raio: 1, luz: 6, hp: null, hpMax: null }
     ],
@@ -261,22 +262,31 @@ function normalizeMapState(s) {
     y: Math.max(0, Math.min(ROWS - 1, Math.round(Number(s.spawn.y))))
   };
   MAPINFO.spawn = { x: s.spawn.x, y: s.spawn.y };
+  // Portais para outros mapas mantêm o formato antigo (destMapId).
+  // Portais internos ligam dois pontos do mesmo mapa (x/y <-> destX/destY).
+  if (!Array.isArray(s.portals)) s.portals = [];
+  s.portals = s.portals.filter(function (portal) {
+    if (!portal || !isFinite(Number(portal.x)) || !isFinite(Number(portal.y))) return false;
+    return !!portal.destMapId || (isFinite(Number(portal.destX)) && isFinite(Number(portal.destY)));
+  }).map(function (portal) {
+    var portalColor = String(portal.color || '#36a9e1');
+    if (!/^#[0-9a-f]{6}$/i.test(portalColor)) portalColor = '#36a9e1';
+    var normalized = {
+      id: portal.id || ('portal-' + String(portal.x) + '-' + String(portal.y)),
+      x: Math.max(0, Math.min(COLS - 1, Math.round(Number(portal.x)))),
+      y: Math.max(0, Math.min(ROWS - 1, Math.round(Number(portal.y)))),
+      color: portalColor.toLowerCase()
+    };
+    if (portal.destMapId) normalized.destMapId = String(portal.destMapId);
+    else {
+      normalized.type = 'local';
+      normalized.destX = Math.max(0, Math.min(COLS - 1, Math.round(Number(portal.destX))));
+      normalized.destY = Math.max(0, Math.min(ROWS - 1, Math.round(Number(portal.destY))));
+    }
+    return normalized;
+  });
   if (isHexMap()) {
     if (!s.gridMode && s.fog && s.fog.length === MAPS.flanaess.cols * MAPS.flanaess.rows) s._legacySquareTokens = true;
-    if (!Array.isArray(s.portals)) s.portals = [];
-    s.portals = s.portals.filter(function (portal) {
-      return portal && isFinite(Number(portal.x)) && isFinite(Number(portal.y)) && portal.destMapId;
-    }).map(function (portal) {
-      var portalColor = String(portal.color || '#36a9e1');
-      if (!/^#[0-9a-f]{6}$/i.test(portalColor)) portalColor = '#36a9e1';
-      return {
-        id: portal.id || ('portal-' + String(portal.x) + '-' + String(portal.y)),
-        x: Math.max(0, Math.min(COLS - 1, Math.round(Number(portal.x)))),
-        y: Math.max(0, Math.min(ROWS - 1, Math.round(Number(portal.y)))),
-        destMapId: String(portal.destMapId),
-        color: portalColor.toLowerCase()
-      };
-    });
     s.fog = []; s.walls = []; s.hEdges = []; s.vEdges = [];
     return s;
   }
@@ -1171,6 +1181,18 @@ function worldTravelFrame(now) {
       player.x = st.to.x; player.y = st.to.y;
       selected = player;
       save();
+      var reachedLocalPortal = findLocalPortalAt(player.x, player.y);
+      if (reachedLocalPortal) {
+        var localDestination = localPortalDestination(reachedLocalPortal, player.x, player.y);
+        if (localDestination) {
+          player.x = localDestination.x; player.y = localDestination.y;
+          worldTravelPath = []; worldTravelTarget = null;
+          worldTravelStep = null; worldTravelPos = null; worldTravelCarry = null;
+          selected = player;
+          save(); draw();
+          return;
+        }
+      }
       var reachedPortal = findWorldPortalAt(player.x, player.y);
       if (reachedPortal) {
         worldTravelPath = []; worldTravelTarget = null;
@@ -1205,6 +1227,11 @@ function startWorldTravel(destination) {
   // Se já está andando, o novo caminho parte do hexágono para onde ele está indo agora.
   var origin = worldTravelStep ? worldTravelStep.to : { x: player.x, y: player.y };
   if (destination.x === origin.x && destination.y === origin.y) {
+    var standingLocalPortal = findLocalPortalAt(destination.x, destination.y);
+    if (standingLocalPortal) {
+      var localDestination = localPortalDestination(standingLocalPortal, destination.x, destination.y);
+      if (localDestination) { player.x = localDestination.x; player.y = localDestination.y; selected = player; save(); draw(); return; }
+    }
     var standingPortal = findWorldPortalAt(destination.x, destination.y);
     if (standingPortal) { teleportThroughWorldPortal(standingPortal); return; }
     worldTravelPath = [];
@@ -1221,15 +1248,49 @@ function startWorldTravel(destination) {
 function drawWorldPortals() {
   if (!isHexMap() || !Array.isArray(state.portals)) return;
   state.portals.forEach(function (portal) {
+    if (!portal.destMapId) return;
     var center = cellCenter(portal.x, portal.y);
     var color = /^#[0-9a-f]{6}$/i.test(String(portal.color || '')) ? portal.color : '#36a9e1';
     cx.save();
-    // Destaque discreto: apenas o contorno do tile, com 40% de opacidade
-    // e a mesma espessura da linha normal da grade.
     cx.globalAlpha = 0.40;
     hexPath(cx, center, null, color, 1 / zoom);
     cx.restore();
   });
+}
+
+function drawLocalPortals() {
+  if (!Array.isArray(state.portals)) return;
+  function drawEndpoint(x, y, label, color) {
+    var center = cellCenter(x, y);
+    cx.save();
+    cx.globalAlpha = 0.88;
+    cx.strokeStyle = color;
+    cx.fillStyle = color;
+    cx.lineWidth = 2 / zoom;
+    if (isHexMap()) {
+      hexPath(cx, center, 'rgba(30,170,220,0.12)', color, 2 / zoom);
+    } else {
+      cx.strokeRect(x * CELL + 2 / zoom, y * CELL + 2 / zoom, CELL - 4 / zoom, CELL - 4 / zoom);
+    }
+    cx.beginPath();
+    cx.arc(center.x, center.y, (isHexMap() ? 7 : 6) / zoom, 0, Math.PI * 2);
+    cx.fill();
+    cx.globalAlpha = 1;
+    cx.fillStyle = '#071018';
+    cx.font = 'bold ' + (10 / zoom) + 'px sans-serif';
+    cx.textAlign = 'center';
+    cx.textBaseline = 'middle';
+    cx.fillText(label, center.x, center.y);
+    cx.restore();
+  }
+
+  state.portals.forEach(function (portal) {
+    if (portal.destMapId || !isFinite(Number(portal.destX)) || !isFinite(Number(portal.destY))) return;
+    var color = /^#[0-9a-f]{6}$/i.test(String(portal.color || '')) ? portal.color : '#36a9e1';
+    drawEndpoint(portal.x, portal.y, 'A', color);
+    drawEndpoint(portal.destX, portal.destY, 'B', color);
+  });
+  if (pendingLocalPortal) drawEndpoint(pendingLocalPortal.x, pendingLocalPortal.y, 'A', '#ffd54f');
 }
 
 function drawWorldTravelPath() {
@@ -1327,6 +1388,7 @@ function draw() {
   state.tokens.forEach(function (t) {
     if (isTokenVisible(t)) drawToken(t, t === selected);
   });
+  drawLocalPortals();
 
   if (!isHexMap()) drawToolPreview();
   else {
@@ -1465,7 +1527,39 @@ function setMapSpawn(cell, player) {
 
 function findWorldPortalAt(x, y) {
   if (!isHexMap() || !Array.isArray(state.portals)) return null;
-  return state.portals.find(function (portal) { return portal.x === x && portal.y === y; }) || null;
+  return state.portals.find(function (portal) { return !!portal.destMapId && portal.x === x && portal.y === y; }) || null;
+}
+
+function findLocalPortalAt(x, y) {
+  if (!Array.isArray(state.portals)) return null;
+  return state.portals.find(function (portal) {
+    if (portal.destMapId || !isFinite(Number(portal.destX)) || !isFinite(Number(portal.destY))) return false;
+    return (portal.x === x && portal.y === y) || (portal.destX === x && portal.destY === y);
+  }) || null;
+}
+
+function localPortalDestination(portal, x, y) {
+  if (!portal || portal.destMapId) return null;
+  if (portal.x === x && portal.y === y) return { x: portal.destX, y: portal.destY };
+  if (portal.destX === x && portal.destY === y) return { x: portal.x, y: portal.y };
+  return null;
+}
+
+function portalCellIsOccupied(x, y) {
+  return !!findWorldPortalAt(x, y) || !!findLocalPortalAt(x, y);
+}
+
+function teleportPlayerWithinMap(portal, player) {
+  if (!portal || !player) return false;
+  var destination = localPortalDestination(portal, player.x, player.y);
+  if (!destination) return false;
+  player.x = destination.x;
+  player.y = destination.y;
+  selected = player;
+  if (!isHexMap() && dynLight) revealAround(player.x, player.y, player.luz || lightRadius);
+  save();
+  draw();
+  return true;
 }
 
 function closePortalDialog(overlay) {
@@ -1490,8 +1584,8 @@ function createPortalDialog(titleText, descriptionText) {
   return { overlay: overlay, panel: panel };
 }
 
-function showPortalColorPicker(initialColor, onApply) {
-  var dialog = createPortalDialog('Cor do teleporte', 'Escolha uma cor para o contorno discreto do hexágono.');
+function showPortalColorPicker(initialColor, onApply, onCancel) {
+  var dialog = createPortalDialog('Cor do teleporte', 'Escolha a cor que vai marcar os dois pontos ligados.');
   if (!dialog) return;
   var colorInput = document.createElement('input');
   colorInput.type = 'color';
@@ -1505,7 +1599,10 @@ function showPortalColorPicker(initialColor, onApply) {
   var cancel = document.createElement('button');
   cancel.type = 'button';
   cancel.textContent = 'Cancelar';
-  cancel.onclick = function () { closePortalDialog(dialog.overlay); };
+  cancel.onclick = function () {
+    closePortalDialog(dialog.overlay);
+    if (typeof onCancel === 'function') onCancel();
+  };
   var apply = document.createElement('button');
   apply.type = 'button';
   apply.className = 'primary';
@@ -1563,9 +1660,111 @@ function showExistingPortalActions(portal) {
   dialog.panel.appendChild(actions);
 }
 
+function showExistingLocalPortalActions(portal) {
+  var dialog = createPortalDialog('Teleporte interno', 'Este par liga os pontos A e B do mapa atual. Você pode mudar a cor ou remover os dois lados.');
+  if (!dialog) return;
+  var actions = document.createElement('div');
+  actions.className = 'mp-portal-dialog-actions mp-portal-dialog-actions-stack';
+
+  var recolor = document.createElement('button');
+  recolor.type = 'button';
+  recolor.className = 'primary';
+  recolor.textContent = '🎨 Mudar cor';
+  recolor.onclick = function () {
+    closePortalDialog(dialog.overlay);
+    showPortalColorPicker(portal.color || '#36a9e1', function (color) {
+      portal.color = color;
+      save(); draw();
+    });
+  };
+
+  var remove = document.createElement('button');
+  remove.type = 'button';
+  remove.className = 'danger';
+  remove.textContent = '🗑 Remover os dois pontos';
+  remove.onclick = function () {
+    closePortalDialog(dialog.overlay);
+    if (window.confirm('Remover este par de teleporte? Os pontos A e B serão apagados.')) {
+      state.portals = state.portals.filter(function (item) { return item !== portal; });
+      save(); draw();
+    }
+  };
+
+  var cancel = document.createElement('button');
+  cancel.type = 'button';
+  cancel.textContent = 'Cancelar';
+  cancel.onclick = function () { closePortalDialog(dialog.overlay); };
+
+  actions.appendChild(recolor);
+  actions.appendChild(remove);
+  actions.appendChild(cancel);
+  dialog.panel.appendChild(actions);
+}
+
+function placeLocalPortal(cell) {
+  if (!cell) return;
+  if (!Array.isArray(state.portals)) state.portals = [];
+
+  var existingLocal = findLocalPortalAt(cell.x, cell.y);
+  if (existingLocal) {
+    if (pendingLocalPortal) { alert('Este local já faz parte de outro teleporte. Escolha um ponto B diferente.'); return; }
+    showExistingLocalPortalActions(existingLocal);
+    return;
+  }
+  var existingWorld = findWorldPortalAt(cell.x, cell.y);
+  if (existingWorld) {
+    if (pendingLocalPortal) { alert('Este local já possui um teleporte para outro mapa. Escolha outro ponto.'); return; }
+    showExistingPortalActions(existingWorld);
+    return;
+  }
+  var placementPlayer = currentPlayer();
+  if (blockMove && !canOccupy(cell.x, cell.y, placementPlayer)) {
+    alert('Não é possível criar um teleporte em uma célula bloqueada. Escolha um espaço livre.');
+    return;
+  }
+
+  if (!pendingLocalPortal) {
+    pendingLocalPortal = { x: cell.x, y: cell.y };
+    draw();
+    alert('Ponto A definido. Agora clique no local do ponto B para concluir o teleporte. Pressione Esc para cancelar.');
+    return;
+  }
+
+  if (pendingLocalPortal.x === cell.x && pendingLocalPortal.y === cell.y) {
+    alert('Escolha um ponto B diferente do ponto A.');
+    return;
+  }
+  if (portalCellIsOccupied(cell.x, cell.y)) {
+    alert('Este local já possui um teleporte. Escolha outro ponto para B.');
+    return;
+  }
+
+  var pointA = pendingLocalPortal;
+  showPortalColorPicker('#36a9e1', function (color) {
+    state.portals.push({
+      id: 'local-portal-' + Date.now().toString(36),
+      type: 'local',
+      x: pointA.x,
+      y: pointA.y,
+      destX: cell.x,
+      destY: cell.y,
+      color: color
+    });
+    pendingLocalPortal = null;
+    setTool('select');
+    save(); draw();
+  }, function () {
+    pendingLocalPortal = null;
+    setTool('select');
+    draw();
+  });
+}
+
 function placeWorldPortal(cell) {
   if (!isHexMap() || !cell) return;
   if (!Array.isArray(state.portals)) state.portals = [];
+  var existingLocal = findLocalPortalAt(cell.x, cell.y);
+  if (existingLocal) { showExistingLocalPortalActions(existingLocal); return; }
   var existing = findWorldPortalAt(cell.x, cell.y);
   if (existing) {
     showExistingPortalActions(existing);
@@ -2024,6 +2223,7 @@ function onPointerDown(e) {
     if (worldPoint.x < 0 || worldPoint.y < 0 || worldPoint.x > MAP_W || worldPoint.y > MAP_H) return;
     var worldCell = worldToCell(worldPoint.x, worldPoint.y);
     if (tool === 'portal') { placeWorldPortal(worldCell); return; }
+    if (tool === 'localPortal') { placeLocalPortal(worldCell); return; }
     if (tool === 'spawn') {
       stopWorldTravel(false);
       var worldPlayer = currentPlayer();
@@ -2045,6 +2245,8 @@ function onPointerDown(e) {
   var rect = cv.getBoundingClientRect();
   var world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
   var cell = worldToCell(world.x, world.y);
+
+  if (tool === 'localPortal') { placeLocalPortal(cell); return; }
 
   // Pan da câmera com o mouse desativado.
   if (tool === 'pan' || e.button === 1 || e.button === 2 || space) {
@@ -2240,8 +2442,14 @@ function onPointerMove(e) {
 }
 
 function onPointerUp() {
+  var teleported = false;
+  if (drag && drag.moveToken && drag.moveToken.tipo === 'player') {
+    var localPortal = findLocalPortalAt(drag.moveToken.x, drag.moveToken.y);
+    if (localPortal) teleported = teleportPlayerWithinMap(localPortal, drag.moveToken);
+  }
   if (drag && (drag.moveToken || drag.brush || drag.wall || drag.edgePaint)) save();
   drag = null;
+  if (teleported) draw();
 }
 
 function onPointerLeave() {
@@ -2325,6 +2533,8 @@ function startClickMove(destination, exitAfterArrival) {
   stopKeyMove();
   if (path.length < 2) {
     if (exitAfterArrival) return returnToWorldMapFromExit();
+    var standingLocalPortal = findLocalPortalAt(player.x, player.y);
+    if (standingLocalPortal) return teleportPlayerWithinMap(standingLocalPortal, player);
     return false;
   }
   clickMovePath = path.slice(1);
@@ -2491,6 +2701,21 @@ function keyMoveFrame(now) {
     if (p >= 1) {
       keyMoveCarry = st.t0 + st.dur;
       keyMoveStep = null;
+      var reachedLocalPortal = findLocalPortalAt(pl.x, pl.y);
+      if (reachedLocalPortal) {
+        var localDestination = localPortalDestination(reachedLocalPortal, pl.x, pl.y);
+        if (localDestination) {
+          pl.x = localDestination.x; pl.y = localDestination.y;
+          selected = pl;
+          keyMoveVis = null;
+          clickMovePath = [];
+          clickMoveExitPending = false;
+          if (hexMode) worldTravelPos = null;
+          else if (dynLight) revealAround(pl.x, pl.y, pl.luz || lightRadius);
+          save(); draw();
+          continue;
+        }
+      }
       if (hexMode) {
         worldTravelPos = null;
         var reachedPortal = findWorldPortalAt(pl.x, pl.y);
@@ -2538,12 +2763,13 @@ function onKey(e) {
   }
   if (isHexMap()) {
     if (e.key === 'Escape') {
-      if (tool === 'portal' || tool === 'spawn') setTool('select');
+      if (tool === 'portal' || tool === 'spawn' || tool === 'localPortal') setTool('select');
       else haltWorldTravel();
     }
     return;
   }
   if (e.code === 'Space') { space = true; e.preventDefault(); return; }
+  if (e.key === 'Escape' && tool === 'localPortal') { pendingLocalPortal = null; setTool('select'); return; }
   if ((e.key === 'Delete' || e.key === 'Backspace') && selected && selected.tipo !== 'player') {
     state.tokens = state.tokens.filter(function (t) { return t !== selected; });
     selected = null; save(); draw();
@@ -2568,11 +2794,14 @@ function setTool(t) {
   R.querySelectorAll('#mp-tools button').forEach(function (b) {
     b.classList.toggle('on', b.dataset.t === t);
   });
+  if (t !== 'localPortal') pendingLocalPortal = null;
   var worldSpawnButton = R.querySelector('#mp-world-spawn');
   var worldPortalButton = R.querySelector('#mp-world-portal');
+  var worldLocalPortalButton = R.querySelector('#mp-world-local-portal');
   var worldMoveButton = R.querySelector('#mp-world-move');
   if (worldSpawnButton) worldSpawnButton.classList.toggle('active', t === 'spawn');
   if (worldPortalButton) worldPortalButton.classList.toggle('active', t === 'portal');
+  if (worldLocalPortalButton) worldLocalPortalButton.classList.toggle('active', t === 'localPortal');
   if (worldMoveButton) worldMoveButton.classList.toggle('active', t === 'select');
   if (cv) cv.style.cursor = t === 'pan' ? 'grab' : t === 'select' ? 'pointer' : 'crosshair';
   draw();
@@ -2630,7 +2859,8 @@ function mountNow(el) {
     '<label id="mp-speed-wrap" class="mp-luz" style="display:none">Velocidade <input id="mp-speed" type="number" min="0.1" step="0.1" placeholder="mi/dia" style="width:62px"></label>' +
     '<button type="button" id="mp-world-move" class="mp-world-action active" title="Desativa os modos de início e teleporte; use as setas ou clique para mover o personagem">🧭 Desativar ferramentas</button>' +
     '<button type="button" id="mp-world-spawn" class="mp-world-action" title="Definir o ponto de início deste mapa">📍 Definir início</button>' +
-    '<button type="button" id="mp-world-portal" class="mp-world-action" title="Adicionar um teleporte para outro mapa">🌀 Adicionar teleporte</button>' +
+    '<button type="button" id="mp-world-portal" class="mp-world-action" title="Adicionar um teleporte para outro mapa">🌀 Teleporte para outro mapa</button>' +
+    '<button type="button" id="mp-world-local-portal" class="mp-world-action" title="Clique no ponto A e depois no ponto B para criar um teleporte dentro deste mapa">🌀 Teleporte neste mapa</button>' +
     '<div class="mp-g" id="mp-tools">' +
     '<button data-t="select" class="on" title="Selecionar / Mover · clique na porta para abrir/fechar">↖ Selecionar</button>' +
     '<button data-t="pan" title="Mover vista">✋ Mover</button>' +
@@ -2640,6 +2870,7 @@ function mountNow(el) {
     '<button data-t="porta" title="Porta na linha · clique de novo para abrir/fechar">🚪 Porta</button>' +
     '<button data-t="eraseedge" title="Apagar muro/porta da linha">✂ Apagar linha</button>' +
     '<button data-t="spawn" title="Definir início do jogador">📍 Início</button>' +
+    '<button data-t="localPortal" title="Clique no ponto A e depois no ponto B para ligar os dois locais por teleporte">🌀 Teleporte</button>' +
     '<button data-t="reveal" title="Revelar névoa">☀ Revelar</button>' +
     '<button data-t="hide" title="Ocultar névoa">🌑 Ocultar</button>' +
     '<button data-t="token" title="Token livre">♟ Token</button>' +
@@ -2761,6 +2992,10 @@ function mountNow(el) {
   $('#mp-world-portal').onclick = function () {
     if (!isHexMap()) return;
     setTool('portal'); setMenu(false);
+  };
+  $('#mp-world-local-portal').onclick = function () {
+    if (!isHexMap()) return;
+    setTool('localPortal'); setMenu(false);
   };
   cv.addEventListener('pointerdown', onPointerDown);
   cv.addEventListener('pointermove', onPointerMove);
@@ -2914,6 +3149,7 @@ function unmount() {
   mountRequestId++;
   stopWorldTravel(false);
   stopKeyMove();
+  pendingLocalPortal = null;
   document.removeEventListener('keydown', onKey);
   document.removeEventListener('keyup', onKeyUp);
   window.removeEventListener('blur', onWindowBlur);
