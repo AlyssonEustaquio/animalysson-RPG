@@ -2252,7 +2252,8 @@ function onWheel(e) {
   // O mapa-múndi mantém sua escala própria; o zoom manual é dos mapas de aventura.
   if (isHexMap()) { zoom = FLANAESS_ZOOM; draw(); return; }
   if (!e.deltaY) return;
-  changeCameraZoom(Math.exp(-e.deltaY * 0.0015));
+  // Sentido invertido para corresponder ao controle esperado: rolar para frente aproxima.
+  changeCameraZoom(Math.exp(e.deltaY * 0.0015));
 }
 
 // ---------- Movimento por clique em tiles visíveis (mapas de quadrados) ----------
