@@ -117,6 +117,38 @@ loadStoredCustomMaps();
 var FLANAESS_GRID_MODE = 'hex-small-6mi';
 var FLANAESS_ZOOM = 3; // Zoom fixo em 300%.
 
+// Mensagens editáveis: as preferências são globais e compartilhadas entre os mapas.
+var MESSAGE_SETTINGS_KEY = 'animalysson-vtt-messages-v1';
+var MESSAGE_CATALOG = [{"id":"msg001","type":"alert","dynamic":false,"default":"Ainda não há mapas adicionados pelo botão +.","pattern":"Ainda não há mapas adicionados pelo botão +."},{"id":"msg002","type":"alert","dynamic":false,"default":"Os mapas originais do projeto não podem ser excluídos. Este botão remove somente mapas adicionados pelo botão +.","pattern":"Os mapas originais do projeto não podem ser excluídos. Este botão remove somente mapas adicionados pelo botão +."},{"id":"msg003","type":"confirm","dynamic":true,"default":"{mensagem}","pattern":"Excluir o mapa \" / \"? / Ele será removido do seletor e os dados salvos deste mapa serão apagados deste navegador. / Um novo mapas.json será baixado para atualizar o catálogo no GitHub. Os arquivos já publicados na pasta mapas/ / / não são apagados automaticamente; remova essa pasta do GitHub se também quiser excluir as imagens e o JSON. …"},{"id":"msg004","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"Mapa excluído do seletor neste navegador. O catálogo mapas.json atualizado foi baixado. Publique esse arquivo em mapas/mapas.json no GitHub e, se desejar apagar também as imagens e dados antigos, exclua a pasta mapas/ … / do repositório. …"},{"id":"msg005","type":"alert","dynamic":false,"default":"Selecione um arquivo de imagem válido.","pattern":"Selecione um arquivo de imagem válido."},{"id":"msg006","type":"prompt","dynamic":false,"default":"Nome do novo mapa:","pattern":"Nome do novo mapa:"},{"id":"msg007","type":"prompt","dynamic":false,"default":"Tamanho da célula da grade em pixels:","pattern":"Tamanho da célula da grade em pixels:"},{"id":"msg008","type":"alert","dynamic":false,"default":"Informe um tamanho de célula entre 8 e 512 pixels.","pattern":"Informe um tamanho de célula entre 8 e 512 pixels."},{"id":"msg009","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"Mapa adicionado e otimizado! … Extraia o ZIP dentro de \" … \". Depois baixe o catálogo mapas.json pelo menu e coloque-o em \"mapas/mapas.json\". Use Salvar mapa para baixar \" … \" na mesma pasta. …"},{"id":"msg010","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"Não foi possível otimizar a imagem do mapa. …"},{"id":"msg011","type":"alert","dynamic":false,"default":"Não foi possível abrir essa imagem.","pattern":"Não foi possível abrir essa imagem."},{"id":"msg012","type":"alert","dynamic":false,"default":"Escolha dois cantos diferentes do grid.","pattern":"Escolha dois cantos diferentes do grid."},{"id":"msg013","type":"prompt","dynamic":true,"default":"{mensagem}","pattern":"Texto variável (definido pelo contexto)"},{"id":"msg014","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"Informe um valor entre … e … . …"},{"id":"msg015","type":"prompt","dynamic":true,"default":"{mensagem}","pattern":"Texto variável (definido pelo contexto)"},{"id":"msg016","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"Percepção passiva / : você percebe / e / . Encontrar não revela como abrir; investigue o mecanismo. …"},{"id":"msg017","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"Sucesso! Você encontrou: / , / . Ainda é necessário descobrir o mecanismo. / Nenhuma passagem secreta foi encontrada nesta seção de aproximadamente 3 metros. …"},{"id":"msg018","type":"alert","dynamic":false,"default":"Você identifica a ilusão. Ela não bloqueia passagem.","pattern":"Você identifica a ilusão. Ela não bloqueia passagem."},{"id":"msg019","type":"alert","dynamic":false,"default":"Não há um mecanismo secreto nesta linha.","pattern":"Não há um mecanismo secreto nesta linha."},{"id":"msg020","type":"alert","dynamic":false,"default":"Primeiro encontre a passagem com Percepção.","pattern":"Primeiro encontre a passagem com Percepção."},{"id":"msg021","type":"alert","dynamic":false,"default":"O mecanismo desta passagem já foi descoberto.","pattern":"O mecanismo desta passagem já foi descoberto."},{"id":"msg022","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"Mecanismo descoberto! Agora você pode acionar a passagem. …"},{"id":"msg023","type":"confirm","dynamic":false,"default":"Já existe uma parede ou porta nesta linha. Substituir?","pattern":"Já existe uma parede ou porta nesta linha. Substituir?"},{"id":"msg024","type":"prompt","dynamic":false,"default":"Descreva como o mecanismo é acionado (ex.: girar uma tocha, puxar um livro, apertar uma pedra):","pattern":"Descreva como o mecanismo é acionado (ex.: girar uma tocha, puxar um livro, apertar uma pedra):"},{"id":"msg025","type":"prompt","dynamic":false,"default":"Complexidade: 1 = simples (1 ação); 2 = complexa (1 minuto).","pattern":"Complexidade: 1 = simples (1 ação); 2 = complexa (1 minuto)."},{"id":"msg026","type":"prompt","dynamic":false,"default":"Nome da chave que abre esta porta (deixe em branco se não houver chave específica):","pattern":"Nome da chave que abre esta porta (deixe em branco se não houver chave específica):"},{"id":"msg027","type":"confirm","dynamic":false,"default":"Esta fechadura possui Tranca Arcana? (Cancelar = não)","pattern":"Esta fechadura possui Tranca Arcana? (Cancelar = não)"},{"id":"msg028","type":"prompt","dynamic":false,"default":"Tipo de bloqueio: 1 = emperrada (Força/Atletismo); 2 = barrada por dentro (ação Utilizar do lado da barra).","pattern":"Tipo de bloqueio: 1 = emperrada (Força/Atletismo); 2 = barrada por dentro (ação Utilizar do lado da barra)."},{"id":"msg029","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"Estrutura criada: / parede secreta / porta secreta / porta trancada / porta emperrada / parede ilusória / Muralha de Energia / parede mágica / . …"},{"id":"msg030","type":"alert","dynamic":false,"default":"Você não percebe nada incomum nesta parte da parede.","pattern":"Você não percebe nada incomum nesta parte da parede."},{"id":"msg031","type":"alert","dynamic":false,"default":"Você encontrou a passagem, mas ainda não descobriu como acioná-la. Use Investigar mecanismo.","pattern":"Você encontrou a passagem, mas ainda não descobriu como acioná-la. Use Investigar mecanismo."},{"id":"msg032","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"O mecanismo foi acionado e a passagem secreta se abriu. / A passagem secreta foi fechada. …"},{"id":"msg033","type":"alert","dynamic":false,"default":"A porta foi fechada.","pattern":"A porta foi fechada."},{"id":"msg034","type":"alert","dynamic":false,"default":"A Tranca Arcana está suprimida; a porta pode ser aberta durante os 10 minutos restantes.","pattern":"A Tranca Arcana está suprimida; a porta pode ser aberta durante os 10 minutos restantes."},{"id":"msg035","type":"prompt","dynamic":true,"default":"{mensagem}","pattern":"Como deseja abrir a porta trancada? 1 = Ferramentas de Ladrão (Destreza/Prestidigitação) — / complex / 1 minuto / 1 ação / 2 = Forçar fisicamente (Força/Atletismo) / CHAVE = usar a chave ( / ) / Digite ARROMBAR para usar a magia Knock/Arrombar. …"},{"id":"msg036","type":"alert","dynamic":false,"default":"Arrombar abriu a porta. A Tranca Arcana fica suprimida por 10 minutos.","pattern":"Arrombar abriu a porta. A Tranca Arcana fica suprimida por 10 minutos."},{"id":"msg037","type":"alert","dynamic":false,"default":"Arrombar abriu instantaneamente a fechadura mundana.","pattern":"Arrombar abriu instantaneamente a fechadura mundana."},{"id":"msg038","type":"prompt","dynamic":false,"default":"Digite o nome da chave utilizada:","pattern":"Digite o nome da chave utilizada:"},{"id":"msg039","type":"alert","dynamic":false,"default":"A chave física não supera a Tranca Arcana. Use um teste com CD +10 ou a magia Arrombar.","pattern":"A chave física não supera a Tranca Arcana. Use um teste com CD +10 ou a magia Arrombar."},{"id":"msg040","type":"alert","dynamic":false,"default":"A chave correta destranca e abre a porta.","pattern":"A chave correta destranca e abre a porta."},{"id":"msg041","type":"alert","dynamic":false,"default":"Esta chave não corresponde à fechadura.","pattern":"Esta chave não corresponde à fechadura."},{"id":"msg042","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"Sucesso! Você força a porta e consegue abri-la. / Sucesso! Você vence a fechadura e abre a porta. …"},{"id":"msg043","type":"alert","dynamic":false,"default":"Falha. A porta continua trancada.","pattern":"Falha. A porta continua trancada."},{"id":"msg044","type":"alert","dynamic":false,"default":"A porta foi fechada.","pattern":"A porta foi fechada."},{"id":"msg045","type":"confirm","dynamic":false,"default":"O personagem está do lado em que consegue alcançar e levantar a barra? (OK = ação Utilizar)","pattern":"O personagem está do lado em que consegue alcançar e levantar a barra? (OK = ação Utilizar)"},{"id":"msg046","type":"alert","dynamic":false,"default":"Você levanta a barra com uma ação Utilizar e abre a porta.","pattern":"Você levanta a barra com uma ação Utilizar e abre a porta."},{"id":"msg047","type":"alert","dynamic":false,"default":"Você força a porta e consegue abri-la.","pattern":"Você força a porta e consegue abri-la."},{"id":"msg048","type":"alert","dynamic":false,"default":"Muralha de Energia: invisível, imune a dano comum e bloqueia a passagem. Só Desintegrar a destrói; teletransporte pode atravessá-la.","pattern":"Muralha de Energia: invisível, imune a dano comum e bloqueia a passagem. Só Desintegrar a destrói; teletransporte pode atravessá-la."},{"id":"msg049","type":"alert","dynamic":false,"default":"Você percebe a ilusão: ela não bloqueia a passagem.","pattern":"Você percebe a ilusão: ela não bloqueia a passagem."},{"id":"msg050","type":"alert","dynamic":true,"default":"{mensagem}","pattern":". Use Atacar estrutura para tentar destruí-la. …"},{"id":"msg051","type":"prompt","dynamic":false,"default":"Muralha de Energia só pode ser destruída por Desintegrar. Digite DESINTEGRAR para aplicar a magia:","pattern":"Muralha de Energia só pode ser destruída por Desintegrar. Digite DESINTEGRAR para aplicar a magia:"},{"id":"msg052","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"foi dissipada. …"},{"id":"msg053","type":"alert","dynamic":false,"default":"A barreira é ilusória; não há estrutura física para destruir.","pattern":"A barreira é ilusória; não há estrutura física para destruir."},{"id":"msg054","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"Ataque não atingiu a CA … . …"},{"id":"msg055","type":"prompt","dynamic":false,"default":"Tipo de dano (cortante, contundente, perfurante, fogo, ácido, elétrico, psíquico, venenoso etc.):","pattern":"Tipo de dano (cortante, contundente, perfurante, fogo, ácido, elétrico, psíquico, venenoso etc.):"},{"id":"msg056","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"Este material é imune a dano … . …"},{"id":"msg057","type":"confirm","dynamic":false,"default":"Ferro/aço resiste a perfuração comum. Este ataque é mágico? (Cancelar = não)","pattern":"Ferro/aço resiste a perfuração comum. Este ataque é mágico? (Cancelar = não)"},{"id":"msg058","type":"alert","dynamic":false,"default":"A estrutura é imune a perfuração não mágica.","pattern":"A estrutura é imune a perfuração não mágica."},{"id":"msg059","type":"confirm","dynamic":false,"default":"O ataque é mágico? (Cancelar = não)","pattern":"O ataque é mágico? (Cancelar = não)"},{"id":"msg060","type":"alert","dynamic":false,"default":"Este material não sofre dano de armas não mágicas.","pattern":"Este material não sofre dano de armas não mágicas."},{"id":"msg061","type":"confirm","dynamic":false,"default":"O personagem é proficiente com Ferramentas de Pedreiro?","pattern":"O personagem é proficiente com Ferramentas de Pedreiro?"},{"id":"msg062","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"O golpe não alcançou o limiar de dano … . Nenhum PV foi removido. …"},{"id":"msg063","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"foi destruído! …"},{"id":"msg064","type":"alert","dynamic":false,"default":"Não há parede ou porta nesta linha.","pattern":"Não há parede ou porta nesta linha."},{"id":"msg065","type":"alert","dynamic":false,"default":"A barreira é uma ilusão e não possui PV.","pattern":"A barreira é uma ilusão e não possui PV."},{"id":"msg066","type":"alert","dynamic":false,"default":"Não há uma parede nesta quadrícula.","pattern":"Não há uma parede nesta quadrícula."},{"id":"msg067","type":"confirm","dynamic":false,"default":"Remover o teleporte deste hexágono?","pattern":"Remover o teleporte deste hexágono?"},{"id":"msg068","type":"confirm","dynamic":false,"default":"Remover este par de teleporte? Os pontos A e B serão apagados.","pattern":"Remover este par de teleporte? Os pontos A e B serão apagados."},{"id":"msg069","type":"alert","dynamic":false,"default":"Este local já faz parte de outro teleporte. Escolha um ponto B diferente.","pattern":"Este local já faz parte de outro teleporte. Escolha um ponto B diferente."},{"id":"msg070","type":"alert","dynamic":false,"default":"Este local já possui um teleporte para outro mapa. Escolha outro ponto.","pattern":"Este local já possui um teleporte para outro mapa. Escolha outro ponto."},{"id":"msg071","type":"alert","dynamic":false,"default":"Não é possível criar um teleporte em uma célula bloqueada. Escolha um espaço livre.","pattern":"Não é possível criar um teleporte em uma célula bloqueada. Escolha um espaço livre."},{"id":"msg072","type":"alert","dynamic":false,"default":"Ponto A definido. Agora clique no local do ponto B para concluir o teleporte. Pressione Esc para cancelar.","pattern":"Ponto A definido. Agora clique no local do ponto B para concluir o teleporte. Pressione Esc para cancelar."},{"id":"msg073","type":"alert","dynamic":false,"default":"Escolha um ponto B diferente do ponto A.","pattern":"Escolha um ponto B diferente do ponto A."},{"id":"msg074","type":"alert","dynamic":false,"default":"Este local já possui um teleporte. Escolha outro ponto para B.","pattern":"Este local já possui um teleporte. Escolha outro ponto para B."},{"id":"msg075","type":"alert","dynamic":false,"default":"Adicione outro mapa primeiro usando o botão + do seletor.","pattern":"Adicione outro mapa primeiro usando o botão + do seletor."},{"id":"msg076","type":"prompt","dynamic":true,"default":"{mensagem}","pattern":"Escolha o mapa de destino digitando o número: …"},{"id":"msg077","type":"alert","dynamic":false,"default":"Destino inválido. Nenhum teleporte foi criado.","pattern":"Destino inválido. Nenhum teleporte foi criado."},{"id":"msg078","type":"alert","dynamic":false,"default":"O mapa de destino deste teleporte não está disponível. Atualize o catálogo mapas/mapas.json.","pattern":"O mapa de destino deste teleporte não está disponível. Atualize o catálogo mapas/mapas.json."},{"id":"msg079","type":"alert","dynamic":false,"default":"Ao tocar a parede, você percebe que ela é uma ilusão e pode atravessá-la.","pattern":"Ao tocar a parede, você percebe que ela é uma ilusão e pode atravessá-la."},{"id":"msg080","type":"alert","dynamic":false,"default":"Você toca uma barreira invisível: Muralha de Energia.","pattern":"Você toca uma barreira invisível: Muralha de Energia."},{"id":"msg081","type":"alert","dynamic":false,"default":"Não é possível iniciar em cima de uma parede.","pattern":"Não é possível iniciar em cima de uma parede."},{"id":"msg082","type":"prompt","dynamic":false,"default":"Nome do token:","pattern":"Nome do token:"},{"id":"msg083","type":"confirm","dynamic":false,"default":"Cobrir o mapa com névoa novamente?","pattern":"Cobrir o mapa com névoa novamente?"},{"id":"msg084","type":"confirm","dynamic":false,"default":"Revelar o mapa inteiro? A névoa será removida de todas as células.","pattern":"Revelar o mapa inteiro? A névoa será removida de todas as células."},{"id":"msg085","type":"confirm","dynamic":false,"default":"Apagar todas as paredes das células?","pattern":"Apagar todas as paredes das células?"},{"id":"msg086","type":"confirm","dynamic":false,"default":"Apagar todos os muros e portas de linha?","pattern":"Apagar todos os muros e portas de linha?"},{"id":"msg087","type":"alert","dynamic":false,"default":"Você não conseguiu identificar a ilusão.","pattern":"Você não conseguiu identificar a ilusão."},{"id":"msg088","type":"alert","dynamic":false,"default":"Você encontrou a passagem, mas ainda não descobriu como abri-la.","pattern":"Você encontrou a passagem, mas ainda não descobriu como abri-la."},{"id":"msg089","type":"alert","dynamic":false,"default":"A porta não cede.","pattern":"A porta não cede."},{"id":"msg090","type":"alert","dynamic":false,"default":"Nenhum dano foi causado.","pattern":"Nenhum dano foi causado."},{"id":"msg091","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"[nome da estrutura] sofreu [dano] de dano. PV restantes: [PV atual]/[PV máximo]."},{"id":"msg092","type":"confirm","dynamic":false,"default":"Restaurar os textos originais de todas as mensagens?","pattern":"Restaurar os textos originais de todas as mensagens?"},{"id":"msg093","type":"alert","dynamic":false,"default":"Não foi possível salvar as mensagens neste navegador.","pattern":"Não foi possível salvar as mensagens neste navegador."}];
+var MESSAGE_OVERRIDES = {};
+try {
+  var savedMessageOverrides = JSON.parse(localStorage.getItem(MESSAGE_SETTINGS_KEY) || '{}');
+  if (savedMessageOverrides && typeof savedMessageOverrides === 'object' && !Array.isArray(savedMessageOverrides)) {
+    MESSAGE_OVERRIDES = savedMessageOverrides;
+  }
+} catch (messageLoadError) { MESSAGE_OVERRIDES = {}; }
+function resolveAppMessage(id, originalMessage) {
+  var original = String(originalMessage == null ? '' : originalMessage);
+  if (!Object.prototype.hasOwnProperty.call(MESSAGE_OVERRIDES, id)) return original;
+  var configured = String(MESSAGE_OVERRIDES[id] == null ? '' : MESSAGE_OVERRIDES[id]);
+  return configured.replace(/\{mensagem\}|\{original\}|\{textoOriginal\}/gi, original);
+}
+function appAlertMessage(id, message) {
+  var resolved = resolveAppMessage(id, message);
+  // Campo vazio suprime completamente avisos informativos.
+  if (!resolved.trim()) return;
+  window.alert(resolved);
+}
+function appConfirmMessage(id, message) {
+  // Mesmo sem texto, a confirmação permanece para não executar ações destrutivas sem consentimento.
+  return window.confirm(resolveAppMessage(id, message));
+}
+function appPromptMessage(id, message, defaultValue) {
+  // Mesmo sem texto, o campo de entrada permanece para que a operação continue utilizável.
+  return window.prompt(resolveAppMessage(id, message), defaultValue);
+}
+
+
 function isHexMap() { return !!(MAPINFO && MAPINFO.scale && mapId === 'flanaess'); }
 function hexMetrics() {
   if (!isHexMap()) return null;
@@ -381,7 +413,7 @@ function downloadBlob(blob, filename) {
 function exportMapCatalog(allowEmpty) {
   var entries = customMapEntries();
   if (!entries.length && !allowEmpty) {
-    alert('Ainda não há mapas adicionados pelo botão +.');
+    appAlertMessage('msg001', 'Ainda não há mapas adicionados pelo botão +.');
     return;
   }
   var payload = {
@@ -440,14 +472,14 @@ function revokeMapRuntimeUrls(info) {
 
 function deleteCurrentCustomMap() {
   if (!MAPINFO || !MAPINFO.custom) {
-    alert('Os mapas originais do projeto não podem ser excluídos. Este botão remove somente mapas adicionados pelo botão +.');
+    appAlertMessage('msg002', 'Os mapas originais do projeto não podem ser excluídos. Este botão remove somente mapas adicionados pelo botão +.');
     return;
   }
 
   var deletedId = mapId;
   var deletedInfo = MAPINFO;
   var host = R;
-  var confirmed = window.confirm(
+  var confirmed = appConfirmMessage('msg003', 
     'Excluir o mapa "' + deletedInfo.nome + '"?\n\n' +
     'Ele será removido do seletor e os dados salvos deste mapa serão apagados deste navegador.\n\n' +
     'Um novo mapas.json será baixado para atualizar o catálogo no GitHub. Os arquivos já publicados na pasta mapas/' + deletedId + '/ não são apagados automaticamente; remova essa pasta do GitHub se também quiser excluir as imagens e o JSON.'
@@ -471,7 +503,7 @@ function deleteCurrentCustomMap() {
   state = migrateFlanaessState(load() || defaultState());
   selected = null; pendingMonster = null; measurePts = null; drag = null;
   mount(host);
-  alert('Mapa excluído do seletor neste navegador. O catálogo mapas.json atualizado foi baixado. Publique esse arquivo em mapas/mapas.json no GitHub e, se desejar apagar também as imagens e dados antigos, exclua a pasta mapas/' + deletedId + '/ do repositório.');
+  appAlertMessage('msg004', 'Mapa excluído do seletor neste navegador. O catálogo mapas.json atualizado foi baixado. Publique esse arquivo em mapas/mapas.json no GitHub e, se desejar apagar também as imagens e dados antigos, exclua a pasta mapas/' + deletedId + '/ do repositório.');
 }
 
 function canvasToWebp(canvas, quality) {
@@ -602,18 +634,18 @@ function safeMapFileName(value) {
 
 function createCustomMapFromFile(file) {
   if (!file || !file.type || file.type.indexOf('image/') !== 0) {
-    alert('Selecione um arquivo de imagem válido.');
+    appAlertMessage('msg005', 'Selecione um arquivo de imagem válido.');
     return;
   }
   var suggestedName = file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim() || 'Novo mapa';
-  var name = window.prompt('Nome do novo mapa:', suggestedName);
+  var name = appPromptMessage('msg006', 'Nome do novo mapa:', suggestedName);
   if (!name || !name.trim()) return;
   name = name.trim();
-  var cellInput = window.prompt('Tamanho da célula da grade em pixels:', '36');
+  var cellInput = appPromptMessage('msg007', 'Tamanho da célula da grade em pixels:', '36');
   if (cellInput == null) return;
   var cell = Number(cellInput);
   if (!isFinite(cell) || cell < 8 || cell > 512) {
-    alert('Informe um tamanho de célula entre 8 e 512 pixels.');
+    appAlertMessage('msg008', 'Informe um tamanho de célula entre 8 e 512 pixels.');
     return;
   }
 
@@ -695,10 +727,10 @@ function createCustomMapFromFile(file) {
         var detailMessage = optimized.detailN
           ? 'O ZIP contém imagem.webp e ' + (optimized.detailN * optimized.detailN) + ' blocos WebP de detalhe, carregados conforme o zoom.'
           : 'O ZIP contém imagem.webp otimizada em WebP.';
-        alert('Mapa adicionado e otimizado! ' + detailMessage + '\n\nExtraia o ZIP dentro de "' + folder + '". Depois baixe o catálogo mapas.json pelo menu e coloque-o em "mapas/mapas.json". Use Salvar mapa para baixar "' + stateFileName + '" na mesma pasta.');
+        appAlertMessage('msg009', 'Mapa adicionado e otimizado! ' + detailMessage + '\n\nExtraia o ZIP dentro de "' + folder + '". Depois baixe o catálogo mapas.json pelo menu e coloque-o em "mapas/mapas.json". Use Salvar mapa para baixar "' + stateFileName + '" na mesma pasta.');
       } catch (error) {
         runtimeUrls.forEach(function (url) { try { URL.revokeObjectURL(url); } catch (e) {} });
-        alert(error && error.message ? error.message : 'Não foi possível otimizar a imagem do mapa.');
+        appAlertMessage('msg010', error && error.message ? error.message : 'Não foi possível otimizar a imagem do mapa.');
       } finally {
         URL.revokeObjectURL(imageUrl);
       }
@@ -706,7 +738,7 @@ function createCustomMapFromFile(file) {
   };
   image.onerror = function () {
     URL.revokeObjectURL(imageUrl);
-    alert('Não foi possível abrir essa imagem.');
+    appAlertMessage('msg011', 'Não foi possível abrir essa imagem.');
   };
   image.src = imageUrl;
 }
@@ -1080,7 +1112,7 @@ function segmentCrosses(a,b,c,d) {
   return ((o1===0 || o2===0 || (o1<0)!==(o2<0)) && (o3===0 || o4===0 || (o3<0)!==(o4<0)));
 }
 function createCustomStructure(a, b, kind) {
-  if (!a || !b || (Math.abs(a.x-b.x)<1 && Math.abs(a.y-b.y)<1)) { alert('Escolha dois cantos diferentes do grid.'); return; }
+  if (!a || !b || (Math.abs(a.x-b.x)<1 && Math.abs(a.y-b.y)<1)) { appAlertMessage('msg012', 'Escolha dois cantos diferentes do grid.'); return; }
   var val = kind === 'muro' ? EDGE_MURO : kind === 'porta' ? EDGE_DOOR_C : null;
   if (kind !== 'muro' && kind !== 'porta') {
     var map = {paredeSecreta:'secretWall',portaSecreta:'secretDoor',portaTrancada:'lockedDoor',portaEmperrada:'jammedDoor',paredeIlusoria:'illusionWall',muralhaForca:'forceWall',paredeMagica:'magicWall'};
@@ -1195,16 +1227,16 @@ var OBJECT_MATERIALS = {
   pedraMagica: { label: 'Pedra mágica', ac: 15, hp: 30, threshold: 10, immune: ['psíquico', 'venenoso'] }
 };
 function numberPrompt(label, fallback, min, max) {
-  var raw = window.prompt(label, String(fallback));
+  var raw = appPromptMessage('msg013', label, String(fallback));
   if (raw == null) return null;
   var n = Number(raw);
-  if (!isFinite(n) || n < min || n > max) { alert('Informe um valor entre ' + min + ' e ' + max + '.'); return null; }
+  if (!isFinite(n) || n < min || n > max) { appAlertMessage('msg014', 'Informe um valor entre ' + min + ' e ' + max + '.'); return null; }
   return Math.round(n);
 }
 function materialPrompt(defaultMaterial) {
   var choices = 'Material:\n1. Madeira\n2. Pedra\n3. Ferro/aço\n4. Mithral\n5. Adamantina\n6. Pedra mágica';
   var initial = defaultMaterial === 'pedra' ? '2' : defaultMaterial === 'ferro' ? '3' : '1';
-  var raw = window.prompt(choices, initial);
+  var raw = appPromptMessage('msg015', choices, initial);
   if (raw == null) return null;
   return ({ '1':'madeira', '2':'pedra', '3':'ferro', '4':'mithral', '5':'adamantina', '6':'pedraMagica' })[String(raw).trim()] || null;
 }
@@ -1280,7 +1312,7 @@ function checkPassiveSecretDetection(player) {
   });
   if (found.length) {
     save(); draw();
-    alert('Percepção passiva ' + passive + ': você percebe ' + found.join(' e ') + '. Encontrar não revela como abrir; investigue o mecanismo.');
+    appAlertMessage('msg016', 'Percepção passiva ' + passive + ': você percebe ' + found.join(' e ') + '. Encontrar não revela como abrir; investigue o mecanismo.');
   }
 }
 function performActiveSecretSearch(cell) {
@@ -1294,7 +1326,7 @@ function performActiveSecretSearch(cell) {
     meta.detected = true;
     found.push(meta.kind === 'secretDoor' ? 'porta secreta' : 'parede secreta');
   });
-  alert(found.length
+  appAlertMessage('msg017', found.length
     ? 'Sucesso! Você encontrou: ' + found.join(', ') + '. Ainda é necessário descobrir o mecanismo.'
     : 'Nenhuma passagem secreta foi encontrada nesta seção de aproximadamente 3 metros.');
   save(); draw();
@@ -1305,28 +1337,28 @@ function investigateEdgeMechanism(edge) {
     var illusionRoll = numberPrompt('Teste de Inteligência (Investigação) para identificar a ilusão. Informe o total:', 15, 0, 60);
     if (illusionRoll == null) return;
     if (meta && illusionRoll >= Number(meta.dcDetection || 15)) {
-      meta.detected = true; alert('Você identifica a ilusão. Ela não bloqueia passagem.');
-    } else alert('Você não conseguiu identificar a ilusão.');
+      meta.detected = true; appAlertMessage('msg018', 'Você identifica a ilusão. Ela não bloqueia passagem.');
+    } else appAlertMessage('msg087', 'Você não conseguiu identificar a ilusão.');
     save(); draw(); return;
   }
   if (val !== EDGE_SECRET_WALL && val !== EDGE_SECRET_DOOR_C && val !== EDGE_SECRET_DOOR_O) {
-    alert('Não há um mecanismo secreto nesta linha.'); return;
+    appAlertMessage('msg019', 'Não há um mecanismo secreto nesta linha.'); return;
   }
-  if (!meta || !meta.detected) { alert('Primeiro encontre a passagem com Percepção.'); return; }
-  if (meta.mechanismKnown) { alert('O mecanismo desta passagem já foi descoberto.'); return; }
+  if (!meta || !meta.detected) { appAlertMessage('msg020', 'Primeiro encontre a passagem com Percepção.'); return; }
+  if (meta.mechanismKnown) { appAlertMessage('msg021', 'O mecanismo desta passagem já foi descoberto.'); return; }
   var roll = numberPrompt('Teste de Inteligência (Investigação) para descobrir o mecanismo. Informe o total:', 15, 0, 60);
   if (roll == null) return;
   if (roll >= Number(meta.dcMechanism || 15)) {
     meta.mechanismKnown = true;
     var hint = meta.mechanismHint ? '\nComo acionar: ' + meta.mechanismHint : '';
-    alert('Mecanismo descoberto! Agora você pode acionar a passagem.' + hint);
-  } else alert('Você encontrou a passagem, mas ainda não descobriu como abri-la.');
+    appAlertMessage('msg022', 'Mecanismo descoberto! Agora você pode acionar a passagem.' + hint);
+  } else appAlertMessage('msg088', 'Você encontrou a passagem, mas ainda não descobriu como abri-la.');
   save(); draw();
 }
 function createSpecialEdge(edge, kind) {
   if (!edge) return;
   var existing = getEdgeVal(edge);
-  if (existing !== EDGE_NONE && !window.confirm('Já existe uma parede ou porta nesta linha. Substituir?')) return;
+  if (existing !== EDGE_NONE && !appConfirmMessage('msg023', 'Já existe uma parede ou porta nesta linha. Substituir?')) return;
   var isDoor = kind === 'secretDoor' || kind === 'lockedDoor' || kind === 'jammedDoor';
   // Parede mágica segue as estatísticas específicas de pedra mágica (CA 15; 30 PV/polegada).
   var material = kind === 'forceWall' ? 'force' : kind === 'illusionWall' ? 'illusion' :
@@ -1339,7 +1371,7 @@ function createSpecialEdge(edge, kind) {
     if (meta.dcDetection == null) return;
     meta.dcMechanism = numberPrompt('CD de Inteligência (Investigação) para descobrir o mecanismo:', 15, 1, 40);
     if (meta.dcMechanism == null) return;
-    meta.mechanismHint = String(window.prompt('Descreva como o mecanismo é acionado (ex.: girar uma tocha, puxar um livro, apertar uma pedra):', 'Um detalhe do ambiente esconde o mecanismo.') || '').trim();
+    meta.mechanismHint = String(appPromptMessage('msg024', 'Descreva como o mecanismo é acionado (ex.: girar uma tocha, puxar um livro, apertar uma pedra):', 'Um detalhe do ambiente esconde o mecanismo.') || '').trim();
     meta.detected = false; meta.mechanismKnown = false;
     type = kind === 'secretWall' ? EDGE_SECRET_WALL : EDGE_SECRET_DOOR_C;
   } else if (kind === 'lockedDoor') {
@@ -1347,14 +1379,14 @@ function createSpecialEdge(edge, kind) {
     if (meta.lockDC == null) return;
     meta.dcForce = numberPrompt('CD de Força (Atletismo) para arrombar fisicamente a porta:', 18, 1, 50);
     if (meta.dcForce == null) return;
-    var complexity = window.prompt('Complexidade: 1 = simples (1 ação); 2 = complexa (1 minuto).', '1');
+    var complexity = appPromptMessage('msg025', 'Complexidade: 1 = simples (1 ação); 2 = complexa (1 minuto).', '1');
     if (complexity == null) return;
     meta.lockComplexity = String(complexity).trim() === '2' ? 'complex' : 'simple';
-    meta.keyName = String(window.prompt('Nome da chave que abre esta porta (deixe em branco se não houver chave específica):', '') || '').trim();
-    meta.arcaneLock = window.confirm('Esta fechadura possui Tranca Arcana? (Cancelar = não)');
+    meta.keyName = String(appPromptMessage('msg026', 'Nome da chave que abre esta porta (deixe em branco se não houver chave específica):', '') || '').trim();
+    meta.arcaneLock = appConfirmMessage('msg027', 'Esta fechadura possui Tranca Arcana? (Cancelar = não)');
     meta.locked = true; type = EDGE_LOCKED_DOOR;
   } else if (kind === 'jammedDoor') {
-    var jamMode = window.prompt('Tipo de bloqueio: 1 = emperrada (Força/Atletismo); 2 = barrada por dentro (ação Utilizar do lado da barra).', '1');
+    var jamMode = appPromptMessage('msg028', 'Tipo de bloqueio: 1 = emperrada (Força/Atletismo); 2 = barrada por dentro (ação Utilizar do lado da barra).', '1');
     if (jamMode == null) return;
     meta.barred = String(jamMode).trim() === '2';
     meta.dcForce = numberPrompt(meta.barred
@@ -1378,7 +1410,7 @@ function createSpecialEdge(edge, kind) {
     meta.detected = true; type = EDGE_MAGIC_WALL;
   }
   setEdgeVal(edge, type); setEdgeMeta(edge, meta); save(); draw();
-  alert('Estrutura criada: ' + ({ secretWall:'parede secreta', secretDoor:'porta secreta', lockedDoor:'porta trancada', jammedDoor:'porta emperrada', illusionWall:'parede ilusória', forceWall:'Muralha de Energia', magicWall:'parede mágica' })[kind] + '.');
+  appAlertMessage('msg029', 'Estrutura criada: ' + ({ secretWall:'parede secreta', secretDoor:'porta secreta', lockedDoor:'porta trancada', jammedDoor:'porta emperrada', illusionWall:'parede ilusória', forceWall:'Muralha de Energia', magicWall:'parede mágica' })[kind] + '.');
 }
 function edgeActionLabel(val, meta) {
   if (val === EDGE_SECRET_WALL || val === EDGE_SECRET_DOOR_C || val === EDGE_SECRET_DOOR_O) return meta && meta.kind === 'secretDoor' ? 'porta secreta' : 'parede secreta';
@@ -1403,18 +1435,18 @@ function openDoorEdge(edge, open) {
 function interactWithEdge(edge) {
   var val = getEdgeVal(edge), meta = getEdgeMeta(edge);
   if (val === EDGE_SECRET_WALL || val === EDGE_SECRET_DOOR_C || val === EDGE_SECRET_DOOR_O) {
-    if (!meta || !meta.detected) { alert('Você não percebe nada incomum nesta parte da parede.'); return; }
-    if (!meta.mechanismKnown) { alert('Você encontrou a passagem, mas ainda não descobriu como acioná-la. Use Investigar mecanismo.'); return; }
+    if (!meta || !meta.detected) { appAlertMessage('msg030', 'Você não percebe nada incomum nesta parte da parede.'); return; }
+    if (!meta.mechanismKnown) { appAlertMessage('msg031', 'Você encontrou a passagem, mas ainda não descobriu como acioná-la. Use Investigar mecanismo.'); return; }
     if (val === EDGE_SECRET_WALL) {
       meta.open = !meta.open;
-      alert(meta.open ? 'O mecanismo foi acionado e a passagem secreta se abriu.' : 'A passagem secreta foi fechada.');
+      appAlertMessage('msg032', meta.open ? 'O mecanismo foi acionado e a passagem secreta se abriu.' : 'A passagem secreta foi fechada.');
       save(); draw(); return;
     }
     openDoorEdge(edge, val !== EDGE_SECRET_DOOR_O); return;
   }
   if (val === EDGE_LOCKED_DOOR) {
     if (!meta) { meta = makeStructureMeta('madeira', 'lockedDoor', 1); meta.locked = true; setEdgeMeta(edge, meta); }
-    if (meta.open) { meta.open = false; save(); draw(); alert('A porta foi fechada.'); return; }
+    if (meta.open) { meta.open = false; save(); draw(); appAlertMessage('msg033', 'A porta foi fechada.'); return; }
 
     var now = Date.now();
     var arcaneConfigured = !!meta.arcaneLock;
@@ -1423,9 +1455,9 @@ function interactWithEdge(edge) {
       meta.open = true;
     } else if (arcaneSuppressed) {
       meta.open = true;
-      alert('A Tranca Arcana está suprimida; a porta pode ser aberta durante os 10 minutos restantes.');
+      appAlertMessage('msg034', 'A Tranca Arcana está suprimida; a porta pode ser aberta durante os 10 minutos restantes.');
     } else {
-      var approach = window.prompt(
+      var approach = appPromptMessage('msg035', 
         'Como deseja abrir a porta trancada?\n1 = Ferramentas de Ladrão (Destreza/Prestidigitação) — ' + (meta.lockComplexity === 'complex' ? '1 minuto' : '1 ação') +
         '\n2 = Forçar fisicamente (Força/Atletismo)' +
         (meta.keyName ? '\nCHAVE = usar a chave (' + meta.keyName + ')' : '') +
@@ -1436,22 +1468,22 @@ function interactWithEdge(edge) {
         meta.open = true;
         if (arcaneConfigured) {
           meta.arcaneSuppressedUntil = now + 10 * 60 * 1000;
-          alert('Arrombar abriu a porta. A Tranca Arcana fica suprimida por 10 minutos.');
+          appAlertMessage('msg036', 'Arrombar abriu a porta. A Tranca Arcana fica suprimida por 10 minutos.');
         } else {
           meta.locked = false;
-          alert('Arrombar abriu instantaneamente a fechadura mundana.');
+          appAlertMessage('msg037', 'Arrombar abriu instantaneamente a fechadura mundana.');
         }
       } else if (command === 'chave' && meta.keyName) {
-        var usedKey = String(window.prompt('Digite o nome da chave utilizada:', '') || '').trim().toLocaleLowerCase();
+        var usedKey = String(appPromptMessage('msg038', 'Digite o nome da chave utilizada:', '') || '').trim().toLocaleLowerCase();
         if (usedKey && usedKey === meta.keyName.toLocaleLowerCase()) {
           if (arcaneConfigured && !arcaneSuppressed) {
-            alert('A chave física não supera a Tranca Arcana. Use um teste com CD +10 ou a magia Arrombar.');
+            appAlertMessage('msg039', 'A chave física não supera a Tranca Arcana. Use um teste com CD +10 ou a magia Arrombar.');
           } else {
             meta.locked = false; meta.open = true;
-            alert('A chave correta destranca e abre a porta.');
+            appAlertMessage('msg040', 'A chave correta destranca e abre a porta.');
           }
         } else {
-          alert('Esta chave não corresponde à fechadura.');
+          appAlertMessage('msg041', 'Esta chave não corresponde à fechadura.');
         }
       } else {
         var checkIsForce = command === '2';
@@ -1465,11 +1497,11 @@ function interactWithEdge(edge) {
           // Sem Tranca Arcana, vencer ou arrombar a fechadura a deixa inutilizada.
           // Com a magia, a proteção persiste e volta a valer quando a porta for fechada.
           if (!arcaneConfigured) meta.locked = false;
-          alert(checkIsForce
+          appAlertMessage('msg042', checkIsForce
             ? 'Sucesso! Você força a porta e consegue abri-la.'
             : 'Sucesso! Você vence a fechadura e abre a porta.');
         } else {
-          alert('Falha. A porta continua trancada.');
+          appAlertMessage('msg043', 'Falha. A porta continua trancada.');
         }
       }
     }
@@ -1477,20 +1509,20 @@ function interactWithEdge(edge) {
   }
   if (val === EDGE_JAMMED_DOOR) {
     if (!meta) { meta = makeStructureMeta('madeira', 'jammedDoor', 1); setEdgeMeta(edge, meta); }
-    if (meta.open) { meta.open = false; save(); draw(); alert('A porta foi fechada.'); return; }
-    if (meta.barred && window.confirm('O personagem está do lado em que consegue alcançar e levantar a barra? (OK = ação Utilizar)')) {
-      meta.open = true; save(); draw(); alert('Você levanta a barra com uma ação Utilizar e abre a porta.'); return;
+    if (meta.open) { meta.open = false; save(); draw(); appAlertMessage('msg044', 'A porta foi fechada.'); return; }
+    if (meta.barred && appConfirmMessage('msg045', 'O personagem está do lado em que consegue alcançar e levantar a barra? (OK = ação Utilizar)')) {
+      meta.open = true; save(); draw(); appAlertMessage('msg046', 'Você levanta a barra com uma ação Utilizar e abre a porta.'); return;
     }
     var forceRoll = numberPrompt('Força (Atletismo) para forçar a porta — CD ' + Number(meta.dcForce || 15) + '. Informe o total:', 15, 0, 60);
     if (forceRoll == null) return;
-    if (forceRoll >= Number(meta.dcForce || 15)) { meta.open = true; alert('Você força a porta e consegue abri-la.'); }
-    else alert('A porta não cede.');
+    if (forceRoll >= Number(meta.dcForce || 15)) { meta.open = true; appAlertMessage('msg047', 'Você força a porta e consegue abri-la.'); }
+    else appAlertMessage('msg089', 'A porta não cede.');
     save(); draw(); return;
   }
   if (val === EDGE_DOOR_C || val === EDGE_DOOR_O) { openDoorEdge(edge, val === EDGE_DOOR_C); return; }
-  if (val === EDGE_FORCE_WALL) { alert('Muralha de Energia: invisível, imune a dano comum e bloqueia a passagem. Só Desintegrar a destrói; teletransporte pode atravessá-la.'); return; }
-  if (val === EDGE_ILLUSION_WALL) { if (meta) meta.detected = true; save(); draw(); alert('Você percebe a ilusão: ela não bloqueia a passagem.'); return; }
-  if (val === EDGE_MAGIC_WALL || val === EDGE_SECRET_WALL || val === EDGE_MURO) alert(edgeActionLabel(val, meta) + '. Use Atacar estrutura para tentar destruí-la.');
+  if (val === EDGE_FORCE_WALL) { appAlertMessage('msg048', 'Muralha de Energia: invisível, imune a dano comum e bloqueia a passagem. Só Desintegrar a destrói; teletransporte pode atravessá-la.'); return; }
+  if (val === EDGE_ILLUSION_WALL) { if (meta) meta.detected = true; save(); draw(); appAlertMessage('msg049', 'Você percebe a ilusão: ela não bloqueia a passagem.'); return; }
+  if (val === EDGE_MAGIC_WALL || val === EDGE_SECRET_WALL || val === EDGE_MURO) appAlertMessage('msg050', edgeActionLabel(val, meta) + '. Use Atacar estrutura para tentar destruí-la.');
 }
 function ensureEdgeStructureMeta(edge) {
   var meta = getEdgeMeta(edge), val = getEdgeVal(edge);
@@ -1511,48 +1543,48 @@ function ensureEdgeStructureMeta(edge) {
 function damageObject(meta, label, destroy) {
   if (!meta) return;
   if (meta.material === 'force') {
-    var command = window.prompt('Muralha de Energia só pode ser destruída por Desintegrar. Digite DESINTEGRAR para aplicar a magia:', '');
-    if (String(command || '').trim().toLowerCase() === 'desintegrar') { destroy(); alert(label + ' foi dissipada.'); }
-    else alert('Nenhum dano foi causado.');
+    var command = appPromptMessage('msg051', 'Muralha de Energia só pode ser destruída por Desintegrar. Digite DESINTEGRAR para aplicar a magia:', '');
+    if (String(command || '').trim().toLowerCase() === 'desintegrar') { destroy(); appAlertMessage('msg052', label + ' foi dissipada.'); }
+    else appAlertMessage('msg090', 'Nenhum dano foi causado.');
     return;
   }
-  if (meta.material === 'illusion') { alert('A barreira é ilusória; não há estrutura física para destruir.'); return; }
+  if (meta.material === 'illusion') { appAlertMessage('msg053', 'A barreira é ilusória; não há estrutura física para destruir.'); return; }
   var stats = OBJECT_MATERIALS[meta.material] || OBJECT_MATERIALS.pedra;
   var ac = Number(meta.ac || stats.ac);
   var attack = numberPrompt('Ataque contra ' + label + ' — CA ' + ac + '. Informe o total da jogada:', ac, 0, 60);
   if (attack == null) return;
-  if (attack < ac) { alert('Ataque não atingiu a CA ' + ac + '.'); return; }
+  if (attack < ac) { appAlertMessage('msg054', 'Ataque não atingiu a CA ' + ac + '.'); return; }
   var damage = numberPrompt('Dano causado em um único golpe (PV restantes: ' + Number(meta.hp || 0) + '):', 8, 0, 500);
   if (damage == null) return;
-  var damageType = window.prompt('Tipo de dano (cortante, contundente, perfurante, fogo, ácido, elétrico, psíquico, venenoso etc.):', 'contundente');
+  var damageType = appPromptMessage('msg055', 'Tipo de dano (cortante, contundente, perfurante, fogo, ácido, elétrico, psíquico, venenoso etc.):', 'contundente');
   if (damageType == null) return;
   damageType = String(damageType).toLowerCase();
-  if ((stats.immune || []).some(function (t) { return damageType.indexOf(t) >= 0; })) { alert('Este material é imune a dano ' + damageType + '.'); return; }
-  if (meta.material === 'ferro' && damageType.indexOf('perfurante') >= 0 && !window.confirm('Ferro/aço resiste a perfuração comum. Este ataque é mágico? (Cancelar = não)')) {
-    alert('A estrutura é imune a perfuração não mágica.'); return;
+  if ((stats.immune || []).some(function (t) { return damageType.indexOf(t) >= 0; })) { appAlertMessage('msg056', 'Este material é imune a dano ' + damageType + '.'); return; }
+  if (meta.material === 'ferro' && damageType.indexOf('perfurante') >= 0 && !appConfirmMessage('msg057', 'Ferro/aço resiste a perfuração comum. Este ataque é mágico? (Cancelar = não)')) {
+    appAlertMessage('msg058', 'A estrutura é imune a perfuração não mágica.'); return;
   }
-  if (stats.needsMagic && !window.confirm('O ataque é mágico? (Cancelar = não)')) { alert('Este material não sofre dano de armas não mágicas.'); return; }
+  if (stats.needsMagic && !appConfirmMessage('msg059', 'O ataque é mágico? (Cancelar = não)')) { appAlertMessage('msg060', 'Este material não sofre dano de armas não mágicas.'); return; }
   var applied = damage;
   if (stats.vulnerableFire && damageType.indexOf('fogo') >= 0) applied *= 2;
   var isStoneWall = (meta.material === 'pedra' || meta.material === 'pedraMagica') && /wall/i.test(meta.kind || '');
-  if (isStoneWall && window.confirm('O personagem é proficiente com Ferramentas de Pedreiro?')) applied *= 2;
+  if (isStoneWall && appConfirmMessage('msg061', 'O personagem é proficiente com Ferramentas de Pedreiro?')) applied *= 2;
   var threshold = Number(meta.threshold || 0);
-  if (applied < threshold) { alert('O golpe não alcançou o limiar de dano ' + threshold + '. Nenhum PV foi removido.'); return; }
+  if (applied < threshold) { appAlertMessage('msg062', 'O golpe não alcançou o limiar de dano ' + threshold + '. Nenhum PV foi removido.'); return; }
   meta.hp = Math.max(0, Number(meta.hp || 0) - applied);
-  if (meta.hp <= 0) { destroy(); alert(label + ' foi destruído!'); }
-  else alert(label + ' sofreu ' + applied + ' de dano. PV restantes: ' + meta.hp + '/' + meta.maxHp + '.');
+  if (meta.hp <= 0) { destroy(); appAlertMessage('msg063', label + ' foi destruído!'); }
+  else appAlertMessage('msg091', label + ' sofreu ' + applied + ' de dano. PV restantes: ' + meta.hp + '/' + meta.maxHp + '.');
 }
 function damageEdgeStructure(edge) {
   var val = getEdgeVal(edge);
-  if (val === EDGE_NONE) { alert('Não há parede ou porta nesta linha.'); return; }
-  if (val === EDGE_ILLUSION_WALL) { alert('A barreira é uma ilusão e não possui PV.'); return; }
+  if (val === EDGE_NONE) { appAlertMessage('msg064', 'Não há parede ou porta nesta linha.'); return; }
+  if (val === EDGE_ILLUSION_WALL) { appAlertMessage('msg065', 'A barreira é uma ilusão e não possui PV.'); return; }
   var meta = ensureEdgeStructureMeta(edge);
   damageObject(meta, edgeActionLabel(val, meta), function () { setEdgeVal(edge, EDGE_NONE); });
   save(); draw();
 }
 function damageCellWall(cell) {
   var i = idx(cell.x, cell.y);
-  if (!state.walls[i]) { alert('Não há uma parede nesta quadrícula.'); return; }
+  if (!state.walls[i]) { appAlertMessage('msg066', 'Não há uma parede nesta quadrícula.'); return; }
   if (!state.wallMeta) state.wallMeta = makeArr(COLS * ROWS, null);
   var meta = state.wallMeta[i] || makeStructureMeta('pedra', 'wall', 2);
   state.wallMeta[i] = meta;
@@ -2188,7 +2220,7 @@ function showExistingPortalActions(portal) {
   remove.textContent = '🗑 Remover teleporte';
   remove.onclick = function () {
     closePortalDialog(dialog.overlay);
-    if (window.confirm('Remover o teleporte deste hexágono?')) {
+    if (appConfirmMessage('msg067', 'Remover o teleporte deste hexágono?')) {
       state.portals = state.portals.filter(function (item) { return item !== portal; });
       save(); draw();
     }
@@ -2229,7 +2261,7 @@ function showExistingLocalPortalActions(portal) {
   remove.textContent = '🗑 Remover os dois pontos';
   remove.onclick = function () {
     closePortalDialog(dialog.overlay);
-    if (window.confirm('Remover este par de teleporte? Os pontos A e B serão apagados.')) {
+    if (appConfirmMessage('msg068', 'Remover este par de teleporte? Os pontos A e B serão apagados.')) {
       state.portals = state.portals.filter(function (item) { return item !== portal; });
       save(); draw();
     }
@@ -2252,35 +2284,35 @@ function placeLocalPortal(cell) {
 
   var existingLocal = findLocalPortalAt(cell.x, cell.y);
   if (existingLocal) {
-    if (pendingLocalPortal) { alert('Este local já faz parte de outro teleporte. Escolha um ponto B diferente.'); return; }
+    if (pendingLocalPortal) { appAlertMessage('msg069', 'Este local já faz parte de outro teleporte. Escolha um ponto B diferente.'); return; }
     showExistingLocalPortalActions(existingLocal);
     return;
   }
   var existingWorld = findWorldPortalAt(cell.x, cell.y);
   if (existingWorld) {
-    if (pendingLocalPortal) { alert('Este local já possui um teleporte para outro mapa. Escolha outro ponto.'); return; }
+    if (pendingLocalPortal) { appAlertMessage('msg070', 'Este local já possui um teleporte para outro mapa. Escolha outro ponto.'); return; }
     showExistingPortalActions(existingWorld);
     return;
   }
   var placementPlayer = currentPlayer();
   if (blockMove && !canOccupy(cell.x, cell.y, placementPlayer)) {
-    alert('Não é possível criar um teleporte em uma célula bloqueada. Escolha um espaço livre.');
+    appAlertMessage('msg071', 'Não é possível criar um teleporte em uma célula bloqueada. Escolha um espaço livre.');
     return;
   }
 
   if (!pendingLocalPortal) {
     pendingLocalPortal = { x: cell.x, y: cell.y };
     draw();
-    alert('Ponto A definido. Agora clique no local do ponto B para concluir o teleporte. Pressione Esc para cancelar.');
+    appAlertMessage('msg072', 'Ponto A definido. Agora clique no local do ponto B para concluir o teleporte. Pressione Esc para cancelar.');
     return;
   }
 
   if (pendingLocalPortal.x === cell.x && pendingLocalPortal.y === cell.y) {
-    alert('Escolha um ponto B diferente do ponto A.');
+    appAlertMessage('msg073', 'Escolha um ponto B diferente do ponto A.');
     return;
   }
   if (portalCellIsOccupied(cell.x, cell.y)) {
-    alert('Este local já possui um teleporte. Escolha outro ponto para B.');
+    appAlertMessage('msg074', 'Este local já possui um teleporte. Escolha outro ponto para B.');
     return;
   }
 
@@ -2316,9 +2348,9 @@ function placeWorldPortal(cell) {
     return;
   }
   var options = Object.keys(MAPS).filter(function (id) { return id !== mapId; });
-  if (!options.length) { alert('Adicione outro mapa primeiro usando o botão + do seletor.'); return; }
+  if (!options.length) { appAlertMessage('msg075', 'Adicione outro mapa primeiro usando o botão + do seletor.'); return; }
   var menu = options.map(function (id, index) { return (index + 1) + '. ' + MAPS[id].nome; }).join('\n');
-  var answer = window.prompt('Escolha o mapa de destino digitando o número:\n\n' + menu, '1');
+  var answer = appPromptMessage('msg076', 'Escolha o mapa de destino digitando o número:\n\n' + menu, '1');
   if (answer == null || !String(answer).trim()) return;
   var destination = options[Number(answer) - 1];
   if (!destination) {
@@ -2326,7 +2358,7 @@ function placeWorldPortal(cell) {
       return id.toLowerCase() === String(answer).trim().toLowerCase() || MAPS[id].nome.toLowerCase() === String(answer).trim().toLowerCase();
     });
   }
-  if (!destination) { alert('Destino inválido. Nenhum teleporte foi criado.'); return; }
+  if (!destination) { appAlertMessage('msg077', 'Destino inválido. Nenhum teleporte foi criado.'); return; }
   showPortalColorPicker('#36a9e1', function (color) {
     state.portals.push({
       id: 'portal-' + Date.now().toString(36),
@@ -2341,7 +2373,7 @@ function placeWorldPortal(cell) {
 
 function teleportThroughWorldPortal(portal) {
   if (!portal || !MAPS[portal.destMapId]) {
-    alert('O mapa de destino deste teleporte não está disponível. Atualize o catálogo mapas/mapas.json.');
+    appAlertMessage('msg078', 'O mapa de destino deste teleporte não está disponível. Atualize o catálogo mapas/mapas.json.');
     draw();
     return;
   }
@@ -2787,11 +2819,11 @@ function canStep(fromX, fromY, toX, toY, token, detectTouch) {
         var val = getEdgeVal(edge), meta = getEdgeMeta(edge);
         if (val === EDGE_ILLUSION_WALL && meta && !meta.detected) {
           meta.detected = true;
-          window.setTimeout(function () { if (cv) { save(); draw(); alert('Ao tocar a parede, você percebe que ela é uma ilusão e pode atravessá-la.'); } }, 0);
+          window.setTimeout(function () { if (cv) { save(); draw(); appAlertMessage('msg079', 'Ao tocar a parede, você percebe que ela é uma ilusão e pode atravessá-la.'); } }, 0);
         }
         if (val === EDGE_FORCE_WALL && meta && !meta.detected) {
           meta.detected = true;
-          window.setTimeout(function () { if (cv) { save(); draw(); alert('Você toca uma barreira invisível: Muralha de Energia.'); } }, 0);
+          window.setTimeout(function () { if (cv) { save(); draw(); appAlertMessage('msg080', 'Você toca uma barreira invisível: Muralha de Energia.'); } }, 0);
         }
       });
     }
@@ -2944,7 +2976,7 @@ function onPointerDown(e) {
       state.tokens.unshift(player);
     } else {
       if (blockMove && isCellWall(cell.x, cell.y)) {
-        alert('Não é possível iniciar em cima de uma parede.');
+        appAlertMessage('msg081', 'Não é possível iniciar em cima de uma parede.');
         return;
       }
       player.x = cell.x;
@@ -3013,7 +3045,7 @@ function onPointerDown(e) {
   }
 
   if (tool === 'token' && !pendingMonster) {
-    var nome = prompt('Nome do token:', 'Criatura');
+    var nome = appPromptMessage('msg082', 'Nome do token:', 'Criatura');
     if (!nome) return;
     if (blockMove && isCellWall(cell.x, cell.y)) return;
     var tok = {
@@ -3583,6 +3615,113 @@ function mount(el) {
   });
 }
 
+
+function closeMessageEditor(overlay) {
+  if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+}
+function openMessageEditor() {
+  if (!R) return;
+  var root = R.querySelector('#mp-root');
+  if (!root || root.querySelector('.mp-message-editor-overlay')) return;
+  var overlay = document.createElement('div');
+  overlay.className = 'mp-message-editor-overlay';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-label', 'Personalizar mensagens');
+  var panel = document.createElement('div');
+  panel.className = 'mp-message-editor';
+  var heading = document.createElement('div');
+  heading.className = 'mp-message-editor-heading';
+  heading.innerHTML = '<div><h3>Personalizar mensagens</h3><p>Edite os avisos, confirmações e perguntas do mapa. Deixe o campo vazio para remover o texto da mensagem. Confirmações e perguntas continuam exibindo os botões/campo necessários.</p><p>Em mensagens variáveis, use <code>{mensagem}</code> para inserir o texto original com os valores calculados.</p></div><button type="button" class="mp-message-close" aria-label="Fechar">×</button>';
+  var filters = document.createElement('div');
+  filters.className = 'mp-message-filters';
+  filters.innerHTML = '<input type="search" id="mp-message-search" placeholder="Buscar mensagem…"><select id="mp-message-type"><option value="all">Todos os tipos</option><option value="alert">Avisos</option><option value="confirm">Confirmações</option><option value="prompt">Perguntas / entradas</option></select><span id="mp-message-count"></span>';
+  var list = document.createElement('div');
+  list.className = 'mp-message-list';
+  list.id = 'mp-message-list';
+  MESSAGE_CATALOG.forEach(function (entry, index) {
+    var item = document.createElement('div');
+    item.className = 'mp-message-item';
+    item.setAttribute('data-message-item', entry.id);
+    var label = document.createElement('label');
+    label.setAttribute('for', 'mp-message-' + entry.id);
+    var typeName = entry.type === 'alert' ? 'Aviso' : entry.type === 'confirm' ? 'Confirmação' : 'Pergunta / entrada';
+    label.textContent = (index + 1) + '. ' + typeName + ' · ' + (entry.dynamic ? 'Mensagem variável' : (entry.pattern || 'Mensagem'));
+    var area = document.createElement('textarea');
+    area.id = 'mp-message-' + entry.id;
+    area.setAttribute('data-message-id', entry.id);
+    area.rows = 2;
+    area.value = Object.prototype.hasOwnProperty.call(MESSAGE_OVERRIDES, entry.id)
+      ? String(MESSAGE_OVERRIDES[entry.id] == null ? '' : MESSAGE_OVERRIDES[entry.id])
+      : entry.default;
+    var hint = document.createElement('small');
+    hint.textContent = entry.dynamic
+      ? 'Texto padrão variável: ' + (entry.pattern || 'definido pelo contexto')
+      : 'Texto padrão';
+    item.appendChild(label);
+    item.appendChild(area);
+    item.appendChild(hint);
+    list.appendChild(item);
+  });
+  var footer = document.createElement('div');
+  footer.className = 'mp-message-editor-footer';
+  footer.innerHTML = '<button type="button" id="mp-message-reset" class="secondary">Restaurar padrões</button><span></span><button type="button" id="mp-message-cancel" class="secondary">Cancelar</button><button type="button" id="mp-message-save" class="primary">Salvar mensagens</button>';
+  panel.appendChild(heading);
+  panel.appendChild(filters);
+  panel.appendChild(list);
+  panel.appendChild(footer);
+  overlay.appendChild(panel);
+  root.appendChild(overlay);
+
+  function applyMessageFilter() {
+    var q = String(filters.querySelector('#mp-message-search').value || '').toLocaleLowerCase();
+    var type = filters.querySelector('#mp-message-type').value;
+    var shown = 0;
+    Array.prototype.forEach.call(list.querySelectorAll('[data-message-item]'), function (item) {
+      var id = item.getAttribute('data-message-item');
+      var entry = MESSAGE_CATALOG.find(function (candidate) { return candidate.id === id; });
+      var area = item.querySelector('textarea');
+      var text = (item.textContent + ' ' + (area ? area.value : '')).toLocaleLowerCase();
+      var visible = (!q || text.indexOf(q) >= 0) && (type === 'all' || (entry && entry.type === type));
+      item.style.display = visible ? '' : 'none';
+      if (visible) shown++;
+    });
+    filters.querySelector('#mp-message-count').textContent = shown + ' de ' + MESSAGE_CATALOG.length + ' mensagens';
+  }
+  filters.querySelector('#mp-message-search').addEventListener('input', applyMessageFilter);
+  filters.querySelector('#mp-message-type').addEventListener('change', applyMessageFilter);
+  list.addEventListener('input', function (event) {
+    if (event.target && event.target.matches('textarea[data-message-id]')) applyMessageFilter();
+  });
+  heading.querySelector('.mp-message-close').onclick = function () { closeMessageEditor(overlay); };
+  footer.querySelector('#mp-message-cancel').onclick = function () { closeMessageEditor(overlay); };
+  footer.querySelector('#mp-message-reset').onclick = function () {
+    if (!appConfirmMessage('msg092', 'Restaurar os textos originais de todas as mensagens?')) return;
+    MESSAGE_OVERRIDES = {};
+    try { localStorage.removeItem(MESSAGE_SETTINGS_KEY); } catch (e) {}
+    closeMessageEditor(overlay);
+  };
+  footer.querySelector('#mp-message-save').onclick = function () {
+    var next = {};
+    Array.prototype.forEach.call(list.querySelectorAll('textarea[data-message-id]'), function (area) {
+      next[area.getAttribute('data-message-id')] = area.value;
+    });
+    MESSAGE_OVERRIDES = next;
+    try {
+      localStorage.setItem(MESSAGE_SETTINGS_KEY, JSON.stringify(MESSAGE_OVERRIDES));
+    } catch (e) {
+      appAlertMessage('msg093', 'Não foi possível salvar as mensagens neste navegador.');
+    }
+    closeMessageEditor(overlay);
+  };
+  overlay.addEventListener('click', function (event) {
+    if (event.target === overlay) closeMessageEditor(overlay);
+  });
+  applyMessageFilter();
+  var search = filters.querySelector('#mp-message-search');
+  if (search) search.focus();
+}
+
 function mountNow(el) {
   R = el;
   R.innerHTML =
@@ -3599,6 +3738,7 @@ function mountNow(el) {
     '<input type="file" id="mp-add-map-file" accept="image/*" style="display:none">' +
     '<button type="button" id="mp-export" title="Baixar os dados deste mapa em JSON">⬇ Salvar mapa</button>' +
     '<button type="button" id="mp-export-catalog" title="Baixar o catálogo para publicar os mapas adicionados">🗂 Baixar catálogo de mapas</button>' +
+    '<button type="button" id="mp-message-settings" title="Editar os textos de avisos, confirmações e perguntas">💬 Personalizar mensagens</button>' +
     '<label id="mp-hex-wrap" class="mp-luz" style="display:none">Hexágono <select id="mp-hex-size" disabled><option value="small" selected>Pequeno · 6 mi</option></select></label>' +
     '<label id="mp-speed-wrap" class="mp-luz" style="display:none">Velocidade <input id="mp-speed" type="number" min="0.1" step="0.1" placeholder="mi/dia" style="width:62px"></label>' +
     '<button type="button" id="mp-world-move" class="mp-world-action active" title="Desativa os modos de início e teleporte; use as setas ou clique para mover o personagem">🧭 Desativar ferramentas</button>' +
@@ -3712,12 +3852,33 @@ function mountNow(el) {
     '#mp-root .mp-portal-dialog-actions-stack{flex-direction:column;}' +
     '#mp-root .mp-portal-dialog-actions button{min-height:38px;padding:8px 12px;border:1px solid rgba(255,255,255,.2);border-radius:7px;background:#30343e;color:#fff;cursor:pointer;}' +
     '#mp-root .mp-portal-dialog-actions button.primary{border-color:#3c9bc7;background:#17688f;}' +
+    '#mp-root .mp-message-editor-overlay{position:absolute;inset:0;z-index:140;display:flex;align-items:center;justify-content:center;padding:12px;box-sizing:border-box;background:rgba(0,0,0,.78);}' +
+    '#mp-root .mp-message-editor{display:flex;flex-direction:column;width:min(900px,96vw);max-height:92%;min-height:0;box-sizing:border-box;padding:16px;border:1px solid rgba(255,255,255,.2);border-radius:12px;background:#17191f;color:#f4f5f7;box-shadow:0 12px 40px rgba(0,0,0,.6);}' +
+    '#mp-root .mp-message-editor-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}' +
+    '#mp-root .mp-message-editor-heading h3{margin:0 0 6px;font-size:18px;}' +
+    '#mp-root .mp-message-editor-heading p{margin:0 0 6px;color:#c5c9d2;font-size:12px;line-height:1.4;}' +
+    '#mp-root .mp-message-close{flex:0 0 34px;width:34px;height:34px;border:1px solid rgba(255,255,255,.2);border-radius:7px;background:#30343e;color:#fff;font-size:22px;cursor:pointer;}' +
+    '#mp-root .mp-message-filters{display:flex;gap:8px;align-items:center;margin:10px 0;}' +
+    '#mp-root .mp-message-filters input{flex:1 1 auto;min-width:80px;}' +
+    '#mp-root .mp-message-filters select{flex:0 0 190px;max-width:45%;}' +
+    '#mp-root #mp-message-count{flex:0 0 auto;color:#aeb6c4;font-size:11px;white-space:nowrap;}' +
+    '#mp-root .mp-message-list{flex:1 1 auto;min-height:0;overflow:auto;padding:2px 4px 2px 0;}' +
+    '#mp-root .mp-message-item{display:flex;flex-direction:column;gap:4px;margin:0 0 10px;padding:9px;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(255,255,255,.035);}' +
+    '#mp-root .mp-message-item label{font-size:12px;font-weight:600;color:#e4e8ef;line-height:1.35;}' +
+    '#mp-root .mp-message-item textarea{width:100%;min-height:42px;max-height:110px;box-sizing:border-box;resize:vertical;padding:7px;border:1px solid rgba(255,255,255,.18);border-radius:6px;background:#242832;color:#fff;font:12px/1.4 inherit;}' +
+    '#mp-root .mp-message-item small{font-size:10px;color:#9ea8b7;}' +
+    '#mp-root .mp-message-editor-footer{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.12);}' +
+    '#mp-root .mp-message-editor-footer span{flex:1;}' +
+    '#mp-root .mp-message-editor-footer button{min-height:36px;padding:7px 11px;border:1px solid rgba(255,255,255,.2);border-radius:7px;background:#30343e;color:#fff;cursor:pointer;}' +
+    '#mp-root .mp-message-editor-footer button.primary{border-color:#3c9bc7;background:#17688f;}' +
+    '#mp-root .mp-message-editor-footer button:hover{filter:brightness(1.15);}' +
+    '@media(max-width:600px){#mp-root .mp-message-filters{flex-wrap:wrap;}#mp-root .mp-message-filters input{flex-basis:100%;}#mp-root .mp-message-filters select{max-width:none;flex:1;}#mp-root .mp-message-editor-footer{flex-wrap:wrap;}#mp-root .mp-message-editor-footer span{display:none;}#mp-root .mp-message-editor-footer button{flex:1;}}' +
     '#mp-root .mp-portal-dialog-actions button.danger{border-color:#9a3b3b;background:#742d35;}';
   R.querySelector('#mp-root').appendChild(menuStyle);
 
   // Tudo que altera o mapa ou seus dados fica disponível apenas no Editor.
   [
-    '#mp-add-map', '#mp-add-map-file', '#mp-export', '#mp-export-catalog',
+    '#mp-add-map', '#mp-add-map-file', '#mp-export', '#mp-export-catalog', '#mp-message-settings',
     '#mp-tools', '#mp-grid', '#mp-fog', '#mp-light', '#mp-walls-vis', '#mp-secret-view',
     '#mp-block', '#mp-lr', '#mp-reset-fog', '#mp-clear-fog', '#mp-clear-walls', '#mp-clear-edges',
     '#mp-zo', '#mp-zi', '#mp-side', '#mp-delete-map', '.mp-menu-footer',
@@ -3730,6 +3891,7 @@ function mountNow(el) {
   });
   var worldActionButtons = R.querySelectorAll('.mp-world-action');
   worldActionButtons.forEach(function (node) { node.classList.add('mp-editor-only'); });
+  $('#mp-message-settings').onclick = function () { openMessageEditor(); };
   $('#mp-mode-player').onclick = function () { setMode('player'); setMenu(false); };
   $('#mp-mode-editor').onclick = function () { setMode('editor'); setMenu(false); };
 
@@ -3852,24 +4014,24 @@ function mountNow(el) {
     draw();
   };
   $('#mp-reset-fog').onclick = function () {
-    if (confirm('Cobrir o mapa com névoa novamente?')) {
+    if (appConfirmMessage('msg083', 'Cobrir o mapa com névoa novamente?')) {
       state.fog = makeGrid(1); save(); draw();
     }
   };
   $('#mp-clear-fog').onclick = function () {
-    if (confirm('Revelar o mapa inteiro? A névoa será removida de todas as células.')) {
+    if (appConfirmMessage('msg084', 'Revelar o mapa inteiro? A névoa será removida de todas as células.')) {
       state.fog = makeGrid(0); save(); draw();
     }
   };
   $('#mp-clear-walls').onclick = function () {
-    if (confirm('Apagar todas as paredes das células?')) {
+    if (appConfirmMessage('msg085', 'Apagar todas as paredes das células?')) {
       state.walls = makeGrid(0);
       state.wallMeta = makeArr(COLS * ROWS, null);
       save(); draw();
     }
   };
   $('#mp-clear-edges').onclick = function () {
-    if (confirm('Apagar todos os muros e portas de linha?')) {
+    if (appConfirmMessage('msg086', 'Apagar todos os muros e portas de linha?')) {
       state.hEdges = makeArr(COLS * (ROWS + 1), 0);
       state.vEdges = makeArr((COLS + 1) * ROWS, 0);
       state.hEdgeMeta = makeArr(COLS * (ROWS + 1), null);
