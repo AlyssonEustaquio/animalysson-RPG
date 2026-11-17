@@ -159,6 +159,7 @@ var SIZE_SQ = {
 var R = null, cv = null, cx = null;
 var zoom = 0.35, ox = 40, oy = 40;
 var tool = 'select';
+var pendingDoorJoin = null; // primeira porta selecionada na ferramenta de união
 var drag = null, space = false;
 var showGrid = true, showFog = true, dynLight = true, showWalls = true;
 var showSecrets = false; // visão do Mestre: exibe estruturas secretas ainda não descobertas.
@@ -1083,26 +1084,57 @@ function isDoorEdge(val) {
 
 function getDoorRun(edge) {
   if (!edge || !isDoorEdge(getEdgeVal(edge))) return edge ? [edge] : [];
-  var initialVal = getEdgeVal(edge);
-  if (initialVal !== EDGE_DOOR_C && initialVal !== EDGE_DOOR_O) return [edge];
-  function isSameOrdinaryDoor(val) { return val === EDGE_DOOR_C || val === EDGE_DOOR_O; }
+  var meta = getEdgeMeta(edge);
+  var groupId = meta && meta.doorGroupId;
+  // Portas independentes continuam independentes, mesmo quando encostadas.
+  if (!groupId) return [edge];
   var run = [];
   if (edge.dir === 'h') {
-    var startX = edge.x, endX = edge.x, ye = edge.yEdge;
-    while (startX > 0 && isSameOrdinaryDoor(getH(startX - 1, ye))) startX--;
-    while (endX + 1 < COLS && isSameOrdinaryDoor(getH(endX + 1, ye))) endX++;
-    for (var x = startX; x <= endX; x++) run.push({ dir: 'h', x: x, yEdge: ye });
+    for (var x = 0; x < COLS; x++) {
+      var candidate = { dir: 'h', x: x, yEdge: edge.yEdge };
+      var cm = getEdgeMeta(candidate);
+      if (isDoorEdge(getEdgeVal(candidate)) && cm && cm.doorGroupId === groupId) run.push(candidate);
+    }
   } else {
-    var startY = edge.y, endY = edge.y, xe = edge.xEdge;
-    while (startY > 0 && isSameOrdinaryDoor(getV(xe, startY - 1))) startY--;
-    while (endY + 1 < ROWS && isSameOrdinaryDoor(getV(xe, endY + 1))) endY++;
-    for (var y = startY; y <= endY; y++) run.push({ dir: 'v', xEdge: xe, y: y });
+    for (var y = 0; y < ROWS; y++) {
+      var candidateV = { dir: 'v', xEdge: edge.xEdge, y: y };
+      var vm = getEdgeMeta(candidateV);
+      if (isDoorEdge(getEdgeVal(candidateV)) && vm && vm.doorGroupId === groupId) run.push(candidateV);
+    }
   }
-  return run;
+  return run.length ? run : [edge];
 }
 
 function setDoorRunValue(edge, val) {
-  getDoorRun(edge).forEach(function (part) { setEdgeVal(part, val); });
+  getDoorRun(edge).forEach(function (part) {
+    var meta = getEdgeMeta(part);
+    setEdgeVal(part, val);
+    // Alterar aberto/fechado não deve apagar os dados nem o grupo da porta.
+    if (meta) setEdgeMeta(part, meta);
+  });
+}
+
+function joinDoorEdges(first, second) {
+  if (!first || !second || first.dir !== second.dir) return false;
+  var edges = [];
+  if (first.dir === 'h') {
+    if (first.yEdge !== second.yEdge) return false;
+    var lo = Math.min(first.x, second.x), hi = Math.max(first.x, second.x);
+    for (var x = lo; x <= hi; x++) edges.push({ dir: 'h', x: x, yEdge: first.yEdge });
+  } else {
+    if (first.xEdge !== second.xEdge) return false;
+    var top = Math.min(first.y, second.y), bottom = Math.max(first.y, second.y);
+    for (var y = top; y <= bottom; y++) edges.push({ dir: 'v', xEdge: first.xEdge, y: y });
+  }
+  // Só une segmentos que já sejam portas, sem atravessar parede, vão ou outra estrutura.
+  if (edges.length < 2 || !edges.every(function (part) { return isDoorEdge(getEdgeVal(part)); })) return false;
+  var id = 'door-group-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
+  edges.forEach(function (part) {
+    var meta = getEdgeMeta(part) || {};
+    meta.doorGroupId = id;
+    setEdgeMeta(part, meta);
+  });
+  return true;
 }
 
 function doorRunIsClosed(edge) {
@@ -2747,6 +2779,27 @@ function onPointerDown(e) {
     return;
   }
 
+  if (!isHexMap() && tool === 'joinDoors') {
+    var joinEdge = nearestEdge(world.x, world.y);
+    if (!isDoorEdge(getEdgeVal(joinEdge))) { alert('Clique sobre uma porta existente.'); return; }
+    if (!pendingDoorJoin) {
+      pendingDoorJoin = joinEdge;
+      alert('Primeira porta selecionada. Agora clique na porta contígua que deseja unir a ela.');
+      draw();
+      return;
+    }
+    var firstJoin = pendingDoorJoin;
+    pendingDoorJoin = null;
+    if (joinDoorEdges(firstJoin, joinEdge)) {
+      save();
+      alert('Portas unidas! Elas agora abrem e fecham como um único conjunto.');
+    } else {
+      alert('Não foi possível unir. Selecione duas portas na mesma linha, lado a lado e sem espaços ou obstáculos entre elas.');
+    }
+    draw();
+    return;
+  }
+
   if (!isHexMap() && ['paredeSecreta', 'portaSecreta', 'portaTrancada', 'portaEmperrada', 'paredeIlusoria', 'muralhaForca', 'paredeMagica'].indexOf(tool) >= 0) {
     var specialEdge = nearestEdge(world.x, world.y);
     var specialKind = ({ paredeSecreta: 'secretWall', portaSecreta: 'secretDoor', portaTrancada: 'lockedDoor', portaEmperrada: 'jammedDoor', paredeIlusoria: 'illusionWall', muralhaForca: 'forceWall', paredeMagica: 'magicWall' })[tool];
@@ -3303,6 +3356,7 @@ function onWindowBlur() { keysHeld = {}; }
 
 function setTool(t) {
   tool = t;
+  if (t !== 'joinDoors') pendingDoorJoin = null;
   measurePts = null;
   if (t !== 'token') pendingMonster = null;
   R.querySelectorAll('#mp-tools button').forEach(function (b) {
@@ -3382,6 +3436,7 @@ function mountNow(el) {
     '<button data-t="erasewall" title="Apagar parede do espaço atual">🧹 Apagar parede</button>' +
     '<button data-t="muro" title="Muro na linha do grid (bloqueia luz e passagem)">─ Muro</button>' +
     '<button data-t="porta" title="Porta comum na linha">🚪 Porta</button>' +
+    '<button data-t="joinDoors" title="Unir portas: selecione esta ferramenta, clique na primeira porta e depois na porta contígua">🔗 Unir portas</button>' +
     '<button data-t="paredeSecreta" title="Parede secreta: Percepção para encontrar e Investigação para descobrir o mecanismo">🧱 Parede secreta</button>' +
     '<button data-t="portaSecreta" title="Porta secreta: encontrar, investigar o mecanismo e abrir">🚪 Porta secreta</button>' +
     '<button data-t="portaTrancada" title="Porta trancada: Ferramentas de Ladrão; pode ter Tranca Arcana">🔒 Porta trancada</button>' +
