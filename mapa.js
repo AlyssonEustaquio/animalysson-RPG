@@ -3491,6 +3491,20 @@ function updateModeUi() {
     root.classList.toggle('player-mode', appMode === 'player');
     root.classList.toggle('editor-mode', appMode === 'editor');
   }
+  // A barra de ferramentas e todos os controles de edição devem sumir no Jogador.
+  // O estilo inline com !important evita que regras de layout do grid reexibam a barra.
+  var editorOnlyNodes = R.querySelectorAll('.mp-editor-only');
+  editorOnlyNodes.forEach(function (node) {
+    if (appMode === 'player') {
+      node.style.setProperty('display', 'none', 'important');
+      node.setAttribute('aria-hidden', 'true');
+      node.setAttribute('inert', '');
+    } else {
+      node.style.removeProperty('display');
+      node.removeAttribute('aria-hidden');
+      node.removeAttribute('inert');
+    }
+  });
   var playerButton = R.querySelector('#mp-mode-player');
   var editorButton = R.querySelector('#mp-mode-editor');
   if (playerButton) playerButton.classList.toggle('active', appMode === 'player');
@@ -3656,6 +3670,7 @@ function mountNow(el) {
     '#mp-root .mp-mode-switch button{min-height:34px;padding:7px 11px;border:1px solid transparent;border-radius:7px;background:transparent;color:#e8eaf0;font-weight:600;cursor:pointer;}' +
     '#mp-root .mp-mode-switch button.active{background:rgba(55,145,190,.38);border-color:#66c8ed;color:#fff;}' +
     '#mp-root.player-mode .mp-editor-only{display:none !important;}' +
+    '#mp-root.player-mode .mp-drawer .mp-g.mp-editor-only{display:none !important;}' +
     '#mp-root .mp-canvas-pan{cursor:grab;}' +
     '#mp-root .mp-map-selector{display:flex;align-items:stretch;gap:6px;width:100%;}' +
     '#mp-root .mp-map-selector select{flex:1 1 auto;min-width:0;width:auto !important;}' +
