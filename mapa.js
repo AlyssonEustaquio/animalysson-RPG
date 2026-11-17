@@ -147,6 +147,9 @@ function mapOptions() {
 applyMap(mapId);
 
 var EDGE_NONE = 0, EDGE_MURO = 1, EDGE_DOOR_C = 2, EDGE_DOOR_O = 3;
+var EDGE_SECRET_WALL = 4, EDGE_SECRET_DOOR_C = 5, EDGE_SECRET_DOOR_O = 6;
+var EDGE_LOCKED_DOOR = 7, EDGE_JAMMED_DOOR = 8, EDGE_ILLUSION_WALL = 9;
+var EDGE_FORCE_WALL = 10, EDGE_MAGIC_WALL = 11;
 
 var SIZE_SQ = {
   Tiny:1, Small:1, Medium:1, Large:2, Huge:3, Gargantuan:4,
@@ -158,6 +161,7 @@ var zoom = 0.35, ox = 40, oy = 40;
 var tool = 'select';
 var drag = null, space = false;
 var showGrid = true, showFog = true, dynLight = true, showWalls = true;
+var showSecrets = false; // visão do Mestre: exibe estruturas secretas ainda não descobertas.
 var lightRadius = 6;
 var selected = null;
 var measurePts = null;
@@ -212,7 +216,7 @@ function migrateFlanaessState(s) {
     }
   }
   s.gridMode = FLANAESS_GRID_MODE;
-  s.fog = []; s.walls = []; s.hEdges = []; s.vEdges = [];
+  s.fog = []; s.walls = []; s.wallMeta = []; s.hEdges = []; s.vEdges = []; s.hEdgeMeta = []; s.vEdgeMeta = [];
   state = s;
   // Não grava a migração automaticamente. Primeiro precisamos comparar o
   // salvamento local com o JSON versionado no GitHub, se ele existir.
@@ -235,8 +239,11 @@ function defaultState() {
     ],
     fog: isHexMap() ? [] : makeGrid(1),
     walls: isHexMap() ? [] : makeGrid(0),
+    wallMeta: isHexMap() ? [] : makeArr(COLS * ROWS, null),
     hEdges: isHexMap() ? [] : makeArr(COLS * (ROWS + 1), 0),
-    vEdges: isHexMap() ? [] : makeArr((COLS + 1) * ROWS, 0)
+    vEdges: isHexMap() ? [] : makeArr((COLS + 1) * ROWS, 0),
+    hEdgeMeta: isHexMap() ? [] : makeArr(COLS * (ROWS + 1), null),
+    vEdgeMeta: isHexMap() ? [] : makeArr((COLS + 1) * ROWS, null)
   };
 }
 
@@ -287,13 +294,16 @@ function normalizeMapState(s) {
   });
   if (isHexMap()) {
     if (!s.gridMode && s.fog && s.fog.length === MAPS.flanaess.cols * MAPS.flanaess.rows) s._legacySquareTokens = true;
-    s.fog = []; s.walls = []; s.hEdges = []; s.vEdges = [];
+    s.fog = []; s.walls = []; s.wallMeta = []; s.hEdges = []; s.vEdges = []; s.hEdgeMeta = []; s.vEdgeMeta = [];
     return s;
   }
   if (!s.fog || s.fog.length !== COLS * ROWS) s.fog = makeGrid(1);
   if (!s.walls || s.walls.length !== COLS * ROWS) s.walls = makeGrid(0);
+  if (!s.wallMeta || s.wallMeta.length !== COLS * ROWS) s.wallMeta = makeArr(COLS * ROWS, null);
   if (!s.hEdges || s.hEdges.length !== COLS * (ROWS + 1)) s.hEdges = makeArr(COLS * (ROWS + 1), 0);
   if (!s.vEdges || s.vEdges.length !== (COLS + 1) * ROWS) s.vEdges = makeArr((COLS + 1) * ROWS, 0);
+  if (!s.hEdgeMeta || s.hEdgeMeta.length !== COLS * (ROWS + 1)) s.hEdgeMeta = makeArr(COLS * (ROWS + 1), null);
+  if (!s.vEdgeMeta || s.vEdgeMeta.length !== (COLS + 1) * ROWS) s.vEdgeMeta = makeArr((COLS + 1) * ROWS, null);
   return s;
 }
 
@@ -738,31 +748,81 @@ function getV(xEdge, y) {
   if (y < 0 || y >= ROWS || xEdge < 0 || xEdge > COLS) return EDGE_MURO;
   return state.vEdges[vIdx(xEdge, y)] || 0;
 }
+function edgeMetaIndex(edge) {
+  if (!edge) return -1;
+  return edge.dir === 'h' ? hIdx(edge.x, edge.yEdge) : vIdx(edge.xEdge, edge.y);
+}
+function getEdgeMeta(edge) {
+  if (!edge) return null;
+  var arr = edge.dir === 'h' ? state.hEdgeMeta : state.vEdgeMeta;
+  return arr && arr[edgeMetaIndex(edge)] || null;
+}
+function setEdgeMeta(edge, meta) {
+  if (!edge) return;
+  var arr = edge.dir === 'h' ? state.hEdgeMeta : state.vEdgeMeta;
+  if (!arr) {
+    if (edge.dir === 'h') state.hEdgeMeta = makeArr(COLS * (ROWS + 1), null);
+    else state.vEdgeMeta = makeArr((COLS + 1) * ROWS, null);
+    arr = edge.dir === 'h' ? state.hEdgeMeta : state.vEdgeMeta;
+  }
+  arr[edgeMetaIndex(edge)] = meta || null;
+}
 function setH(x, yEdge, val) {
   if (x < 0 || x >= COLS || yEdge < 0 || yEdge > ROWS) return;
-  state.hEdges[hIdx(x, yEdge)] = val;
+  var i = hIdx(x, yEdge), old = state.hEdges[i];
+  state.hEdges[i] = val;
+  if (old !== val && state.hEdgeMeta) state.hEdgeMeta[i] = null;
 }
 function setV(xEdge, y, val) {
   if (y < 0 || y >= ROWS || xEdge < 0 || xEdge > COLS) return;
-  state.vEdges[vIdx(xEdge, y)] = val;
+  var i = vIdx(xEdge, y), old = state.vEdges[i];
+  state.vEdges[i] = val;
+  if (old !== val && state.vEdgeMeta) state.vEdgeMeta[i] = null;
 }
-
-function edgeBlocks(val) {
-  return val === EDGE_MURO || val === EDGE_DOOR_C;
+function edgeBlocks(val, edge) {
+  var meta = getEdgeMeta(edge);
+  if (val === EDGE_NONE || val === EDGE_ILLUSION_WALL) return false;
+  if (val === EDGE_SECRET_WALL) return !(meta && meta.open);
+  if (val === EDGE_SECRET_DOOR_O || val === EDGE_DOOR_O) return false;
+  if (val === EDGE_SECRET_DOOR_C || val === EDGE_DOOR_C || val === EDGE_MURO) return true;
+  if (val === EDGE_LOCKED_DOOR || val === EDGE_JAMMED_DOOR) return !(meta && meta.open);
+  return val === EDGE_FORCE_WALL || val === EDGE_MAGIC_WALL;
 }
-
 function blocksBetween(x0, y0, x1, y1) {
   if (x0 === x1 && y0 === y1) return false;
   if (isCellWall(x1, y1)) return true;
   if (y0 === y1) {
-    if (x1 > x0) return edgeBlocks(getV(x1, y0));
-    return edgeBlocks(getV(x0, y0));
+    var vertical = { dir: 'v', xEdge: x1 > x0 ? x1 : x0, y: y0 };
+    return edgeBlocks(getEdgeVal(vertical), vertical);
   }
   if (x0 === x1) {
-    if (y1 > y0) return edgeBlocks(getH(x0, y1));
-    return edgeBlocks(getH(x0, y0));
+    var horizontal = { dir: 'h', x: x0, yEdge: y1 > y0 ? y1 : y0 };
+    return edgeBlocks(getEdgeVal(horizontal), horizontal);
   }
   return blocksBetween(x0, y0, x1, y0) || blocksBetween(x0, y0, x0, y1);
+}
+function edgeBlocksVision(val, edge) {
+  // Wall of Force é invisível e transparente: bloqueia movimento, não visão.
+  if (val === EDGE_FORCE_WALL || val === EDGE_NONE) return false;
+  // A parede ilusória parece sólida até ser identificada; depois disso a visão passa.
+  if (val === EDGE_ILLUSION_WALL) {
+    var illusionMeta = getEdgeMeta(edge);
+    return !(illusionMeta && illusionMeta.detected);
+  }
+  return edgeBlocks(val, edge);
+}
+function blocksVisionBetween(x0, y0, x1, y1) {
+  if (x0 === x1 && y0 === y1) return false;
+  if (isCellWall(x1, y1)) return true;
+  if (y0 === y1) {
+    var vertical = { dir: 'v', xEdge: x1 > x0 ? x1 : x0, y: y0 };
+    return edgeBlocksVision(getEdgeVal(vertical), vertical);
+  }
+  if (x0 === x1) {
+    var horizontal = { dir: 'h', x: x0, yEdge: y1 > y0 ? y1 : y0 };
+    return edgeBlocksVision(getEdgeVal(horizontal), horizontal);
+  }
+  return blocksVisionBetween(x0, y0, x1, y0) || blocksVisionBetween(x0, y0, x0, y1);
 }
 
 function sizeSquares(m) {
@@ -809,11 +869,11 @@ function hasLOS(x0, y0, x1, y1) {
     if (stepY) { err += dx; ny = y + sy; }
 
     if (nx !== x && ny !== y) {
-      if (blocksBetween(x, y, nx, y) || blocksBetween(x, y, x, ny)) return false;
-      if (blocksBetween(nx, y, nx, ny) || blocksBetween(x, ny, nx, ny)) return false;
+      if (blocksVisionBetween(x, y, nx, y) || blocksVisionBetween(x, y, x, ny)) return false;
+      if (blocksVisionBetween(nx, y, nx, ny) || blocksVisionBetween(x, ny, nx, ny)) return false;
       if (isCellWall(nx, y) || isCellWall(x, ny)) return false;
     } else {
-      if (blocksBetween(x, y, nx, ny)) return false;
+      if (blocksVisionBetween(x, y, nx, ny)) return false;
     }
     x = nx; y = ny;
     if (!(x === x1 && y === y1) && isCellWall(x, y)) return false;
@@ -1017,21 +1077,25 @@ function setEdgeVal(edge, val) {
 }
 
 function isDoorEdge(val) {
-  return val === EDGE_DOOR_C || val === EDGE_DOOR_O;
+  return val === EDGE_DOOR_C || val === EDGE_DOOR_O || val === EDGE_SECRET_DOOR_C ||
+    val === EDGE_SECRET_DOOR_O || val === EDGE_LOCKED_DOOR || val === EDGE_JAMMED_DOOR;
 }
 
 function getDoorRun(edge) {
   if (!edge || !isDoorEdge(getEdgeVal(edge))) return edge ? [edge] : [];
+  var initialVal = getEdgeVal(edge);
+  if (initialVal !== EDGE_DOOR_C && initialVal !== EDGE_DOOR_O) return [edge];
+  function isSameOrdinaryDoor(val) { return val === EDGE_DOOR_C || val === EDGE_DOOR_O; }
   var run = [];
   if (edge.dir === 'h') {
     var startX = edge.x, endX = edge.x, ye = edge.yEdge;
-    while (startX > 0 && isDoorEdge(getH(startX - 1, ye))) startX--;
-    while (endX + 1 < COLS && isDoorEdge(getH(endX + 1, ye))) endX++;
+    while (startX > 0 && isSameOrdinaryDoor(getH(startX - 1, ye))) startX--;
+    while (endX + 1 < COLS && isSameOrdinaryDoor(getH(endX + 1, ye))) endX++;
     for (var x = startX; x <= endX; x++) run.push({ dir: 'h', x: x, yEdge: ye });
   } else {
     var startY = edge.y, endY = edge.y, xe = edge.xEdge;
-    while (startY > 0 && isDoorEdge(getV(xe, startY - 1))) startY--;
-    while (endY + 1 < ROWS && isDoorEdge(getV(xe, endY + 1))) endY++;
+    while (startY > 0 && isSameOrdinaryDoor(getV(xe, startY - 1))) startY--;
+    while (endY + 1 < ROWS && isSameOrdinaryDoor(getV(xe, endY + 1))) endY++;
     for (var y = startY; y <= endY; y++) run.push({ dir: 'v', xEdge: xe, y: y });
   }
   return run;
@@ -1043,7 +1107,378 @@ function setDoorRunValue(edge, val) {
 
 function doorRunIsClosed(edge) {
   var run = getDoorRun(edge);
-  return run.every(function (part) { return getEdgeVal(part) === EDGE_DOOR_C; });
+  return run.every(function (part) { return edgeBlocks(getEdgeVal(part), part); });
+}
+
+
+// ---------- Regras de portas secretas, trancadas e estruturas ----------
+var OBJECT_MATERIALS = {
+  madeira: { label: 'Madeira', ac: 15, hp: 18, threshold: 0, vulnerableFire: true },
+  pedra: { label: 'Pedra', ac: 17, hp: 27, threshold: 10, immune: ['psíquico', 'venenoso'] },
+  ferro: { label: 'Ferro/aço', ac: 19, hp: 27, threshold: 10, immune: ['psíquico', 'venenoso'] },
+  mithral: { label: 'Mithral', ac: 21, hp: 36, threshold: 15, immune: ['psíquico', 'venenoso'], needsMagic: true },
+  adamantina: { label: 'Adamantina', ac: 23, hp: 45, threshold: 15, immune: ['psíquico', 'venenoso'], needsMagic: true },
+  pedraMagica: { label: 'Pedra mágica', ac: 15, hp: 30, threshold: 10, immune: ['psíquico', 'venenoso'] }
+};
+function numberPrompt(label, fallback, min, max) {
+  var raw = window.prompt(label, String(fallback));
+  if (raw == null) return null;
+  var n = Number(raw);
+  if (!isFinite(n) || n < min || n > max) { alert('Informe um valor entre ' + min + ' e ' + max + '.'); return null; }
+  return Math.round(n);
+}
+function materialPrompt(defaultMaterial) {
+  var choices = 'Material:\n1. Madeira\n2. Pedra\n3. Ferro/aço\n4. Mithral\n5. Adamantina\n6. Pedra mágica';
+  var initial = defaultMaterial === 'pedra' ? '2' : defaultMaterial === 'ferro' ? '3' : '1';
+  var raw = window.prompt(choices, initial);
+  if (raw == null) return null;
+  return ({ '1':'madeira', '2':'pedra', '3':'ferro', '4':'mithral', '5':'adamantina', '6':'pedraMagica' })[String(raw).trim()] || null;
+}
+function makeStructureMeta(material, kind, multiplier) {
+  var base = OBJECT_MATERIALS[material] || OBJECT_MATERIALS.madeira;
+  var factor = multiplier || 1;
+  var hp = base.hp * factor;
+  return {
+    kind: kind || 'structure', material: material, ac: base.ac, hp: hp, maxHp: hp,
+    threshold: base.threshold * (factor > 1 ? 1.5 : 1), detected: false,
+    mechanismKnown: false, open: false, locked: false, lockDC: 15,
+    lockComplexity: 'simple', arcaneLock: false, arcaneSuppressedUntil: 0,
+    dcDetection: 15, dcMechanism: 15, dcForce: 15
+  };
+}
+function edgeMidpoint(edge) {
+  return edge.dir === 'h'
+    ? { x: (edge.x + 0.5) * CELL, y: edge.yEdge * CELL }
+    : { x: edge.xEdge * CELL, y: (edge.y + 0.5) * CELL };
+}
+function forEachEdge(callback) {
+  for (var hy = 0; hy <= ROWS; hy++) for (var hx = 0; hx < COLS; hx++) callback({ dir: 'h', x: hx, yEdge: hy }, getH(hx, hy));
+  for (var vy = 0; vy < ROWS; vy++) for (var vx = 0; vx <= COLS; vx++) callback({ dir: 'v', xEdge: vx, y: vy }, getV(vx, vy));
+}
+function edgeIsHidden(edge, val) {
+  if (val === EDGE_FORCE_WALL) return !showSecrets; // continua invisível para os jogadores mesmo após o toque.
+  if (val === EDGE_ILLUSION_WALL) return false; // a ilusão parece uma parede comum até ser tocada/investigada.
+  if (val !== EDGE_SECRET_WALL && val !== EDGE_SECRET_DOOR_C && val !== EDGE_SECRET_DOOR_O) return false;
+  var meta = getEdgeMeta(edge);
+  return !showSecrets && !(meta && meta.detected);
+}
+function nearbyEdgesForCell(cell, radiusCells) {
+  var center = cellCenter(cell.x, cell.y), found = [];
+  var limit2 = Math.pow(radiusCells * CELL, 2);
+  var x0 = Math.max(0, Math.floor(cell.x - radiusCells - 1));
+  var x1 = Math.min(COLS - 1, Math.ceil(cell.x + radiusCells + 1));
+  var y0 = Math.max(0, Math.floor(cell.y - radiusCells - 1));
+  var y1 = Math.min(ROWS - 1, Math.ceil(cell.y + radiusCells + 1));
+  for (var hy = Math.max(0, y0); hy <= Math.min(ROWS, y1 + 1); hy++) {
+    for (var hx = x0; hx <= x1; hx++) {
+      var horizontal = { dir: 'h', x: hx, yEdge: hy }, hv = getH(hx, hy);
+      if (hv === EDGE_NONE) continue;
+      var hm = edgeMidpoint(horizontal), hdx = hm.x - center.x, hdy = hm.y - center.y;
+      if (hdx * hdx + hdy * hdy <= limit2) found.push({ edge: horizontal, val: hv });
+    }
+  }
+  for (var vy = y0; vy <= y1; vy++) {
+    for (var vx = Math.max(0, x0); vx <= Math.min(COLS, x1 + 1); vx++) {
+      var vertical = { dir: 'v', xEdge: vx, y: vy }, vv = getV(vx, vy);
+      if (vv === EDGE_NONE) continue;
+      var vm = edgeMidpoint(vertical), vdx = vm.x - center.x, vdy = vm.y - center.y;
+      if (vdx * vdx + vdy * vdy <= limit2) found.push({ edge: vertical, val: vv });
+    }
+  }
+  return found;
+}
+function checkPassiveSecretDetection(player) {
+  if (!player || player.tipo !== 'player' || isHexMap()) return;
+  var passive = Number(player.percepcaoPassiva);
+  if (!isFinite(passive)) passive = 10;
+  var found = [];
+  nearbyEdgesForCell({ x: player.x, y: player.y }, 1.15).forEach(function (item) {
+    if (item.val !== EDGE_SECRET_WALL && item.val !== EDGE_SECRET_DOOR_C && item.val !== EDGE_SECRET_DOOR_O) return;
+    var meta = getEdgeMeta(item.edge);
+    if (!meta || meta.detected || passive < Number(meta.dcDetection || 15)) return;
+    meta.detected = true;
+    found.push(meta.kind === 'secretDoor' ? 'uma porta secreta' : 'uma parede secreta');
+  });
+  if (found.length) {
+    save(); draw();
+    alert('Percepção passiva ' + passive + ': você percebe ' + found.join(' e ') + '. Encontrar não revela como abrir; investigue o mecanismo.');
+  }
+}
+function performActiveSecretSearch(cell) {
+  var roll = numberPrompt('Busca ativa — total de Sabedoria (Percepção):', 15, 0, 60);
+  if (roll == null) return;
+  var found = [];
+  nearbyEdgesForCell(cell, 2).forEach(function (item) {
+    if (item.val !== EDGE_SECRET_WALL && item.val !== EDGE_SECRET_DOOR_C && item.val !== EDGE_SECRET_DOOR_O) return;
+    var meta = getEdgeMeta(item.edge);
+    if (!meta || meta.detected || roll < Number(meta.dcDetection || 15)) return;
+    meta.detected = true;
+    found.push(meta.kind === 'secretDoor' ? 'porta secreta' : 'parede secreta');
+  });
+  alert(found.length
+    ? 'Sucesso! Você encontrou: ' + found.join(', ') + '. Ainda é necessário descobrir o mecanismo.'
+    : 'Nenhuma passagem secreta foi encontrada nesta seção de aproximadamente 3 metros.');
+  save(); draw();
+}
+function investigateEdgeMechanism(edge) {
+  var val = getEdgeVal(edge), meta = getEdgeMeta(edge);
+  if (val === EDGE_ILLUSION_WALL) {
+    var illusionRoll = numberPrompt('Teste de Inteligência (Investigação) para identificar a ilusão. Informe o total:', 15, 0, 60);
+    if (illusionRoll == null) return;
+    if (meta && illusionRoll >= Number(meta.dcDetection || 15)) {
+      meta.detected = true; alert('Você identifica a ilusão. Ela não bloqueia passagem.');
+    } else alert('Você não conseguiu identificar a ilusão.');
+    save(); draw(); return;
+  }
+  if (val !== EDGE_SECRET_WALL && val !== EDGE_SECRET_DOOR_C && val !== EDGE_SECRET_DOOR_O) {
+    alert('Não há um mecanismo secreto nesta linha.'); return;
+  }
+  if (!meta || !meta.detected) { alert('Primeiro encontre a passagem com Percepção.'); return; }
+  if (meta.mechanismKnown) { alert('O mecanismo desta passagem já foi descoberto.'); return; }
+  var roll = numberPrompt('Teste de Inteligência (Investigação) para descobrir o mecanismo. Informe o total:', 15, 0, 60);
+  if (roll == null) return;
+  if (roll >= Number(meta.dcMechanism || 15)) {
+    meta.mechanismKnown = true;
+    var hint = meta.mechanismHint ? '\nComo acionar: ' + meta.mechanismHint : '';
+    alert('Mecanismo descoberto! Agora você pode acionar a passagem.' + hint);
+  } else alert('Você encontrou a passagem, mas ainda não descobriu como abri-la.');
+  save(); draw();
+}
+function createSpecialEdge(edge, kind) {
+  if (!edge) return;
+  var existing = getEdgeVal(edge);
+  if (existing !== EDGE_NONE && !window.confirm('Já existe uma parede ou porta nesta linha. Substituir?')) return;
+  var isDoor = kind === 'secretDoor' || kind === 'lockedDoor' || kind === 'jammedDoor';
+  // Parede mágica segue as estatísticas específicas de pedra mágica (CA 15; 30 PV/polegada).
+  var material = kind === 'forceWall' ? 'force' : kind === 'illusionWall' ? 'illusion' :
+    kind === 'magicWall' ? 'pedraMagica' : materialPrompt(isDoor ? 'madeira' : 'pedra');
+  if (!material) return;
+  var meta = makeStructureMeta(OBJECT_MATERIALS[material] ? material : 'madeira', kind, kind === 'secretWall' || kind === 'magicWall' ? 2 : 1);
+  var type = EDGE_SECRET_WALL;
+  if (kind === 'secretWall' || kind === 'secretDoor') {
+    meta.dcDetection = numberPrompt('CD para encontrar (10 fácil, 15 padrão, 20 muito bem escondida):', 15, 1, 40);
+    if (meta.dcDetection == null) return;
+    meta.dcMechanism = numberPrompt('CD de Inteligência (Investigação) para descobrir o mecanismo:', 15, 1, 40);
+    if (meta.dcMechanism == null) return;
+    meta.mechanismHint = String(window.prompt('Descreva como o mecanismo é acionado (ex.: girar uma tocha, puxar um livro, apertar uma pedra):', 'Um detalhe do ambiente esconde o mecanismo.') || '').trim();
+    meta.detected = false; meta.mechanismKnown = false;
+    type = kind === 'secretWall' ? EDGE_SECRET_WALL : EDGE_SECRET_DOOR_C;
+  } else if (kind === 'lockedDoor') {
+    meta.lockDC = numberPrompt('CD das Ferramentas de Ladrão (10–25 é o intervalo comum):', 15, 1, 50);
+    if (meta.lockDC == null) return;
+    meta.dcForce = numberPrompt('CD de Força (Atletismo) para arrombar fisicamente a porta:', 18, 1, 50);
+    if (meta.dcForce == null) return;
+    var complexity = window.prompt('Complexidade: 1 = simples (1 ação); 2 = complexa (1 minuto).', '1');
+    if (complexity == null) return;
+    meta.lockComplexity = String(complexity).trim() === '2' ? 'complex' : 'simple';
+    meta.keyName = String(window.prompt('Nome da chave que abre esta porta (deixe em branco se não houver chave específica):', '') || '').trim();
+    meta.arcaneLock = window.confirm('Esta fechadura possui Tranca Arcana? (Cancelar = não)');
+    meta.locked = true; type = EDGE_LOCKED_DOOR;
+  } else if (kind === 'jammedDoor') {
+    var jamMode = window.prompt('Tipo de bloqueio: 1 = emperrada (Força/Atletismo); 2 = barrada por dentro (ação Utilizar do lado da barra).', '1');
+    if (jamMode == null) return;
+    meta.barred = String(jamMode).trim() === '2';
+    meta.dcForce = numberPrompt(meta.barred
+      ? 'CD de Força (Atletismo) para arrombar a porta do lado oposto à barra:'
+      : 'CD de Força (Atletismo) para forçar a porta emperrada:', 15, 1, 50);
+    if (meta.dcForce == null) return;
+    meta.locked = true; type = EDGE_JAMMED_DOOR;
+  } else if (kind === 'illusionWall') {
+    meta.dcDetection = numberPrompt('CD de Inteligência (Investigação) para identificar a ilusão:', 15, 1, 40);
+    if (meta.dcDetection == null) return;
+    meta.material = 'illusion'; meta.detected = false; type = EDGE_ILLUSION_WALL;
+    meta.ac = null; meta.hp = null; meta.maxHp = null; meta.threshold = 0;
+  } else if (kind === 'forceWall') {
+    meta.material = 'force'; meta.ac = null; meta.hp = null; meta.maxHp = null; meta.threshold = 999999;
+    meta.detected = false; type = EDGE_FORCE_WALL;
+  } else if (kind === 'magicWall') {
+    var thickness = numberPrompt('Espessura da parede mágica em polegadas (PV = 30 por polegada):', 1, 1, 36);
+    if (thickness == null) return;
+    meta.material = 'pedraMagica'; meta.ac = 15;
+    meta.hp = 30 * thickness; meta.maxHp = meta.hp; meta.threshold = 10;
+    meta.detected = true; type = EDGE_MAGIC_WALL;
+  }
+  setEdgeVal(edge, type); setEdgeMeta(edge, meta); save(); draw();
+  alert('Estrutura criada: ' + ({ secretWall:'parede secreta', secretDoor:'porta secreta', lockedDoor:'porta trancada', jammedDoor:'porta emperrada', illusionWall:'parede ilusória', forceWall:'Muralha de Energia', magicWall:'parede mágica' })[kind] + '.');
+}
+function edgeActionLabel(val, meta) {
+  if (val === EDGE_SECRET_WALL || val === EDGE_SECRET_DOOR_C || val === EDGE_SECRET_DOOR_O) return meta && meta.kind === 'secretDoor' ? 'porta secreta' : 'parede secreta';
+  if (val === EDGE_LOCKED_DOOR) return 'porta trancada';
+  if (val === EDGE_JAMMED_DOOR) return 'porta emperrada/barrada';
+  if (val === EDGE_ILLUSION_WALL) return 'parede ilusória';
+  if (val === EDGE_FORCE_WALL) return 'Muralha de Energia';
+  if (val === EDGE_MAGIC_WALL) return 'parede mágica';
+  if (val === EDGE_MURO) return 'muro';
+  return 'porta';
+}
+function openDoorEdge(edge, open) {
+  var val = getEdgeVal(edge), meta = getEdgeMeta(edge);
+  if (val === EDGE_SECRET_DOOR_C || val === EDGE_SECRET_DOOR_O) {
+    setEdgeVal(edge, open ? EDGE_SECRET_DOOR_O : EDGE_SECRET_DOOR_C);
+    setEdgeMeta(edge, meta);
+  } else if (val === EDGE_LOCKED_DOOR || val === EDGE_JAMMED_DOOR) {
+    if (meta) meta.open = !!open;
+  } else setEdgeVal(edge, open ? EDGE_DOOR_O : EDGE_DOOR_C);
+  save(); draw();
+}
+function interactWithEdge(edge) {
+  var val = getEdgeVal(edge), meta = getEdgeMeta(edge);
+  if (val === EDGE_SECRET_WALL || val === EDGE_SECRET_DOOR_C || val === EDGE_SECRET_DOOR_O) {
+    if (!meta || !meta.detected) { alert('Você não percebe nada incomum nesta parte da parede.'); return; }
+    if (!meta.mechanismKnown) { alert('Você encontrou a passagem, mas ainda não descobriu como acioná-la. Use Investigar mecanismo.'); return; }
+    if (val === EDGE_SECRET_WALL) {
+      meta.open = !meta.open;
+      alert(meta.open ? 'O mecanismo foi acionado e a passagem secreta se abriu.' : 'A passagem secreta foi fechada.');
+      save(); draw(); return;
+    }
+    openDoorEdge(edge, val !== EDGE_SECRET_DOOR_O); return;
+  }
+  if (val === EDGE_LOCKED_DOOR) {
+    if (!meta) { meta = makeStructureMeta('madeira', 'lockedDoor', 1); meta.locked = true; setEdgeMeta(edge, meta); }
+    if (meta.open) { meta.open = false; save(); draw(); alert('A porta foi fechada.'); return; }
+
+    var now = Date.now();
+    var arcaneConfigured = !!meta.arcaneLock;
+    var arcaneSuppressed = arcaneConfigured && now < Number(meta.arcaneSuppressedUntil || 0);
+    if (!meta.locked && !arcaneSuppressed) {
+      meta.open = true;
+    } else if (arcaneSuppressed) {
+      meta.open = true;
+      alert('A Tranca Arcana está suprimida; a porta pode ser aberta durante os 10 minutos restantes.');
+    } else {
+      var approach = window.prompt(
+        'Como deseja abrir a porta trancada?\n1 = Ferramentas de Ladrão (Destreza/Prestidigitação) — ' + (meta.lockComplexity === 'complex' ? '1 minuto' : '1 ação') +
+        '\n2 = Forçar fisicamente (Força/Atletismo)' +
+        (meta.keyName ? '\nCHAVE = usar a chave (' + meta.keyName + ')' : '') +
+        '\nDigite ARROMBAR para usar a magia Knock/Arrombar.', '1');
+      if (approach == null) return;
+      var command = String(approach).trim().toLowerCase();
+      if (command === 'arrombar' || command === 'knock') {
+        meta.open = true;
+        if (arcaneConfigured) {
+          meta.arcaneSuppressedUntil = now + 10 * 60 * 1000;
+          alert('Arrombar abriu a porta. A Tranca Arcana fica suprimida por 10 minutos.');
+        } else {
+          meta.locked = false;
+          alert('Arrombar abriu instantaneamente a fechadura mundana.');
+        }
+      } else if (command === 'chave' && meta.keyName) {
+        var usedKey = String(window.prompt('Digite o nome da chave utilizada:', '') || '').trim().toLocaleLowerCase();
+        if (usedKey && usedKey === meta.keyName.toLocaleLowerCase()) {
+          if (arcaneConfigured && !arcaneSuppressed) {
+            alert('A chave física não supera a Tranca Arcana. Use um teste com CD +10 ou a magia Arrombar.');
+          } else {
+            meta.locked = false; meta.open = true;
+            alert('A chave correta destranca e abre a porta.');
+          }
+        } else {
+          alert('Esta chave não corresponde à fechadura.');
+        }
+      } else {
+        var checkIsForce = command === '2';
+        var baseDC = checkIsForce ? Number(meta.dcForce || 18) : Number(meta.lockDC || 15);
+        var dc = baseDC + (arcaneConfigured ? 10 : 0);
+        var testName = checkIsForce ? 'Força (Atletismo)' : 'Destreza (Prestidigitação) com Ferramentas de Ladrão';
+        var roll = numberPrompt(testName + ' — CD ' + dc + '. Informe o total:', dc, 0, 60);
+        if (roll == null) return;
+        if (roll >= dc) {
+          meta.open = true;
+          // Sem Tranca Arcana, vencer ou arrombar a fechadura a deixa inutilizada.
+          // Com a magia, a proteção persiste e volta a valer quando a porta for fechada.
+          if (!arcaneConfigured) meta.locked = false;
+          alert(checkIsForce
+            ? 'Sucesso! Você força a porta e consegue abri-la.'
+            : 'Sucesso! Você vence a fechadura e abre a porta.');
+        } else {
+          alert('Falha. A porta continua trancada.');
+        }
+      }
+    }
+    save(); draw(); return;
+  }
+  if (val === EDGE_JAMMED_DOOR) {
+    if (!meta) { meta = makeStructureMeta('madeira', 'jammedDoor', 1); setEdgeMeta(edge, meta); }
+    if (meta.open) { meta.open = false; save(); draw(); alert('A porta foi fechada.'); return; }
+    if (meta.barred && window.confirm('O personagem está do lado em que consegue alcançar e levantar a barra? (OK = ação Utilizar)')) {
+      meta.open = true; save(); draw(); alert('Você levanta a barra com uma ação Utilizar e abre a porta.'); return;
+    }
+    var forceRoll = numberPrompt('Força (Atletismo) para forçar a porta — CD ' + Number(meta.dcForce || 15) + '. Informe o total:', 15, 0, 60);
+    if (forceRoll == null) return;
+    if (forceRoll >= Number(meta.dcForce || 15)) { meta.open = true; alert('Você força a porta e consegue abri-la.'); }
+    else alert('A porta não cede.');
+    save(); draw(); return;
+  }
+  if (val === EDGE_DOOR_C || val === EDGE_DOOR_O) { openDoorEdge(edge, val === EDGE_DOOR_C); return; }
+  if (val === EDGE_FORCE_WALL) { alert('Muralha de Energia: invisível, imune a dano comum e bloqueia a passagem. Só Desintegrar a destrói; teletransporte pode atravessá-la.'); return; }
+  if (val === EDGE_ILLUSION_WALL) { if (meta) meta.detected = true; save(); draw(); alert('Você percebe a ilusão: ela não bloqueia a passagem.'); return; }
+  if (val === EDGE_MAGIC_WALL || val === EDGE_SECRET_WALL || val === EDGE_MURO) alert(edgeActionLabel(val, meta) + '. Use Atacar estrutura para tentar destruí-la.');
+}
+function ensureEdgeStructureMeta(edge) {
+  var meta = getEdgeMeta(edge), val = getEdgeVal(edge);
+  if (meta) return meta;
+  var isWall = val === EDGE_MURO || val === EDGE_SECRET_WALL || val === EDGE_MAGIC_WALL;
+  var material = isWall || val === EDGE_FORCE_WALL ? 'pedra' : 'madeira';
+  var kind = val === EDGE_MURO ? 'wallLine' :
+    val === EDGE_SECRET_WALL ? 'secretWall' :
+    val === EDGE_MAGIC_WALL ? 'magicWall' :
+    val === EDGE_FORCE_WALL ? 'forceWall' :
+    val === EDGE_LOCKED_DOOR ? 'lockedDoor' :
+    val === EDGE_JAMMED_DOOR ? 'jammedDoor' :
+    val === EDGE_SECRET_DOOR_C || val === EDGE_SECRET_DOOR_O ? 'secretDoor' : 'door';
+  meta = makeStructureMeta(material, kind, isWall ? 2 : 1);
+  if (val === EDGE_FORCE_WALL) { meta.material = 'force'; meta.ac = null; meta.hp = null; meta.maxHp = null; }
+  setEdgeMeta(edge, meta); return meta;
+}
+function damageObject(meta, label, destroy) {
+  if (!meta) return;
+  if (meta.material === 'force') {
+    var command = window.prompt('Muralha de Energia só pode ser destruída por Desintegrar. Digite DESINTEGRAR para aplicar a magia:', '');
+    if (String(command || '').trim().toLowerCase() === 'desintegrar') { destroy(); alert(label + ' foi dissipada.'); }
+    else alert('Nenhum dano foi causado.');
+    return;
+  }
+  if (meta.material === 'illusion') { alert('A barreira é ilusória; não há estrutura física para destruir.'); return; }
+  var stats = OBJECT_MATERIALS[meta.material] || OBJECT_MATERIALS.pedra;
+  var ac = Number(meta.ac || stats.ac);
+  var attack = numberPrompt('Ataque contra ' + label + ' — CA ' + ac + '. Informe o total da jogada:', ac, 0, 60);
+  if (attack == null) return;
+  if (attack < ac) { alert('Ataque não atingiu a CA ' + ac + '.'); return; }
+  var damage = numberPrompt('Dano causado em um único golpe (PV restantes: ' + Number(meta.hp || 0) + '):', 8, 0, 500);
+  if (damage == null) return;
+  var damageType = window.prompt('Tipo de dano (cortante, contundente, perfurante, fogo, ácido, elétrico, psíquico, venenoso etc.):', 'contundente');
+  if (damageType == null) return;
+  damageType = String(damageType).toLowerCase();
+  if ((stats.immune || []).some(function (t) { return damageType.indexOf(t) >= 0; })) { alert('Este material é imune a dano ' + damageType + '.'); return; }
+  if (meta.material === 'ferro' && damageType.indexOf('perfurante') >= 0 && !window.confirm('Ferro/aço resiste a perfuração comum. Este ataque é mágico? (Cancelar = não)')) {
+    alert('A estrutura é imune a perfuração não mágica.'); return;
+  }
+  if (stats.needsMagic && !window.confirm('O ataque é mágico? (Cancelar = não)')) { alert('Este material não sofre dano de armas não mágicas.'); return; }
+  var applied = damage;
+  if (stats.vulnerableFire && damageType.indexOf('fogo') >= 0) applied *= 2;
+  var isStoneWall = (meta.material === 'pedra' || meta.material === 'pedraMagica') && /wall/i.test(meta.kind || '');
+  if (isStoneWall && window.confirm('O personagem é proficiente com Ferramentas de Pedreiro?')) applied *= 2;
+  var threshold = Number(meta.threshold || 0);
+  if (applied < threshold) { alert('O golpe não alcançou o limiar de dano ' + threshold + '. Nenhum PV foi removido.'); return; }
+  meta.hp = Math.max(0, Number(meta.hp || 0) - applied);
+  if (meta.hp <= 0) { destroy(); alert(label + ' foi destruído!'); }
+  else alert(label + ' sofreu ' + applied + ' de dano. PV restantes: ' + meta.hp + '/' + meta.maxHp + '.');
+}
+function damageEdgeStructure(edge) {
+  var val = getEdgeVal(edge);
+  if (val === EDGE_NONE) { alert('Não há parede ou porta nesta linha.'); return; }
+  if (val === EDGE_ILLUSION_WALL) { alert('A barreira é uma ilusão e não possui PV.'); return; }
+  var meta = ensureEdgeStructureMeta(edge);
+  damageObject(meta, edgeActionLabel(val, meta), function () { setEdgeVal(edge, EDGE_NONE); });
+  save(); draw();
+}
+function damageCellWall(cell) {
+  var i = idx(cell.x, cell.y);
+  if (!state.walls[i]) { alert('Não há uma parede nesta quadrícula.'); return; }
+  if (!state.wallMeta) state.wallMeta = makeArr(COLS * ROWS, null);
+  var meta = state.wallMeta[i] || makeStructureMeta('pedra', 'wall', 2);
+  state.wallMeta[i] = meta;
+  damageObject(meta, 'parede de pedra', function () { state.walls[i] = 0; state.wallMeta[i] = null; });
+  save(); draw();
 }
 
 var detailCache = {};
@@ -1429,55 +1864,56 @@ function draw() {
 
 function drawEdges() {
   var lw = Math.max(2.5, 3.5 / zoom);
-  for (var ye = 0; ye <= ROWS; ye++) {
-    for (var x = 0; x < COLS; x++) {
-      var v = getH(x, ye);
-      if (v === EDGE_MURO) {
-        cx.strokeStyle = '#c62828';
-        cx.lineWidth = lw;
-        cx.beginPath(); cx.moveTo(x * CELL, ye * CELL); cx.lineTo((x + 1) * CELL, ye * CELL); cx.stroke();
-      } else if (isDoorEdge(v)) {
-        if (x > 0 && isDoorEdge(getH(x - 1, ye))) continue;
-        var endX = x;
-        while (endX + 1 < COLS && isDoorEdge(getH(endX + 1, ye))) endX++;
-        var closed = false;
-        for (var hx = x; hx <= endX; hx++) if (getH(hx, ye) === EDGE_DOOR_C) closed = true;
-        var x0 = x * CELL, x1 = (endX + 1) * CELL, y0 = ye * CELL;
-        cx.strokeStyle = closed ? '#8d6e63' : 'rgba(141,110,99,0.35)';
-        cx.lineWidth = closed ? lw : lw * 0.7;
-        if (!closed) cx.setLineDash([6 / zoom, 4 / zoom]);
-        cx.beginPath(); cx.moveTo(x0, y0); cx.lineTo(x1, y0); cx.stroke();
-        if (!closed) cx.setLineDash([]);
-        cx.fillStyle = closed ? '#ffcc80' : '#a5d6a7';
-        cx.beginPath(); cx.arc((x0 + x1) / 2, y0, 4 / zoom, 0, Math.PI * 2); cx.fill();
-      }
+  function drawOne(edge, val) {
+    if (val === EDGE_NONE || edgeIsHidden(edge, val)) return;
+    var meta = getEdgeMeta(edge) || {};
+    if (val === EDGE_SECRET_WALL && meta.open) return;
+    var a, b;
+    if (edge.dir === 'h') {
+      a = { x: edge.x * CELL, y: edge.yEdge * CELL };
+      b = { x: (edge.x + 1) * CELL, y: edge.yEdge * CELL };
+    } else {
+      a = { x: edge.xEdge * CELL, y: edge.y * CELL };
+      b = { x: edge.xEdge * CELL, y: (edge.y + 1) * CELL };
     }
-  }
-
-  for (var y = 0; y < ROWS; y++) {
-    for (var xe = 0; xe <= COLS; xe++) {
-      var vv = getV(xe, y);
-      if (vv === EDGE_MURO) {
-        cx.strokeStyle = '#c62828';
-        cx.lineWidth = lw;
-        cx.beginPath(); cx.moveTo(xe * CELL, y * CELL); cx.lineTo(xe * CELL, (y + 1) * CELL); cx.stroke();
-      } else if (isDoorEdge(vv)) {
-        if (y > 0 && isDoorEdge(getV(xe, y - 1))) continue;
-        var endY = y;
-        while (endY + 1 < ROWS && isDoorEdge(getV(xe, endY + 1))) endY++;
-        var vClosed = false;
-        for (var vy = y; vy <= endY; vy++) if (getV(xe, vy) === EDGE_DOOR_C) vClosed = true;
-        var xx = xe * CELL, yy0 = y * CELL, yy1 = (endY + 1) * CELL;
-        cx.strokeStyle = vClosed ? '#8d6e63' : 'rgba(141,110,99,0.35)';
-        cx.lineWidth = vClosed ? lw : lw * 0.7;
-        if (!vClosed) cx.setLineDash([6 / zoom, 4 / zoom]);
-        cx.beginPath(); cx.moveTo(xx, yy0); cx.lineTo(xx, yy1); cx.stroke();
-        if (!vClosed) cx.setLineDash([]);
-        cx.fillStyle = vClosed ? '#ffcc80' : '#a5d6a7';
-        cx.beginPath(); cx.arc(xx, (yy0 + yy1) / 2, 4 / zoom, 0, Math.PI * 2); cx.fill();
-      }
+    var isDoor = isDoorEdge(val);
+    var opened = val === EDGE_DOOR_O || val === EDGE_SECRET_DOOR_O || !!meta.open;
+    var color = '#c62828', width = lw, dash = [];
+    if (val === EDGE_SECRET_WALL) { color = '#ab47bc'; dash = [5 / zoom, 3 / zoom]; }
+    else if (val === EDGE_SECRET_DOOR_C || val === EDGE_SECRET_DOOR_O) color = opened ? 'rgba(142,36,170,0.38)' : '#8e24aa';
+    else if (val === EDGE_LOCKED_DOOR) color = opened ? '#81c784' : '#42a5f5';
+    else if (val === EDGE_JAMMED_DOOR) color = opened ? '#81c784' : '#ff8f00';
+    else if (val === EDGE_ILLUSION_WALL) {
+      if (meta.detected) { color = '#26c6da'; dash = [3 / zoom, 4 / zoom]; }
+      else color = '#c62828'; // antes de ser percebida, parece uma parede comum.
     }
+    else if (val === EDGE_FORCE_WALL) { color = '#80deea'; width = lw * 1.5; dash = [2 / zoom, 3 / zoom]; }
+    else if (val === EDGE_MAGIC_WALL) { color = '#7e57c2'; width = lw * 1.5; }
+    else if (val === EDGE_MURO) color = '#c62828';
+    else if (isDoor) { color = opened ? 'rgba(141,110,99,0.45)' : '#8d6e63'; if (opened) dash = [6 / zoom, 4 / zoom]; }
+    cx.save();
+    cx.strokeStyle = color; cx.lineWidth = width;
+    if ((val === EDGE_SECRET_DOOR_O || (isDoor && opened)) && !dash.length) dash = [6 / zoom, 4 / zoom];
+    if (dash.length) cx.setLineDash(dash);
+    cx.beginPath(); cx.moveTo(a.x, a.y); cx.lineTo(b.x, b.y); cx.stroke();
+    cx.setLineDash([]);
+    var mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    if (isDoor) {
+      cx.fillStyle = color; cx.beginPath(); cx.arc(mx, my, 4.5 / zoom, 0, Math.PI * 2); cx.fill();
+      if (val === EDGE_LOCKED_DOOR && !opened) {
+        cx.fillStyle = '#e3f2fd'; cx.font = 'bold ' + (10 / zoom) + 'px sans-serif'; cx.textAlign = 'center'; cx.fillText('🔒', mx, my - 7 / zoom);
+      }
+      if ((val === EDGE_SECRET_DOOR_C || val === EDGE_SECRET_DOOR_O) && meta.detected) {
+        cx.fillStyle = '#f3e5f5'; cx.font = 'bold ' + (9 / zoom) + 'px sans-serif'; cx.textAlign = 'center'; cx.fillText('✦', mx, my - 7 / zoom);
+      }
+    } else if (val === EDGE_SECRET_WALL || val === EDGE_FORCE_WALL || val === EDGE_MAGIC_WALL ||
+        (val === EDGE_ILLUSION_WALL && meta.detected)) {
+      cx.fillStyle = color; cx.beginPath(); cx.arc(mx, my, 3.5 / zoom, 0, Math.PI * 2); cx.fill();
+    }
+    cx.restore();
   }
+  for (var ye = 0; ye <= ROWS; ye++) for (var x = 0; x < COLS; x++) drawOne({ dir: 'h', x: x, yEdge: ye }, getH(x, ye));
+  for (var y = 0; y < ROWS; y++) for (var xe = 0; xe <= COLS; xe++) drawOne({ dir: 'v', xEdge: xe, y: y }, getV(xe, y));
 }
 
 function isCurrentlyVisible(x, y, px, py, r) {
@@ -1556,7 +1992,10 @@ function teleportPlayerWithinMap(portal, player) {
   player.x = destination.x;
   player.y = destination.y;
   selected = player;
-  if (!isHexMap() && dynLight) revealAround(player.x, player.y, player.luz || lightRadius);
+  if (!isHexMap()) {
+    if (dynLight) revealAround(player.x, player.y, player.luz || lightRadius);
+    checkPassiveSecretDetection(player);
+  }
   save();
   draw();
   return true;
@@ -1859,7 +2298,7 @@ function previewDoorEdge() {
   var fx = Math.abs(gx - Math.round(gx)), fy = Math.abs(gy - Math.round(gy));
   if (Math.min(fx, fy) >= 0.12) return null;
   var edge = previewEdge(), value = edge ? getEdgeVal(edge) : EDGE_NONE;
-  return value === EDGE_DOOR_C || value === EDGE_DOOR_O ? edge : null;
+  return isDoorEdge(value) ? edge : null;
 }
 
 function drawPreviewCell(cell, fill, stroke) {
@@ -1911,7 +2350,11 @@ function drawToolPreview() {
   if (tool === 'wall') drawPreviewCell(cell, 'rgba(229,57,53,0.38)', '#ff5252');
   else if (tool === 'erasewall') drawPreviewCell(cell, 'rgba(102,187,106,0.28)', '#81c784');
   else if (tool === 'muro') drawEdgePreview(edge, '#ff5252', false);
-  else if (tool === 'porta') drawEdgePreview(edge, '#ffb74d', true);
+  else if (tool === 'porta' || tool === 'portaSecreta' || tool === 'portaTrancada' || tool === 'portaEmperrada') drawEdgePreview(edge, '#ffb74d', true);
+  else if (tool === 'paredeSecreta') drawEdgePreview(edge, '#ab47bc', false);
+  else if (tool === 'paredeIlusoria') drawEdgePreview(edge, '#26c6da', false);
+  else if (tool === 'muralhaForca') drawEdgePreview(edge, '#80deea', false);
+  else if (tool === 'paredeMagica') drawEdgePreview(edge, '#7e57c2', false);
   else if (tool === 'eraseedge') drawEdgePreview(edge, '#80deea', isDoorEdge(getEdgeVal(edge)));
   else if (tool === 'reveal' || tool === 'hide') {
     cx.save();
@@ -2083,6 +2526,9 @@ function updateDetailPanel() {
       '<button type="button" id="mp-hp-full">Máx</button></div>';
   }
   var extra = '';
+  var passiveHtml = t.tipo === 'player'
+    ? '<div class="mp-hp-row"><span>Percepção passiva: <b>' + (t.percepcaoPassiva != null ? Number(t.percepcaoPassiva) : 10) + '</b></span> <button type="button" id="mp-passive-perception">Editar</button></div>'
+    : '';
   if (t.monsterId && window.MONSTERS) {
     var m = (window.MONSTERS || []).find(function (x) { return x.id === t.monsterId; });
     if (m) {
@@ -2105,13 +2551,19 @@ function updateDetailPanel() {
   box.innerHTML =
     '<div class="mp-detail-head"><strong>' + esc(t.nome) + '</strong>' +
     (t.nd != null ? '<span class="card-tag">ND ' + esc(t.nd) + '</span>' : '') + '</div>' +
-    hpHtml + extra +
+    hpHtml + passiveHtml + extra +
     '<div class="mp-detail-tools">' +
     (t.tipo !== 'player' ? '<button type="button" id="mp-del-tok">Remover token</button>' : '') +
     '</div>';
 
   var hpIn = $('#mp-hp');
   if (hpIn) hpIn.onchange = function () { t.hp = +this.value; save(); draw(); };
+  var passiveButton = $('#mp-passive-perception');
+  if (passiveButton) passiveButton.onclick = function () {
+    var value = numberPrompt('Valor de Sabedoria (Percepção) passiva do personagem:', t.percepcaoPassiva != null ? t.percepcaoPassiva : 10, 0, 40);
+    if (value == null) return;
+    t.percepcaoPassiva = value; save(); draw();
+  };
   var hpFull = $('#mp-hp-full');
   if (hpFull) hpFull.onclick = function () { t.hp = t.hpMax; save(); draw(); };
   var del = $('#mp-del-tok');
@@ -2172,22 +2624,56 @@ function canOccupy(x, y, token) {
   return true;
 }
 
-function canStep(fromX, fromY, toX, toY, token) {
+function edgesBetweenStep(x0, y0, x1, y1) {
+  var found = [];
+  if (x0 !== x1 && y0 !== y1) {
+    found.push({ dir: 'v', xEdge: Math.max(x0, x1), y: y0 });
+    found.push({ dir: 'h', x: x0, yEdge: Math.max(y0, y1) });
+  } else if (x0 !== x1) found.push({ dir: 'v', xEdge: Math.max(x0, x1), y: y0 });
+  else if (y0 !== y1) found.push({ dir: 'h', x: x0, yEdge: Math.max(y0, y1) });
+  return found;
+}
+function canStep(fromX, fromY, toX, toY, token, detectTouch) {
   if (!canOccupy(toX, toY, token)) return false;
-  if (!blockMove) return true;
   if (isHexMap()) return !!hexRoute({ x: fromX, y: fromY }, { x: toX, y: toY });
   if (Math.abs(toX - fromX) <= 1 && Math.abs(toY - fromY) <= 1) {
+    var crossedEdges = edgesBetweenStep(fromX, fromY, toX, toY);
+    // A detecção por toque só ocorre no passo que o jogador realmente tenta dar,
+    // nunca durante a busca automática de rotas do algoritmo A*.
+    if (detectTouch && token && token.tipo === 'player') {
+      crossedEdges.forEach(function (edge) {
+        var val = getEdgeVal(edge), meta = getEdgeMeta(edge);
+        if (val === EDGE_ILLUSION_WALL && meta && !meta.detected) {
+          meta.detected = true;
+          window.setTimeout(function () { if (cv) { save(); draw(); alert('Ao tocar a parede, você percebe que ela é uma ilusão e pode atravessá-la.'); } }, 0);
+        }
+        if (val === EDGE_FORCE_WALL && meta && !meta.detected) {
+          meta.detected = true;
+          window.setTimeout(function () { if (cv) { save(); draw(); alert('Você toca uma barreira invisível: Muralha de Energia.'); } }, 0);
+        }
+      });
+    }
+    // A Muralha de Energia é uma barreira absoluta mesmo quando o Mestre desativa
+    // a colisão geral para reposicionar tokens ou facilitar a edição do mapa.
+    if (crossedEdges.some(function (edge) { return getEdgeVal(edge) === EDGE_FORCE_WALL; })) return false;
+    if (!blockMove) return true;
     if (blocksBetween(fromX, fromY, toX, toY)) return false;
+    return true;
   }
-  return true;
+  return !blockMove;
 }
 
 function applyWallBrush(cx, cy, val, radius) {
   var r = radius == null ? 0 : radius;
+  if (!state.wallMeta) state.wallMeta = makeArr(COLS * ROWS, null);
   for (var dy = -r; dy <= r; dy++) {
     for (var dx = -r; dx <= r; dx++) {
       var x = cx + dx, y = cy + dy;
-      if (x >= 0 && x < COLS && y >= 0 && y < ROWS) state.walls[idx(x, y)] = val;
+      if (x < 0 || x >= COLS || y < 0 || y >= ROWS) continue;
+      var i = idx(x, y);
+      state.walls[i] = val;
+      if (val) { if (!state.wallMeta[i]) state.wallMeta[i] = makeStructureMeta('pedra', 'wall', 2); }
+      else state.wallMeta[i] = null;
     }
   }
 }
@@ -2228,7 +2714,7 @@ function onPointerDown(e) {
       stopWorldTravel(false);
       var worldPlayer = currentPlayer();
       if (!worldPlayer) {
-        worldPlayer = { id: 'p1', nome: 'Aventureiro', tipo: 'player', x: worldCell.x, y: worldCell.y, cor: '#4fc3f7', raio: 1, luz: 6, hp: null, hpMax: null };
+        worldPlayer = { id: 'p1', nome: 'Aventureiro', tipo: 'player', x: worldCell.x, y: worldCell.y, cor: '#4fc3f7', raio: 1, luz: 6, percepcaoPassiva: 10, hp: null, hpMax: null };
         state.tokens.unshift(worldPlayer);
       }
       setMapSpawn(worldCell, worldPlayer);
@@ -2261,6 +2747,22 @@ function onPointerDown(e) {
     return;
   }
 
+  if (!isHexMap() && ['paredeSecreta', 'portaSecreta', 'portaTrancada', 'portaEmperrada', 'paredeIlusoria', 'muralhaForca', 'paredeMagica'].indexOf(tool) >= 0) {
+    var specialEdge = nearestEdge(world.x, world.y);
+    var specialKind = ({ paredeSecreta: 'secretWall', portaSecreta: 'secretDoor', portaTrancada: 'lockedDoor', portaEmperrada: 'jammedDoor', paredeIlusoria: 'illusionWall', muralhaForca: 'forceWall', paredeMagica: 'magicWall' })[tool];
+    createSpecialEdge(specialEdge, specialKind); return;
+  }
+  if (!isHexMap() && tool === 'searchSecret') { performActiveSecretSearch(cell); setTool('select'); return; }
+  if (!isHexMap() && tool === 'investigateMechanism') { investigateEdgeMechanism(nearestEdge(world.x, world.y)); setTool('select'); return; }
+  if (!isHexMap() && tool === 'damageStructure') {
+    var damageEdge = nearestEdge(world.x, world.y);
+    var gxDamage = world.x / CELL, gyDamage = world.y / CELL;
+    var nearDamageLine = Math.min(Math.abs(gxDamage - Math.round(gxDamage)), Math.abs(gyDamage - Math.round(gyDamage))) < 0.12;
+    if (nearDamageLine && getEdgeVal(damageEdge) !== EDGE_NONE) damageEdgeStructure(damageEdge);
+    else damageCellWall(cell);
+    setTool('select'); return;
+  }
+
   if (!isHexMap() && (tool === 'muro' || tool === 'porta' || tool === 'eraseedge')) {
     var edge = nearestEdge(world.x, world.y);
     var cur = getEdgeVal(edge);
@@ -2268,11 +2770,12 @@ function onPointerDown(e) {
       setEdgeVal(edge, EDGE_MURO);
       drag = { edgePaint: true, mode: 'muro' };
     } else if (tool === 'porta') {
-      if (isDoorEdge(cur)) setDoorRunValue(edge, doorRunIsClosed(edge) ? EDGE_DOOR_O : EDGE_DOOR_C);
-      else setEdgeVal(edge, EDGE_DOOR_C);
+      if (cur === EDGE_DOOR_C || cur === EDGE_DOOR_O) setDoorRunValue(edge, doorRunIsClosed(edge) ? EDGE_DOOR_O : EDGE_DOOR_C);
+      else if (cur === EDGE_NONE) setEdgeVal(edge, EDGE_DOOR_C);
+      else { alert('Apague ou selecione outra linha antes de substituir esta estrutura.'); return; }
       drag = { edgePaint: true, mode: 'porta' };
     } else {
-      if (isDoorEdge(cur)) setDoorRunValue(edge, EDGE_NONE);
+      if (cur === EDGE_DOOR_C || cur === EDGE_DOOR_O) setDoorRunValue(edge, EDGE_NONE);
       else setEdgeVal(edge, EDGE_NONE);
       drag = { edgePaint: true, mode: 'erase' };
     }
@@ -2297,7 +2800,7 @@ function onPointerDown(e) {
   if (tool === 'spawn') {
     var player = state.tokens.find(function (t) { return t.tipo === 'player'; });
     if (!player) {
-      player = { id: 'p1', nome: 'Aventureiro', tipo: 'player', x: cell.x, y: cell.y, cor: '#4fc3f7', raio: 1, luz: lightRadius, hp: null, hpMax: null };
+      player = { id: 'p1', nome: 'Aventureiro', tipo: 'player', x: cell.x, y: cell.y, cor: '#4fc3f7', raio: 1, luz: lightRadius, percepcaoPassiva: 10, hp: null, hpMax: null };
       state.tokens.unshift(player);
     } else {
       if (blockMove && isCellWall(cell.x, cell.y)) {
@@ -2326,11 +2829,13 @@ function onPointerDown(e) {
     var gx = world.x / CELL, gy = world.y / CELL;
     var fx = Math.abs(gx - Math.round(gx)), fy = Math.abs(gy - Math.round(gy));
     var nearLine = !isHexMap() && Math.min(fx, fy) < 0.12;
-    if (nearLine && isDoorEdge(ev)) {
+    if (nearLine && (ev === EDGE_DOOR_C || ev === EDGE_DOOR_O)) {
       setDoorRunValue(edge2, doorRunIsClosed(edge2) ? EDGE_DOOR_O : EDGE_DOOR_C);
-      save();
-      draw();
-      return;
+      save(); draw(); return;
+    }
+    if (nearLine && isDoorEdge(ev)) { interactWithEdge(edge2); return; }
+    if (nearLine && (ev === EDGE_SECRET_WALL || ev === EDGE_ILLUSION_WALL || ev === EDGE_FORCE_WALL || ev === EDGE_MAGIC_WALL || ev === EDGE_MURO)) {
+      interactWithEdge(edge2); return;
     }
 
     var hit = null;
@@ -2403,9 +2908,12 @@ function onPointerMove(e) {
     if (drag.mode === 'muro') setEdgeVal(edge, EDGE_MURO);
     else if (drag.mode === 'porta') {
       var c = getEdgeVal(edge);
-      if (c !== EDGE_DOOR_C && c !== EDGE_DOOR_O) setEdgeVal(edge, EDGE_DOOR_C);
-    } else if (isDoorEdge(getEdgeVal(edge))) setDoorRunValue(edge, EDGE_NONE);
-    else setEdgeVal(edge, EDGE_NONE);
+      if (c === EDGE_NONE) setEdgeVal(edge, EDGE_DOOR_C);
+    } else {
+      var eraseVal = getEdgeVal(edge);
+      if (eraseVal === EDGE_DOOR_C || eraseVal === EDGE_DOOR_O) setDoorRunValue(edge, EDGE_NONE);
+      else setEdgeVal(edge, EDGE_NONE);
+    }
     draw();
     return;
   }
@@ -2422,9 +2930,10 @@ function onPointerMove(e) {
     var world2 = screenToWorld(e.clientX - rect2.left, e.clientY - rect2.top);
     var cell2 = worldToCell(world2.x, world2.y);
     var t = drag.moveToken;
-    if (canStep(t.x, t.y, cell2.x, cell2.y, t)) {
+    if (canStep(t.x, t.y, cell2.x, cell2.y, t, true)) {
       t.x = cell2.x;
       t.y = cell2.y;
+      if (t.tipo === 'player') checkPassiveSecretDetection(t);
       if (t.tipo === 'player' && dynLight) {
         revealAround(cell2.x, cell2.y, t.luz || lightRadius);
       }
@@ -2606,7 +3115,7 @@ function pickKeyStep(pl, dir) {
   if (dir.dx && dir.dy) cands.push({ x: pl.x + dir.dx, y: pl.y + dir.dy }, { x: pl.x + dir.dx, y: pl.y }, { x: pl.x, y: pl.y + dir.dy });
   else cands.push({ x: pl.x + dir.dx, y: pl.y + dir.dy });
   for (var i = 0; i < cands.length; i++) {
-    if (canStep(pl.x, pl.y, cands[i].x, cands[i].y, pl)) return cands[i];
+    if (canStep(pl.x, pl.y, cands[i].x, cands[i].y, pl, true)) return cands[i];
   }
   return null;
 }
@@ -2672,6 +3181,7 @@ function keyMoveFrame(now) {
 
   while (true) {
     if (!keyMoveStep) {
+      if (!hexMode) checkPassiveSecretDetection(pl);
       var dir = heldDirection();
       var next = hexMode
         ? pickHexKeyStep(pl)
@@ -2684,7 +3194,7 @@ function keyMoveFrame(now) {
         if (!hexMode && keyMoveWouldExitMap(pl, dir) && returnToWorldMapFromExit()) return;
         break;
       }
-      if (!canStep(pl.x, pl.y, next.x, next.y, pl)) {
+      if (!canStep(pl.x, pl.y, next.x, next.y, pl, true)) {
         if (!hexMode) { clickMovePath = []; clickMoveExitPending = false; }
         break;
       }
@@ -2694,6 +3204,7 @@ function keyMoveFrame(now) {
       keyMoveCarry = null;
       // A posição lógica avança no início do passo; a posição visual desliza até o centro.
       pl.x = next.x; pl.y = next.y; selected = pl;
+      if (!hexMode) checkPassiveSecretDetection(pl);
       if (dynLight && !hexMode) revealAround(pl.x, pl.y, pl.luz || lightRadius);
     }
     var st = keyMoveStep;
@@ -2711,7 +3222,10 @@ function keyMoveFrame(now) {
           clickMovePath = [];
           clickMoveExitPending = false;
           if (hexMode) worldTravelPos = null;
-          else if (dynLight) revealAround(pl.x, pl.y, pl.luz || lightRadius);
+          else {
+            if (dynLight) revealAround(pl.x, pl.y, pl.luz || lightRadius);
+            checkPassiveSecretDetection(pl);
+          }
           save(); draw();
           continue;
         }
@@ -2867,8 +3381,18 @@ function mountNow(el) {
     '<button data-t="wall" title="Parede no espaço atual (bloqueia tudo)">🧱 Parede</button>' +
     '<button data-t="erasewall" title="Apagar parede do espaço atual">🧹 Apagar parede</button>' +
     '<button data-t="muro" title="Muro na linha do grid (bloqueia luz e passagem)">─ Muro</button>' +
-    '<button data-t="porta" title="Porta na linha · clique de novo para abrir/fechar">🚪 Porta</button>' +
-    '<button data-t="eraseedge" title="Apagar muro/porta da linha">✂ Apagar linha</button>' +
+    '<button data-t="porta" title="Porta comum na linha">🚪 Porta</button>' +
+    '<button data-t="paredeSecreta" title="Parede secreta: Percepção para encontrar e Investigação para descobrir o mecanismo">🧱 Parede secreta</button>' +
+    '<button data-t="portaSecreta" title="Porta secreta: encontrar, investigar o mecanismo e abrir">🚪 Porta secreta</button>' +
+    '<button data-t="portaTrancada" title="Porta trancada: Ferramentas de Ladrão; pode ter Tranca Arcana">🔒 Porta trancada</button>' +
+    '<button data-t="portaEmperrada" title="Porta emperrada/barrada: Força (Atletismo) para forçar">🪵 Porta emperrada</button>' +
+    '<button data-t="paredeIlusoria" title="Parede ilusória: não bloqueia passagem; toque ou Investigação revela">🫥 Parede ilusória</button>' +
+    '<button data-t="muralhaForca" title="Muralha de Energia: invisível, imune a dano comum; Desintegrar a destrói">🔷 Muralha de Energia</button>' +
+    '<button data-t="paredeMagica" title="Parede mágica de pedra/metal, pode ser danificada">✨ Parede mágica</button>' +
+    '<button data-t="searchSecret" title="Busca ativa em uma seção de parede de aproximadamente 3 m: Sabedoria (Percepção)">🔎 Buscar segredo</button>' +
+    '<button data-t="investigateMechanism" title="Inteligência (Investigação) para descobrir mecanismo ou ilusão">🧠 Investigar mecanismo</button>' +
+    '<button data-t="damageStructure" title="Atacar estrutura: informe ataque, dano e tipo de dano">⚔ Atacar estrutura</button>' +
+    '<button data-t="eraseedge" title="Apagar parede/porta desta linha">✂ Apagar linha</button>' +
     '<button data-t="spawn" title="Definir início do jogador">📍 Início</button>' +
     '<button data-t="localPortal" title="Clique no ponto A e depois no ponto B para ligar os dois locais por teleporte">🌀 Teleporte</button>' +
     '<button data-t="reveal" title="Revelar névoa">☀ Revelar</button>' +
@@ -2880,6 +3404,7 @@ function mountNow(el) {
     '<button id="mp-fog" title="Névoa (F)">Névoa</button>' +
     '<button id="mp-light" title="Luz dinâmica (L)">Luz</button>' +
     '<button id="mp-walls-vis" title="Mostrar paredes/muros (W)">Ver muros</button>' +
+    '<button id="mp-secret-view" title="Alternar a visão do Mestre para estruturas secretas ainda não descobertas">👁 Segredos (Mestre)</button>' +
     '<label class="mp-luz"><input id="mp-block" type="checkbox" checked> Bloquear movimento</label>' +
     '<label class="mp-luz">Raio <input id="mp-lr" type="number" min="0" max="20" value="6" style="width:44px"></label>' +
     '<button id="mp-reset-fog" title="Cobrir novamente todas as áreas do mapa">Reset Névoa</button>' +
@@ -2895,7 +3420,7 @@ function mountNow(el) {
     '<h4 style="margin-top:12px">Token selecionado</h4>' +
     '<div id="mp-detail" class="mp-detail"><div class="mp-detail-empty">Selecione um token.</div></div>' +
     '<small style="display:block;margin-top:10px;color:var(--mute)">' +
-    (isHexMap() ? '<b>Parede</b> = hexágono bloqueado.<br><b>Flanaess</b> usa deslocamento e medição em hexágonos; muros e portas lineares ficam desativados.' : '<b>Parede</b> = quadrado inteiro.<br><b>Muro</b> = linha do grid (bloqueia luz 100%).<br><b>Porta</b> = linha; laranja=fechada, verde=aberta. Clique de novo ou use Selecionar na porta para abrir/fechar.') + '</small>' +
+    (isHexMap() ? '<b>Parede</b> = hexágono bloqueado.<br><b>Flanaess</b> usa deslocamento e medição em hexágonos; muros e portas lineares ficam desativados.' : '<b>Parede</b> = quadrícula bloqueada.<br><b>Segredos:</b> Percepção passiva/Busca ativa encontra; Investigação descobre o mecanismo.<br><b>Trancadas:</b> Ferramentas de Ladrão; <b>emperradas:</b> Atletismo.<br><b>Estruturas:</b> Atacar estrutura usa CA, PV e limiar de dano. Ilusões não bloqueiam; Muralha de Energia só cai com Desintegrar.') + '</small>' +
     '</aside>' +
     '<div class="mp-menu-footer"><button type="button" id="mp-delete-map" class="mp-delete-map" title="Excluir somente mapas adicionados pelo botão +">🗑 Excluir mapa</button></div>' +
     '</div>' + // fim do menu lateral (drawer)
@@ -3083,16 +3608,26 @@ function mountNow(el) {
   };
   $('#mp-clear-walls').onclick = function () {
     if (confirm('Apagar todas as paredes das células?')) {
-      state.walls = makeGrid(0); save(); draw();
+      state.walls = makeGrid(0);
+      state.wallMeta = makeArr(COLS * ROWS, null);
+      save(); draw();
     }
   };
   $('#mp-clear-edges').onclick = function () {
     if (confirm('Apagar todos os muros e portas de linha?')) {
       state.hEdges = makeArr(COLS * (ROWS + 1), 0);
       state.vEdges = makeArr((COLS + 1) * ROWS, 0);
+      state.hEdgeMeta = makeArr(COLS * (ROWS + 1), null);
+      state.vEdgeMeta = makeArr((COLS + 1) * ROWS, null);
       save(); draw();
     }
   };
+  var secretViewButton = $('#mp-secret-view');
+  if (secretViewButton) {
+    secretViewButton.style.display = isHexMap() ? 'none' : '';
+    secretViewButton.classList.toggle('on', showSecrets);
+    secretViewButton.onclick = function () { showSecrets = !showSecrets; this.classList.toggle('on', showSecrets); draw(); };
+  }
   $('#mp-zo').onclick = function () { if (isHexMap()) { zoom = FLANAESS_ZOOM; draw(); } else changeCameraZoom(1 / 1.2); };
   $('#mp-zi').onclick = function () { if (isHexMap()) { zoom = FLANAESS_ZOOM; draw(); } else changeCameraZoom(1.2); };
 
@@ -3113,7 +3648,7 @@ function mountNow(el) {
   window.addEventListener('blur', onWindowBlur);
   window.addEventListener('resize', onWindowResize);
 
-  ['muro', 'porta', 'eraseedge'].forEach(function (name) {
+  ['muro', 'porta', 'paredeSecreta', 'portaSecreta', 'portaTrancada', 'portaEmperrada', 'paredeIlusoria', 'muralhaForca', 'paredeMagica', 'searchSecret', 'investigateMechanism', 'damageStructure', 'eraseedge'].forEach(function (name) {
     var btn = R.querySelector('#mp-tools button[data-t="' + name + '"]');
     if (btn) btn.style.display = isHexMap() ? 'none' : '';
   });
@@ -3140,6 +3675,7 @@ function mountNow(el) {
   });
   if (!isHexMap()) {
     centerCameraOnPlayer();
+    checkPassiveSecretDetection(currentPlayer());
     window.requestAnimationFrame(function () { centerCameraOnPlayer(); draw(); });
   }
   draw();
