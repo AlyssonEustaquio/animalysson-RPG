@@ -1300,10 +1300,12 @@ function nearbyEdgesForCell(cell, radiusCells) {
 }
 function checkPassiveSecretDetection(player) {
   if (!player || player.tipo !== 'player' || isHexMap()) return;
+  var sheet = getCharacterSheetActionData();
+  if (sheet) player.percepcaoPassiva = sheet.passivePerception;
   var passive = Number(player.percepcaoPassiva);
   if (!isFinite(passive)) passive = 10;
   var found = [];
-  nearbyEdgesForCell({ x: player.x, y: player.y }, 1.15).forEach(function (item) {
+  visibleEdgesForPlayer(player, playerVisionRadius(player)).forEach(function (item) {
     if (item.val !== EDGE_SECRET_WALL && item.val !== EDGE_SECRET_DOOR_C && item.val !== EDGE_SECRET_DOOR_O) return;
     var meta = getEdgeMeta(item.edge);
     if (!meta || meta.detected || passive < Number(meta.dcDetection || 15)) return;
@@ -3610,6 +3612,525 @@ function setTool(t) {
 }
 
 
+// ---------- Ações do personagem: ficha, rolagens automáticas e área de visão ----------
+// Lê a ficha montada no index.html (S, CL, BG e os mesmos cálculos usados na ficha).
+// O mapa e o criador de personagens são carregados na mesma página; não há cópia manual
+// dos bônus quando a ficha já está preenchida.
+var RPG_SKILL_ABILITIES = {
+  'Acrobacia':'DES','Adestrar Animais':'SAB','Arcanismo':'INT','Atletismo':'FOR',
+  'Atuação':'CAR','Enganação':'CAR','Furtividade':'DES','História':'INT',
+  'Intimidação':'CAR','Intuição':'SAB','Investigação':'INT','Medicina':'SAB',
+  'Natureza':'INT','Percepção':'SAB','Persuasão':'CAR','Prestidigitação':'DES',
+  'Religião':'INT','Sobrevivência':'SAB'
+};
+function getCharacterSheetActionData() {
+  try {
+    if (typeof S === 'undefined' || !S || S.cls == null) return null;
+    var classes = (typeof CL !== 'undefined' && Array.isArray(CL)) ? CL : window.CLASSES;
+    var backgrounds = (typeof BG !== 'undefined' && Array.isArray(BG)) ? BG : window.BACKGROUNDS;
+    var cls = classes && classes[S.cls];
+    if (!cls) return null;
+    var bg = backgrounds && S.bg != null ? backgrounds[S.bg] : null;
+    function base(attr) {
+      if (S.method === 'std' || S.method === 'rnd') return S.std && S.std[attr] != null ? Number(S.std[attr]) : 10;
+      if (S.method === 'pb') return S.pb && S.pb[attr] != null ? Number(S.pb[attr]) : 8;
+      return S.man && S.man[attr] != null ? Number(S.man[attr]) : 10;
+    }
+    function originBonus(attr) {
+      if (!bg || !Array.isArray(bg.a) || bg.a.indexOf(attr) < 0) return 0;
+      if (S.mode === '111') return 1;
+      return attr === S.p2 ? 2 : attr === S.p1 ? 1 : 0;
+    }
+    var scores = {}, abilityMods = {};
+    ['FOR','DES','CON','INT','SAB','CAR'].forEach(function (attr) {
+      scores[attr] = Math.min(20, base(attr) + originBonus(attr));
+      abilityMods[attr] = Math.floor((scores[attr] - 10) / 2);
+    });
+    var proficiencyBonus = cls ? 2 : 0; // a ficha atual do repositório está no nível 1.
+    var proficiencies = new Set((Array.isArray(S.skills) ? S.skills : []).concat(bg && Array.isArray(bg.s) ? bg.s : []));
+    var skillBonuses = {};
+    Object.keys(RPG_SKILL_ABILITIES).forEach(function (skill) {
+      var ability = RPG_SKILL_ABILITIES[skill];
+      skillBonuses[skill] = abilityMods[ability] + (proficiencies.has(skill) ? proficiencyBonus : 0);
+    });
+    var toolsBonus = abilityMods.DES + (bg && normalizeRpgText(bg.i || '') === 'ferramentas de ladrao' ? proficiencyBonus : 0);
+    return {
+      name: String(S.name || 'Personagem'), className: cls.n || '',
+      scores: scores, abilityMods: abilityMods, skillBonuses: skillBonuses,
+      proficiencies: Array.from(proficiencies), proficiencyBonus: proficiencyBonus,
+      passivePerception: 10 + skillBonuses['Percepção'],
+      meleeAttack: abilityMods.FOR + proficiencyBonus,
+      rangedAttack: abilityMods.DES + proficiencyBonus,
+      toolsBonus: toolsBonus,
+      hp: Math.max(1, Number(cls.d || 0) + abilityMods.CON),
+      armorClass: 10 + abilityMods.DES
+    };
+  } catch (e) { return null; }
+}
+function playerActionProfile(player) {
+  if (!player) return null;
+  if (!player.actionProfile || typeof player.actionProfile !== 'object') player.actionProfile = {};
+  var profile = player.actionProfile;
+  var previousConfigVersion = profile.configVersion;
+  var defaults = {
+    perception: 0, investigation: 0, attack: 0, athletics: 0, tools: 0,
+    skillBonuses: {}, damage: '1d8+0', attackRange: 0, weaponId: '', weaponMode: 'melee', damageOverride: '',
+    useSheet: true, configVersion: 2
+  };
+  Object.keys(defaults).forEach(function (key) {
+    if (profile[key] == null) profile[key] = defaults[key];
+  });
+  if (!profile.skillBonuses || typeof profile.skillBonuses !== 'object') profile.skillBonuses = {};
+  // Migra os três bônus que versões anteriores guardavam separadamente.
+  if (profile.skillBonuses['Percepção'] == null) profile.skillBonuses['Percepção'] = Number(profile.perception) || 0;
+  if (profile.skillBonuses['Investigação'] == null) profile.skillBonuses['Investigação'] = Number(profile.investigation) || 0;
+  if (profile.skillBonuses['Atletismo'] == null) profile.skillBonuses['Atletismo'] = Number(profile.athletics) || 0;
+  // Migra o perfil antigo: 1d8+0 e 6 quadrículas eram apenas valores padrão.
+  if (previousConfigVersion !== 2) {
+    if (profile.damage && profile.damage !== '1d8+0') profile.damageOverride = profile.damage;
+    if (Number(profile.attackRange) === 6) profile.attackRange = 0;
+    profile.weaponId = profile.weaponId || '';
+    profile.configVersion = 2;
+  }
+  var sheet = getCharacterSheetActionData();
+  if (sheet) {
+    profile.useSheet = true;
+    profile.perception = sheet.skillBonuses['Percepção'];
+    profile.investigation = sheet.skillBonuses['Investigação'];
+    profile.athletics = sheet.skillBonuses['Atletismo'];
+    profile.tools = sheet.toolsBonus;
+    player.percepcaoPassiva = sheet.passivePerception;
+    profile.sheetName = sheet.name;
+  }
+  return profile;
+}
+function normalizeRpgText(value) {
+  return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+function playerWeaponCatalog() {
+  var items = window.ITEMS || window.EQUIPMENT || [];
+  return Array.isArray(items) ? items.filter(function (item) {
+    return item && item.categoria === 'Armas' && item.dano && !item.magico;
+  }) : [];
+}
+function playerWeaponById(id) {
+  if (!id) return null;
+  return playerWeaponCatalog().find(function (item) { return item.id === id; }) || null;
+}
+function playerWeaponRange(item, weaponMode) {
+  var props = normalizeRpgText(item && item.propriedades || '');
+  var use = normalizeRpgText((item && item.uso || '') + ' ' + (item && item.tipo || ''));
+  var ammo = props.match(/Municao\s*\(\s*([0-9]+(?:[.,][0-9]+)?)\s*\/\s*([0-9]+(?:[.,][0-9]+)?)\s*m/i);
+  var thrown = props.match(/Arremesso\s*([0-9]+(?:[.,][0-9]+)?)\s*\/\s*([0-9]+(?:[.,][0-9]+)?)\s*m/i);
+  function cells(meters) { return Math.max(1, Math.ceil(Number(String(meters).replace(',', '.')) / 1.5)); }
+  if (ammo) return { normal: cells(ammo[1]), max: cells(ammo[2]), ranged: true, thrown: false };
+  var listedAsRanged = /a distancia|ataque a distancia/.test(use);
+  if (thrown && (listedAsRanged || weaponMode === 'thrown')) {
+    // Armas corpo a corpo com Arremesso usam o alcance de arremesso só quando esse modo é escolhido.
+    // O atributo continua sendo o mesmo do ataque corpo a corpo (Força, salvo Acuidade).
+    return { normal: cells(thrown[1]), max: cells(thrown[2]), ranged: listedAsRanged, thrown: true };
+  }
+  var reach = props.indexOf('alcance') >= 0 ? 2 : 1;
+  return { normal: reach, max: reach, ranged: listedAsRanged, thrown: !!thrown };
+}
+function playerWeaponDamageDice(item) {
+  var raw = String(item && item.dano || '');
+  var match = raw.match(/(?:^|\s)(\d*d\d+|\d+)(?=\s|$)/i);
+  return match ? match[1] : '';
+}
+function resolvePlayerAttackData(player, profile) {
+  var sheet = getCharacterSheetActionData();
+  var weapon = playerWeaponById(profile.weaponId);
+  if (!weapon) return {
+    weapon: null, sheet: sheet,
+    bonus: sheet ? sheet.meleeAttack : (Number(profile.attack) || 0),
+    damage: String(profile.damageOverride || profile.damage || '1d8+0'),
+    normalRange: Number(profile.attackRange) || 6,
+    maxRange: Number(profile.attackRange) || 6,
+    ranged: false, ability: 'FOR'
+  };
+  var range = playerWeaponRange(weapon, profile.weaponMode);
+  var props = normalizeRpgText(weapon.propriedades || '');
+  var finesse = props.indexOf('acuidade') >= 0;
+  var ability = range.ranged ? 'DES' : 'FOR';
+  if (finesse && sheet) ability = sheet.abilityMods.DES > sheet.abilityMods.FOR ? 'DES' : 'FOR';
+  var abilityMod = sheet ? sheet.abilityMods[ability] : 0;
+  var dice = playerWeaponDamageDice(weapon) || '1d4';
+  var derivedDamage = dice + (abilityMod > 0 ? '+' + abilityMod : abilityMod < 0 ? String(abilityMod) : '');
+  var customRange = Number(profile.attackRange) > 0;
+  return {
+    weapon: weapon, sheet: sheet,
+    bonus: sheet ? abilityMod + sheet.proficiencyBonus : Number(profile.attack) || 0,
+    damage: String(profile.damageOverride || derivedDamage),
+    normalRange: customRange ? Number(profile.attackRange) : range.normal,
+    maxRange: customRange ? Number(profile.attackRange) : range.max,
+    ranged: range.ranged, thrown: range.thrown, ability: ability, abilityMod: abilityMod
+  };
+}
+function playerSkillOptionsHtml() {
+  return Object.keys(RPG_SKILL_ABILITIES).map(function (skill) {
+    return '<option value="' + esc(skill) + '">' + esc(skill) + ' (' + RPG_SKILL_ABILITIES[skill] + ')</option>';
+  }).join('');
+}
+function rollDie(sides) { return 1 + Math.floor(Math.random() * Math.max(2, Number(sides) || 20)); }
+function rollCheck(bonus) {
+  var die = rollDie(20), mod = Number(bonus) || 0;
+  return { die: die, bonus: mod, total: die + mod };
+}
+function rollDamageExpression(expression, critical) {
+  var raw = String(expression || '1d8').trim();
+  var constant = raw.match(/^([0-9]+)\s*([+-]\s*\d+)?$/);
+  if (constant) {
+    var flat = Number(constant[1]) + (Number(String(constant[2] || '0').replace(/\s/g, '')) || 0);
+    return { rolls: [], modifier: 0, total: Math.max(0, flat), formula: raw, critical: !!critical };
+  }
+  var match = raw.match(/^\s*(\d*)d(\d+)\s*([+-]\s*\d+)?\s*$/i);
+  if (!match) return null;
+  var count = Math.max(1, Math.min(20, Number(match[1] || 1)));
+  var sides = Math.max(2, Math.min(100, Number(match[2] || 8)));
+  var modifier = Number(String(match[3] || '0').replace(/\s/g, '')) || 0;
+  var rolls = [];
+  for (var i = 0; i < count; i++) rolls.push(rollDie(sides));
+  var diceTotal = rolls.reduce(function (sum, value) { return sum + value; }, 0);
+  return { rolls: rolls, modifier: modifier, total: diceTotal * (critical ? 2 : 1) + modifier, formula: count + 'd' + sides + (modifier ? (modifier > 0 ? '+' : '') + modifier : ''), critical: !!critical };
+}
+function playerVisionRadius(player) {
+  return Math.max(1, Number(player && player.luz) || Number(lightRadius) || 6);
+}
+function edgeInPlayerVision(edge, player, range) {
+  if (!edge || !player || isHexMap()) return false;
+  var mid = edgeMidpoint(edge);
+  var cell = worldToCell(mid.x, mid.y);
+  return isCurrentlyVisible(cell.x, cell.y, player.x, player.y, range) &&
+    hasLOS(player.x, player.y, cell.x, cell.y);
+}
+function visibleEdgesForPlayer(player, range) {
+  if (!player || isHexMap()) return [];
+  return nearbyEdgesForCell({ x: player.x, y: player.y }, range + 0.5).filter(function (item) {
+    return item.val !== EDGE_NONE && edgeInPlayerVision(item.edge, player, range);
+  });
+}
+function playerActionResult(title, lines) {
+  var dlg = createPortalDialog(title, 'Resultado automático — a rolagem foi aplicada aos alvos dentro da visão do personagem.');
+  if (!dlg) return;
+  dlg.panel.style.width = 'min(620px,100%)';
+  dlg.panel.style.maxHeight = '86%';
+  dlg.panel.style.overflow = 'auto';
+  var list = document.createElement('div');
+  list.style.cssText = 'display:flex;flex-direction:column;gap:7px;margin:10px 0 14px;max-height:55vh;overflow:auto;';
+  (lines || []).forEach(function (line) {
+    var item = document.createElement('div');
+    item.style.cssText = 'padding:8px 10px;border:1px solid rgba(255,255,255,.12);border-radius:7px;background:rgba(255,255,255,.045);font-size:13px;line-height:1.45;white-space:pre-wrap;';
+    item.textContent = String(line);
+    list.appendChild(item);
+  });
+  dlg.panel.appendChild(list);
+  var actions = document.createElement('div'); actions.className = 'mp-portal-dialog-actions';
+  var close = document.createElement('button'); close.type = 'button'; close.className = 'primary'; close.textContent = 'Fechar';
+  close.onclick = function () { closePortalDialog(dlg.overlay); };
+  actions.appendChild(close); dlg.panel.appendChild(actions);
+}
+function configurePlayerActionProfile(player) {
+  if (!player) return;
+  var profile = playerActionProfile(player);
+  var sheet = getCharacterSheetActionData();
+  var dlg = createPortalDialog('Configurar ações do personagem', sheet
+    ? 'Os bônus de perícias e atributos vêm diretamente da ficha aberta no site. Escolha a arma usada no Ataque; dano e alcance serão calculados pelo catálogo.'
+    : 'Preencha os bônus manuais ou conclua a ficha do personagem para sincronizar os atributos e perícias automaticamente.');
+  if (!dlg) return;
+  dlg.panel.style.width = 'min(560px,100%)';
+  dlg.panel.style.maxHeight = '88%'; dlg.panel.style.overflow = 'auto';
+  var form = document.createElement('div');
+  form.style.cssText = 'display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:10px 0 14px;';
+  var inputs = {};
+  function addField(captionText, key, type, value, full) {
+    var label = document.createElement('label');
+    label.style.cssText = 'display:flex;flex-direction:column;gap:4px;color:#d5d9e2;font-size:12px;' + (full ? 'grid-column:1/-1;' : '');
+    var caption = document.createElement('span'); caption.textContent = captionText; label.appendChild(caption);
+    var input = document.createElement('input'); input.type = type; input.value = value == null ? '' : value;
+    input.style.cssText = 'width:100%;min-width:0;box-sizing:border-box;padding:8px;border:1px solid #555d6c;border-radius:6px;background:#252a34;color:#fff;';
+    if (type === 'number') { input.step = '1'; input.min = key === 'attackRange' ? '0' : '-20'; input.max = key === 'attackRange' ? '120' : '30'; }
+    inputs[key] = input; label.appendChild(input); form.appendChild(label);
+  }
+  if (sheet) {
+    var summary = document.createElement('div');
+    summary.style.cssText = 'grid-column:1/-1;padding:10px;border:1px solid rgba(100,190,230,.3);border-radius:7px;background:rgba(38,92,125,.18);font-size:12px;line-height:1.55;color:#e9f5fc;';
+    summary.textContent = 'Ficha sincronizada: ' + sheet.name + (sheet.className ? ' · ' + sheet.className : '') + '. Percepção ' + signed(sheet.skillBonuses['Percepção']) + ' (passiva ' + sheet.passivePerception + '), Investigação ' + signed(sheet.skillBonuses['Investigação']) + ', Atletismo ' + signed(sheet.skillBonuses['Atletismo']) + ', ataque corpo a corpo ' + signed(sheet.meleeAttack) + ' e à distância ' + signed(sheet.rangedAttack) + '.';
+    form.appendChild(summary);
+  } else {
+    addField('Bônus de Ataque','attack','number',profile.attack);
+    addField('Bônus de Ferramentas de Ladrão','tools','number',profile.tools);
+    Object.keys(RPG_SKILL_ABILITIES).forEach(function (skill) {
+      var legacyKey = skill === 'Percepção' ? 'perception' : skill === 'Investigação' ? 'investigation' : skill === 'Atletismo' ? 'athletics' : null;
+      var value = legacyKey ? profile[legacyKey] : profile.skillBonuses[skill];
+      addField('Bônus de ' + skill + ' (' + RPG_SKILL_ABILITIES[skill] + ')', 'skillBonus_' + skill, 'number', value);
+    });
+  }
+  var weaponLabel = document.createElement('label');
+  weaponLabel.style.cssText = 'grid-column:1/-1;display:flex;flex-direction:column;gap:4px;color:#d5d9e2;font-size:12px;';
+  var weaponCaption = document.createElement('span'); weaponCaption.textContent = 'Arma usada no Ataque'; weaponLabel.appendChild(weaponCaption);
+  var weaponSelect = document.createElement('select'); weaponSelect.style.cssText = 'width:100%;padding:8px;border:1px solid #555d6c;border-radius:6px;background:#252a34;color:#fff;';
+  var emptyOption = document.createElement('option'); emptyOption.value = ''; emptyOption.textContent = 'Sem arma selecionada (usar configuração manual)'; weaponSelect.appendChild(emptyOption);
+  playerWeaponCatalog().forEach(function (item) {
+    var option = document.createElement('option'); option.value = item.id;
+    option.textContent = item.n + ' — ' + item.dano + (item.uso ? ' · ' + item.uso.replace('Arma de ataque ','') : '');
+    weaponSelect.appendChild(option);
+  });
+  weaponSelect.value = profile.weaponId || '';
+  inputs.weaponId = weaponSelect; weaponLabel.appendChild(weaponSelect); form.appendChild(weaponLabel);
+  var weaponModeLabel = document.createElement('label');
+  weaponModeLabel.style.cssText = 'grid-column:1/-1;display:flex;flex-direction:column;gap:4px;color:#d5d9e2;font-size:12px;';
+  var weaponModeCaption = document.createElement('span'); weaponModeCaption.textContent = 'Armas com propriedade Arremesso'; weaponModeLabel.appendChild(weaponModeCaption);
+  var weaponModeSelect = document.createElement('select'); weaponModeSelect.style.cssText = 'width:100%;padding:8px;border:1px solid #555d6c;border-radius:6px;background:#252a34;color:#fff;';
+  [{value:'melee',label:'Usar corpo a corpo'},{value:'thrown',label:'Arremessar (usar alcance de arremesso)'}].forEach(function (entry) {
+    var option = document.createElement('option'); option.value = entry.value; option.textContent = entry.label; weaponModeSelect.appendChild(option);
+  });
+  weaponModeSelect.value = profile.weaponMode || 'melee';
+  inputs.weaponMode = weaponModeSelect; weaponModeLabel.appendChild(weaponModeSelect); form.appendChild(weaponModeLabel);
+  addField('Alcance personalizado (quadrículas; 0 = automático)','attackRange','number',Number(profile.attackRange) || 0);
+  addField('Dano personalizado (vazio = automático)','damageOverride','text',profile.damageOverride || '');
+  weaponSelect.addEventListener('change', function () {
+    var item = playerWeaponById(weaponSelect.value);
+    if (!item) return;
+    var selectedProfile = Object.assign({}, profile, { weaponId: item.id, weaponMode: weaponModeSelect.value, attackRange: 0, damageOverride: '' });
+    var resolved = resolvePlayerAttackData(player, selectedProfile);
+    inputs.attackRange.value = '';
+    inputs.damageOverride.value = '';
+    var preview = dlg.panel.querySelector('#mp-weapon-preview');
+    if (!preview) { preview = document.createElement('p'); preview.id = 'mp-weapon-preview'; preview.style.cssText = 'grid-column:1/-1;margin:0;color:#aebdcb;font-size:11px;'; form.appendChild(preview); }
+    preview.textContent = 'Cálculo da arma: ataque ' + signed(resolved.bonus) + ', dano ' + resolved.damage + ', alcance normal ' + resolved.normalRange + ' e máximo ' + resolved.maxRange + ' quadrículas.';
+  });
+  weaponModeSelect.addEventListener('change', function () { weaponSelect.dispatchEvent(new Event('change')); });
+  var note = document.createElement('p');
+  note.style.cssText = 'grid-column:1/-1;margin:0;color:#aeb5c0;font-size:11px;line-height:1.4;';
+  note.textContent = 'As ações usam a área iluminada/visível ao redor do personagem e respeitam paredes e linha de visão. Ataque faz uma rolagem para cada criatura visível no alcance.';
+  form.appendChild(note);
+  dlg.panel.appendChild(form);
+  if (weaponSelect.value) weaponSelect.dispatchEvent(new Event('change'));
+  var actions = document.createElement('div'); actions.className = 'mp-portal-dialog-actions';
+  var cancel = document.createElement('button'); cancel.type = 'button'; cancel.textContent = 'Cancelar'; cancel.onclick = function () { closePortalDialog(dlg.overlay); };
+  var saveBtn = document.createElement('button'); saveBtn.type = 'button'; saveBtn.className = 'primary'; saveBtn.textContent = 'Salvar';
+  saveBtn.onclick = function () {
+    profile.useSheet = true;
+    if (!sheet) {
+      ['attack','tools'].forEach(function (key) {
+        if (inputs[key]) profile[key] = Math.max(-20, Math.min(30, Math.round(Number(inputs[key].value) || 0)));
+      });
+      Object.keys(RPG_SKILL_ABILITIES).forEach(function (skill) {
+        var key = 'skillBonus_' + skill;
+        if (!inputs[key]) return;
+        var value = Math.max(-20, Math.min(30, Math.round(Number(inputs[key].value) || 0)));
+        profile.skillBonuses[skill] = value;
+        if (skill === 'Percepção') profile.perception = value;
+        else if (skill === 'Investigação') profile.investigation = value;
+        else if (skill === 'Atletismo') profile.athletics = value;
+      });
+    }
+    profile.weaponId = String(inputs.weaponId.value || '');
+    profile.weaponMode = String(inputs.weaponMode.value || 'melee');
+    profile.attackRange = Math.max(0, Math.min(120, Math.round(Number(inputs.attackRange.value) || 0)));
+    profile.damageOverride = String(inputs.damageOverride.value || '').trim();
+    if (profile.damageOverride && !rollDamageExpression(profile.damageOverride, false)) {
+      appAlertMessage('msg014', 'Informe um dano válido, como 1d8+3 ou 2d6.'); return;
+    }
+    save(); closePortalDialog(dlg.overlay); draw();
+  };
+  actions.appendChild(cancel); actions.appendChild(saveBtn); dlg.panel.appendChild(actions);
+}
+function signed(value) { var n = Number(value) || 0; return (n >= 0 ? '+' : '') + n; }
+function runPlayerPerception(player, profile, range) {
+  var check = rollCheck(profile.perception), found = [], edges = visibleEdgesForPlayer(player, range);
+  edges.forEach(function (item) {
+    if (item.val !== EDGE_SECRET_WALL && item.val !== EDGE_SECRET_DOOR_C && item.val !== EDGE_SECRET_DOOR_O) return;
+    var meta = getEdgeMeta(item.edge);
+    if (!meta || meta.detected) return;
+    var dc = Number(meta.dcDetection || 15);
+    if (check.total >= dc) {
+      meta.detected = true;
+      found.push((meta.kind === 'secretDoor' || item.val === EDGE_SECRET_DOOR_C || item.val === EDGE_SECRET_DOOR_O ? 'Porta secreta' : 'Parede secreta') + ' descoberta (CD ' + dc + ').');
+    }
+  });
+  var lines = ['Percepção: 1d20 (' + check.die + ') + ' + check.bonus + ' = ' + check.total + '.'];
+  if (found.length) lines = lines.concat(found);
+  else lines.push(isHexMap() ? 'Nenhuma estrutura secreta deste tipo está cadastrada neste mapa.' : 'Nenhum segredo com CD igual ou inferior ao resultado foi encontrado na área visível.');
+  save(); draw(); playerActionResult('👁 Percepção', lines);
+}
+function runPlayerInvestigation(player, profile, range) {
+  var check = rollCheck(profile.investigation), found = [], edges = visibleEdgesForPlayer(player, range);
+  edges.forEach(function (item) {
+    var meta = getEdgeMeta(item.edge);
+    if (!meta) return;
+    if (item.val === EDGE_ILLUSION_WALL && !meta.detected) {
+      var illusionDc = Number(meta.dcDetection || 15);
+      if (check.total >= illusionDc) {
+        meta.detected = true;
+        found.push('Parede ilusória identificada (CD ' + illusionDc + '); ela não bloqueia a passagem.');
+      }
+    } else if ((item.val === EDGE_SECRET_WALL || item.val === EDGE_SECRET_DOOR_C || item.val === EDGE_SECRET_DOOR_O) && meta.detected && !meta.mechanismKnown) {
+      var mechanismDc = Number(meta.dcMechanism || 15);
+      if (check.total >= mechanismDc) {
+        meta.mechanismKnown = true;
+        found.push('Mecanismo descoberto (CD ' + mechanismDc + ').' + (meta.mechanismHint ? ' Como acionar: ' + meta.mechanismHint : ''));
+      }
+    }
+  });
+  var lines = ['Investigação: 1d20 (' + check.die + ') + ' + check.bonus + ' = ' + check.total + '.'];
+  if (found.length) lines = lines.concat(found);
+  else lines.push('Nenhuma ilusão ou mecanismo detectado pôde ser identificado na área visível.');
+  save(); draw(); playerActionResult('🔎 Investigação', lines);
+}
+function tokenDistanceInCells(target, player) {
+  var size = Math.max(1, Number(target && target.raio) || 1);
+  var tx = target.x + (size - 1) / 2;
+  var ty = target.y + (size - 1) / 2;
+  if (isHexMap()) return hexDistance({ x: player.x, y: player.y }, { x: Math.round(tx), y: Math.round(ty) });
+  var dx = tx - player.x, dy = ty - player.y;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+function tokenInPlayerVision(target, player, range) {
+  if (!target || target === player || target.tipo === 'player') return false;
+  var size = Math.max(1, Number(target.raio) || 1);
+  var tx = Math.round(target.x + (size - 1) / 2);
+  var ty = Math.round(target.y + (size - 1) / 2);
+  if (tokenDistanceInCells(target, player) > range + 0.01) return false;
+  if (isHexMap()) return hasLOS(player.x, player.y, tx, ty);
+  return isCurrentlyVisible(tx, ty, player.x, player.y, range) && hasLOS(player.x, player.y, tx, ty);
+}
+function isAttackableNpc(token) {
+  return !!(token && token.tipo !== 'player' && (token.monsterId || token.tipo === 'npc' || token.tipo === 'enemy'));
+}
+function monsterStatsForToken(token) {
+  if (!token || !token.monsterId || !window.MONSTERS) return null;
+  return (window.MONSTERS || []).find(function (monster) { return monster.id === token.monsterId; }) || null;
+}
+function rollAttackCheck(bonus, disadvantage) {
+  var first = rollDie(20), second = disadvantage ? rollDie(20) : null;
+  var die = disadvantage ? Math.min(first, second) : first;
+  return { die: die, dice: disadvantage ? [first, second] : [first], bonus: Number(bonus) || 0, total: die + (Number(bonus) || 0), disadvantage: !!disadvantage };
+}
+function runPlayerAttack(player, profile, visionRange) {
+  var attackData = resolvePlayerAttackData(player, profile);
+  if (!attackData.weapon && !profile.damageOverride) {
+    configurePlayerActionProfile(player);
+    return;
+  }
+  var range = Math.max(1, Math.min(Number(attackData.maxRange) || 1, Number(visionRange) || 1));
+  var targets = state.tokens.filter(function (token) {
+    return isAttackableNpc(token) && tokenInPlayerVision(token, player, range);
+  });
+  var lines = [];
+  if (!targets.length) {
+    playerActionResult('⚔ Ataque', ['Nenhuma criatura inimiga está dentro do alcance e da linha de visão (' + range + ' quadrículas).']);
+    return;
+  }
+  targets.forEach(function (target) {
+    var monster = monsterStatsForToken(target);
+    var ac = Number(target.classeArmadura || target.ca || (monster && monster.classeArmadura) || 10);
+    var distance = tokenDistanceInCells(target, player);
+    var longRange = distance > attackData.normalRange + 0.01;
+    var check = rollAttackCheck(attackData.bonus, longRange);
+    var hit = check.die === 20 || (check.die !== 1 && check.total >= ac);
+    var rollText = '1d20 (' + check.dice.join(' e ') + (check.disadvantage ? ', desvantagem: menor' : '') + ') + ' + check.bonus + ' = ' + check.total;
+    if (!hit) {
+      lines.push((target.nome || 'Criatura') + ': ' + rollText + ' contra CA ' + ac + ' — errou.');
+      return;
+    }
+    var critical = check.die === 20;
+    var damage = rollDamageExpression(attackData.damage, critical);
+    if (!damage) {
+      lines.push((target.nome || 'Criatura') + ': acertou, mas a expressão de dano configurada é inválida.');
+      return;
+    }
+    if (target.hpMax == null && monster && Number(monster.pontosVida) > 0) {
+      target.hpMax = Number(monster.pontosVida); target.hp = target.hp == null ? target.hpMax : target.hp;
+    }
+    var hpText = '';
+    if (target.hpMax != null) {
+      target.hp = Math.max(0, Number(target.hp == null ? target.hpMax : target.hp) - damage.total);
+      hpText = ' PV: ' + target.hp + '/' + target.hpMax + (target.hp <= 0 ? ' — derrotado.' : '.');
+    } else hpText = ' Dano rolado; este token não possui PV cadastrados.';
+    lines.push((target.nome || 'Criatura') + ': ' + rollText + ' contra CA ' + ac + ' — acertou; dano ' + damage.formula + ' (' + damage.rolls.join(' + ') + (critical ? ', crítico: dados dobrados' : '') + ') = ' + damage.total + '.' + hpText);
+  });
+  save(); draw();
+  playerActionResult('⚔ Ataque automático na área visível' + (attackData.weapon ? ' — ' + attackData.weapon.n : ''), lines);
+}
+function runPlayerDoorCheck(player, profile, range, useTools) {
+  // Forçar ou destrancar exige proximidade física: procura portas adjacentes visíveis,
+  // sem exigir que o jogador clique em cada uma.
+  var edges = visibleEdgesForPlayer(player, Math.min(1.5, range)), relevant = edges.filter(function (item) {
+    return useTools ? item.val === EDGE_LOCKED_DOOR : (item.val === EDGE_LOCKED_DOOR || item.val === EDGE_JAMMED_DOOR);
+  });
+  var label = useTools ? 'Ferramentas de Ladrão' : 'Atletismo';
+  var check = rollCheck(useTools ? profile.tools : profile.athletics);
+  var lines = [label + ': 1d20 (' + check.die + ') + ' + check.bonus + ' = ' + check.total + '.'];
+  if (!relevant.length) lines.push('Nenhuma porta compatível com esta ação está adjacente e visível.');
+  relevant.forEach(function (item) {
+    var meta = ensureEdgeStructureMeta(item.edge);
+    var dc = useTools ? Number(meta.lockDC || 15) : Number(meta.dcForce || 18);
+    if (meta.arcaneLock) dc += 10;
+    if (meta.barred && !useTools) {
+      lines.push('Porta barrada por dentro: é necessário alcançar a barra pelo lado correto; o teste de Atletismo não a abre automaticamente.');
+      return;
+    }
+    if (check.die === 20 || (check.die !== 1 && check.total >= dc)) {
+      meta.open = true;
+      if (!meta.arcaneLock) meta.locked = false;
+      lines.push(edgeActionLabel(item.val, meta) + ': sucesso contra CD ' + dc + '; porta aberta.');
+    } else lines.push(edgeActionLabel(item.val, meta) + ': falha contra CD ' + dc + '; continua fechada.');
+  });
+  save(); draw(); playerActionResult(useTools ? '🗝 Ferramentas de Ladrão' : '💪 Atletismo', lines);
+}
+function runPlayerSkill(player, profile) {
+  var selector = R && R.querySelector('#mp-player-skill');
+  var skill = selector ? selector.value : 'Percepção';
+  var sheet = getCharacterSheetActionData();
+  var ability = RPG_SKILL_ABILITIES[skill] || 'SAB';
+  var bonus = sheet && sheet.skillBonuses[skill] != null ? sheet.skillBonuses[skill] : 0;
+  if (!sheet) {
+    if (profile.skillBonuses && profile.skillBonuses[skill] != null) bonus = Number(profile.skillBonuses[skill]) || 0;
+    else if (skill === 'Percepção') bonus = Number(profile.perception) || 0;
+    else if (skill === 'Investigação') bonus = Number(profile.investigation) || 0;
+    else if (skill === 'Atletismo') bonus = Number(profile.athletics) || 0;
+  }
+  var check = rollCheck(bonus);
+  playerActionResult('🎲 ' + skill, [skill + ' (' + ability + '): 1d20 (' + check.die + ') + ' + signed(check.bonus) + ' = ' + check.total + '.', 'O teste foi rolado automaticamente.']);
+}
+function runPlayerInteract(player, range) {
+  var edges = visibleEdgesForPlayer(player, Math.min(1.5, range)), changed = [], lines = [];
+  edges.forEach(function (item) {
+    var val = item.val, meta = getEdgeMeta(item.edge);
+    if ((val === EDGE_SECRET_WALL || val === EDGE_SECRET_DOOR_C || val === EDGE_SECRET_DOOR_O) && meta && meta.detected && meta.mechanismKnown) {
+      if (val === EDGE_SECRET_WALL) {
+        meta.open = !meta.open;
+        changed.push(meta.open ? 'Passagem secreta aberta.' : 'Passagem secreta fechada.');
+      } else {
+        var open = val !== EDGE_SECRET_DOOR_O;
+        setEdgeVal(item.edge, open ? EDGE_SECRET_DOOR_O : EDGE_SECRET_DOOR_C);
+        setEdgeMeta(item.edge, meta);
+        changed.push(open ? 'Porta secreta aberta.' : 'Porta secreta fechada.');
+      }
+    }
+  });
+  lines.push(changed.length ? changed.join(' ') : 'Nenhum mecanismo secreto descoberto está ao alcance imediato.');
+  save(); draw(); playerActionResult('✋ Interagir', lines);
+}
+function runPlayerAction(action) {
+  if (appMode !== 'player') return;
+  var player = currentPlayer();
+  if (!player || player.tipo !== 'player') {
+    playerActionResult('Ações do personagem', ['Não há um personagem jogador neste mapa.']); return;
+  }
+  var profile = playerActionProfile(player), range = playerVisionRadius(player);
+  if (action === 'perception') runPlayerPerception(player, profile, range);
+  else if (action === 'investigation') runPlayerInvestigation(player, profile, range);
+  else if (action === 'attack') runPlayerAttack(player, profile, range);
+  else if (action === 'athletics') runPlayerDoorCheck(player, profile, range, false);
+  else if (action === 'tools') runPlayerDoorCheck(player, profile, range, true);
+  else if (action === 'interact') runPlayerInteract(player, range);
+  else if (action === 'skill') runPlayerSkill(player, profile);
+}
+
+
 function updateModeUi() {
   if (!R) return;
   var root = R.querySelector('#mp-root');
@@ -3631,6 +4152,8 @@ function updateModeUi() {
       node.removeAttribute('inert');
     }
   });
+  var actionTray = R.querySelector('#mp-player-actions');
+  if (actionTray) actionTray.style.display = appMode === 'player' ? 'block' : 'none';
   var playerButton = R.querySelector('#mp-mode-player');
   var editorButton = R.querySelector('#mp-mode-editor');
   if (playerButton) playerButton.classList.toggle('active', appMode === 'player');
@@ -3825,6 +4348,17 @@ function mountNow(el) {
     '<canvas id="mp-cv"></canvas>' +
     '<button type="button" id="mp-burger" class="mp-burger" title="Menu" aria-label="Abrir menu" aria-expanded="false" aria-controls="mp-drawer"><span></span><span></span><span></span></button>' +
     '<div class="mp-mode-switch" role="group" aria-label="Modo do mapa"><button type="button" id="mp-mode-player" class="active" title="Modo Jogador: sem ferramentas de edição">♟ Jogador</button><button type="button" id="mp-mode-editor" title="Modo Editor: liberar ferramentas e câmera livre">✎ Editor</button></div>' +
+    '<section id="mp-player-actions" class="mp-player-actions" aria-label="Ações do personagem">' +
+    '<div class="mp-player-actions-head"><strong>🎲 Ações do personagem</strong><button type="button" id="mp-action-config" title="Configurar bônus e dano">⚙</button></div>' +
+    '<div class="mp-player-actions-buttons">' +
+    '<button type="button" data-player-action="perception">👁 Percepção</button>' +
+    '<button type="button" data-player-action="investigation">🔎 Investigação</button>' +
+    '<button type="button" data-player-action="attack">⚔ Ataque</button>' +
+    '<button type="button" data-player-action="athletics">💪 Atletismo</button>' +
+    '<button type="button" data-player-action="tools">🗝 Ferramentas</button>' +
+    '<button type="button" data-player-action="interact">✋ Interagir</button>' +
+    '</div><div class="mp-player-skill-row"><select id="mp-player-skill" aria-label="Escolher perícia">' + playerSkillOptionsHtml() + '</select><button type="button" data-player-action="skill">🎲 Rolar perícia</button></div>' +
+    '<small>Percepção, Investigação e ações de interação verificam automaticamente os objetos na visão. Ataque aplica rolagens e dano às criaturas visíveis no alcance.</small></section>' +
     '<div id="mp-drawer" class="mp-drawer" aria-hidden="true">' +
     '<div class="mp-bar">' +
     '<div class="mp-map-selector"><select id="mp-map" class="mp-title" title="Trocar de mapa">' + mapOptions() + '</select>' +
@@ -3836,8 +4370,8 @@ function mountNow(el) {
     '<label id="mp-speed-wrap" class="mp-luz" style="display:none">Velocidade <input id="mp-speed" type="number" min="0.1" step="0.1" placeholder="mi/dia" style="width:62px"></label>' +
     '<button type="button" id="mp-world-move" class="mp-world-action active" title="Desativa os modos de início e teleporte; use as setas ou clique para mover o personagem">🧭 Desativar ferramentas</button>' +
     '<button type="button" id="mp-world-spawn" class="mp-world-action" title="Definir o ponto de início deste mapa">📍 Definir início</button>' +
-    '<button type="button" id="mp-world-portal" class="mp-world-action" title="Adicionar um teleporte para outro mapa">🌀 Teleporte para outro mapa</button>' +
-    '<button type="button" id="mp-world-local-portal" class="mp-world-action" title="Clique no ponto A e depois no ponto B para criar um teleporte dentro deste mapa">🌀 Teleporte neste mapa</button>' +
+    '<button type="button" id="mp-world-portal" class="mp-world-action" title="No modo Editor: adicionar um teleporte para outro mapa">🌀 Teleporte para outro mapa</button>' +
+    '<button type="button" id="mp-world-local-portal" class="mp-world-action" title="No modo Editor: clique no ponto A e depois no ponto B para criar um teleporte dentro deste mapa">🌀 Teleporte neste mapa</button>' +
     '<div class="mp-g" id="mp-tools">' +
     '<button data-t="wall" title="Posicionar parede em uma quadrícula">🧱 Parede</button>' +
     '<button data-t="muro" title="Desenhar muro: clique em um canto e depois em outro">─ Muro</button>' +
@@ -3883,6 +4417,18 @@ function mountNow(el) {
     '#mp-root .mp-mode-switch{position:absolute;top:10px;right:10px;z-index:35;display:flex;gap:5px;padding:4px;border:1px solid rgba(255,255,255,.2);border-radius:11px;background:rgba(15,15,18,.88);backdrop-filter:blur(8px);}' +
     '#mp-root .mp-mode-switch button{min-height:34px;padding:7px 11px;border:1px solid transparent;border-radius:7px;background:transparent;color:#e8eaf0;font-weight:600;cursor:pointer;}' +
     '#mp-root .mp-mode-switch button.active{background:rgba(55,145,190,.38);border-color:#66c8ed;color:#fff;}' +
+    '#mp-root .mp-player-actions{position:absolute;left:64px;bottom:14px;z-index:32;width:min(590px,calc(100% - 82px));box-sizing:border-box;padding:9px 10px;border:1px solid rgba(255,255,255,.2);border-radius:11px;background:rgba(15,17,22,.92);color:#f3f6fb;box-shadow:0 6px 22px rgba(0,0,0,.4);backdrop-filter:blur(8px);}' +
+    '#mp-root .mp-player-actions-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;font-size:13px;}' +
+    '#mp-root .mp-player-actions-head button{width:30px;height:28px;border:1px solid rgba(255,255,255,.2);border-radius:6px;background:#30343e;color:#fff;cursor:pointer;}' +
+    '#mp-root .mp-player-actions-buttons{display:flex;flex-wrap:wrap;gap:6px;}' +
+    '#mp-root .mp-player-actions-buttons button{flex:1 1 auto;min-width:112px;min-height:34px;padding:7px 9px;border:1px solid rgba(100,180,220,.35);border-radius:7px;background:rgba(38,92,125,.28);color:#eef8ff;font-size:12px;font-weight:600;cursor:pointer;}' +
+    '#mp-root .mp-player-actions-buttons button:hover{background:rgba(48,125,165,.48);}' +
+    '#mp-root .mp-player-actions small{display:block;margin-top:7px;color:#aab5c4;font-size:10px;line-height:1.35;}' +
+    '#mp-root .mp-player-skill-row{display:flex;gap:6px;margin-top:7px;}' +
+    '#mp-root .mp-player-skill-row select{flex:1;min-width:0;padding:7px;border:1px solid rgba(255,255,255,.2);border-radius:7px;background:#252a34;color:#eef8ff;font-size:12px;}' +
+    '#mp-root .mp-player-skill-row button{padding:7px 10px;border:1px solid rgba(100,180,220,.35);border-radius:7px;background:rgba(38,92,125,.28);color:#eef8ff;font-size:12px;font-weight:600;cursor:pointer;}' +
+    '#mp-root.editor-mode .mp-player-actions{display:none !important;}' +
+    '@media(max-width:600px){#mp-root .mp-player-actions{left:10px;bottom:10px;width:calc(100% - 20px);padding:7px;}#mp-root .mp-player-actions-buttons button{min-width:calc(33.333% - 6px);font-size:11px;padding:6px 4px;}}' +
     '#mp-root.player-mode .mp-editor-only{display:none !important;}' +
     '#mp-root.player-mode .mp-drawer .mp-g.mp-editor-only{display:none !important;}' +
     '#mp-root .mp-canvas-pan{cursor:grab;}' +
@@ -3969,6 +4515,14 @@ function mountNow(el) {
   if (editStructureButton) editStructureButton.onclick = function () { setTool('editStructure'); setMenu(false); };
   $('#mp-mode-player').onclick = function () { setMode('player'); setMenu(false); };
   $('#mp-mode-editor').onclick = function () { setMode('editor'); setMenu(false); };
+  var playerActionTray = R.querySelector('#mp-player-actions');
+  if (playerActionTray) {
+    playerActionTray.addEventListener('click', function (event) {
+      var actionButton = event.target.closest('button[data-player-action]');
+      if (actionButton) { runPlayerAction(actionButton.getAttribute('data-player-action')); return; }
+      if (event.target.closest('#mp-action-config')) configurePlayerActionProfile(currentPlayer());
+    });
+  }
 
   cv = $('#mp-cv');
   cx = cv.getContext('2d');
@@ -4055,6 +4609,10 @@ function mountNow(el) {
       '#mp-root.mp-world-map #mp-lr,'+
       '#mp-root.mp-world-map #mp-hex-wrap {display:none !important;}' +
       '#mp-root.mp-world-map.editor-mode .mp-world-action {display:block !important;}' +
+      '#mp-root.editor-mode #mp-world-local-portal {display:block !important;}' +
+      '#mp-root:not(.mp-world-map).editor-mode #mp-world-move,' +
+      '#mp-root:not(.mp-world-map).editor-mode #mp-world-spawn,' +
+      '#mp-root:not(.mp-world-map).editor-mode #mp-world-portal {display:none !important;}' +
       '#mp-root.mp-world-map.editor-mode #mp-tools {display:grid !important;grid-template-columns:1fr 1fr;gap:6px;}' +
       '#mp-root.mp-world-map.editor-mode #mp-tools button {width:100%;box-sizing:border-box;}' +
       '#mp-root.mp-world-map #mp-side {display:none !important;}' +
