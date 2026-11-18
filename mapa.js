@@ -4348,6 +4348,7 @@ function mountNow(el) {
     '<canvas id="mp-cv"></canvas>' +
     '<button type="button" id="mp-burger" class="mp-burger" title="Menu" aria-label="Abrir menu" aria-expanded="false" aria-controls="mp-drawer"><span></span><span></span><span></span></button>' +
     '<div class="mp-mode-switch" role="group" aria-label="Modo do mapa"><button type="button" id="mp-mode-player" class="active" title="Modo Jogador: sem ferramentas de edição">♟ Jogador</button><button type="button" id="mp-mode-editor" title="Modo Editor: liberar ferramentas e câmera livre">✎ Editor</button></div>' +
+    '<div id="mp-drawer" class="mp-drawer" aria-hidden="true">' +
     '<section id="mp-player-actions" class="mp-player-actions" aria-label="Ações do personagem">' +
     '<div class="mp-player-actions-head"><strong>🎲 Ações do personagem</strong><button type="button" id="mp-action-config" title="Configurar bônus e dano">⚙</button></div>' +
     '<div class="mp-player-actions-buttons">' +
@@ -4359,7 +4360,6 @@ function mountNow(el) {
     '<button type="button" data-player-action="interact">✋ Interagir</button>' +
     '</div><div class="mp-player-skill-row"><select id="mp-player-skill" aria-label="Escolher perícia">' + playerSkillOptionsHtml() + '</select><button type="button" data-player-action="skill">🎲 Rolar perícia</button></div>' +
     '<small>Percepção, Investigação e ações de interação verificam automaticamente os objetos na visão. Ataque aplica rolagens e dano às criaturas visíveis no alcance.</small></section>' +
-    '<div id="mp-drawer" class="mp-drawer" aria-hidden="true">' +
     '<div class="mp-bar">' +
     '<div class="mp-map-selector"><select id="mp-map" class="mp-title" title="Trocar de mapa">' + mapOptions() + '</select>' +
     '<button type="button" id="mp-add-map" class="mp-map-add" title="Adicionar mapa" aria-label="Adicionar mapa">＋</button></div>' +
@@ -4417,18 +4417,17 @@ function mountNow(el) {
     '#mp-root .mp-mode-switch{position:absolute;top:10px;right:10px;z-index:35;display:flex;gap:5px;padding:4px;border:1px solid rgba(255,255,255,.2);border-radius:11px;background:rgba(15,15,18,.88);backdrop-filter:blur(8px);}' +
     '#mp-root .mp-mode-switch button{min-height:34px;padding:7px 11px;border:1px solid transparent;border-radius:7px;background:transparent;color:#e8eaf0;font-weight:600;cursor:pointer;}' +
     '#mp-root .mp-mode-switch button.active{background:rgba(55,145,190,.38);border-color:#66c8ed;color:#fff;}' +
-    '#mp-root .mp-player-actions{position:absolute;left:64px;bottom:14px;z-index:32;width:min(590px,calc(100% - 82px));box-sizing:border-box;padding:9px 10px;border:1px solid rgba(255,255,255,.2);border-radius:11px;background:rgba(15,17,22,.92);color:#f3f6fb;box-shadow:0 6px 22px rgba(0,0,0,.4);backdrop-filter:blur(8px);}' +
+    '#mp-root .mp-player-actions{position:static;width:auto;box-sizing:border-box;margin:0 0 14px;padding:10px;border:1px solid rgba(255,255,255,.2);border-radius:11px;background:rgba(255,255,255,.04);color:#f3f6fb;}' +
     '#mp-root .mp-player-actions-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;font-size:13px;}' +
     '#mp-root .mp-player-actions-head button{width:30px;height:28px;border:1px solid rgba(255,255,255,.2);border-radius:6px;background:#30343e;color:#fff;cursor:pointer;}' +
     '#mp-root .mp-player-actions-buttons{display:flex;flex-wrap:wrap;gap:6px;}' +
-    '#mp-root .mp-player-actions-buttons button{flex:1 1 auto;min-width:112px;min-height:34px;padding:7px 9px;border:1px solid rgba(100,180,220,.35);border-radius:7px;background:rgba(38,92,125,.28);color:#eef8ff;font-size:12px;font-weight:600;cursor:pointer;}' +
+    '#mp-root .mp-player-actions-buttons button{flex:1 1 calc(50% - 6px);min-width:0;min-height:34px;padding:7px 9px;border:1px solid rgba(100,180,220,.35);border-radius:7px;background:rgba(38,92,125,.28);color:#eef8ff;font-size:12px;font-weight:600;cursor:pointer;}' +
     '#mp-root .mp-player-actions-buttons button:hover{background:rgba(48,125,165,.48);}' +
     '#mp-root .mp-player-actions small{display:block;margin-top:7px;color:#aab5c4;font-size:10px;line-height:1.35;}' +
     '#mp-root .mp-player-skill-row{display:flex;gap:6px;margin-top:7px;}' +
     '#mp-root .mp-player-skill-row select{flex:1;min-width:0;padding:7px;border:1px solid rgba(255,255,255,.2);border-radius:7px;background:#252a34;color:#eef8ff;font-size:12px;}' +
     '#mp-root .mp-player-skill-row button{padding:7px 10px;border:1px solid rgba(100,180,220,.35);border-radius:7px;background:rgba(38,92,125,.28);color:#eef8ff;font-size:12px;font-weight:600;cursor:pointer;}' +
     '#mp-root.editor-mode .mp-player-actions{display:none !important;}' +
-    '@media(max-width:600px){#mp-root .mp-player-actions{left:10px;bottom:10px;width:calc(100% - 20px);padding:7px;}#mp-root .mp-player-actions-buttons button{min-width:calc(33.333% - 6px);font-size:11px;padding:6px 4px;}}' +
     '#mp-root.player-mode .mp-editor-only{display:none !important;}' +
     '#mp-root.player-mode .mp-drawer .mp-g.mp-editor-only{display:none !important;}' +
     '#mp-root .mp-canvas-pan{cursor:grab;}' +
@@ -4519,7 +4518,7 @@ function mountNow(el) {
   if (playerActionTray) {
     playerActionTray.addEventListener('click', function (event) {
       var actionButton = event.target.closest('button[data-player-action]');
-      if (actionButton) { runPlayerAction(actionButton.getAttribute('data-player-action')); return; }
+      if (actionButton) { setMenu(false); runPlayerAction(actionButton.getAttribute('data-player-action')); return; }
       if (event.target.closest('#mp-action-config')) configurePlayerActionProfile(currentPlayer());
     });
   }
