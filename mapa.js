@@ -517,7 +517,7 @@ function canvasToWebp(canvas, quality) {
     if (!canvas.toBlob) { reject(new Error('Este navegador não oferece conversão WebP pelo canvas.')); return; }
     canvas.toBlob(function (blob) {
       if (!blob) { reject(new Error('Não foi possível gerar a imagem WebP.')); return; }
-      if (blob.type !== 'image/webp') { reject(new Error('O navegador não conseguiu exportar WebP. Use uma versão atualizada do Chrome, Edge ou Firefox.')); return; }
+      if (blob.type !== 'image/webp') { reject(new Error('Este navegador não consegue exportar WebP. Use o Google Chrome ou o Microsoft Edge atualizados.')); return; }
       resolve(blob);
     }, 'image/webp', quality);
   });
@@ -616,7 +616,10 @@ function verifyLosslessWebp(sourceCanvas, blob) {
     for (var i = 0; i < original.length; i += 4) {
       var same = original[i + 3] === converted[i + 3] &&
         (original[i + 3] !== 255 || (original[i] === converted[i] && original[i + 1] === converted[i + 1] && original[i + 2] === converted[i + 2]));
-      if (!same) throw new Error('O navegador não gerou um WebP idêntico à imagem original. Para não perder qualidade, a otimização foi cancelada. Use o Google Chrome ou o Microsoft Edge atualizados.');
+      if (!same) {
+        var px = i / 4;
+        throw new Error('O navegador não gerou um WebP idêntico à imagem original. Para não perder qualidade, a otimização foi cancelada. Use o Google Chrome ou o Microsoft Edge atualizados.\n(pixel ' + (px % w) + ',' + Math.floor(px / w) + ': original ' + original[i] + ',' + original[i + 1] + ',' + original[i + 2] + ',' + original[i + 3] + ' → WebP ' + converted[i] + ',' + converted[i + 1] + ',' + converted[i + 2] + ',' + converted[i + 3] + ')');
+      }
     }
   });
 }
@@ -665,6 +668,21 @@ function showOptimizeProgress(text) {
   }
   box.firstChild.textContent = text;
 }
+function showOptimizeError(message) {
+  hideOptimizeProgress();
+  try { console.error('[Mapa] Falha ao importar a imagem:', message); } catch (e) {}
+  var root = R && R.querySelector('#mp-root');
+  if (!root) { window.alert(message); return; }
+  showOptimizeProgress(message);
+  var box = root.querySelector('#mp-optimize-progress');
+  if (!box) { window.alert(message); return; }
+  var close = document.createElement('button');
+  close.type = 'button';
+  close.textContent = 'Fechar';
+  close.style.cssText = 'display:block;margin:14px auto 0;min-height:36px;padding:7px 16px;border:1px solid #3c9bc7;border-radius:7px;background:#17688f;color:#fff;cursor:pointer;';
+  close.onclick = hideOptimizeProgress;
+  box.firstChild.appendChild(close);
+}
 function hideOptimizeProgress() {
   var box = R && R.querySelector('#mp-optimize-progress');
   if (box && box.parentNode) box.parentNode.removeChild(box);
@@ -695,6 +713,7 @@ function createCustomMapFromFile(file) {
     return;
   }
 
+  showOptimizeProgress('Lendo a imagem…');
   var imageUrl = URL.createObjectURL(file);
   var image = new Image();
   image.onload = function () {
@@ -762,9 +781,8 @@ function createCustomMapFromFile(file) {
         var detailMessage = 'A imagem (' + width + ' × ' + height + ' px) foi dividida em ' + optimized.parts.length + ' partes (' + optimized.cols + ' × ' + optimized.rows + ') e convertida para WebP sem perdas, na resolução original. O ZIP contém hi_part1.webp até hi_part' + optimized.parts.length + '.webp.';
         appAlertMessage('msg009', 'Mapa adicionado e otimizado! ' + detailMessage + '\n\nExtraia o ZIP dentro de "' + folder + '". Depois baixe o catálogo mapas.json pelo menu e coloque-o em "mapas/mapas.json". Use Salvar mapa para baixar "' + stateFileName + '" na mesma pasta.');
       } catch (error) {
-        hideOptimizeProgress();
         runtimeUrls.forEach(function (url) { try { URL.revokeObjectURL(url); } catch (e) {} });
-        appAlertMessage('msg010', error && error.message ? error.message : 'Não foi possível otimizar a imagem do mapa.');
+        showOptimizeError(error && error.message ? error.message : 'Não foi possível otimizar a imagem do mapa.');
       } finally {
         URL.revokeObjectURL(imageUrl);
       }
@@ -772,7 +790,7 @@ function createCustomMapFromFile(file) {
   };
   image.onerror = function () {
     URL.revokeObjectURL(imageUrl);
-    appAlertMessage('msg011', 'Não foi possível abrir essa imagem.');
+    showOptimizeError('Não foi possível abrir essa imagem. Ela pode estar corrompida, em formato que o navegador não lê ou grande demais para a memória disponível.');
   };
   image.src = imageUrl;
 }
@@ -4532,7 +4550,7 @@ function mountNow(el) {
     '<div class="mp-bar">' +
     '<div class="mp-map-selector"><select id="mp-map" class="mp-title" title="Trocar de mapa">' + mapOptions() + '</select>' +
     '<button type="button" id="mp-add-map" class="mp-map-add" title="Adicionar mapa" aria-label="Adicionar mapa">＋</button></div>' +
-    '<input type="file" id="mp-add-map-file" accept="image/*" style="display:none">' +
+    '<input type="file" id="mp-add-map-file" accept="image/*" hidden>' +
     '<button type="button" id="mp-export" title="Baixar os dados deste mapa em JSON">⬇ Salvar mapa</button>' +
     '<button type="button" id="mp-export-catalog" title="Baixar o catálogo para publicar os mapas adicionados">🗂 Baixar catálogo de mapas</button>' +
     '<label id="mp-hex-wrap" class="mp-luz" style="display:none">Hexágono <select id="mp-hex-size" disabled><option value="small" selected>Pequeno · 6 mi</option></select></label>' +
