@@ -1,0 +1,46 @@
+{
+  "format": "animalysson-rpg-map",
+  "version": 1,
+  "mapId": "flanaess",
+  "mapName": "Flanaess 598 CY",
+  "exportedAt": "2024-01-01T00:00:00.000Z",
+  "dimensions": {
+    "width": 8800,
+    "height": 10480,
+    "columns": 220,
+    "rows": 262
+  },
+  "imageFolder": "mapas/flanaess_mapa/",
+  "images": [
+    "mapas/flanaess_mapa/hi_part1.webp",
+    "mapas/flanaess_mapa/hi_part2.webp",
+    "mapas/flanaess_mapa/hi_part3.webp",
+    "mapas/flanaess_mapa/hi_part4.webp"
+  ],
+  "mapConfig": null,
+  "catalogFile": null,
+  "state": {
+    "v": 4,
+    "nome": "Flanaess 598 CY",
+    "gridMode": "hex-small-6mi",
+    "spawn": {
+      "x": 110,
+      "y": 131
+    },
+    "portals": [],
+    "tokens": [
+      {
+        "id": "p1",
+        "nome": "Aventureiro",
+        "tipo": "player",
+        "x": 110,
+        "y": 131,
+        "cor": "#4fc3f7",
+        "raio": 1,
+        "luz": 6,
+        "hp": null,
+        "hpMax": null
+      }
+    ]
+  }
+}
