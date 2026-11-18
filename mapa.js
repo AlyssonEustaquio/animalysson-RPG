@@ -523,6 +523,16 @@ function canvasToWebp(canvas, quality) {
   });
 }
 
+function canvasToPng(canvas) {
+  return new Promise(function (resolve, reject) {
+    if (!canvas.toBlob) { reject(new Error('Este navegador não oferece exportação de PNG pelo canvas.')); return; }
+    canvas.toBlob(function (blob) {
+      if (!blob || blob.type !== 'image/png') { reject(new Error('Não foi possível gerar o PNG sem perdas.')); return; }
+      resolve(blob);
+    }, 'image/png');
+  });
+}
+
 function crc32Bytes(bytes) {
   var crc = 0xFFFFFFFF;
   for (var i = 0; i < bytes.length; i++) {
@@ -532,56 +542,107 @@ function crc32Bytes(bytes) {
   return (crc ^ 0xFFFFFFFF) >>> 0;
 }
 
-// ZIP sem compressão adicional: os WebP já chegam comprimidos pelo encoder.
-function createImagesZip(entries) {
-  return Promise.all(entries.map(function (entry) {
-    return entry.blob.arrayBuffer().then(function (buffer) {
-      var bytes = new Uint8Array(buffer);
-      return { name: entry.name, nameBytes: new TextEncoder().encode(entry.name), bytes: bytes, crc: crc32Bytes(bytes) };
-    });
-  })).then(function (files) {
-    var localParts = [], centralParts = [], offset = 0, centralSize = 0;
-    var now = new Date();
-    var dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | Math.floor(now.getSeconds() / 2);
-    var dosDate = ((Math.max(1980, now.getFullYear()) - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
-    files.forEach(function (file) {
-      var local = new Uint8Array(30 + file.nameBytes.length);
-      var lv = new DataView(local.buffer);
-      lv.setUint32(0, 0x04034B50, true); lv.setUint16(4, 20, true);
-      lv.setUint16(6, 0x0800, true); lv.setUint16(8, 0, true);
-      lv.setUint16(10, dosTime, true); lv.setUint16(12, dosDate, true);
-      lv.setUint32(14, file.crc, true); lv.setUint32(18, file.bytes.length, true);
-      lv.setUint32(22, file.bytes.length, true); lv.setUint16(26, file.nameBytes.length, true);
-      lv.setUint16(28, 0, true); local.set(file.nameBytes, 30);
-      localParts.push(local, file.bytes);
-
-      var central = new Uint8Array(46 + file.nameBytes.length);
-      var cv = new DataView(central.buffer);
-      cv.setUint32(0, 0x02014B50, true); cv.setUint16(4, 20, true); cv.setUint16(6, 20, true);
-      cv.setUint16(8, 0x0800, true); cv.setUint16(10, 0, true);
-      cv.setUint16(12, dosTime, true); cv.setUint16(14, dosDate, true);
-      cv.setUint32(16, file.crc, true); cv.setUint32(20, file.bytes.length, true);
-      cv.setUint32(24, file.bytes.length, true); cv.setUint16(28, file.nameBytes.length, true);
-      cv.setUint16(30, 0, true); cv.setUint16(32, 0, true); cv.setUint16(34, 0, true);
-      cv.setUint32(36, 0, true); cv.setUint32(38, 0, true); cv.setUint32(42, offset, true);
-      central.set(file.nameBytes, 46);
-      centralParts.push(central);
-      offset += local.length + file.bytes.length;
-      centralSize += central.length;
-    });
-    var end = new Uint8Array(22), ev = new DataView(end.buffer);
-    ev.setUint32(0, 0x06054B50, true); ev.setUint16(4, 0, true); ev.setUint16(6, 0, true);
-    ev.setUint16(8, files.length, true); ev.setUint16(10, files.length, true);
-    ev.setUint32(12, centralSize, true); ev.setUint32(16, offset, true); ev.setUint16(20, 0, true);
-    return new Blob(localParts.concat(centralParts, [end]), { type: 'application/zip' });
-  });
+// ZIP64 sem recomprimir os WebP. O CRC é calculado em sequência, um bloco
+// por vez; os Blobs são incorporados diretamente para não duplicar a memória.
+function zipSetUint64(view, offset, value) {
+  var big = BigInt(Math.floor(value));
+  var mask = BigInt(0xFFFFFFFF);
+  view.setUint32(offset, Number(big & mask), true);
+  view.setUint32(offset + 4, Number(big >> BigInt(32)), true);
 }
 
-// ---------- Otimizador de imagens de mapa: divide em partes e converte para WebP sem perdas ----------
-// Cada parte mantém a resolução original (sem redimensionar) e é gravada em WebP lossless
-// (qualidade 1 no canvas do Chrome/Edge). Depois de gerar cada parte, os pixels do WebP são
-// decodificados e comparados com os da imagem original; se houver qualquer diferença, o processo é interrompido.
-var MAP_PART_MAX_EDGE = 2048;
+async function createImagesZip(entries) {
+  var localParts = [], centralParts = [], offset = 0, centralSize = 0;
+  var now = new Date();
+  var dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | Math.floor(now.getSeconds() / 2);
+  var dosDate = ((Math.max(1980, now.getFullYear()) - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+
+  for (var i = 0; i < entries.length; i++) {
+    var entry = entries[i];
+    var nameBytes = new TextEncoder().encode(entry.name);
+    var size = entry.blob.size;
+    // Cada imagem individual é um tile pequeno; ZIP64 é usado para permitir
+    // que o conjunto inteiro ultrapasse 4 GB e/ou 65.535 arquivos.
+    if (size > 0xFFFFFFFF) throw new Error('Uma parte individual ultrapassou 4 GB, acima do tamanho suportado por um tile.');
+
+    var buffer = await entry.blob.arrayBuffer();
+    var crc = crc32Bytes(new Uint8Array(buffer));
+    buffer = null;
+
+    var local = new Uint8Array(30 + nameBytes.length);
+    var lv = new DataView(local.buffer);
+    lv.setUint32(0, 0x04034B50, true); lv.setUint16(4, 20, true);
+    lv.setUint16(6, 0x0800, true); lv.setUint16(8, 0, true);
+    lv.setUint16(10, dosTime, true); lv.setUint16(12, dosDate, true);
+    lv.setUint32(14, crc, true); lv.setUint32(18, size, true);
+    lv.setUint32(22, size, true); lv.setUint16(26, nameBytes.length, true);
+    lv.setUint16(28, 0, true); local.set(nameBytes, 30);
+    localParts.push(local, entry.blob);
+
+    var needsOffset64 = offset > 0xFFFFFFFF;
+    var extraLength = needsOffset64 ? 12 : 0;
+    var central = new Uint8Array(46 + nameBytes.length + extraLength);
+    var cv = new DataView(central.buffer);
+    cv.setUint32(0, 0x02014B50, true); cv.setUint16(4, 45, true); cv.setUint16(6, needsOffset64 ? 45 : 20, true);
+    cv.setUint16(8, 0x0800, true); cv.setUint16(10, 0, true);
+    cv.setUint16(12, dosTime, true); cv.setUint16(14, dosDate, true);
+    cv.setUint32(16, crc, true); cv.setUint32(20, size, true);
+    cv.setUint32(24, size, true); cv.setUint16(28, nameBytes.length, true);
+    cv.setUint16(30, extraLength, true); cv.setUint16(32, 0, true); cv.setUint16(34, 0, true);
+    cv.setUint32(36, 0, true); cv.setUint32(38, 0, true);
+    cv.setUint32(42, needsOffset64 ? 0xFFFFFFFF : offset, true);
+    central.set(nameBytes, 46);
+    if (needsOffset64) {
+      var extraView = new DataView(central.buffer);
+      var extraAt = 46 + nameBytes.length;
+      extraView.setUint16(extraAt, 0x0001, true);
+      extraView.setUint16(extraAt + 2, 8, true);
+      zipSetUint64(extraView, extraAt + 4, offset);
+    }
+    centralParts.push(central);
+    offset += local.length + size;
+    centralSize += central.length;
+  }
+
+  var needsZip64 = entries.length > 65535 || centralSize > 0xFFFFFFFF || offset > 0xFFFFFFFF;
+  var endParts = [];
+  if (needsZip64) {
+    var zip64Offset = offset + centralSize;
+    var zip64End = new Uint8Array(56), z64 = new DataView(zip64End.buffer);
+    z64.setUint32(0, 0x06064B50, true);
+    zipSetUint64(z64, 4, 44);
+    z64.setUint16(12, 45, true); z64.setUint16(14, 45, true);
+    z64.setUint32(16, 0, true); z64.setUint32(20, 0, true);
+    zipSetUint64(z64, 24, entries.length);
+    zipSetUint64(z64, 32, entries.length);
+    zipSetUint64(z64, 40, centralSize);
+    zipSetUint64(z64, 48, offset);
+    endParts.push(zip64End);
+
+    var locator = new Uint8Array(20), loc = new DataView(locator.buffer);
+    loc.setUint32(0, 0x07064B50, true);
+    loc.setUint32(4, 0, true);
+    zipSetUint64(loc, 8, zip64Offset);
+    loc.setUint32(16, 1, true);
+    endParts.push(locator);
+  }
+
+  var end = new Uint8Array(22), ev = new DataView(end.buffer);
+  ev.setUint32(0, 0x06054B50, true); ev.setUint16(4, 0, true); ev.setUint16(6, 0, true);
+  ev.setUint16(8, Math.min(entries.length, 65535), true);
+  ev.setUint16(10, Math.min(entries.length, 65535), true);
+  ev.setUint32(12, Math.min(centralSize, 0xFFFFFFFF), true);
+  ev.setUint32(16, Math.min(offset, 0xFFFFFFFF), true);
+  ev.setUint16(20, 0, true);
+  endParts.push(end);
+
+  return new Blob(localParts.concat(centralParts, endParts), { type: 'application/zip' });
+}
+
+// ---------- Otimizador: divide a imagem em partes e só aceita WebP com pixels preservados ----------
+// Cada parte mantém a resolução original. O encoder pode tentar WebP com qualidade máxima, mas
+// o resultado só é aceito se todos os canais RGBA forem idênticos. Se WebP alterar pixels, usa PNG lossless.
+var MAP_PART_MAX_EDGE = 1024; // Blocos menores reduzem o pico de memória em mapas enormes.
 
 function planMapParts(width, height, maxEdge) {
   var limit = maxEdge || MAP_PART_MAX_EDGE;
@@ -597,12 +658,12 @@ function planMapParts(width, height, maxEdge) {
   return { cols: cols, rows: rows, parts: parts };
 }
 
-function verifyLosslessWebp(sourceCanvas, blob) {
+function verifyLosslessImage(sourceCanvas, blob, formatName) {
   var w = sourceCanvas.width, h = sourceCanvas.height;
   return new Promise(function (resolve, reject) {
     var url = URL.createObjectURL(blob), decoded = new Image();
     decoded.onload = function () { URL.revokeObjectURL(url); resolve(decoded); };
-    decoded.onerror = function () { URL.revokeObjectURL(url); reject(new Error('Não foi possível conferir o WebP gerado.')); };
+    decoded.onerror = function () { URL.revokeObjectURL(url); reject(new Error('Não foi possível conferir a imagem convertida.')); };
     decoded.src = url;
   }).then(function (decoded) {
     var check = document.createElement('canvas');
@@ -614,14 +675,67 @@ function verifyLosslessWebp(sourceCanvas, blob) {
     var converted = checkContext.getImageData(0, 0, w, h).data;
     check.width = 1; check.height = 1;
     for (var i = 0; i < original.length; i += 4) {
-      var same = original[i + 3] === converted[i + 3] &&
-        (original[i + 3] !== 255 || (original[i] === converted[i] && original[i + 1] === converted[i + 1] && original[i + 2] === converted[i + 2]));
+      var same = original[i] === converted[i] && original[i + 1] === converted[i + 1] &&
+        original[i + 2] === converted[i + 2] && original[i + 3] === converted[i + 3];
       if (!same) {
         var px = i / 4;
-        throw new Error('O navegador não gerou um WebP idêntico à imagem original. Para não perder qualidade, a otimização foi cancelada. Use o Google Chrome ou o Microsoft Edge atualizados.\n(pixel ' + (px % w) + ',' + Math.floor(px / w) + ': original ' + original[i] + ',' + original[i + 1] + ',' + original[i + 2] + ',' + original[i + 3] + ' → WebP ' + converted[i] + ',' + converted[i + 1] + ',' + converted[i + 2] + ',' + converted[i + 3] + ')');
+        throw new Error('O navegador não gerou um ' + formatName + ' idêntico à imagem original.\n(pixel ' + (px % w) + ',' + Math.floor(px / w) + ': original ' + original[i] + ',' + original[i + 1] + ',' + original[i + 2] + ',' + original[i + 3] + ' → convertido ' + converted[i] + ',' + converted[i + 1] + ',' + converted[i + 2] + ',' + converted[i + 3] + ')');
       }
     }
   });
+}
+
+// Obtém as dimensões sem manter a imagem inteira decodificada quando o navegador
+// oferece ImageDecoder. Em navegadores sem essa API, usa Image como compatibilidade.
+function loadMapImageElement(file) {
+  return new Promise(function (resolve, reject) {
+    var url = URL.createObjectURL(file);
+    var image = new Image();
+    image.onload = function () {
+      var width = image.naturalWidth || image.width;
+      var height = image.naturalHeight || image.height;
+      if (!width || !height) {
+        URL.revokeObjectURL(url);
+        reject(new Error('Não foi possível identificar as dimensões da imagem.'));
+        return;
+      }
+      resolve({
+        width: width,
+        height: height,
+        image: image,
+        release: function () {
+          image.onload = null;
+          image.onerror = null;
+          image.src = '';
+          URL.revokeObjectURL(url);
+        }
+      });
+    };
+    image.onerror = function () {
+      URL.revokeObjectURL(url);
+      reject(new Error('Não foi possível abrir essa imagem. Ela pode estar corrompida ou em um formato não suportado pelo navegador.'));
+    };
+    image.src = url;
+  });
+}
+
+async function readMapImageInfo(file) {
+  if (typeof window.ImageDecoder === 'function' && file && typeof file.stream === 'function') {
+    var decoder = null;
+    try {
+      decoder = new window.ImageDecoder({ data: file.stream(), type: file.type });
+      await decoder.tracks.ready;
+      var track = decoder.tracks.selectedTrack;
+      var width = track && Number(track.displayWidth || track.codedWidth);
+      var height = track && Number(track.displayHeight || track.codedHeight);
+      decoder.close();
+      decoder = null;
+      if (width > 0 && height > 0) return { width: width, height: height, image: null, release: function () {} };
+    } catch (metadataError) {
+      if (decoder) { try { decoder.close(); } catch (e) {} }
+    }
+  }
+  return loadMapImageElement(file);
 }
 
 function imageRegionToLosslessWebp(image, sx, sy, sw, sh) {
@@ -634,22 +748,76 @@ function imageRegionToLosslessWebp(image, sx, sy, sw, sh) {
   context.drawImage(image, sx, sy, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
   function release() { canvas.width = 1; canvas.height = 1; }
   return canvasToWebp(canvas, 1)
-    .then(function (blob) { return verifyLosslessWebp(canvas, blob).then(function () { return blob; }); })
+    .then(function (blob) {
+      return verifyLosslessImage(canvas, blob, 'WebP').then(function () { return blob; });
+    })
+    .catch(function (webpError) {
+      // Se o encoder WebP produzir qualquer diferença, usa PNG lossless em vez
+      // de reduzir a qualidade ou abortar a importação.
+      return canvasToPng(canvas).then(function (pngBlob) {
+        return verifyLosslessImage(canvas, pngBlob, 'PNG').then(function () { return pngBlob; });
+      }).catch(function (pngError) {
+        throw new Error('Não foi possível preservar exatamente os pixels nem em WebP nem em PNG. WebP: ' + (webpError && webpError.message ? webpError.message : 'falha de codificação') + ' PNG: ' + (pngError && pngError.message ? pngError.message : 'falha de codificação'));
+      });
+    })
     .then(function (blob) { release(); return blob; }, function (error) { release(); throw error; });
 }
 
-function optimizeMapImage(image, width, height, onProgress) {
-  var plan = planMapParts(width, height), files = [], chain = Promise.resolve();
-  // Processa uma parte por vez para não manter vários canvas gigantes na memória.
-  plan.parts.forEach(function (part, index) {
-    chain = chain.then(function () {
+async function optimizeMapImage(file, width, height, onProgress, initialImage) {
+  var plan = planMapParts(width, height), files = [];
+  var fallbackImage = initialImage || null;
+  var ownsFallbackImage = false;
+  var useCroppedBitmap = !fallbackImage && typeof createImageBitmap === 'function';
+
+  if (!fallbackImage && !useCroppedBitmap) {
+    fallbackImage = await loadMapImageElement(file);
+    ownsFallbackImage = true;
+  }
+
+  try {
+    // Decodifica somente o recorte atual, fecha o bitmap e então passa ao próximo.
+    // Se createImageBitmap não aceitar recortes desse formato, usa Image como fallback.
+    for (var index = 0; index < plan.parts.length; index++) {
+      var part = plan.parts[index];
       if (onProgress) onProgress(index + 1, plan.parts.length);
-      return new Promise(function (resolve) { setTimeout(resolve, 16); });
-    }).then(function () {
-      return imageRegionToLosslessWebp(image, part.x, part.y, part.w, part.h);
-    }).then(function (blob) { files.push({ name: part.name, blob: blob }); });
-  });
-  return chain.then(function () { return { files: files, parts: plan.parts, cols: plan.cols, rows: plan.rows }; });
+      await new Promise(function (resolve) { setTimeout(resolve, 16); });
+
+      var sourceImage = fallbackImage && fallbackImage.image ? fallbackImage.image : fallbackImage;
+      var sourceX = part.x, sourceY = part.y, bitmap = null;
+      if (useCroppedBitmap) {
+        try {
+          bitmap = await createImageBitmap(file, part.x, part.y, part.w, part.h);
+          if (bitmap.width !== part.w || bitmap.height !== part.h) {
+            bitmap.close();
+            bitmap = null;
+            throw new Error('O navegador retornou um recorte com dimensões inesperadas.');
+          }
+          sourceImage = bitmap;
+          sourceX = 0;
+          sourceY = 0;
+        } catch (cropError) {
+          useCroppedBitmap = false;
+          if (!fallbackImage) {
+            fallbackImage = await loadMapImageElement(file);
+            ownsFallbackImage = true;
+          }
+          sourceImage = fallbackImage.image || fallbackImage;
+          sourceX = part.x;
+          sourceY = part.y;
+        }
+      }
+
+      try {
+        var blob = await imageRegionToLosslessWebp(sourceImage, sourceX, sourceY, part.w, part.h);
+        files.push({ name: blob.type === 'image/png' ? part.name.replace(/\.webp$/i, '.png') : part.name, blob: blob });
+      } finally {
+        if (bitmap) bitmap.close();
+      }
+    }
+    return { files: files, parts: plan.parts, cols: plan.cols, rows: plan.rows };
+  } finally {
+    if (ownsFallbackImage && fallbackImage && typeof fallbackImage.release === 'function') fallbackImage.release();
+  }
 }
 
 function showOptimizeProgress(text) {
@@ -713,86 +881,99 @@ function createCustomMapFromFile(file) {
     return;
   }
 
-  showOptimizeProgress('Lendo a imagem…');
-  var imageUrl = URL.createObjectURL(file);
-  var image = new Image();
-  image.onload = function () {
-    (async function () {
-      var runtimeUrls = [];
-      try {
-        var width = image.naturalWidth || image.width;
-        var height = image.naturalHeight || image.height;
-        if (!width || !height) throw new Error('Não foi possível identificar as dimensões da imagem.');
-        if (width * height > 160000000) throw new Error('A imagem ultrapassa o limite de 160 megapixels para otimização segura no navegador. Reduza a imagem antes de importar.');
-        var optimized = await optimizeMapImage(image, width, height, function (done, total) {
-          showOptimizeProgress('Otimizando a imagem em WebP sem perdas…\nParte ' + done + ' de ' + total);
-        });
-        showOptimizeProgress('Gerando o ZIP com as imagens…');
-        var zipBlob = await createImagesZip(optimized.files);
-        var id = slugifyMapName(name);
-        var suffix = 2;
-        while (MAPS[id]) { id = slugifyMapName(name) + '-' + suffix; suffix++; }
-        var cols = Math.ceil(width / cell), rows = Math.ceil(height / cell);
-        if (cols * rows > 500000) throw new Error('A grade ficaria grande demais. Escolha um tamanho de célula maior.');
+  showOptimizeProgress('Lendo as dimensões da imagem…');
+  (async function () {
+    var runtimeUrls = [];
+    var imageInfo = null;
+    try {
+      imageInfo = await readMapImageInfo(file);
+      var width = imageInfo.width;
+      var height = imageInfo.height;
+      if (!width || !height) throw new Error('Não foi possível identificar as dimensões da imagem.');
 
-        clearDeletedCustomMap(id);
-        var folder = 'mapas/' + id + '/';
-        var stateFileName = safeMapFileName(name) + '.json';
-        var runtimeParts = optimized.parts.map(function (part, index) {
-          var partUrl = URL.createObjectURL(optimized.files[index].blob);
-          runtimeUrls.push(partUrl);
-          return { src: folder + part.name, x: part.x, y: part.y, w: part.w, h: part.h, localSrc: partUrl };
-        });
-        var config = {
-          nome: name,
-          icone: '🗺️',
-          key: 'animalysson-vtt-custom-' + id,
-          custom: true,
-          folder: folder,
-          stateFile: folder + stateFileName,
-          cell: cell,
-          cols: cols,
-          rows: rows,
-          w: width,
-          h: height,
-          spawn: { x: Math.floor(cols / 2), y: Math.floor(rows / 2) },
-          fit: true,
-          maxZoom: 4,
-          parts: runtimeParts
-        };
-        if (!registerCustomMap(id, config, runtimeParts[0].localSrc)) throw new Error('Não foi possível adicionar este mapa.');
-        persistCustomMaps();
-
-        var zipName = safeMapFileName(name) + '-imagens-webp.zip';
-        downloadBlob(zipBlob, zipName);
-
-        hideOptimizeProgress();
-        var host = R;
-        stopWorldTravel(false);
-        save();
-        unmount();
-        applyMap(id);
-        try { localStorage.setItem(MAP_ID_KEY, id); } catch (e) {}
-        state = defaultState();
-        showGrid = true; showFog = true; dynLight = true; showWalls = true;
-        selected = null; pendingMonster = null; measurePts = null; drag = null;
-        save();
-        mount(host);
-        var detailMessage = 'A imagem (' + width + ' × ' + height + ' px) foi dividida em ' + optimized.parts.length + ' partes (' + optimized.cols + ' × ' + optimized.rows + ') e convertida para WebP sem perdas, na resolução original. O ZIP contém hi_part1.webp até hi_part' + optimized.parts.length + '.webp.';
-        appAlertMessage('msg009', 'Mapa adicionado e otimizado! ' + detailMessage + '\n\nExtraia o ZIP dentro de "' + folder + '". Depois baixe o catálogo mapas.json pelo menu e coloque-o em "mapas/mapas.json". Use Salvar mapa para baixar "' + stateFileName + '" na mesma pasta.');
-      } catch (error) {
-        runtimeUrls.forEach(function (url) { try { URL.revokeObjectURL(url); } catch (e) {} });
-        showOptimizeError(error && error.message ? error.message : 'Não foi possível otimizar a imagem do mapa.');
-      } finally {
-        URL.revokeObjectURL(imageUrl);
+      // Preserva o limite de segurança da grade sem rejeitar mapas maiores:
+      // aumenta apenas o espaçamento da grade, nunca redimensiona a imagem.
+      var requestedCell = cell;
+      var maxGridCells = 500000;
+      var cols = Math.ceil(width / cell), rows = Math.ceil(height / cell);
+      while (cols * rows > maxGridCells && cell < 512) {
+        cell++;
+        cols = Math.ceil(width / cell);
+        rows = Math.ceil(height / cell);
       }
-    })();
-  };
-  image.onerror = function () {
-    URL.revokeObjectURL(imageUrl);
-    showOptimizeError('Não foi possível abrir essa imagem. Ela pode estar corrompida, em formato que o navegador não lê ou grande demais para a memória disponível.');
-  };
-  image.src = imageUrl;
+      if (cols * rows > maxGridCells) {
+        throw new Error('A imagem foi processada sem redução, mas a grade ainda teria mais de 500.000 células mesmo com célula de 512 px. O navegador não consegue manter uma grade desse tamanho com segurança.');
+      }
+
+      var optimized = await optimizeMapImage(file, width, height, function (done, total) {
+        showOptimizeProgress('Otimizando os blocos sem perda e verificando todos os pixels…\nParte ' + done + ' de ' + total);
+      }, imageInfo.image ? imageInfo : null);
+      showOptimizeProgress('Gerando o ZIP com as imagens…');
+      var zipBlob = await createImagesZip(optimized.files);
+      var id = slugifyMapName(name);
+      var suffix = 2;
+      while (MAPS[id]) { id = slugifyMapName(name) + '-' + suffix; suffix++; }
+
+      clearDeletedCustomMap(id);
+      var folder = 'mapas/' + id + '/';
+      var stateFileName = safeMapFileName(name) + '.json';
+      var runtimeParts = optimized.parts.map(function (part, index) {
+        var partUrl = URL.createObjectURL(optimized.files[index].blob);
+        runtimeUrls.push(partUrl);
+        return { src: folder + optimized.files[index].name, x: part.x, y: part.y, w: part.w, h: part.h, localSrc: partUrl };
+      });
+      var config = {
+        nome: name,
+        icone: '🗺️',
+        key: 'animalysson-vtt-custom-' + id,
+        custom: true,
+        folder: folder,
+        stateFile: folder + stateFileName,
+        cell: cell,
+        cols: cols,
+        rows: rows,
+        w: width,
+        h: height,
+        spawn: { x: Math.floor(cols / 2), y: Math.floor(rows / 2) },
+        fit: true,
+        maxZoom: 4,
+        parts: runtimeParts
+      };
+      if (!registerCustomMap(id, config, runtimeParts[0].localSrc)) throw new Error('Não foi possível adicionar este mapa.');
+      persistCustomMaps();
+
+      var zipName = safeMapFileName(name) + '-imagens-sem-perda.zip';
+      downloadBlob(zipBlob, zipName);
+
+      hideOptimizeProgress();
+      var host = R;
+      stopWorldTravel(false);
+      save();
+      unmount();
+      applyMap(id);
+      try { localStorage.setItem(MAP_ID_KEY, id); } catch (e) {}
+      state = defaultState();
+      showGrid = true; showFog = true; dynLight = true; showWalls = true;
+      selected = null; pendingMonster = null; measurePts = null; drag = null;
+      save();
+      mount(host);
+      var gridMessage = cell !== requestedCell
+        ? ' Para manter a grade leve, o tamanho da célula foi ajustado automaticamente de ' + requestedCell + ' para ' + cell + ' px; a resolução da imagem não foi alterada.'
+        : '';
+      var pngParts = optimized.files.filter(function (entry) { return entry.blob.type === 'image/png'; }).length;
+      var webpParts = optimized.files.length - pngParts;
+      var formatMessage = pngParts
+        ? (webpParts ? webpParts + ' partes foram salvas em WebP sem perdas e ' + pngParts + ' em PNG sem perdas, pois o PNG foi necessário para preservar exatamente os pixels.' : 'Os ' + pngParts + ' blocos foram salvos em PNG sem perdas para preservar exatamente os pixels.')
+        : 'Todas as partes foram salvas em WebP sem perdas e verificadas pixel a pixel.';
+      var detailMessage = 'A imagem (' + width + ' × ' + height + ' px) foi dividida em ' + optimized.parts.length + ' partes (' + optimized.cols + ' × ' + optimized.rows + '), mantendo a resolução original. ' + formatMessage + gridMessage + ' O ZIP contém todas as partes com os nomes corretos.';
+      appAlertMessage('msg009', 'Mapa adicionado e otimizado! ' + detailMessage + '\n\nExtraia o ZIP dentro de "' + folder + '". Depois baixe o catálogo mapas.json pelo menu e coloque-o em "mapas/mapas.json". Use Salvar mapa para baixar "' + stateFileName + '" na mesma pasta.');
+    } catch (error) {
+      runtimeUrls.forEach(function (url) { try { URL.revokeObjectURL(url); } catch (e) {} });
+      showOptimizeError(error && error.message ? error.message : 'Não foi possível otimizar a imagem do mapa.');
+    } finally {
+      if (imageInfo && typeof imageInfo.release === 'function') imageInfo.release();
+    }
+  })();
 }
 
 function save() {
