@@ -3799,10 +3799,25 @@ function playerVisionRadius(player) {
 }
 function edgeInPlayerVision(edge, player, range) {
   if (!edge || !player || isHexMap()) return false;
-  var mid = edgeMidpoint(edge);
-  var cell = worldToCell(mid.x, mid.y);
-  return isCurrentlyVisible(cell.x, cell.y, player.x, player.y, range) &&
-    hasLOS(player.x, player.y, cell.x, cell.y);
+  // A própria parede/porta bloqueia a visão para a célula do outro lado, então o ponto médio
+  // (que cai exatamente na divisa) não pode ser usado sozinho. A estrutura é visível se ao
+  // menos uma das células que encostam nela estiver visível ao personagem.
+  var cells = [];
+  if (edge.custom) {
+    var c = edge.custom, mid = edgeMidpoint(edge);
+    var ex = c.x2 - c.x1, ey = c.y2 - c.y1, len = Math.sqrt(ex * ex + ey * ey) || 1;
+    var nx = -ey / len * CELL * 0.3, ny = ex / len * CELL * 0.3;
+    cells.push(worldToCell(mid.x + nx, mid.y + ny), worldToCell(mid.x - nx, mid.y - ny), worldToCell(mid.x, mid.y));
+  } else if (edge.dir === 'h') {
+    cells.push({ x: edge.x, y: edge.yEdge - 1 }, { x: edge.x, y: edge.yEdge });
+  } else {
+    cells.push({ x: edge.xEdge - 1, y: edge.y }, { x: edge.xEdge, y: edge.y });
+  }
+  return cells.some(function (cell) {
+    return cell && cell.x >= 0 && cell.y >= 0 && cell.x < COLS && cell.y < ROWS &&
+      isCurrentlyVisible(cell.x, cell.y, player.x, player.y, range) &&
+      hasLOS(player.x, player.y, cell.x, cell.y);
+  });
 }
 function visibleEdgesForPlayer(player, range) {
   if (!player || isHexMap()) return [];
