@@ -1559,6 +1559,57 @@ function openStructureEditor(edge) {
   actions.appendChild(remove); actions.appendChild(cancel); actions.appendChild(saveBtn); dlg.panel.appendChild(actions);
 }
 
+function openCellWallEditor(cell) {
+  if (!cell || cell.x < 0 || cell.y < 0 || cell.x >= COLS || cell.y >= ROWS || !state.walls[idx(cell.x, cell.y)]) {
+    appAlertMessage('msg066', 'Não há uma parede nesta quadrícula.'); return;
+  }
+  var i = idx(cell.x, cell.y);
+  if (!state.wallMeta) state.wallMeta = makeArr(COLS * ROWS, null);
+  var oldMeta = state.wallMeta[i] || makeStructureMeta('pedra', 'wall', 2);
+  var dlg = createPortalDialog('Editar parede', 'Edite somente esta parede (uma quadrícula). Ajuste o material e a resistência dela.');
+  if (!dlg) return;
+  dlg.panel.style.width = 'min(520px,100%)';
+  dlg.panel.style.maxHeight = '88%'; dlg.panel.style.overflow = 'auto';
+  var form = document.createElement('div');
+  form.style.cssText = 'display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:10px 0 16px;';
+  function field(label, value, type) {
+    var wrap = document.createElement('label'); wrap.style.cssText = 'display:flex;flex-direction:column;gap:4px;font-size:12px;color:#d5d9e2;';
+    var span = document.createElement('span'); span.textContent = label; wrap.appendChild(span);
+    var input = document.createElement(type === 'select' ? 'select' : 'input');
+    if (type !== 'select') input.type = type || 'text';
+    input.style.cssText = 'width:100%;min-width:0;box-sizing:border-box;padding:8px;border:1px solid #555d6c;border-radius:6px;background:#252a34;color:#fff;';
+    if (type === 'select') Object.keys(OBJECT_MATERIALS).forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = OBJECT_MATERIALS[k].label; input.appendChild(o); });
+    input.value = value == null ? '' : String(value);
+    wrap.appendChild(input); form.appendChild(wrap); return input;
+  }
+  var material = field('Material', OBJECT_MATERIALS[oldMeta.material] ? oldMeta.material : 'pedra', 'select');
+  var ac = field('Classe de Armadura (CA)', oldMeta.ac == null ? 17 : oldMeta.ac, 'number');
+  var hp = field('Pontos de Vida (PV)', oldMeta.hp == null ? 54 : oldMeta.hp, 'number');
+  var maxHp = field('PV máximo', oldMeta.maxHp == null ? (oldMeta.hp == null ? 54 : oldMeta.hp) : oldMeta.maxHp, 'number');
+  var threshold = field('Limiar de dano', oldMeta.threshold == null ? 15 : oldMeta.threshold, 'number');
+  // Ao trocar o material, preenche os valores padrão de parede daquele material (podem ser ajustados em seguida).
+  material.addEventListener('change', function () {
+    var base = OBJECT_MATERIALS[material.value] || OBJECT_MATERIALS.pedra;
+    ac.value = base.ac; hp.value = base.hp * 2; maxHp.value = base.hp * 2; threshold.value = base.threshold * 1.5;
+  });
+  dlg.panel.appendChild(form);
+  var actions = document.createElement('div'); actions.className = 'mp-portal-dialog-actions';
+  var cancel = document.createElement('button'); cancel.type = 'button'; cancel.textContent = 'Cancelar'; cancel.onclick = function () { closePortalDialog(dlg.overlay); };
+  var remove = document.createElement('button'); remove.type = 'button'; remove.className = 'danger'; remove.textContent = 'Remover parede';
+  remove.onclick = function () { state.walls[i] = 0; state.wallMeta[i] = null; save(); draw(); closePortalDialog(dlg.overlay); };
+  var saveBtn = document.createElement('button'); saveBtn.type = 'button'; saveBtn.className = 'primary'; saveBtn.textContent = 'Salvar alterações';
+  saveBtn.onclick = function () {
+    var m = Object.assign({}, oldMeta);
+    m.kind = 'wall'; m.material = material.value;
+    m.ac = Math.max(0, Number(ac.value) || 0);
+    m.hp = Math.max(0, Number(hp.value) || 0);
+    m.maxHp = Math.max(0, Number(maxHp.value) || m.hp);
+    m.threshold = Math.max(0, Number(threshold.value) || 0);
+    state.wallMeta[i] = m; save(); draw(); closePortalDialog(dlg.overlay);
+  };
+  actions.appendChild(remove); actions.appendChild(cancel); actions.appendChild(saveBtn); dlg.panel.appendChild(actions);
+}
+
 function edgeActionLabel(val, meta) {
   if (val === EDGE_SECRET_WALL || val === EDGE_SECRET_DOOR_C || val === EDGE_SECRET_DOOR_O) return meta && meta.kind === 'secretDoor' ? 'porta secreta' : 'parede secreta';
   if (val === EDGE_LOCKED_DOOR) return 'porta trancada';
@@ -3073,7 +3124,8 @@ function onPointerDown(e) {
       if (nearGrid <= Math.max(8 / zoom, CELL * 0.18)) structureEdge = nearestEdge(world.x, world.y);
     }
     if (structureEdge && getEdgeVal(structureEdge) !== EDGE_NONE) openStructureEditor(structureEdge);
-    else appAlertMessage('msg064', 'Não há parede ou porta nesta linha.');
+    else if (!isHexMap() && cell.x >= 0 && cell.y >= 0 && cell.x < COLS && cell.y < ROWS && state.walls[idx(cell.x, cell.y)]) openCellWallEditor(cell);
+    else appAlertMessage('msg064', 'Não há parede, muro ou porta neste ponto.');
     return;
   }
 
