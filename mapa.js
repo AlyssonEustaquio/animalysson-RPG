@@ -63,6 +63,8 @@ function serializableMapConfig(info) {
   var copy = JSON.parse(JSON.stringify(info || {}));
   (copy.parts || []).forEach(function (part) { delete part.localSrc; });
   if (copy.detail) delete copy.detail.runtimeTiles;
+  delete copy.packageState;
+  delete copy.packageStateExportedAt;
   return copy;
 }
 function customMapEntries() {
@@ -71,7 +73,10 @@ function customMapEntries() {
   });
 }
 function persistCustomMaps() {
-  try { localStorage.setItem(CUSTOM_MAPS_KEY, JSON.stringify(customMapEntries())); } catch (e) {}
+  try {
+    if (MAPS[mapId] && MAPS[mapId].custom) MAPS[mapId].settingsUpdatedAt = new Date().toISOString();
+    localStorage.setItem(CUSTOM_MAPS_KEY, JSON.stringify(customMapEntries()));
+  } catch (e) {}
 }
 function deletedCustomMapIds() {
   try {
@@ -93,9 +98,13 @@ function clearDeletedCustomMap(id) {
 }
 function registerCustomMap(id, config, runtimeImageSrc) {
   if (!id || !config || !config.nome || !config.w || !config.h || !config.parts || !config.parts.length) return false;
-  var saved = serializableMapConfig(config);
-  saved.custom = true;
   var previous = MAPS[id];
+  var saved = serializableMapConfig(config);
+  var packageState = config.packageState || (previous && previous.packageState) || null;
+  var packageStateExportedAt = config.packageStateExportedAt || (previous && previous.packageStateExportedAt) || null;
+  if (packageState) saved.packageState = packageState;
+  if (packageStateExportedAt) saved.packageStateExportedAt = packageStateExportedAt;
+  saved.custom = true;
   saved.parts.forEach(function (part, index) {
     var fresh = config.parts[index], old = previous && previous.parts && previous.parts[index];
     if (fresh && fresh.localSrc) part.localSrc = fresh.localSrc;
@@ -117,7 +126,9 @@ function loadStoredCustomMaps() {
     });
   } catch (e) {}
 }
-loadStoredCustomMaps();
+// Mapas personalizados são carregados dos pacotes ZIP publicados no servidor.
+// Não restaure definições antigas do localStorage: elas podem conter URLs blob temporárias.
+// loadStoredCustomMaps();
 // Flanaess usa exclusivamente hexágonos pequenos de 6 milhas (48 px de referência).
 // Ignora preferências antigas de tamanho para impedir retorno à grade grande.
 var FLANAESS_GRID_MODE = 'hex-small-6mi';
@@ -228,7 +239,7 @@ var clickMovePath = [];      // caminho calculado ao clicar em um tile iluminado
 var WORLD_TRAVEL_STEP_MS = 2000; // tempo para atravessar 1 hexágono ao clicar no mapa-múndi
 var HEX_KEY_STEP_MS = WORLD_TRAVEL_STEP_MS; // setas usam exatamente a mesma velocidade do clique
 
-var state = load() || defaultState();
+var state = loadCurrentMapState();
 // Migra tokens salvos na antiga grade quadrada sem perder as áreas de névoa já reveladas.
 function migrateFlanaessState(s) {
   if (!isHexMap() || !s) return s;
@@ -358,24 +369,256 @@ function load() {
   } catch (e) { return null; }
 }
 
+function loadCurrentMapState() {
+  var localState = load();
+  var packageState = MAPINFO && MAPINFO.packageState;
+  var packageTime = MAPINFO && Date.parse(MAPINFO.packageStateExportedAt || '') || 0;
+  var localTime = localState && Number(localState._savedAt) || 0;
+  if (packageState && (!localState || packageTime > localTime)) {
+    var remoteState = normalizeMapState(JSON.parse(JSON.stringify(packageState)));
+    if (remoteState) {
+      remoteState._savedAt = packageTime || Date.now();
+      return migrateFlanaessState(remoteState);
+    }
+  }
+  return migrateFlanaessState(localState || defaultState());
+}
+
+var repositoryMapCatalogPromise = null;
+var MAP_PACKAGE_FORMAT = 'animalysson-rpg-map-package';
+var MAP_PACKAGE_REPOSITORY_API = 'https://api.github.com/repos/AlyssonEustaquio/animalysson-RPG/contents/mapas';
+
+function zipEntryMime(name) {
+  var lower = String(name || '').toLowerCase();
+  if (/\.png$/.test(lower)) return 'image/png';
+  if (/\.jpe?g$/.test(lower)) return 'image/jpeg';
+  if (/\.webp$/.test(lower)) return 'image/webp';
+  if (/\.json$/.test(lower)) return 'application/json;charset=utf-8';
+  return 'application/octet-stream';
+}
+
+// Os pacotes produzidos pelo editor usam ZIP STORE (sem recompressão). A leitura
+// sequencial dos cabeçalhos locais evita copiar o arquivo ZIP inteiro para RAM.
+async function readStoredZipEntries(zipBlob) {
+  if (!zipBlob || typeof zipBlob.slice !== 'function' || !isFinite(zipBlob.size)) throw new Error('Arquivo ZIP inválido.');
+  var entries = new Map(), offset = 0, totalSize = zipBlob.size;
+  var decoder = new TextDecoder('utf-8');
+  while (offset + 30 <= totalSize) {
+    var header = new DataView(await zipBlob.slice(offset, offset + 30).arrayBuffer());
+    if (header.getUint32(0, true) !== 0x04034B50) break;
+    var flags = header.getUint16(6, true), method = header.getUint16(8, true);
+    var crc = header.getUint32(14, true), compressedSize = header.getUint32(18, true);
+    var uncompressedSize = header.getUint32(22, true), nameLength = header.getUint16(26, true);
+    var extraLength = header.getUint16(28, true);
+    if (flags & 0x0008) throw new Error('O ZIP usa descritor de dados. Gere o pacote pelo editor do projeto.');
+    if (method !== 0) throw new Error('O ZIP está compactado internamente. Selecione o ZIP sem compressão gerado pelo editor.');
+    if (compressedSize === 0xFFFFFFFF || uncompressedSize === 0xFFFFFFFF) throw new Error('Uma entrada individual do ZIP excede 4 GB.');
+    if (compressedSize !== uncompressedSize) throw new Error('O ZIP contém uma entrada com tamanho inconsistente.');
+    var nameStart = offset + 30, dataStart = nameStart + nameLength + extraLength;
+    var dataEnd = dataStart + compressedSize;
+    if (dataEnd > totalSize || dataStart < nameStart) throw new Error('O ZIP está incompleto ou corrompido.');
+    var name = decoder.decode(await zipBlob.slice(nameStart, nameStart + nameLength).arrayBuffer()).replace(/\\/g, '/');
+    if (!name || name.indexOf('../') >= 0 || name.charAt(0) === '/') throw new Error('O ZIP contém um caminho de arquivo inválido.');
+    var body = zipBlob.slice(dataStart, dataEnd, zipEntryMime(name));
+    var bodyBytes = new Uint8Array(await body.arrayBuffer());
+    if (crc32Bytes(bodyBytes) !== crc) throw new Error('Falha na integridade do arquivo ' + name + ' dentro do ZIP.');
+    entries.set(name, body);
+    offset = dataEnd;
+  }
+  if (!entries.size) throw new Error('Não encontrei arquivos válidos dentro do ZIP.');
+  return entries;
+}
+
+async function getZipImageDimensions(blob) {
+  if (typeof createImageBitmap === 'function') {
+    var bitmap = await createImageBitmap(blob), size = { width: bitmap.width, height: bitmap.height };
+    bitmap.close();
+    return size;
+  }
+  return new Promise(function (resolve, reject) {
+    var url = URL.createObjectURL(blob), img = new Image();
+    img.onload = function () { var size = { width: img.naturalWidth, height: img.naturalHeight }; img.src = ''; URL.revokeObjectURL(url); resolve(size); };
+    img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('Não foi possível ler uma parte antiga do mapa.')); };
+    img.src = url;
+  });
+}
+
+// Compatibilidade com os ZIPs anteriores, que tinham apenas hi_partN.webp/png.
+// A grade de partes é reconstruída pelas dimensões dos próprios blocos.
+async function buildLegacyMapPackage(entries, zipFilename) {
+  var parts = [];
+  entries.forEach(function (blob, name) {
+    var match = name.match(/(?:^|\/)hi_part(\d+)\.(webp|png)$/i);
+    if (match) parts.push({ index: Number(match[1]), name: name, blob: blob });
+  });
+  parts.sort(function (a, b) { return a.index - b.index; });
+  if (!parts.length || parts.some(function (part, i) { return part.index !== i + 1; })) throw new Error('O ZIP antigo não contém todas as partes hi_part1, hi_part2 etc.');
+  var dimensions = [];
+  for (var i = 0; i < parts.length; i++) dimensions.push(await getZipImageDimensions(parts[i].blob));
+  var candidates = [];
+  for (var cols = 1; cols <= parts.length; cols++) {
+    if (parts.length % cols) continue;
+    var rows = parts.length / cols, colWidths = [], rowHeights = [];
+    for (var c = 0; c < cols; c++) colWidths.push(dimensions[c].width);
+    for (var r = 0; r < rows; r++) rowHeights.push(dimensions[r * cols].height);
+    var width = colWidths.reduce(function (a, b) { return a + b; }, 0);
+    var height = rowHeights.reduce(function (a, b) { return a + b; }, 0), valid = true;
+    for (var rr = 0; rr < rows && valid; rr++) for (var cc = 0; cc < cols; cc++) {
+      var dim = dimensions[rr * cols + cc];
+      if (dim.width !== colWidths[cc] || dim.height !== rowHeights[rr]) { valid = false; break; }
+    }
+    var expected = planMapParts(width, height, 1024);
+    var expectedLegacy = planMapParts(width, height, 2048);
+    if (valid && ((expected.cols === cols && expected.rows === rows) || (expectedLegacy.cols === cols && expectedLegacy.rows === rows))) candidates.push({ cols: cols, rows: rows, width: width, height: height });
+  }
+  if (candidates.length !== 1) throw new Error('Não foi possível reconstruir com segurança a grade deste ZIP antigo. Recrie o pacote usando a versão atual do editor.');
+  var layout = candidates[0];
+  var name = String(zipFilename || 'Mapa').replace(/\.zip$/i, '').replace(/-imagens-(?:sem-perda|webp)$/i, '').replace(/[_-]+/g, ' ').trim() || 'Mapa';
+  var cell = 36, urls = [], mapCols = Math.ceil(layout.width / cell), mapRows = Math.ceil(layout.height / cell);
+  var config = {
+    nome: name, icone: '🗺️', key: 'animalysson-vtt-custom-' + slugifyMapName(name),
+    custom: true, folder: 'mapas/', stateFile: null, cell: cell, cols: mapCols, rows: mapRows,
+    w: layout.width, h: layout.height,
+    spawn: { x: Math.floor(mapCols / 2), y: Math.floor(mapRows / 2) }, fit: true, maxZoom: 4, parts: []
+  };
+  for (var r = 0; r < layout.rows; r++) for (var c = 0; c < layout.cols; c++) {
+    var partIndex = r * layout.cols + c;
+    var x = Math.round(c * layout.width / layout.cols), x1 = Math.round((c + 1) * layout.width / layout.cols);
+    var y = Math.round(r * layout.height / layout.rows), y1 = Math.round((r + 1) * layout.height / layout.rows);
+    var url = URL.createObjectURL(parts[partIndex].blob);
+    urls.push(url);
+    config.parts.push({ src: parts[partIndex].name.split('/').pop(), x: x, y: y, w: x1 - x, h: y1 - y, localSrc: url });
+  }
+  return { id: slugifyMapName(name), config: config, urls: urls, manifest: null };
+}
+
+async function readMapPackage(zipBlob, zipFilename) {
+  var entries = await readStoredZipEntries(zipBlob);
+  var manifestBlob = entries.get('mapa.json') || entries.get('map-package.json');
+  if (!manifestBlob) return buildLegacyMapPackage(entries, zipFilename);
+  var manifest;
+  try { manifest = JSON.parse(await manifestBlob.text()); }
+  catch (error) { throw new Error('O arquivo mapa.json dentro do ZIP está inválido.'); }
+  if (!manifest || manifest.format !== MAP_PACKAGE_FORMAT || !manifest.config) throw new Error('Este ZIP não é um pacote de mapa compatível com o Animalysson RPG.');
+  var config = JSON.parse(JSON.stringify(manifest.config));
+  var id = slugifyMapName(manifest.id || config.id || config.nome);
+  if (!config.nome || !Number(config.w) || !Number(config.h) || !Array.isArray(config.parts) || !config.parts.length) throw new Error('O ZIP não contém as dimensões ou as partes necessárias para montar o mapa.');
+  var urls = [];
+  try {
+    config.parts = config.parts.map(function (part) {
+      var entryName = String(part.src || '').replace(/\\/g, '/').replace(/^\.\//, ''), imageBlob = entries.get(entryName);
+      if (!imageBlob) {
+        var leaf = entryName.substring(entryName.lastIndexOf('/') + 1);
+        entries.forEach(function (candidate, name) { if (!imageBlob && name.substring(name.lastIndexOf('/') + 1) === leaf) imageBlob = candidate; });
+      }
+      if (!imageBlob) throw new Error('A parte ' + entryName + ' não foi encontrada dentro do ZIP.');
+      var url = URL.createObjectURL(imageBlob);
+      urls.push(url);
+      return { src: entryName.substring(entryName.lastIndexOf('/') + 1), x: Number(part.x), y: Number(part.y), w: Number(part.w), h: Number(part.h), localSrc: url };
+    });
+  } catch (error) {
+    urls.forEach(function (url) { try { URL.revokeObjectURL(url); } catch (e) {} });
+    throw error;
+  }
+  config.custom = true;
+  config.folder = 'mapas/';
+  config.stateFile = null;
+  config.packageState = manifest.state || null;
+  config.packageStateExportedAt = manifest.exportedAt || manifest.createdAt || null;
+  config.key = config.key || ('animalysson-vtt-custom-' + id);
+  config.cell = Math.max(8, Math.min(512, Number(config.cell) || 36));
+  config.cols = Number(config.cols) || Math.ceil(config.w / config.cell);
+  config.rows = Number(config.rows) || Math.ceil(config.h / config.cell);
+  return { id: id, config: config, urls: urls, manifest: manifest };
+}
+
+function releaseMapPackage(pkg) {
+  if (!pkg || !pkg.urls) return;
+  pkg.urls.forEach(function (url) { try { URL.revokeObjectURL(url); } catch (e) {} });
+  pkg.urls = [];
+}
+
+function registerMapPackage(pkg) {
+  if (!pkg || !pkg.id || !pkg.config || (MAPS[pkg.id] && !MAPS[pkg.id].custom)) { releaseMapPackage(pkg); return false; }
+  if (MAPS[pkg.id] && MAPS[pkg.id].custom) revokeMapRuntimeUrls(MAPS[pkg.id]);
+  return registerCustomMap(pkg.id, pkg.config);
+}
+
+async function loadServerMapPackages() {
+  if (typeof window.fetch !== 'function') return;
+  // A API pública do GitHub lista /mapas; o GitHub Pages não lista diretórios sozinho.
+  var allFiles = [];
+  for (var page = 1; page <= 10; page++) {
+    var response = await fetch(MAP_PACKAGE_REPOSITORY_API + '?per_page=100&page=' + page, { cache: 'no-store', headers: { Accept: 'application/vnd.github+json' } });
+    if (!response.ok) throw new Error('Não foi possível listar os pacotes ZIP no GitHub.');
+    var items = await response.json();
+    if (!Array.isArray(items)) break;
+    allFiles = allFiles.concat(items.filter(function (item) { return item && item.type === 'file' && /\.zip$/i.test(item.name || '') && item.download_url; }));
+    if (items.length < 100) break;
+  }
+  for (var i = 0; i < allFiles.length; i++) {
+    var item = allFiles[i];
+    try {
+      var zipResponse = await fetch(item.download_url, { cache: 'no-store' });
+      if (!zipResponse.ok) continue;
+      var pkg = await readMapPackage(await zipResponse.blob(), item.name);
+      if (isCustomMapDeleted(pkg.id) || MAPS[pkg.id]) releaseMapPackage(pkg);
+      else registerMapPackage(pkg);
+    } catch (error) { try { console.warn('[Mapa] Pacote ignorado: ' + item.name, error); } catch (e) {} }
+  }
+}
+
+async function loadLegacyMapCatalog() {
+  if (typeof window.fetch !== 'function') return;
+  try {
+    var response = await fetch(MAP_CATALOG_FILE + '?v=' + Date.now(), { cache: 'no-store' });
+    if (!response.ok) return;
+    var payload = await response.json();
+    if (!payload || payload.format !== 'animalysson-rpg-map-catalog' || !Array.isArray(payload.maps)) return;
+    payload.maps.forEach(function (entry) {
+      if (entry && entry.id && entry.config && !MAPS[entry.id] && !isCustomMapDeleted(entry.id)) registerCustomMap(entry.id, entry.config);
+    });
+  } catch (error) { /* O catálogo antigo é opcional. */ }
+}
+
+// Reaplica somente ajustes locais (tile e ponto inicial) aos mapas que vieram
+// do servidor. Configurações locais sem ZIP correspondente nunca criam mapas órfãos.
+function loadStoredServerMapSettings() {
+  try {
+    var entries = JSON.parse(localStorage.getItem(CUSTOM_MAPS_KEY) || '[]');
+    if (!Array.isArray(entries)) return;
+    entries.forEach(function (entry) {
+      var current = entry && entry.id && MAPS[entry.id];
+      var saved = entry && entry.config;
+      if (!current || !current.custom || !saved) return;
+      var remoteTime = Date.parse(current.packageStateExportedAt || '') || 0;
+      var localSettingsTime = Date.parse(saved.settingsUpdatedAt || '') || 0;
+      if (remoteTime && localSettingsTime && remoteTime >= localSettingsTime) return;
+      var merged = serializableMapConfig(current);
+      var cell = Number(saved.cell);
+      if (isFinite(cell) && cell >= 8 && cell <= 512) {
+        merged.cell = cell;
+        merged.cols = Math.ceil(Number(merged.w) / cell);
+        merged.rows = Math.ceil(Number(merged.h) / cell);
+      }
+      if (saved.spawn && isFinite(Number(saved.spawn.x)) && isFinite(Number(saved.spawn.y))) {
+        merged.spawn = { x: Number(saved.spawn.x), y: Number(saved.spawn.y) };
+      }
+      registerCustomMap(entry.id, merged);
+    });
+  } catch (error) { /* Preferências locais inválidas não impedem o carregamento. */ }
+}
+
 function loadRepositoryMapCatalog(done) {
-  if (typeof window.fetch !== 'function') { done(); return; }
-  fetch(MAP_CATALOG_FILE + '?v=' + Date.now(), { cache: 'no-store' })
-    .then(function (response) { if (!response.ok) return null; return response.json(); })
-    .then(function (payload) {
-      if (!payload || payload.format !== 'animalysson-rpg-map-catalog' || !Array.isArray(payload.maps)) return;
-      payload.maps.forEach(function (entry) {
-        if (!entry || !entry.id || !entry.config || isCustomMapDeleted(entry.id) || MAPS[entry.id] && !MAPS[entry.id].custom) return;
-        var localInfo = MAPS[entry.id];
-        var runtimeSrc = localInfo && localInfo.parts && localInfo.parts[0] ? localInfo.parts[0].localSrc : null;
-        registerCustomMap(entry.id, entry.config, runtimeSrc);
-      });
-      persistCustomMaps();
-    })
-    .catch(function () {
-      // O catálogo ainda não foi publicado. Os mapas locais continuam disponíveis.
-    })
-    .then(function () { done(); });
+  if (!repositoryMapCatalogPromise) {
+    repositoryMapCatalogPromise = (async function () {
+      try { await loadServerMapPackages(); }
+      catch (error) { try { console.warn('[Mapa] Não foi possível descobrir os ZIPs em mapas/.', error); } catch (e) {} }
+      await loadLegacyMapCatalog();
+      loadStoredServerMapSettings();
+    })();
+  }
+  repositoryMapCatalogPromise.then(function () { done(); }, function () { done(); });
 }
 
 function loadRepositoryMapState(done) {
@@ -461,6 +704,50 @@ function exportMapFile() {
   downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' }), safeMapFileName(MAPINFO.nome) + '.json');
 }
 
+
+async function exportMapPackage() {
+  if (!MAPINFO || !MAPINFO.custom) { exportMapFile(); return; }
+  showOptimizeProgress('Preparando o pacote ZIP atualizado…');
+  try {
+    var config = serializableMapConfig(MAPINFO);
+    config.folder = 'mapas/';
+    config.stateFile = null;
+    var entries = [];
+    config.parts = config.parts.map(function (part) {
+      return {
+        src: String(part.src || '').replace(/\\/g, '/').split('/').pop(),
+        x: part.x, y: part.y, w: part.w, h: part.h
+      };
+    });
+    for (var i = 0; i < MAPINFO.parts.length; i++) {
+      var livePart = MAPINFO.parts[i];
+      var imageResponse = await fetch(livePart.localSrc || livePart.src);
+      if (!imageResponse.ok) throw new Error('Não foi possível ler a imagem ' + livePart.src + ' para atualizar o ZIP.');
+      var imageBlob = await imageResponse.blob();
+      entries.push({ name: config.parts[i].src, blob: imageBlob });
+    }
+    var exportedState = isHexMap()
+      ? { v: 4, nome: MAPINFO.nome, gridMode: FLANAESS_GRID_MODE, spawn: state.spawn || MAPINFO.spawn, portals: state.portals || [], tokens: state.tokens || [] }
+      : JSON.parse(JSON.stringify(state));
+    if (exportedState && Object.prototype.hasOwnProperty.call(exportedState, '_savedAt')) delete exportedState._savedAt;
+    var manifest = {
+      format: MAP_PACKAGE_FORMAT,
+      version: 1,
+      id: mapId,
+      createdAt: MAPINFO.packageStateExportedAt || new Date().toISOString(),
+      exportedAt: new Date().toISOString(),
+      config: config,
+      state: exportedState
+    };
+    entries.unshift({ name: 'mapa.json', blob: new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json;charset=utf-8' }) });
+    var zipBlob = await createImagesZip(entries);
+    hideOptimizeProgress();
+    downloadBlob(zipBlob, safeMapFileName(MAPINFO.nome) + '.zip');
+  } catch (error) {
+    showOptimizeError(error && error.message ? error.message : 'Não foi possível gerar o ZIP atualizado.');
+  }
+}
+
 function revokeMapRuntimeUrls(info) {
   if (!info) return;
   (info.parts || []).forEach(function (part) {
@@ -485,10 +772,10 @@ function deleteCurrentCustomMap() {
   var deletedId = mapId;
   var deletedInfo = MAPINFO;
   var host = R;
-  var confirmed = appConfirmMessage('msg003', 
-    'Excluir o mapa "' + deletedInfo.nome + '"?\n\n' +
-    'Ele será removido do seletor e os dados salvos deste mapa serão apagados deste navegador.\n\n' +
-    'Um novo mapas.json será baixado para atualizar o catálogo no GitHub. Os arquivos já publicados na pasta mapas/' + deletedId + '/ não são apagados automaticamente; remova essa pasta do GitHub se também quiser excluir as imagens e o JSON.'
+  var confirmed = appConfirmMessage('msg003',
+    'Excluir o mapa "' + deletedInfo.nome + '" deste navegador?\n\n' +
+    'Ele será removido do seletor e os dados locais deste mapa serão apagados.\n\n' +
+    'Se ele veio de um ZIP publicado, apague também o arquivo ZIP correspondente da pasta mapas/ no GitHub para removê-lo de todos os dispositivos.'
   );
   if (!confirmed) return;
 
@@ -501,15 +788,13 @@ function deleteCurrentCustomMap() {
 
   preferredMapId = 'tumba';
   try { localStorage.setItem(MAP_ID_KEY, 'tumba'); } catch (e) {}
-  exportMapCatalog(true);
-
   stopWorldTravel(false);
   unmount();
   applyMap('tumba');
-  state = migrateFlanaessState(load() || defaultState());
+  state = loadCurrentMapState();
   selected = null; pendingMonster = null; measurePts = null; drag = null;
   mount(host);
-  appAlertMessage('msg004', 'Mapa excluído do seletor neste navegador. O catálogo mapas.json atualizado foi baixado. Publique esse arquivo em mapas/mapas.json no GitHub e, se desejar apagar também as imagens e dados antigos, exclua a pasta mapas/' + deletedId + '/ do repositório.');
+  appAlertMessage('msg004', 'Mapa removido deste navegador. Para removê-lo também dos outros dispositivos, exclua o arquivo ZIP correspondente da pasta mapas/ no GitHub.');
 }
 
 function canvasToWebp(canvas, quality) {
@@ -864,9 +1149,42 @@ function safeMapFileName(value) {
   return String(value || '').replace(/[\\/:*?"<>|]/g, '-').replace(/[\r\n]+/g, ' ').trim() || 'mapa';
 }
 
+async function createCustomMapFromZip(file) {
+  showOptimizeProgress('Lendo o pacote ZIP do mapa…');
+  var pkg = null;
+  try {
+    pkg = await readMapPackage(file, file.name);
+    var importedId = pkg.id;
+    clearDeletedCustomMap(importedId);
+    if (MAPS[importedId] && !MAPS[importedId].custom) {
+      releaseMapPackage(pkg); pkg = null;
+      throw new Error('Este pacote usa o identificador de um mapa original do projeto. Renomeie o mapa ao recriá-lo.');
+    }
+    var host = R;
+    stopWorldTravel(false);
+    save();
+    unmount();
+    if (!registerMapPackage(pkg)) throw new Error('Não foi possível registrar o pacote ZIP.');
+    pkg = null;
+    preferredMapId = importedId;
+    try { localStorage.setItem(MAP_ID_KEY, importedId); } catch (e) {}
+    mount(host);
+    hideOptimizeProgress();
+    appAlertMessage('msg009', 'Mapa adicionado! O ZIP já contém a configuração e todas as imagens. Para mantê-lo disponível após reiniciar, publique este mesmo ZIP diretamente em mapas/ no GitHub; não extraia os arquivos e não precisa atualizar mapas.json.');
+  } catch (error) {
+    if (pkg) releaseMapPackage(pkg);
+    showOptimizeError(error && error.message ? error.message : 'Não foi possível abrir o pacote ZIP do mapa.');
+  }
+}
+
 function createCustomMapFromFile(file) {
-  if (!file || !file.type || file.type.indexOf('image/') !== 0) {
-    appAlertMessage('msg005', 'Selecione um arquivo de imagem válido.');
+  if (!file) return;
+  if (/\.zip$/i.test(file.name || '') || /application\/(?:zip|x-zip-compressed)/i.test(file.type || '')) {
+    createCustomMapFromZip(file);
+    return;
+  }
+  if (!file.type || file.type.indexOf('image/') !== 0) {
+    appAlertMessage('msg005', 'Selecione uma imagem ou um pacote ZIP de mapa.');
     return;
   }
   var suggestedName = file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim() || 'Novo mapa';
@@ -908,27 +1226,22 @@ function createCustomMapFromFile(file) {
       var optimized = await optimizeMapImage(file, width, height, function (done, total) {
         showOptimizeProgress('Otimizando os blocos sem perda e verificando todos os pixels…\nParte ' + done + ' de ' + total);
       }, imageInfo.image ? imageInfo : null);
-      showOptimizeProgress('Gerando o ZIP com as imagens…');
-      var zipBlob = await createImagesZip(optimized.files);
       var id = slugifyMapName(name);
       var suffix = 2;
       while (MAPS[id]) { id = slugifyMapName(name) + '-' + suffix; suffix++; }
-
-      clearDeletedCustomMap(id);
-      var folder = 'mapas/' + id + '/';
-      var stateFileName = safeMapFileName(name) + '.json';
       var runtimeParts = optimized.parts.map(function (part, index) {
-        var partUrl = URL.createObjectURL(optimized.files[index].blob);
+        var imageFile = optimized.files[index];
+        var partUrl = URL.createObjectURL(imageFile.blob);
         runtimeUrls.push(partUrl);
-        return { src: folder + optimized.files[index].name, x: part.x, y: part.y, w: part.w, h: part.h, localSrc: partUrl };
+        return { src: imageFile.name, x: part.x, y: part.y, w: part.w, h: part.h, localSrc: partUrl };
       });
       var config = {
         nome: name,
         icone: '🗺️',
         key: 'animalysson-vtt-custom-' + id,
         custom: true,
-        folder: folder,
-        stateFile: folder + stateFileName,
+        folder: 'mapas/',
+        stateFile: null,
         cell: cell,
         cols: cols,
         rows: rows,
@@ -939,18 +1252,28 @@ function createCustomMapFromFile(file) {
         maxZoom: 4,
         parts: runtimeParts
       };
-      if (!registerCustomMap(id, config, runtimeParts[0].localSrc)) throw new Error('Não foi possível adicionar este mapa.');
-      persistCustomMaps();
+      var manifest = {
+        format: MAP_PACKAGE_FORMAT,
+        version: 1,
+        id: id,
+        createdAt: new Date().toISOString(),
+        config: serializableMapConfig(config)
+      };
+      var zipEntries = [{
+        name: 'mapa.json',
+        blob: new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json;charset=utf-8' })
+      }].concat(optimized.files);
+      showOptimizeProgress('Montando o pacote ZIP com configuração e imagens…');
+      var zipBlob = await createImagesZip(zipEntries);
 
-      var zipName = safeMapFileName(name) + '-imagens-sem-perda.zip';
-      downloadBlob(zipBlob, zipName);
-
+      if (!registerCustomMap(id, config)) throw new Error('Não foi possível adicionar este mapa.');
       hideOptimizeProgress();
       var host = R;
       stopWorldTravel(false);
       save();
       unmount();
       applyMap(id);
+      preferredMapId = id;
       try { localStorage.setItem(MAP_ID_KEY, id); } catch (e) {}
       state = defaultState();
       showGrid = true; showFog = true; dynLight = true; showWalls = true;
@@ -963,10 +1286,12 @@ function createCustomMapFromFile(file) {
       var pngParts = optimized.files.filter(function (entry) { return entry.blob.type === 'image/png'; }).length;
       var webpParts = optimized.files.length - pngParts;
       var formatMessage = pngParts
-        ? (webpParts ? webpParts + ' partes foram salvas em WebP sem perdas e ' + pngParts + ' em PNG sem perdas, pois o PNG foi necessário para preservar exatamente os pixels.' : 'Os ' + pngParts + ' blocos foram salvos em PNG sem perdas para preservar exatamente os pixels.')
+        ? (webpParts ? webpParts + ' partes foram salvas em WebP sem perdas e ' + pngParts + ' em PNG sem perdas.' : 'Os ' + pngParts + ' blocos foram salvos em PNG sem perdas.')
         : 'Todas as partes foram salvas em WebP sem perdas e verificadas pixel a pixel.';
-      var detailMessage = 'A imagem (' + width + ' × ' + height + ' px) foi dividida em ' + optimized.parts.length + ' partes (' + optimized.cols + ' × ' + optimized.rows + '), mantendo a resolução original. ' + formatMessage + gridMessage + ' O ZIP contém todas as partes com os nomes corretos.';
-      appAlertMessage('msg009', 'Mapa adicionado e otimizado! ' + detailMessage + '\n\nExtraia o ZIP dentro de "' + folder + '". Depois baixe o catálogo mapas.json pelo menu e coloque-o em "mapas/mapas.json". Use Salvar mapa para baixar "' + stateFileName + '" na mesma pasta.');
+      var detailMessage = 'A imagem (' + width + ' × ' + height + ' px) foi dividida em ' + optimized.parts.length + ' partes (' + optimized.cols + ' × ' + optimized.rows + '), mantendo a resolução original. ' + formatMessage + gridMessage;
+      appAlertMessage('msg009', 'Mapa criado e ZIP pronto! ' + detailMessage + '\n\nPara disponibilizar em todos os dispositivos, coloque o arquivo ZIP diretamente na pasta mapas/ do repositório. Não extraia o ZIP e não precisa baixar nem atualizar mapas.json.');
+      var zipName = safeMapFileName(name) + '.zip';
+      downloadBlob(zipBlob, zipName);
     } catch (error) {
       runtimeUrls.forEach(function (url) { try { URL.revokeObjectURL(url); } catch (e) {} });
       showOptimizeError(error && error.message ? error.message : 'Não foi possível otimizar a imagem do mapa.');
@@ -2974,7 +3299,7 @@ function teleportThroughWorldPortal(portal) {
   try { localStorage.setItem(MAP_ID_KEY, destinationId); } catch (e) {}
   unmount();
   applyMap(destinationId);
-  state = migrateFlanaessState(load() || defaultState());
+  state = loadCurrentMapState();
   loadRepositoryMapState(function () {
     if (!host || !MAPS[destinationId] || mapId !== destinationId) return;
     var spawn = state.spawn || MAPINFO.spawn || { x: Math.floor(COLS / 2), y: Math.floor(ROWS / 2) };
@@ -4744,7 +5069,7 @@ function mount(el) {
     var desiredMap = preferredMapId;
     try { desiredMap = localStorage.getItem(MAP_ID_KEY) || preferredMapId; } catch (e) {}
     applyMap(MAPS[desiredMap] ? desiredMap : 'tumba');
-    state = migrateFlanaessState(load() || defaultState());
+    state = loadCurrentMapState();
     loadRepositoryMapState(function () {
       if (requestId !== mountRequestId) return;
       mountNow(el);
@@ -4882,9 +5207,9 @@ function mountNow(el) {
     '<small>Percepção, Investigação e ações de interação verificam automaticamente os objetos na visão. Ataque aplica rolagens e dano às criaturas visíveis no alcance.</small></section>' +
     '<div class="mp-bar">' +
     '<div class="mp-map-selector"><select id="mp-map" class="mp-title" title="Trocar de mapa">' + mapOptions() + '</select>' +
-    '<button type="button" id="mp-add-map" class="mp-map-add" title="Adicionar mapa" aria-label="Adicionar mapa">＋</button></div>' +
-    '<input type="file" id="mp-add-map-file" accept="image/*" hidden>' +
-    '<button type="button" id="mp-export" title="Baixar os dados deste mapa em JSON">⬇ Salvar mapa</button>' +
+    '<button type="button" id="mp-add-map" class="mp-map-add" title="Adicionar imagem ou pacote ZIP de mapa" aria-label="Adicionar mapa">＋</button></div>' +
+    '<input type="file" id="mp-add-map-file" accept=".zip,application/zip,image/*" hidden>' +
+    '<button type="button" id="mp-export" title="Baixar pacote ZIP atualizado (mapas personalizados) ou dados JSON (mapas originais)">⬇ Salvar mapa</button>' +
     '<button type="button" id="mp-export-catalog" title="Baixar o catálogo para publicar os mapas adicionados">🗂 Baixar catálogo de mapas</button>' +
     '<label id="mp-hex-wrap" class="mp-luz" style="display:none">Hexágono <select id="mp-hex-size" disabled><option value="small" selected>Pequeno · 6 mi</option></select></label>' +
     '<label id="mp-speed-wrap" class="mp-luz" style="display:none">Velocidade <input id="mp-speed" type="number" min="0.1" step="0.1" placeholder="mi/dia" style="width:62px"></label>' +
@@ -5059,7 +5384,8 @@ function mountNow(el) {
   $('#mp-burger').onclick = function () { setMenu(!menuIsOpen()); };
   $('#mp-export').onclick = function () {
     save();
-    exportMapFile();
+    if (MAPINFO && MAPINFO.custom) exportMapPackage();
+    else exportMapFile();
   };
   $('#mp-export-catalog').style.display = customMapEntries().length ? '' : 'none';
   $('#mp-export-catalog').onclick = function () { exportMapCatalog(); };
@@ -5129,7 +5455,7 @@ function mountNow(el) {
     applyMap(id);
     zoom = isHexMap() ? FLANAESS_ZOOM : 0.35; ox = 40; oy = 40;
     if (isHexMap() && ['muro', 'porta', 'eraseedge'].indexOf(tool) >= 0) tool = 'select';
-    state = migrateFlanaessState(load() || defaultState());
+    state = loadCurrentMapState();
     selected = null; pendingMonster = null; measurePts = null; drag = null;
     mount(host);
   };
