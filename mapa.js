@@ -5015,8 +5015,9 @@ function setMode(nextMode) {
   // Presets de visão pedidos: Jogador sem grade/segredos; Editor com visão completa.
   showGrid = appMode === 'editor';
   showSecrets = appMode === 'editor';
-  showFog = true;
-  dynLight = true;
+  // Editor: sem névoa e sem luz por padrão (continuam podendo ser ligadas pelos botões Névoa/Luz).
+  showFog = appMode === 'player';
+  dynLight = appMode === 'player';
   showWalls = true;
   blockMove = true;
   pendingStructureStart = null;
