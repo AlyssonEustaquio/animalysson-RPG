@@ -4497,7 +4497,7 @@ function mountNow(el) {
 
   // Tudo que altera o mapa ou seus dados fica disponível apenas no Editor.
   [
-    '#mp-add-map', '#mp-add-map-file', '#mp-export', '#mp-export-catalog',
+    '.mp-map-selector', '#mp-add-map', '#mp-add-map-file', '#mp-export', '#mp-export-catalog',
     '#mp-tools', '#mp-grid', '#mp-fog', '#mp-light', '#mp-walls-vis', '#mp-secret-view',
     '#mp-block', '#mp-lr', '#mp-reset-fog', '#mp-clear-fog', '#mp-clear-walls', '#mp-clear-edges',
     '#mp-zo', '#mp-zi', '#mp-side', '#mp-delete-map', '.mp-menu-footer',
