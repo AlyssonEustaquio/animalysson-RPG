@@ -95,7 +95,13 @@ function registerCustomMap(id, config, runtimeImageSrc) {
   if (!id || !config || !config.nome || !config.w || !config.h || !config.parts || !config.parts.length) return false;
   var saved = serializableMapConfig(config);
   saved.custom = true;
-  if (runtimeImageSrc && saved.parts[0]) saved.parts[0].localSrc = runtimeImageSrc;
+  var previous = MAPS[id];
+  saved.parts.forEach(function (part, index) {
+    var fresh = config.parts[index], old = previous && previous.parts && previous.parts[index];
+    if (fresh && fresh.localSrc) part.localSrc = fresh.localSrc;
+    else if (old && old.localSrc && old.src === part.src) part.localSrc = old.localSrc;
+  });
+  if (runtimeImageSrc && saved.parts[0] && !saved.parts[0].localSrc) saved.parts[0].localSrc = runtimeImageSrc;
   if (config.detail && config.detail.runtimeTiles && saved.detail) {
     saved.detail.runtimeTiles = config.detail.runtimeTiles;
   }
@@ -517,24 +523,6 @@ function canvasToWebp(canvas, quality) {
   });
 }
 
-function imageRegionToWebp(image, sx, sy, sw, sh, outW, outH, quality) {
-  var canvas = document.createElement('canvas');
-  canvas.width = Math.max(1, Math.round(outW));
-  canvas.height = Math.max(1, Math.round(outH));
-  var context = canvas.getContext('2d', { alpha: false });
-  if (!context) return Promise.reject(new Error('Não foi possível preparar o canvas de otimização.'));
-  context.imageSmoothingEnabled = true;
-  if ('imageSmoothingQuality' in context) context.imageSmoothingQuality = 'high';
-  context.drawImage(image, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
-  return canvasToWebp(canvas, quality).then(function (blob) {
-    canvas.width = 1; canvas.height = 1;
-    return blob;
-  }, function (error) {
-    canvas.width = 1; canvas.height = 1;
-    throw error;
-  });
-}
-
 function crc32Bytes(bytes) {
   var crc = 0xFFFFFFFF;
   for (var i = 0; i < bytes.length; i++) {
@@ -589,39 +577,97 @@ function createImagesZip(entries) {
   });
 }
 
-function optimizeMapImage(image, width, height) {
-  var maxEdge = Math.max(width, height);
-  var baseMaxEdge = 3000;
-  var baseScale = Math.min(1, baseMaxEdge / maxEdge);
-  var baseW = Math.max(1, Math.round(width * baseScale));
-  var baseH = Math.max(1, Math.round(height * baseScale));
-  var tasks = [{ name: 'imagem.webp', sx: 0, sy: 0, sw: width, sh: height, outW: baseW, outH: baseH, quality: 0.84 }];
-  var detailN = maxEdge > baseMaxEdge ? Math.ceil(maxEdge / 4096) : 0;
-  if (detailN) {
-    var tileW = width / detailN, tileH = height / detailN;
-    for (var r = 0; r < detailN; r++) {
-      for (var c = 0; c < detailN; c++) {
-        var sx = c * tileW, sy = r * tileH;
-        var sw = Math.min(tileW, width - sx), sh = Math.min(tileH, height - sy);
-        tasks.push({
-          name: 'detalhe/d_' + r + '_' + c + '.webp',
-          sx: sx, sy: sy, sw: sw, sh: sh,
-          outW: Math.ceil(sw), outH: Math.ceil(sh), quality: 0.86
-        });
-      }
+// ---------- Otimizador de imagens de mapa: divide em partes e converte para WebP sem perdas ----------
+// Cada parte mantém a resolução original (sem redimensionar) e é gravada em WebP lossless
+// (qualidade 1 no canvas do Chrome/Edge). Depois de gerar cada parte, os pixels do WebP são
+// decodificados e comparados com os da imagem original; se houver qualquer diferença, o processo é interrompido.
+var MAP_PART_MAX_EDGE = 2048;
+
+function planMapParts(width, height, maxEdge) {
+  var limit = maxEdge || MAP_PART_MAX_EDGE;
+  function pieces(size) { return Math.max(size > 1024 ? 2 : 1, Math.ceil(size / limit)); }
+  var cols = pieces(width), rows = pieces(height), parts = [];
+  for (var r = 0; r < rows; r++) {
+    for (var c = 0; c < cols; c++) {
+      var x0 = Math.round(c * width / cols), x1 = Math.round((c + 1) * width / cols);
+      var y0 = Math.round(r * height / rows), y1 = Math.round((r + 1) * height / rows);
+      parts.push({ name: 'hi_part' + (r * cols + c + 1) + '.webp', x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
     }
   }
-  var files = [], chain = Promise.resolve();
-  // Processa um canvas por vez para não manter vários mapas gigantes na memória.
-  tasks.forEach(function (task) {
+  return { cols: cols, rows: rows, parts: parts };
+}
+
+function verifyLosslessWebp(sourceCanvas, blob) {
+  var w = sourceCanvas.width, h = sourceCanvas.height;
+  return new Promise(function (resolve, reject) {
+    var url = URL.createObjectURL(blob), decoded = new Image();
+    decoded.onload = function () { URL.revokeObjectURL(url); resolve(decoded); };
+    decoded.onerror = function () { URL.revokeObjectURL(url); reject(new Error('Não foi possível conferir o WebP gerado.')); };
+    decoded.src = url;
+  }).then(function (decoded) {
+    var check = document.createElement('canvas');
+    check.width = w; check.height = h;
+    var checkContext = check.getContext('2d', { willReadFrequently: true });
+    checkContext.imageSmoothingEnabled = false;
+    checkContext.drawImage(decoded, 0, 0);
+    var original = sourceCanvas.getContext('2d').getImageData(0, 0, w, h).data;
+    var converted = checkContext.getImageData(0, 0, w, h).data;
+    check.width = 1; check.height = 1;
+    for (var i = 0; i < original.length; i += 4) {
+      var same = original[i + 3] === converted[i + 3] &&
+        (original[i + 3] !== 255 || (original[i] === converted[i] && original[i + 1] === converted[i + 1] && original[i + 2] === converted[i + 2]));
+      if (!same) throw new Error('O navegador não gerou um WebP idêntico à imagem original. Para não perder qualidade, a otimização foi cancelada. Use o Google Chrome ou o Microsoft Edge atualizados.');
+    }
+  });
+}
+
+function imageRegionToLosslessWebp(image, sx, sy, sw, sh) {
+  var canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(sw));
+  canvas.height = Math.max(1, Math.round(sh));
+  var context = canvas.getContext('2d', { willReadFrequently: true });
+  if (!context) return Promise.reject(new Error('Não foi possível preparar o canvas de otimização.'));
+  context.imageSmoothingEnabled = false;
+  context.drawImage(image, sx, sy, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+  function release() { canvas.width = 1; canvas.height = 1; }
+  return canvasToWebp(canvas, 1)
+    .then(function (blob) { return verifyLosslessWebp(canvas, blob).then(function () { return blob; }); })
+    .then(function (blob) { release(); return blob; }, function (error) { release(); throw error; });
+}
+
+function optimizeMapImage(image, width, height, onProgress) {
+  var plan = planMapParts(width, height), files = [], chain = Promise.resolve();
+  // Processa uma parte por vez para não manter vários canvas gigantes na memória.
+  plan.parts.forEach(function (part, index) {
     chain = chain.then(function () {
-      return imageRegionToWebp(image, task.sx, task.sy, task.sw, task.sh, task.outW, task.outH, task.quality)
-        .then(function (blob) { files.push({ name: task.name, blob: blob }); });
-    });
+      if (onProgress) onProgress(index + 1, plan.parts.length);
+      return new Promise(function (resolve) { setTimeout(resolve, 16); });
+    }).then(function () {
+      return imageRegionToLosslessWebp(image, part.x, part.y, part.w, part.h);
+    }).then(function (blob) { files.push({ name: part.name, blob: blob }); });
   });
-  return chain.then(function () {
-    return { baseBlob: files[0].blob, files: files, detailN: detailN };
-  });
+  return chain.then(function () { return { files: files, parts: plan.parts, cols: plan.cols, rows: plan.rows }; });
+}
+
+function showOptimizeProgress(text) {
+  var root = R && R.querySelector('#mp-root');
+  if (!root) return;
+  var box = root.querySelector('#mp-optimize-progress');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'mp-optimize-progress';
+    box.setAttribute('role', 'status');
+    box.style.cssText = 'position:absolute;inset:0;z-index:150;display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;background:rgba(0,0,0,.72);color:#f4f5f7;font-size:14px;text-align:center;';
+    var inner = document.createElement('div');
+    inner.style.cssText = 'max-width:360px;padding:18px 20px;border:1px solid rgba(255,255,255,.2);border-radius:12px;background:#17191f;line-height:1.5;white-space:pre-line;';
+    box.appendChild(inner);
+    root.appendChild(box);
+  }
+  box.firstChild.textContent = text;
+}
+function hideOptimizeProgress() {
+  var box = R && R.querySelector('#mp-optimize-progress');
+  if (box && box.parentNode) box.parentNode.removeChild(box);
 }
 
 function slugifyMapName(value) {
@@ -659,7 +705,10 @@ function createCustomMapFromFile(file) {
         var height = image.naturalHeight || image.height;
         if (!width || !height) throw new Error('Não foi possível identificar as dimensões da imagem.');
         if (width * height > 160000000) throw new Error('A imagem ultrapassa o limite de 160 megapixels para otimização segura no navegador. Reduza a imagem antes de importar.');
-        var optimized = await optimizeMapImage(image, width, height);
+        var optimized = await optimizeMapImage(image, width, height, function (done, total) {
+          showOptimizeProgress('Otimizando a imagem em WebP sem perdas…\nParte ' + done + ' de ' + total);
+        });
+        showOptimizeProgress('Gerando o ZIP com as imagens…');
         var zipBlob = await createImagesZip(optimized.files);
         var id = slugifyMapName(name);
         var suffix = 2;
@@ -670,16 +719,10 @@ function createCustomMapFromFile(file) {
         clearDeletedCustomMap(id);
         var folder = 'mapas/' + id + '/';
         var stateFileName = safeMapFileName(name) + '.json';
-        var baseUrl = URL.createObjectURL(optimized.baseBlob);
-        runtimeUrls.push(baseUrl);
-        var runtimeTiles = {};
-        optimized.files.forEach(function (entry) {
-          if (entry.name.indexOf('detalhe/') !== 0) return;
-          var tileMatch = entry.name.match(/d_(\d+)_(\d+)\.webp$/);
-          if (!tileMatch) return;
-          var tileUrl = URL.createObjectURL(entry.blob);
-          runtimeUrls.push(tileUrl);
-          runtimeTiles[tileMatch[1] + '_' + tileMatch[2]] = tileUrl;
+        var runtimeParts = optimized.parts.map(function (part, index) {
+          var partUrl = URL.createObjectURL(optimized.files[index].blob);
+          runtimeUrls.push(partUrl);
+          return { src: folder + part.name, x: part.x, y: part.y, w: part.w, h: part.h, localSrc: partUrl };
         });
         var config = {
           nome: name,
@@ -696,23 +739,15 @@ function createCustomMapFromFile(file) {
           spawn: { x: Math.floor(cols / 2), y: Math.floor(rows / 2) },
           fit: true,
           maxZoom: 4,
-          parts: [{ src: folder + 'imagem.webp', x: 0, y: 0, w: width, h: height }]
+          parts: runtimeParts
         };
-        config.parts[0].localSrc = baseUrl;
-        if (optimized.detailN) {
-          config.detail = {
-            src: folder + 'detalhe/d_{r}_{c}.webp',
-            n: optimized.detailN,
-            minZoom: 1.1,
-            runtimeTiles: runtimeTiles
-          };
-        }
-        if (!registerCustomMap(id, config, baseUrl)) throw new Error('Não foi possível adicionar este mapa.');
+        if (!registerCustomMap(id, config, runtimeParts[0].localSrc)) throw new Error('Não foi possível adicionar este mapa.');
         persistCustomMaps();
 
         var zipName = safeMapFileName(name) + '-imagens-webp.zip';
         downloadBlob(zipBlob, zipName);
 
+        hideOptimizeProgress();
         var host = R;
         stopWorldTravel(false);
         save();
@@ -724,11 +759,10 @@ function createCustomMapFromFile(file) {
         selected = null; pendingMonster = null; measurePts = null; drag = null;
         save();
         mount(host);
-        var detailMessage = optimized.detailN
-          ? 'O ZIP contém imagem.webp e ' + (optimized.detailN * optimized.detailN) + ' blocos WebP de detalhe, carregados conforme o zoom.'
-          : 'O ZIP contém imagem.webp otimizada em WebP.';
+        var detailMessage = 'A imagem (' + width + ' × ' + height + ' px) foi dividida em ' + optimized.parts.length + ' partes (' + optimized.cols + ' × ' + optimized.rows + ') e convertida para WebP sem perdas, na resolução original. O ZIP contém hi_part1.webp até hi_part' + optimized.parts.length + '.webp.';
         appAlertMessage('msg009', 'Mapa adicionado e otimizado! ' + detailMessage + '\n\nExtraia o ZIP dentro de "' + folder + '". Depois baixe o catálogo mapas.json pelo menu e coloque-o em "mapas/mapas.json". Use Salvar mapa para baixar "' + stateFileName + '" na mesma pasta.');
       } catch (error) {
+        hideOptimizeProgress();
         runtimeUrls.forEach(function (url) { try { URL.revokeObjectURL(url); } catch (e) {} });
         appAlertMessage('msg010', error && error.message ? error.message : 'Não foi possível otimizar a imagem do mapa.');
       } finally {
@@ -2095,10 +2129,15 @@ function draw() {
   cx.translate(ox, oy);
   cx.scale(zoom, zoom);
 
+  // Só desenha as partes que aparecem na tela; a sobreposição de meio pixel evita linhas finas entre as partes.
+  var viewX0 = -ox / zoom, viewY0 = -oy / zoom, viewX1 = (W - ox) / zoom, viewY1 = (H - oy) / zoom;
+  var partSeam = 0.5 / zoom;
   PARTS.forEach(function (p, i) {
+    if (p.x > viewX1 || p.y > viewY1 || p.x + p.w < viewX0 || p.y + p.h < viewY0) return;
     var img = bgImages[i];
-    if (img && img.complete && img.naturalWidth) cx.drawImage(img, p.x, p.y, p.w, p.h);
-    else { cx.fillStyle = '#1a1a1c'; cx.fillRect(p.x, p.y, p.w, p.h); }
+    var partW = p.w + (p.x + p.w < MAP_W ? partSeam : 0), partH = p.h + (p.y + p.h < MAP_H ? partSeam : 0);
+    if (img && img.complete && img.naturalWidth) cx.drawImage(img, p.x, p.y, partW, partH);
+    else { cx.fillStyle = '#1a1a1c'; cx.fillRect(p.x, p.y, partW, partH); }
   });
   // No Flanaess, sobrepõe os tiles detalhados para usar a resolução máxima.
   if (isHexMap()) drawDetail(W, H);
