@@ -2743,6 +2743,8 @@ function drawEdges() {
   function drawOne(edge, val) {
     if (val === EDGE_NONE || edgeIsHidden(edge, val)) return;
     var meta = getEdgeMeta(edge) || {};
+    // Modo Jogador: muros comuns (e ilusões ainda não percebidas, que parecem muros comuns) não são desenhados.
+    if (appMode === 'player' && (val === EDGE_MURO || (val === EDGE_ILLUSION_WALL && !meta.detected))) return;
     if (val === EDGE_SECRET_WALL && meta.open) return;
     var a, b;
     if (edge.dir === 'h') {
@@ -2793,6 +2795,7 @@ function drawEdges() {
   (state.customEdges || []).forEach(function(item){
     var val=item.val, meta=item.meta||{}; if(!val || edgeIsHidden({custom:item},val)) return;
     if(val===EDGE_SECRET_WALL && meta.open) return;
+    if(appMode==='player' && (val===EDGE_MURO || (val===EDGE_ILLUSION_WALL && !meta.detected))) return;
     var isDoor=isDoorEdge(val), opened=val===EDGE_DOOR_O || val===EDGE_SECRET_DOOR_O || !!meta.open;
     var color=val===EDGE_MURO?'#c62828':val===EDGE_SECRET_WALL?'#ab47bc':val===EDGE_SECRET_DOOR_C||val===EDGE_SECRET_DOOR_O?'#8e24aa':val===EDGE_LOCKED_DOOR?'#42a5f5':val===EDGE_JAMMED_DOOR?'#ff8f00':val===EDGE_ILLUSION_WALL?'#26c6da':val===EDGE_FORCE_WALL?'#80deea':val===EDGE_MAGIC_WALL?'#7e57c2':(opened?'rgba(141,110,99,0.45)':'#8d6e63');
     cx.save(); cx.strokeStyle=color; cx.lineWidth=Math.max(2.5,3.5/zoom);
