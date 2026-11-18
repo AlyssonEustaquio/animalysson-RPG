@@ -2522,6 +2522,158 @@ function currentPlayer() {
   return state.tokens.find(function (t) { return t.tipo === 'player'; }) || state.tokens[0] || null;
 }
 
+function resizeCustomMapTiles(requestedCell) {
+  if (!MAPINFO || !MAPINFO.custom || isHexMap()) {
+    appAlertMessage('msg010', 'O ajuste de tile está disponível para mapas personalizados com grade quadrada.');
+    return false;
+  }
+  var newCell = Math.round(Number(requestedCell));
+  if (!isFinite(newCell) || newCell < 8 || newCell > 512) {
+    appAlertMessage('msg010', 'Informe um tamanho de tile entre 8 e 512 pixels.');
+    return false;
+  }
+  var oldCell = Number(MAPINFO.cell) || CELL;
+  if (newCell === oldCell) return true;
+
+  var oldCols = COLS, oldRows = ROWS;
+  var newCols = Math.ceil(MAP_W / newCell), newRows = Math.ceil(MAP_H / newCell);
+  var newCount = newCols * newRows;
+  if (!newCols || !newRows || !isFinite(newCount) || newCount > 500000) {
+    appAlertMessage('msg010', 'Esse tamanho criaria ' + newCount.toLocaleString('pt-BR') + ' tiles. Escolha um tile maior para manter a grade abaixo de 500.000 células.');
+    return false;
+  }
+
+  var oldFog = state.fog || [], oldWalls = state.walls || [], oldWallMeta = state.wallMeta || [];
+  var oldHEdges = state.hEdges || [], oldVEdges = state.vEdges || [];
+  var oldHEdgeMeta = state.hEdgeMeta || [], oldVEdgeMeta = state.vEdgeMeta || [];
+  var oldSpawn = state.spawn || MAPINFO.spawn || { x: Math.floor(oldCols / 2), y: Math.floor(oldRows / 2) };
+
+  function remapCellPoint(point) {
+    var worldX = (Number(point.x) + 0.5) * oldCell;
+    var worldY = (Number(point.y) + 0.5) * oldCell;
+    return {
+      x: Math.max(0, Math.min(newCols - 1, Math.floor(worldX / newCell))),
+      y: Math.max(0, Math.min(newRows - 1, Math.floor(worldY / newCell)))
+    };
+  }
+
+  // Sample old values at each new tile center. This handles both finer and coarser grids.
+  var newFog = new Array(newCount);
+  var newWalls = new Array(newCount);
+  var newWallMeta = new Array(newCount);
+  for (var ny = 0; ny < newRows; ny++) {
+    var sampleY = Math.min(oldRows - 1, Math.max(0, Math.floor(((ny + 0.5) * newCell) / oldCell)));
+    for (var nx = 0; nx < newCols; nx++) {
+      var sampleX = Math.min(oldCols - 1, Math.max(0, Math.floor(((nx + 0.5) * newCell) / oldCell)));
+      var oldIndex = sampleY * oldCols + sampleX;
+      var newIndex = ny * newCols + nx;
+      newFog[newIndex] = oldFog[oldIndex] == null ? 1 : oldFog[oldIndex];
+      newWalls[newIndex] = oldWalls[oldIndex] ? 1 : 0;
+      newWallMeta[newIndex] = oldWallMeta[oldIndex] || null;
+    }
+  }
+
+  // When merging tiles, preserve any wall/revealed area that would otherwise fall
+  // between the new tile centers. The OR behavior is intentional for coarse grids.
+  if (newCell > oldCell) {
+    for (var oy0 = 0; oy0 < oldRows; oy0++) {
+      var targetY = Math.max(0, Math.min(newRows - 1, Math.floor(((oy0 + 0.5) * oldCell) / newCell)));
+      for (var ox0 = 0; ox0 < oldCols; ox0++) {
+        var sourceIndex = oy0 * oldCols + ox0;
+        var targetX = Math.max(0, Math.min(newCols - 1, Math.floor(((ox0 + 0.5) * oldCell) / newCell)));
+        var targetIndex = targetY * newCols + targetX;
+        if (oldWalls[sourceIndex]) {
+          newWalls[targetIndex] = 1;
+          if (!newWallMeta[targetIndex] && oldWallMeta[sourceIndex]) newWallMeta[targetIndex] = oldWallMeta[sourceIndex];
+        }
+        if (oldFog[sourceIndex] === 0) newFog[targetIndex] = 0;
+      }
+    }
+  }
+
+  var newHEdges = new Array(newCols * (newRows + 1));
+  var newHEdgeMeta = new Array(newCols * (newRows + 1));
+  var newVEdges = new Array((newCols + 1) * newRows);
+  var newVEdgeMeta = new Array((newCols + 1) * newRows);
+  for (var hi = 0; hi < newHEdges.length; hi++) { newHEdges[hi] = 0; newHEdgeMeta[hi] = null; }
+  for (var vi = 0; vi < newVEdges.length; vi++) { newVEdges[vi] = 0; newVEdgeMeta[vi] = null; }
+
+  // Transfer existing horizontal/vertical edges by their image-space coordinates.
+  for (var oldYEdge = 0; oldYEdge <= oldRows; oldYEdge++) {
+    var newYEdge = Math.round((oldYEdge * oldCell) / newCell);
+    if (newYEdge < 0 || newYEdge > newRows) continue;
+    for (var oldXEdge = 0; oldXEdge < oldCols; oldXEdge++) {
+      var oldHIndex = oldYEdge * oldCols + oldXEdge;
+      var hValue = oldHEdges[oldHIndex] || 0;
+      if (!hValue) continue;
+      var hStart = oldXEdge * oldCell;
+      var hEnd = Math.min(MAP_W, (oldXEdge + 1) * oldCell);
+      var hFirst = Math.max(0, Math.floor(hStart / newCell));
+      var hLast = Math.min(newCols - 1, Math.ceil(hEnd / newCell) - 1);
+      for (var hX = hFirst; hX <= hLast; hX++) {
+        var hIndex = newYEdge * newCols + hX;
+        if (!newHEdges[hIndex]) {
+          newHEdges[hIndex] = hValue;
+          newHEdgeMeta[hIndex] = oldHEdgeMeta[oldHIndex] || null;
+        }
+      }
+    }
+  }
+  for (var oldY = 0; oldY < oldRows; oldY++) {
+    for (var oldXEdge2 = 0; oldXEdge2 <= oldCols; oldXEdge2++) {
+      var oldVIndex = oldY * (oldCols + 1) + oldXEdge2;
+      var vValue = oldVEdges[oldVIndex] || 0;
+      if (!vValue) continue;
+      var newXEdge = Math.round((oldXEdge2 * oldCell) / newCell);
+      if (newXEdge < 0 || newXEdge > newCols) continue;
+      var vStart = oldY * oldCell;
+      var vEnd = Math.min(MAP_H, (oldY + 1) * oldCell);
+      var vFirst = Math.max(0, Math.floor(vStart / newCell));
+      var vLast = Math.min(newRows - 1, Math.ceil(vEnd / newCell) - 1);
+      for (var vY = vFirst; vY <= vLast; vY++) {
+        var vIndex = vY * (newCols + 1) + newXEdge;
+        if (!newVEdges[vIndex]) {
+          newVEdges[vIndex] = vValue;
+          newVEdgeMeta[vIndex] = oldVEdgeMeta[oldVIndex] || null;
+        }
+      }
+    }
+  }
+
+  // Keep token and portal positions in the same approximate image-space location.
+  (state.tokens || []).forEach(function (token) {
+    var next = remapCellPoint(token);
+    token.x = next.x; token.y = next.y;
+  });
+  state.spawn = remapCellPoint(oldSpawn);
+  (state.portals || []).forEach(function (portal) {
+    var next = remapCellPoint(portal);
+    portal.x = next.x; portal.y = next.y;
+    if (!portal.destMapId && isFinite(Number(portal.destX)) && isFinite(Number(portal.destY))) {
+      var destination = remapCellPoint({ x: portal.destX, y: portal.destY });
+      portal.destX = destination.x; portal.destY = destination.y;
+    }
+  });
+
+  MAPINFO.cell = newCell;
+  MAPINFO.cols = newCols;
+  MAPINFO.rows = newRows;
+  MAPINFO.spawn = { x: state.spawn.x, y: state.spawn.y };
+  state.fog = newFog;
+  state.walls = newWalls;
+  state.wallMeta = newWallMeta;
+  state.hEdges = newHEdges;
+  state.vEdges = newVEdges;
+  state.hEdgeMeta = newHEdgeMeta;
+  state.vEdgeMeta = newVEdgeMeta;
+
+  applyMap(mapId);
+  persistCustomMaps();
+  save();
+  if (cv) draw();
+  return true;
+}
+
 function setMapSpawn(cell, player) {
   if (!cell) return;
   var point = {
@@ -4740,6 +4892,7 @@ function mountNow(el) {
     '<button type="button" id="mp-world-spawn" class="mp-world-action" title="Definir o ponto de início deste mapa">📍 Definir início</button>' +
     '<button type="button" id="mp-world-portal" class="mp-world-action" title="No modo Editor: adicionar um teleporte para outro mapa">🌀 Teleporte para outro mapa</button>' +
     '<button type="button" id="mp-world-local-portal" class="mp-world-action" title="No modo Editor: clique no ponto A e depois no ponto B para criar um teleporte dentro deste mapa">🌀 Teleporte neste mapa</button>' +
+    '<label id="mp-tile-size-wrap" class="mp-luz mp-editor-only" style="display:none">Tile (px) <input id="mp-tile-size" type="number" min="8" max="512" step="1" style="width:68px" aria-label="Tamanho do tile em pixels"><button type="button" id="mp-apply-tile-size">Aplicar</button></label>' +
     '<div class="mp-g" id="mp-tools">' +
     '<button data-t="wall" title="Posicionar parede em uma quadrícula">🧱 Parede</button>' +
     '<button data-t="muro" title="Desenhar muro: clique em um canto e depois em outro">─ Muro</button>' +
@@ -4826,6 +4979,10 @@ function mountNow(el) {
     '#mp-root .mp-world-action{display:none;width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid rgba(90,210,235,.45);border-radius:8px;background:rgba(35,125,150,.18);color:#d9fbff;font-weight:600;cursor:pointer;}' +
     '#mp-root .mp-world-action:hover{background:rgba(35,155,180,.3);}' +
     '#mp-root .mp-world-action.active{background:rgba(35,155,180,.48);border-color:#55e6ff;}' +
+    '#mp-root.editor-mode:not(.mp-world-map) #mp-world-spawn{display:block !important;}' +
+    '#mp-root #mp-tile-size-wrap{align-items:center;gap:7px;flex-wrap:wrap;padding:7px 9px;border:1px solid rgba(255,255,255,.14);border-radius:7px;background:rgba(255,255,255,.035);}' +
+    '#mp-root #mp-tile-size{max-width:80px;box-sizing:border-box;padding:6px;border:1px solid rgba(255,255,255,.2);border-radius:6px;background:#252a34;color:#fff;}' +
+    '#mp-root #mp-apply-tile-size{min-height:30px;padding:5px 9px;border:1px solid rgba(90,180,220,.45);border-radius:6px;background:#24536b;color:#fff;cursor:pointer;}' +
     '#mp-root .mp-delete-map{display:block;width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid rgba(220,70,70,.65);border-radius:8px;' +
       'background:rgba(150,35,35,.2);color:#ffb6b6;font-weight:600;cursor:pointer;}' +
     '#mp-root .mp-delete-map:hover:not(:disabled){background:rgba(180,45,45,.38);}' +
@@ -4866,7 +5023,7 @@ function mountNow(el) {
   // Tudo que altera o mapa ou seus dados fica disponível apenas no Editor.
   [
     '.mp-map-selector', '#mp-add-map', '#mp-add-map-file', '#mp-export', '#mp-export-catalog',
-    '#mp-tools', '#mp-grid', '#mp-fog', '#mp-light', '#mp-walls-vis', '#mp-secret-view',
+    '#mp-tools', '#mp-tile-size-wrap', '#mp-grid', '#mp-fog', '#mp-light', '#mp-walls-vis', '#mp-secret-view',
     '#mp-block', '#mp-lr', '#mp-reset-fog', '#mp-clear-fog', '#mp-clear-walls', '#mp-clear-edges',
     '#mp-zo', '#mp-zi', '#mp-side', '#mp-delete-map', '.mp-menu-footer',
     '#mp-world-move', '#mp-world-spawn', '#mp-world-portal', '#mp-world-local-portal'
@@ -4923,7 +5080,6 @@ function mountNow(el) {
     setTool('select'); setMenu(false);
   };
   $('#mp-world-spawn').onclick = function () {
-    if (!isHexMap()) return;
     setTool('spawn'); setMenu(false);
   };
   $('#mp-world-portal').onclick = function () {
@@ -4934,6 +5090,27 @@ function mountNow(el) {
     if (!isHexMap()) return;
     setTool('localPortal'); setMenu(false);
   };
+  var tileSizeWrap = $('#mp-tile-size-wrap');
+  var tileSizeInput = $('#mp-tile-size');
+  var applyTileSizeButton = $('#mp-apply-tile-size');
+  if (tileSizeWrap && tileSizeInput && applyTileSizeButton) {
+    tileSizeWrap.style.display = MAPINFO.custom && !isHexMap() ? 'flex' : 'none';
+    tileSizeInput.value = String(MAPINFO.cell || CELL);
+    applyTileSizeButton.onclick = function () {
+      var nextSize = Number(tileSizeInput.value);
+      if (!isFinite(nextSize) || nextSize < 8 || nextSize > 512) {
+        appAlertMessage('msg010', 'Informe um tamanho de tile entre 8 e 512 pixels.');
+        tileSizeInput.value = String(MAPINFO.cell || CELL);
+        return;
+      }
+      if (resizeCustomMapTiles(nextSize)) {
+        tileSizeInput.value = String(MAPINFO.cell || CELL);
+        appAlertMessage('msg009', 'Tamanho do tile atualizado para ' + MAPINFO.cell + ' px. As posições dos tokens, o ponto de início, a névoa, as paredes e os muros/portas foram ajustados para a nova grade.');
+      } else {
+        tileSizeInput.value = String(MAPINFO.cell || CELL);
+      }
+    };
+  }
   cv.addEventListener('pointerdown', onPointerDown);
   cv.addEventListener('pointermove', onPointerMove);
   cv.addEventListener('pointerleave', onPointerLeave);
@@ -4978,7 +5155,6 @@ function mountNow(el) {
       '#mp-root.mp-world-map.editor-mode .mp-world-action {display:block !important;}' +
       '#mp-root.editor-mode #mp-world-local-portal {display:block !important;}' +
       '#mp-root:not(.mp-world-map).editor-mode #mp-world-move,' +
-      '#mp-root:not(.mp-world-map).editor-mode #mp-world-spawn,' +
       '#mp-root:not(.mp-world-map).editor-mode #mp-world-portal {display:none !important;}' +
       '#mp-root.mp-world-map.editor-mode #mp-tools {display:grid !important;grid-template-columns:1fr 1fr;gap:6px;}' +
       '#mp-root.mp-world-map.editor-mode #mp-tools button {width:100%;box-sizing:border-box;}' +
