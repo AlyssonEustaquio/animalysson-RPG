@@ -1,6 +1,3 @@
-/* monsters.js — gerado automaticamente a partir de monsters.json (PT-BR).
- * Não editar à mão; rode translate-monsters.py novamente.
- */
 (function () {
   'use strict';
   var RAW = [
