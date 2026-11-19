@@ -3,9 +3,6 @@
     B: 'Bardo', Br: 'Bruxo', C: 'Clérigo', D: 'Druida', F: 'Feiticeiro',
     M: 'Mago', P: 'Paladino', R: 'Guardião'
   };
-
-  // formato: nome PT|nome EN|nível|escola|classes (códigos)|tempo|alcance|flags
-  // flags: C = concentração; R = ritual
   const RAW = `
 Ataque Certeiro|True Strike|0|Adivinhação|B,Br,F,M|1 ação|9 m|C
 Bordão Místico|Shillelagh|0|Transmutação|D|1 ação bônus|toque|-
@@ -31,7 +28,6 @@ Taumaturgia|Thaumaturgy|0|Transmutação|C|1 ação|9 m|-
 Toque Arrepiante|Chill Touch|0|Necromancia|Br,F,M|1 ação|36 m|-
 Toque Chocante|Shocking Grasp|0|Evocação|F,M|1 ação|toque|-
 Zombaria Viciosa|Vicious Mockery|0|Encantamento|B|1 ação|18 m|-
-
 Alarme|Alarm|1|Abjuração|M,R|1 minuto|9 m|R
 Amizade Animal|Animal Friendship|1|Encantamento|B,D,R|1 ação|9 m|-
 Armadura Arcana|Mage Armor|1|Abjuração|F,M|1 ação|toque|-
@@ -81,7 +77,6 @@ Santuário|Sanctuary|1|Abjuração|C|1 ação bônus|9 m|-
 Servo Invisível|Unseen Servant|1|Conjuração|B,Br,M|1 ação|18 m|R
 Sono|Sleep|1|Encantamento|B,F,M|1 ação|27 m|-
 Vitalidade Falsa|False Life|1|Necromancia|F,M|1 ação|pessoal|-
-
 Acalmar Emoções|Calm Emotions|2|Encantamento|B,C|1 ação|18 m|C
 Ajuda|Aid|2|Abjuração|C,P|1 ação|9 m|-
 Alterar-se|Alter Self|2|Transmutação|F,M|1 ação|pessoal|C
@@ -136,7 +131,6 @@ Ver o Invisível|See Invisibility|2|Adivinhação|B,F,M|1 ação|pessoal|-
 Vínculo Protetor|Warding Bond|2|Abjuração|C|1 ação|toque|-
 Visão no Escuro|Darkvision|2|Transmutação|D,F,M,R|1 ação|toque|-
 Zona da Verdade|Zone of Truth|2|Encantamento|B,C,P|1 ação|18 m|-
-
 Ampliar Plantas|Plant Growth|3|Transmutação|B,D,R|1 ação|45 m|-
 Andar na Água|Water Walk|3|Transmutação|C,D,F,R|1 ação|9 m|R
 Animar Mortos|Animate Dead|3|Necromancia|C,M|1 minuto|3 m|-
@@ -179,7 +173,6 @@ Tempestade de Granizo|Sleet Storm|3|Conjuração|D,F,M|1 ação|45 m|C
 Toque Vampírico|Vampiric Touch|3|Necromancia|Br,M|1 ação|pessoal|C
 Velocidade|Haste|3|Transmutação|F,M|1 ação|9 m|C
 Voo|Fly|3|Transmutação|Br,F,M|1 ação|toque|C
-
 Adivinhação|Divination|4|Adivinhação|D|1 ação|pessoal|R
 Arca Secreta|Secret Chest|4|Conjuração|M|1 ação|toque|-
 Assassino Fantasmagórico|Phantasmal Killer|4|Ilusão|M|1 ação|36 m|C
@@ -211,7 +204,6 @@ Santuário Particular|Private Sanctum|4|Abjuração|M|10 minutos|36 m|-
 Tempestade de Gelo|Ice Storm|4|Evocação|D,F,M|1 ação|90 m|-
 Tentáculos Negros|Black Tentacles|4|Conjuração|M|1 ação|27 m|C
 Terreno Alucinógeno|Hallucinatory Terrain|4|Ilusão|B,Br,D,M|10 minutos|90 m|-
-
 Animar Objetos|Animate Objects|5|Transmutação|B,F,M|1 ação|36 m|C
 Aparência|Seeming|5|Ilusão|B,F,M|1 ação|9 m|-
 Círculo de Teletransporte|Teleportation Circle|5|Conjuração|B,F,M|1 minuto|3 m|-
@@ -249,7 +241,6 @@ Sonho|Dream|5|Ilusão|B,Br,M|1 minuto|especial|-
 Telecinésia|Telekinesis|5|Transmutação|F,M|1 ação|18 m|C
 Vidência|Scrying|5|Adivinhação|B,Br,C,D,M|10 minutos|pessoal|C
 Vínculo Planar|Planar Binding|5|Abjuração|B,C,D,M|1 hora|18 m|-
-
 Aliado Planar|Planar Ally|6|Conjuração|C|10 minutos|18 m|-
 Banquete de Heróis|Heroes' Feast|6|Conjuração|C,D|10 minutos|9 m|-
 Barreira de Lâminas|Blade Barrier|6|Evocação|C|1 ação|27 m|C
@@ -281,7 +272,6 @@ Recipiente Arcano|Magic Jar|6|Necromancia|M|1 minuto|pessoal|-
 Sugestão em Massa|Mass Suggestion|6|Encantamento|B,Br,F,M|1 ação|18 m|-
 Teletransporte por Árvores|Transport via Plants|6|Conjuração|D|1 ação|3 m|-
 Visão da Verdade|True Seeing|6|Adivinhação|B,Br,C,F,M|1 ação|toque|-
-
 Bola de Fogo Controlável|Delayed Blast Fireball|7|Evocação|F,M|1 ação|45 m|C
 Conjurar Celestial|Conjure Celestial|7|Conjuração|C|1 minuto|27 m|C
 Dedo da Morte|Finger of Death|7|Necromancia|Br,F,M|1 ação|18 m|-
@@ -302,7 +292,6 @@ Simulacro|Simulacrum|7|Ilusão|M|12 horas|toque|-
 Teletransporte|Teleport|7|Conjuração|B,F,M|1 ação|3 m|-
 Tempestade de Fogo|Fire Storm|7|Evocação|C,D,F|1 ação|45 m|-
 Viagem Planar|Plane Shift|7|Conjuração|Br,C,D,F,M|1 ação|toque|-
-
 Antipatia/Simpatia|Antipathy/Sympathy|8|Encantamento|D,M|1 hora|18 m|-
 Aura Sagrada|Holy Aura|8|Abjuração|C|1 ação|pessoal|C
 Campo Antimagia|Antimagic Field|8|Abjuração|C,M|1 ação|pessoal|C
@@ -319,7 +308,6 @@ Nuvem Incendiária|Incendiary Cloud|8|Conjuração|F,M|1 ação|45 m|C
 Palavra de Poder Atordoar|Power Word Stun|8|Encantamento|B,Br,F,M|1 ação|18 m|-
 Semiplano|Demiplane|8|Conjuração|Br,M|1 ação|18 m|-
 Terremoto|Earthquake|8|Evocação|C,D,F|1 ação|150 m|C
-
 Alterar Forma|Shapechange|9|Transmutação|D,M|1 ação|pessoal|C
 Aprisionamento|Imprisonment|9|Abjuração|Br,M|1 minuto|9 m|-
 Chuva de Meteoros|Meteor Swarm|9|Evocação|F,M|1 ação|1,6 km|-
@@ -336,7 +324,6 @@ Ressurreição Verdadeira|True Resurrection|9|Necromancia|C,D|1 hora|toque|-
 Sexto Sentido|Foresight|9|Adivinhação|B,Br,D,M|1 minuto|toque|-
 Tempestade da Vingança|Storm of Vengeance|9|Conjuração|D|1 ação|visão|C
 `;
-
   window.SPELLS = RAW.trim().split(/\n+/).map(function (line) {
     const [n, en, level, school, classCodes, time, range, flags] = line.split('|');
     return {
@@ -353,7 +340,6 @@ Tempestade da Vingança|Storm of Vengeance|9|Conjuração|D|1 ação|visão|C
       fonte: 'SRD 5.1'
     };
   });
-
   window.SPELLS_META = {
     total: 319,
     edicao: 'D&D 5e (2014)',
@@ -363,12 +349,9 @@ Tempestade da Vingança|Storm of Vengeance|9|Conjuração|D|1 ação|visão|C
     licencaConteudoBase: 'CC BY 4.0',
     observacao: 'Não inclui o catálogo completo do Livro do Jogador 2024 nem suplementos.'
   };
-
   window.SPELLS.sort(function (a, b) {
     return a.lvl - b.lvl || a.n.localeCompare(b.n, 'pt-BR');
   });
-
-  // Índices e consultas simples para o criador de personagem.
   window.SPELLS_BY_LEVEL = window.SPELLS.reduce(function (index, spell) {
     (index[spell.lvl] ||= []).push(spell);
     return index;
@@ -382,7 +365,6 @@ Tempestade da Vingança|Storm of Vengeance|9|Conjuração|D|1 ação|visão|C
         spell.en.toLocaleLowerCase('en').includes(q);
     });
   };
-
   window.getSpells = function (filters) {
     const f = filters || {};
     return window.SPELLS.filter(function (spell) {
