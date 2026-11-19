@@ -153,7 +153,6 @@ function appPromptMessage(id, message, defaultValue) {
   return window.prompt(resolveAppMessage(id, message), defaultValue);
 }
 
-
 function isHexMap() { return !!(MAPINFO && MAPINFO.scale && mapId === 'flanaess'); }
 function hexMetrics() {
   if (!isHexMap()) return null;
@@ -210,25 +209,25 @@ var blockMove = true;
 var previewPointer = null;
 var worldTravelRaf = null;
 var worldTravelStep = null;
-var worldTravelPos = null;   // posição visual (px do mapa) do personagem durante a viagem
-var worldTravelCarry = null; // instante em que o passo anterior terminou (evita engasgo entre hexágonos)
+var worldTravelPos = null;
+var worldTravelCarry = null;
 var worldTravelPath = [];
 var worldTravelTarget = null;
-var KEY_STEP_MS = 140;       // tempo para andar 1 quadrado com as setas (velocidade constante)
+var KEY_STEP_MS = 140;
 var MOVE_KEYS = { ArrowLeft: 1, ArrowRight: 1, ArrowUp: 1, ArrowDown: 1 };
-var keysHeld = {};           // setas atualmente pressionadas
-var keyMoveRaf = null;       // requestAnimationFrame do movimento por teclado
-var keyMoveStep = null;      // passo em andamento: { from, to, dur, t0 }
-var keyMoveVis = null;       // posição visual (px do mapa) do personagem enquanto desliza
-var keyMoveCarry = null;     // instante em que o passo anterior terminou (sem engasgo entre quadrados)
-var clickMoveExitPending = false; // sai para o mapa-múndi somente depois de alcançar a borda
+var keysHeld = {};
+var keyMoveRaf = null;
+var keyMoveStep = null;
+var keyMoveVis = null;
+var keyMoveCarry = null;
+var clickMoveExitPending = false;
 var keyMoveLastSave = 0;
-var clickMovePath = [];      // caminho calculado ao clicar em um tile iluminado
-var WORLD_TRAVEL_STEP_MS = 2000; // tempo para atravessar 1 hexágono ao clicar no mapa-múndi
-var HEX_KEY_STEP_MS = WORLD_TRAVEL_STEP_MS; // setas usam exatamente a mesma velocidade do clique
+var clickMovePath = [];
+var WORLD_TRAVEL_STEP_MS = 2000;
+var HEX_KEY_STEP_MS = WORLD_TRAVEL_STEP_MS;
 
 var state = loadCurrentMapState();
-// Migra tokens salvos na antiga grade quadrada sem perder as áreas de névoa já reveladas.
+
 function migrateFlanaessState(s) {
   if (!isHexMap() || !s) return s;
   if (s._legacySquareTokens) {
@@ -242,7 +241,7 @@ function migrateFlanaessState(s) {
   } else if (s.gridMode && s.gridMode !== FLANAESS_GRID_MODE) {
     var oldMode = s.gridMode === 'hex-small' ? 'small' : (s.gridMode === 'hex-large' ? 'large' : null);
     if (oldMode) {
-      // Dimensões da grade anterior: pequeno=96 px e grande=240 px de referência.
+
       var oldReferenceWidth = oldMode === 'small' ? 96 : 240;
       var oldWidth = oldReferenceWidth / MAPINFO.scale.referencePixelsPerLogicalPixel;
       var oldHeight = oldWidth * 2 / Math.sqrt(3), oldStep = oldHeight * 0.75;
@@ -257,8 +256,7 @@ function migrateFlanaessState(s) {
   s.gridMode = FLANAESS_GRID_MODE;
   s.fog = []; s.walls = []; s.wallMeta = []; s.hEdges = []; s.vEdges = []; s.hEdgeMeta = []; s.vEdgeMeta = [];
   state = s;
-  // Não grava a migração automaticamente. Primeiro precisamos comparar o
-  // salvamento local com o JSON versionado no GitHub, se ele existir.
+
   return s;
 }
 state = migrateFlanaessState(state);
@@ -309,8 +307,7 @@ function normalizeMapState(s) {
     y: Math.max(0, Math.min(ROWS - 1, Math.round(Number(s.spawn.y))))
   };
   MAPINFO.spawn = { x: s.spawn.x, y: s.spawn.y };
-  // Portais para outros mapas mantêm o formato antigo (destMapId).
-  // Portais internos ligam dois pontos do mesmo mapa (x/y <-> destX/destY).
+
   if (!Array.isArray(s.portals)) s.portals = [];
   s.portals = s.portals.filter(function (portal) {
     if (!portal || !isFinite(Number(portal.x)) || !isFinite(Number(portal.y))) return false;
@@ -385,8 +382,6 @@ function zipEntryMime(name) {
   return 'application/octet-stream';
 }
 
-// Os pacotes produzidos pelo editor usam ZIP STORE (sem recompressão). A leitura
-// sequencial dos cabeçalhos locais evita copiar o arquivo ZIP inteiro para RAM.
 async function readStoredZipEntries(zipBlob) {
   if (!zipBlob || typeof zipBlob.slice !== 'function' || !isFinite(zipBlob.size)) throw new Error('Arquivo ZIP inválido.');
   var entries = new Map(), offset = 0, totalSize = zipBlob.size;
@@ -431,8 +426,6 @@ async function getZipImageDimensions(blob) {
   });
 }
 
-// Compatibilidade com os ZIPs anteriores, que tinham apenas hi_partN.webp/png.
-// A grade de partes é reconstruída pelas dimensões dos próprios blocos.
 async function buildLegacyMapPackage(entries, zipFilename) {
   var parts = [];
   entries.forEach(function (blob, name) {
@@ -534,7 +527,7 @@ function registerMapPackage(pkg) {
 
 async function loadServerMapPackages() {
   if (typeof window.fetch !== 'function') return;
-  // A API pública do GitHub lista /mapas; o GitHub Pages não lista diretórios sozinho.
+
   var allFiles = [];
   for (var page = 1; page <= 10; page++) {
     var response = await fetch(MAP_PACKAGE_REPOSITORY_API + '?per_page=100&page=' + page, { cache: 'no-store', headers: { Accept: 'application/vnd.github+json' } });
@@ -566,11 +559,9 @@ async function loadLegacyMapCatalog() {
     payload.maps.forEach(function (entry) {
       if (entry && entry.id && entry.config && !MAPS[entry.id] && !isCustomMapDeleted(entry.id)) registerCustomMap(entry.id, entry.config);
     });
-  } catch (error) { /* O catálogo antigo é opcional. */ }
+  } catch (error) {  }
 }
 
-// Reaplica somente ajustes locais (tile e ponto inicial) aos mapas que vieram
-// do servidor. Configurações locais sem ZIP correspondente nunca criam mapas órfãos.
 function loadStoredServerMapSettings() {
   try {
     var entries = JSON.parse(localStorage.getItem(CUSTOM_MAPS_KEY) || '[]');
@@ -594,7 +585,7 @@ function loadStoredServerMapSettings() {
       }
       registerCustomMap(entry.id, merged);
     });
-  } catch (error) { /* Preferências locais inválidas não impedem o carregamento. */ }
+  } catch (error) {  }
 }
 
 function loadRepositoryMapCatalog(done) {
@@ -631,7 +622,7 @@ function loadRepositoryMapState(done) {
       state = migrateFlanaessState(remoteState);
     })
     .catch(function () {
-      // JSON ainda não publicado (ou execução local sem servidor): segue com o estado local.
+
     })
     .then(function () { done(); });
 }
@@ -691,7 +682,6 @@ function exportMapFile() {
   };
   downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' }), safeMapFileName(MAPINFO.nome) + '.json');
 }
-
 
 async function exportMapPackage() {
   if (!MAPINFO || !MAPINFO.custom) { exportMapFile(); return; }
@@ -815,8 +805,6 @@ function crc32Bytes(bytes) {
   return (crc ^ 0xFFFFFFFF) >>> 0;
 }
 
-// ZIP64 sem recomprimir os WebP. O CRC é calculado em sequência, um bloco
-// por vez; os Blobs são incorporados diretamente para não duplicar a memória.
 function zipSetUint64(view, offset, value) {
   var big = BigInt(Math.floor(value));
   var mask = BigInt(0xFFFFFFFF);
@@ -834,8 +822,7 @@ async function createImagesZip(entries) {
     var entry = entries[i];
     var nameBytes = new TextEncoder().encode(entry.name);
     var size = entry.blob.size;
-    // Cada imagem individual é um tile pequeno; ZIP64 é usado para permitir
-    // que o conjunto inteiro ultrapasse 4 GB e/ou 65.535 arquivos.
+
     if (size > 0xFFFFFFFF) throw new Error('Uma parte individual ultrapassou 4 GB, acima do tamanho suportado por um tile.');
 
     var buffer = await entry.blob.arrayBuffer();
@@ -912,10 +899,7 @@ async function createImagesZip(entries) {
   return new Blob(localParts.concat(centralParts, endParts), { type: 'application/zip' });
 }
 
-// ---------- Otimizador: divide a imagem em partes e só aceita WebP com pixels preservados ----------
-// Cada parte mantém a resolução original. O encoder pode tentar WebP com qualidade máxima, mas
-// o resultado só é aceito se todos os canais RGBA forem idênticos. Se WebP alterar pixels, usa PNG lossless.
-var MAP_PART_MAX_EDGE = 1024; // Blocos menores reduzem o pico de memória em mapas enormes.
+var MAP_PART_MAX_EDGE = 1024;
 
 function planMapParts(width, height, maxEdge) {
   var limit = maxEdge || MAP_PART_MAX_EDGE;
@@ -958,8 +942,6 @@ function verifyLosslessImage(sourceCanvas, blob, formatName) {
   });
 }
 
-// Obtém as dimensões sem manter a imagem inteira decodificada quando o navegador
-// oferece ImageDecoder. Em navegadores sem essa API, usa Image como compatibilidade.
 function loadMapImageElement(file) {
   return new Promise(function (resolve, reject) {
     var url = URL.createObjectURL(file);
@@ -1025,8 +1007,7 @@ function imageRegionToLosslessWebp(image, sx, sy, sw, sh) {
       return verifyLosslessImage(canvas, blob, 'WebP').then(function () { return blob; });
     })
     .catch(function (webpError) {
-      // Se o encoder WebP produzir qualquer diferença, usa PNG lossless em vez
-      // de reduzir a qualidade ou abortar a importação.
+
       return canvasToPng(canvas).then(function (pngBlob) {
         return verifyLosslessImage(canvas, pngBlob, 'PNG').then(function () { return pngBlob; });
       }).catch(function (pngError) {
@@ -1048,8 +1029,7 @@ async function optimizeMapImage(file, width, height, onProgress, initialImage) {
   }
 
   try {
-    // Decodifica somente o recorte atual, fecha o bitmap e então passa ao próximo.
-    // Se createImageBitmap não aceitar recortes desse formato, usa Image como fallback.
+
     for (var index = 0; index < plan.parts.length; index++) {
       var part = plan.parts[index];
       if (onProgress) onProgress(index + 1, plan.parts.length);
@@ -1197,8 +1177,6 @@ function createCustomMapFromFile(file) {
       var height = imageInfo.height;
       if (!width || !height) throw new Error('Não foi possível identificar as dimensões da imagem.');
 
-      // Preserva o limite de segurança da grade sem rejeitar mapas maiores:
-      // aumenta apenas o espaçamento da grade, nunca redimensiona a imagem.
       var requestedCell = cell;
       var maxGridCells = 500000;
       var cols = Math.ceil(width / cell), rows = Math.ceil(height / cell);
@@ -1389,9 +1367,9 @@ function blocksBetween(x0, y0, x1, y1) {
   return blocksBetween(x0, y0, x1, y0) || blocksBetween(x0, y0, x0, y1);
 }
 function edgeBlocksVision(val, edge) {
-  // Wall of Force é invisível e transparente: bloqueia movimento, não visão.
+
   if (val === EDGE_FORCE_WALL || val === EDGE_NONE) return false;
-  // A parede ilusória parece sólida até ser identificada; depois disso a visão passa.
+
   if (val === EDGE_ILLUSION_WALL) {
     var illusionMeta = getEdgeMeta(edge);
     return !(illusionMeta && illusionMeta.detected);
@@ -1701,8 +1679,6 @@ function setEdgeVal(edge, val) {
   else setV(edge.xEdge, edge.y, val);
 }
 
-// Retorna exatamente a linha que seria apagada no clique, permitindo que a prévia
-// e a ação de apagar usem o mesmo critério de proximidade.
 function findEraseEdgeAt(wx, wy) {
   var eraseTolerance = Math.max(5 / zoom, 2);
   var edge = customEdgeAt(wx, wy, eraseTolerance);
@@ -1729,7 +1705,7 @@ function getDoorRun(edge) {
   if (!edge || !isDoorEdge(getEdgeVal(edge))) return edge ? [edge] : [];
   var meta = getEdgeMeta(edge);
   var groupId = meta && meta.doorGroupId;
-  // Portas independentes continuam independentes, mesmo quando encostadas.
+
   if (!groupId) return [edge];
   var run = [];
   if (edge.dir === 'h') {
@@ -1752,7 +1728,7 @@ function setDoorRunValue(edge, val) {
   getDoorRun(edge).forEach(function (part) {
     var meta = getEdgeMeta(part);
     setEdgeVal(part, val);
-    // Alterar aberto/fechado não deve apagar os dados nem o grupo da porta.
+
     if (meta) setEdgeMeta(part, meta);
   });
 }
@@ -1762,8 +1738,6 @@ function doorRunIsClosed(edge) {
   return run.every(function (part) { return edgeBlocks(getEdgeVal(part), part); });
 }
 
-
-// ---------- Regras de portas secretas, trancadas e estruturas ----------
 var OBJECT_MATERIALS = {
   madeira: { label: 'Madeira', ac: 15, hp: 18, threshold: 0, vulnerableFire: true },
   pedra: { label: 'Pedra', ac: 17, hp: 27, threshold: 10, immune: ['psíquico', 'venenoso'] },
@@ -1809,8 +1783,8 @@ function forEachEdge(callback) {
   for (var vy = 0; vy < ROWS; vy++) for (var vx = 0; vx <= COLS; vx++) callback({ dir: 'v', xEdge: vx, y: vy }, getV(vx, vy));
 }
 function edgeIsHidden(edge, val) {
-  if (val === EDGE_FORCE_WALL) return !showSecrets; // continua invisível para os jogadores mesmo após o toque.
-  if (val === EDGE_ILLUSION_WALL) return false; // a ilusão parece uma parede comum até ser tocada/investigada.
+  if (val === EDGE_FORCE_WALL) return !showSecrets;
+  if (val === EDGE_ILLUSION_WALL) return false;
   if (val !== EDGE_SECRET_WALL && val !== EDGE_SECRET_DOOR_C && val !== EDGE_SECRET_DOOR_O) return false;
   var meta = getEdgeMeta(edge);
   return !showSecrets && !(meta && meta.detected);
@@ -1908,7 +1882,7 @@ function createSpecialEdge(edge, kind) {
   var existing = getEdgeVal(edge);
   if (existing !== EDGE_NONE && !appConfirmMessage('msg023', 'Já existe uma parede ou porta nesta linha. Substituir?')) return;
   var isDoor = kind === 'secretDoor' || kind === 'lockedDoor' || kind === 'jammedDoor';
-  // Parede mágica segue as estatísticas específicas de pedra mágica (CA 15; 30 PV/polegada).
+
   var material = kind === 'forceWall' ? 'force' : kind === 'illusionWall' ? 'illusion' :
     kind === 'magicWall' ? 'pedraMagica' : materialPrompt(isDoor ? 'madeira' : 'pedra');
   if (!material) return;
@@ -1979,14 +1953,14 @@ function openStructureEditor(edge) {
   var initialKind = structureKindFromEdge(edge);
   var DOOR_KINDS = ['porta', 'secretDoor', 'lockedDoor', 'jammedDoor'];
   var isDoor = DOOR_KINDS.indexOf(initialKind) >= 0;
-  // Portas e muros têm editores separados: cada um lista só os tipos da sua categoria.
+
   var kinds = isDoor ? [
     ['porta','Porta comum'],['secretDoor','Porta secreta'],['lockedDoor','Porta trancada'],['jammedDoor','Porta emperrada / barrada']
   ] : [
     ['muro','Muro comum'],['secretWall','Parede secreta'],['illusionWall','Parede ilusória'],
     ['forceWall','Muralha de Energia'],['magicWall','Parede mágica']
   ];
-  // Campos exibidos (e salvos) para cada tipo.
+
   var STRUCT = ['material','ac','hp','maxHp','threshold'];
   var KIND_FIELDS = {
     muro: ['ac','hp','maxHp','threshold'],
@@ -2133,7 +2107,7 @@ function openCellWallEditor(cell) {
   var hp = field('Pontos de Vida (PV)', oldMeta.hp == null ? 54 : oldMeta.hp, 'number');
   var maxHp = field('PV máximo', oldMeta.maxHp == null ? (oldMeta.hp == null ? 54 : oldMeta.hp) : oldMeta.maxHp, 'number');
   var threshold = field('Limiar de dano', oldMeta.threshold == null ? 15 : oldMeta.threshold, 'number');
-  // Ao trocar o material, preenche os valores padrão de parede daquele material (podem ser ajustados em seguida).
+
   material.addEventListener('change', function () {
     var base = OBJECT_MATERIALS[material.value] || OBJECT_MATERIALS.pedra;
     ac.value = base.ac; hp.value = base.hp * 2; maxHp.value = base.hp * 2; threshold.value = base.threshold * 1.5;
@@ -2201,7 +2175,7 @@ function interactWithEdge(edge) {
       meta.open = true;
       appAlertMessage('msg034', 'A Tranca Arcana está suprimida; a porta pode ser aberta durante os 10 minutos restantes.');
     } else {
-      var approach = appPromptMessage('msg035', 
+      var approach = appPromptMessage('msg035',
         'Como deseja abrir a porta trancada?\n1 = Ferramentas de Ladrão (Destreza/Prestidigitação) — ' + (meta.lockComplexity === 'complex' ? '1 minuto' : '1 ação') +
         '\n2 = Forçar fisicamente (Força/Atletismo)' +
         (meta.keyName ? '\nCHAVE = usar a chave (' + meta.keyName + ')' : '') +
@@ -2238,8 +2212,7 @@ function interactWithEdge(edge) {
         if (roll == null) return;
         if (roll >= dc) {
           meta.open = true;
-          // Sem Tranca Arcana, vencer ou arrombar a fechadura a deixa inutilizada.
-          // Com a magia, a proteção persiste e volta a valer quando a porta for fechada.
+
           if (!arcaneConfigured) meta.locked = false;
           appAlertMessage('msg042', checkIsForce
             ? 'Sucesso! Você força a porta e consegue abri-la.'
@@ -2374,12 +2347,11 @@ function drawDetail(W, H) {
 
 function focusCameraOnPlayer(viewW, viewH, force) {
   if (!isHexMap() || !cv || (appMode === 'editor' && !force)) return;
-  zoom = FLANAESS_ZOOM; // Flanaess fixo em 300%.
+  zoom = FLANAESS_ZOOM;
   var player = currentPlayer();
   if (!player) return;
   var center = worldTravelPos || cellCenter(player.x, player.y);
-  // O canvas aplica translate(ox, oy) antes de scale(zoom, zoom).
-  // Portanto, o deslocamento precisa compensar a coordenada já multiplicada pelo zoom.
+
   var width = viewW == null ? cv.clientWidth : viewW;
   var height = viewH == null ? cv.clientHeight : viewH;
   ox = width / 2 - center.x * zoom;
@@ -2401,13 +2373,9 @@ function centerCameraOnPlayer(viewW, viewH, force) {
   var height = viewH == null ? cv.clientHeight : viewH;
   if (!p || !width || !height) return;
 
-  // Limita o afastamento: a câmera não pode mostrar uma área maior
-  // que o raio de visão atual do personagem. Aproximar continua permitido.
   var minZoom = visionZoom(width, height);
   zoom = Math.max(minZoom, zoom);
 
-  // Durante a caminhada usa a posição interpolada para a câmera acompanhar
-  // o personagem quadro a quadro, sem zona morta ou atraso.
   var c = keyMoveVis || tokenAnchor(p, p.x, p.y);
   ox = width / 2 - c.x * zoom;
   oy = height / 2 - c.y * zoom;
@@ -2416,7 +2384,7 @@ function centerCameraOnPlayer(viewW, viewH, force) {
 function changeCameraZoom(factor, anchorX, anchorY) {
   if (!cv) return;
   if (appMode === 'editor') {
-    // Zoom livre, ancorado no cursor (ou no centro da tela pelos botões +/-).
+
     var viewW = cv.clientWidth, viewH = cv.clientHeight;
     var ax = anchorX == null ? viewW / 2 : anchorX;
     var ay = anchorY == null ? viewH / 2 : anchorY;
@@ -2427,7 +2395,7 @@ function changeCameraZoom(factor, anchorX, anchorY) {
     draw();
     return;
   }
-  // No modo Jogador, o mapa-múndi mantém o enquadramento automático.
+
   if (isHexMap()) return;
   var minZoom = visionZoom();
   var maxZoom = 16;
@@ -2454,7 +2422,6 @@ function stopWorldTravel(shouldSave) {
   if (shouldSave && isHexMap()) save();
 }
 
-// Para a viagem de forma suave: termina o hexágono atual e não continua o resto do caminho.
 function haltWorldTravel() {
   worldTravelPath = [];
   worldTravelTarget = null;
@@ -2481,7 +2448,7 @@ function worldTravelFrame(now) {
     var st = worldTravelStep;
     var p = (now - st.t0) / WORLD_TRAVEL_STEP_MS;
     if (p >= 1) {
-      // Chegou ao hexágono: grava a posição lógica e segue para o próximo sem pausa.
+
       player.x = st.to.x; player.y = st.to.y;
       selected = player;
       save();
@@ -2528,7 +2495,7 @@ function startWorldTravel(destination) {
   var player = currentPlayer();
   if (!isHexMap() || !player || !destination) return;
   stopKeyMove();
-  // Se já está andando, o novo caminho parte do hexágono para onde ele está indo agora.
+
   var origin = worldTravelStep ? worldTravelStep.to : { x: player.x, y: player.y };
   if (destination.x === origin.x && destination.y === origin.y) {
     var standingLocalPortal = findLocalPortalAt(destination.x, destination.y);
@@ -2623,6 +2590,7 @@ function drawWorldTravelPath() {
 
 function draw() {
   if (!cv || !cx) return;
+  renderCombatHud();
   var dpr = window.devicePixelRatio || 1;
   var W = cv.clientWidth, H = cv.clientHeight;
   if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) {
@@ -2641,7 +2609,6 @@ function draw() {
   cx.translate(ox, oy);
   cx.scale(zoom, zoom);
 
-  // Só desenha as partes que aparecem na tela; a sobreposição de meio pixel evita linhas finas entre as partes.
   var viewX0 = -ox / zoom, viewY0 = -oy / zoom, viewX1 = (W - ox) / zoom, viewY1 = (H - oy) / zoom;
   var partSeam = 0.5 / zoom;
   PARTS.forEach(function (p, i) {
@@ -2651,7 +2618,7 @@ function draw() {
     if (img && img.complete && img.naturalWidth) cx.drawImage(img, p.x, p.y, partW, partH);
     else { cx.fillStyle = '#1a1a1c'; cx.fillRect(p.x, p.y, partW, partH); }
   });
-  // No Flanaess, sobrepõe os tiles detalhados para usar a resolução máxima.
+
   if (isHexMap()) drawDetail(W, H);
 
   if (showWalls && !isHexMap()) {
@@ -2684,7 +2651,7 @@ function draw() {
       for (var hy = gridBounds.y0; hy <= gridBounds.y1; hy++) {
         for (var hx = gridBounds.x0; hx <= gridBounds.x1; hx++) appendHexPath(cx, cellCenter(hx, hy), hmGrid);
       }
-      cx.strokeStyle = 'rgba(0,0,0,0.10)'; cx.lineWidth = 1 / zoom; cx.stroke(); // Flanaess: grid preto com 10% de opacidade
+      cx.strokeStyle = 'rgba(0,0,0,0.10)'; cx.lineWidth = 1 / zoom; cx.stroke();
     } else {
       cx.beginPath();
       for (var gx = 0; gx <= COLS; gx++) { cx.moveTo(gx * CELL, 0); cx.lineTo(gx * CELL, ROWS * CELL); }
@@ -2743,7 +2710,7 @@ function drawEdges() {
   function drawOne(edge, val) {
     if (val === EDGE_NONE || edgeIsHidden(edge, val)) return;
     var meta = getEdgeMeta(edge) || {};
-    // Modo Jogador: muros comuns (e ilusões ainda não percebidas, que parecem muros comuns) não são desenhados.
+
     if (appMode === 'player' && (val === EDGE_MURO || (val === EDGE_ILLUSION_WALL && !meta.detected))) return;
     if (val === EDGE_SECRET_WALL && meta.open) return;
     var a, b;
@@ -2763,7 +2730,7 @@ function drawEdges() {
     else if (val === EDGE_JAMMED_DOOR) color = opened ? '#81c784' : '#ff8f00';
     else if (val === EDGE_ILLUSION_WALL) {
       if (meta.detected) { color = '#26c6da'; dash = [3 / zoom, 4 / zoom]; }
-      else color = '#c62828'; // antes de ser percebida, parece uma parede comum.
+      else color = '#c62828';
     }
     else if (val === EDGE_FORCE_WALL) { color = '#80deea'; width = lw * 1.5; dash = [2 / zoom, 3 / zoom]; }
     else if (val === EDGE_MAGIC_WALL) { color = '#7e57c2'; width = lw * 1.5; }
@@ -2873,7 +2840,6 @@ function resizeCustomMapTiles(requestedCell) {
     };
   }
 
-  // Sample old values at each new tile center. This handles both finer and coarser grids.
   var newFog = new Array(newCount);
   var newWalls = new Array(newCount);
   var newWallMeta = new Array(newCount);
@@ -2889,8 +2855,6 @@ function resizeCustomMapTiles(requestedCell) {
     }
   }
 
-  // When merging tiles, preserve any wall/revealed area that would otherwise fall
-  // between the new tile centers. The OR behavior is intentional for coarse grids.
   if (newCell > oldCell) {
     for (var oy0 = 0; oy0 < oldRows; oy0++) {
       var targetY = Math.max(0, Math.min(newRows - 1, Math.floor(((oy0 + 0.5) * oldCell) / newCell)));
@@ -2914,7 +2878,6 @@ function resizeCustomMapTiles(requestedCell) {
   for (var hi = 0; hi < newHEdges.length; hi++) { newHEdges[hi] = 0; newHEdgeMeta[hi] = null; }
   for (var vi = 0; vi < newVEdges.length; vi++) { newVEdges[vi] = 0; newVEdgeMeta[vi] = null; }
 
-  // Transfer existing horizontal/vertical edges by their image-space coordinates.
   for (var oldYEdge = 0; oldYEdge <= oldRows; oldYEdge++) {
     var newYEdge = Math.round((oldYEdge * oldCell) / newCell);
     if (newYEdge < 0 || newYEdge > newRows) continue;
@@ -2956,7 +2919,6 @@ function resizeCustomMapTiles(requestedCell) {
     }
   }
 
-  // Keep token and portal positions in the same approximate image-space location.
   (state.tokens || []).forEach(function (token) {
     var next = remapCellPoint(token);
     token.x = next.x; token.y = next.y;
@@ -3389,8 +3351,6 @@ function drawToolPreview() {
   var center = cellCenter(cell.x, cell.y);
   var ghost;
 
-  // Na ferramenta Apagar linha, destaca a linha inteira sob o cursor.
-  // O mesmo helper é usado no clique, então a prévia nunca aponta para outra linha.
   if (tool === 'eraseedge') {
     var erasePreviewEdge = findEraseEdgeAt(previewPointer.x, previewPointer.y);
     if (erasePreviewEdge) {
@@ -3576,6 +3536,7 @@ function drawToken(t, sel) {
   cx.textAlign = 'center';
   cx.textBaseline = 'middle';
   cx.fillText((t.nome || '?').charAt(0).toUpperCase(), c.x, c.y + 1);
+  combatDrawOverlay(t, c, r);
 
   if (t.hpMax != null && t.hp != null && t.hpMax > 0) {
     var pct = Math.max(0, Math.min(1, t.hp / t.hpMax));
@@ -3634,6 +3595,7 @@ function updateDetailPanel() {
     (t.tipo !== 'player' ? '<button type="button" id="mp-del-tok">Remover token</button>' : '') +
     '</div>';
 
+  if (appMode === 'editor' && combatAvailable()) { box.insertAdjacentHTML('beforeend', combatDetailHtml(t)); combatDetailBind(box, t); }
   var hpIn = $('#mp-hp');
   if (hpIn) hpIn.onchange = function () { t.hp = +this.value; save(); draw(); };
   var passiveButton = $('#mp-passive-perception');
@@ -3681,6 +3643,7 @@ function placeMonsterFromId(id, cell) {
     nd: m.nd, hp: m.pontosVida, hpMax: m.pontosVida
   };
   state.tokens.push(tok);
+  if (combatActive()) getCombat().entrarNoCombate(tok);
   selected = tok;
   pendingMonster = null;
   setTool('select');
@@ -3689,8 +3652,7 @@ function placeMonsterFromId(id, cell) {
 }
 
 function canOccupy(x, y, token) {
-  // Os limites do mapa sempre bloqueiam a passagem; desativar colisões
-  // permite atravessar paredes, mas não sair da área física do mapa.
+
   var sq = (token && token.raio) || 1;
   if (x < 0 || y < 0 || x + sq > COLS || y + sq > ROWS) return false;
   if (!blockMove) return true;
@@ -3716,8 +3678,7 @@ function canStep(fromX, fromY, toX, toY, token, detectTouch) {
   if (isHexMap()) return !!hexRoute({ x: fromX, y: fromY }, { x: toX, y: toY });
   if (Math.abs(toX - fromX) <= 1 && Math.abs(toY - fromY) <= 1) {
     var crossedEdges = edgesBetweenStep(fromX, fromY, toX, toY);
-    // A detecção por toque só ocorre no passo que o jogador realmente tenta dar,
-    // nunca durante a busca automática de rotas do algoritmo A*.
+
     if (detectTouch && token && token.tipo === 'player') {
       crossedEdges.forEach(function (edge) {
         var val = getEdgeVal(edge), meta = getEdgeMeta(edge);
@@ -3731,8 +3692,7 @@ function canStep(fromX, fromY, toX, toY, token, detectTouch) {
         }
       });
     }
-    // A Muralha de Energia é uma barreira absoluta mesmo quando o Mestre desativa
-    // a colisão geral para reposicionar tokens ou facilitar a edição do mapa.
+
     if (crossedEdges.some(function (edge) { return getEdgeVal(edge) === EDGE_FORCE_WALL; })) return false;
     if (!blockMove) return true;
     if (blocksBetween(fromX, fromY, toX, toY)) return false;
@@ -3780,7 +3740,7 @@ function revealAround(cx, cy, radius) {
 }
 
 function onPointerDown(e) {
-  // No Editor, a câmera pode ser arrastada em qualquer tipo de mapa.
+
   if (appMode === 'editor' && (tool === 'pan' || e.button === 1 || e.button === 2 || space)) {
     e.preventDefault();
     if (cv.setPointerCapture) cv.setPointerCapture(e.pointerId);
@@ -3821,8 +3781,6 @@ function onPointerDown(e) {
 
   if (tool === 'localPortal') { placeLocalPortal(cell); return; }
 
-
-  // O modo Editar seleciona uma única estrutura e abre seu editor individual.
   if (tool === 'editStructure') {
     var structureEdge = customEdgeAt(world.x, world.y, Math.max(8 / zoom, CELL * 0.18));
     if (!structureEdge) {
@@ -3835,7 +3793,6 @@ function onPointerDown(e) {
     return;
   }
 
-  // Apaga a linha inteira com um único clique diretamente sobre ela.
   if (tool === 'eraseedge') {
     var edgeToErase = findEraseEdgeAt(world.x, world.y);
     if (edgeToErase) {
@@ -3846,14 +3803,11 @@ function onPointerDown(e) {
     return;
   }
 
-  // Clicar fora da imagem manda o personagem caminhar até a borda mais próxima
-  // na direção do clique. A troca para o mapa-múndi ocorre só depois do último passo.
   if (!isHexMap() && tool === 'select' && !pendingMonster && currentPlayer() &&
       (world.x < 0 || world.y < 0 || world.x >= MAP_W || world.y >= MAP_H)) {
     startClickExit(world);
     return;
   }
-
 
   if (!isHexMap() && ['muro','porta','paredeSecreta','portaSecreta','portaTrancada','portaEmperrada','paredeIlusoria','muralhaForca','paredeMagica'].indexOf(tool) >= 0) {
     var point = snapGridPoint(world.x, world.y);
@@ -3871,7 +3825,6 @@ function onPointerDown(e) {
     else damageCellWall(cell);
     setTool('select'); return;
   }
-
 
   if (tool === 'wall') {
     drag = { wall: true, val: 1 };
@@ -3943,8 +3896,7 @@ function onPointerDown(e) {
         drag = { moveToken: hit, fromX: hit.x, fromY: hit.y };
       }
     } else {
-      // Em mapas de aventura, clicar em um espaço vazio iluminado traça uma rota
-      // até ele. Áreas fora da luz atual não aceitam destino de movimento.
+
       var movingPlayer = currentPlayer();
       if (movingPlayer && isCurrentlyVisible(cell.x, cell.y, movingPlayer.x, movingPlayer.y, movingPlayer.luz || lightRadius)) {
         startClickMove(cell);
@@ -3996,7 +3948,7 @@ function onPointerMove(e) {
   previewPointer = screenToWorld(e.clientX - previewRect.left, e.clientY - previewRect.top);
   if (!drag) { draw(); return; }
   if (drag.pan) {
-    // Pan da câmera com o mouse desativado.
+
     return;
   }
   if (drag.edgePaint && !isHexMap()) {
@@ -4067,18 +4019,17 @@ function onPointerLeave() {
 function onWheel(e) {
   e.preventDefault();
   if (!e.deltaY) return;
-  // No Editor o zoom é livre nos dois mapas e acompanha a posição do cursor.
+
   if (appMode === 'editor') {
     var rect = cv.getBoundingClientRect();
     changeCameraZoom(Math.exp(-e.deltaY * 0.0015), e.clientX - rect.left, e.clientY - rect.top);
     return;
   }
-  // No modo Jogador, o mapa-múndi mantém o zoom automático.
+
   if (isHexMap()) { zoom = FLANAESS_ZOOM; draw(); return; }
   changeCameraZoom(Math.exp(-e.deltaY * 0.0015));
 }
 
-// ---------- Movimento por clique em tiles visíveis (mapas de quadrados) ----------
 function findVisiblePath(start, goal, token, allowUnseenForExit) {
   if (!start || !goal || isHexMap()) return null;
   if (goal.x < 0 || goal.y < 0 || goal.x >= COLS || goal.y >= ROWS) return null;
@@ -4155,8 +4106,6 @@ function startClickMove(destination, exitAfterArrival) {
   return true;
 }
 
-// Encontra onde a trajetória do clique externo cruza o limite do mapa,
-// considerando também o tamanho (raio) do token do jogador.
 function mapExitBorderCell(outsideWorldPoint, player) {
   var sq = Math.max(1, player && player.raio || 1);
   var maxX = Math.max(0, COLS - sq), maxY = Math.max(0, ROWS - sq);
@@ -4195,12 +4144,10 @@ function startClickExit(outsideWorldPoint) {
   if (!player || !outsideWorldPoint || isHexMap()) return false;
   var borderCell = mapExitBorderCell(outsideWorldPoint, player);
   if (!borderCell) return false;
-  // A rota de saída respeita paredes/portas e colisões, mas o comando explícito
-  // de sair pode atravessar trechos ainda escuros até alcançar a borda escolhida.
+
   return startClickMove(borderCell, true);
 }
 
-// ---------- Movimento do personagem com setas ----------
 function tokenAnchor(t, x, y) {
   var sq = t.raio || 1;
   return cellCenter(x + (sq - 1) / 2, y + (sq - 1) / 2);
@@ -4212,7 +4159,6 @@ function heldDirection() {
   return (dx || dy) ? { dx: dx, dy: dy } : null;
 }
 
-// Diagonal bloqueada? Tenta deslizar só na horizontal ou só na vertical.
 function pickKeyStep(pl, dir) {
   var cands = [];
   if (dir.dx && dir.dy) cands.push({ x: pl.x + dir.dx, y: pl.y + dir.dy }, { x: pl.x + dir.dx, y: pl.y }, { x: pl.x, y: pl.y + dir.dy });
@@ -4223,8 +4169,6 @@ function pickKeyStep(pl, dir) {
   return null;
 }
 
-// As setas escolhem quatro direções estáveis na grade pointy-top:
-// esquerda/direita são horizontais; cima/baixo seguem o mesmo eixo diagonal.
 function pickHexKeyStep(pl) {
   var next = null, odd = pl.y & 1;
   if (keysHeld.ArrowLeft) next = { x: pl.x - 1, y: pl.y };
@@ -4241,8 +4185,6 @@ function keyMoveWouldExitMap(pl, dir) {
   return nx < 0 || ny < 0 || nx + sq > COLS || ny + sq > ROWS;
 }
 
-// Ao sair pela borda de um mapa de aventura, retorna ao Flanaess na
-// última posição salva (normalmente o hexágono de onde o portal foi usado).
 function returnToWorldMapFromExit() {
   if (isHexMap() || !MAPS.flanaess) return false;
   var host = R;
@@ -4261,8 +4203,6 @@ function returnToWorldMapFromExit() {
   return true;
 }
 
-// Mantém a câmera travada no personagem durante todo o deslocamento,
-// sem margem morta: qualquer movimento do personagem move a câmera junto.
 function followKeyMove() {
   if (!cv) return;
   if (isHexMap()) focusCameraOnPlayer();
@@ -4301,12 +4241,15 @@ function keyMoveFrame(now) {
         if (!hexMode) { clickMovePath = []; clickMoveExitPending = false; }
         break;
       }
+      if (!hexMode && !combatStepAllowed(pl, next)) { clickMovePath = []; clickMoveExitPending = false; break; }
       var from = tokenAnchor(pl, pl.x, pl.y), to = tokenAnchor(pl, next.x, next.y);
       var cells = Math.sqrt(Math.pow(next.x - pl.x, 2) + Math.pow(next.y - pl.y, 2));
       keyMoveStep = { from: from, to: to, dur: (hexMode ? HEX_KEY_STEP_MS : KEY_STEP_MS) * cells, t0: keyMoveCarry != null ? keyMoveCarry : now };
       keyMoveCarry = null;
-      // A posição lógica avança no início do passo; a posição visual desliza até o centro.
+
+      var combatFrom = { x: pl.x, y: pl.y };
       pl.x = next.x; pl.y = next.y; selected = pl;
+      if (!hexMode) combatAfterStep(pl, combatFrom, { x: next.x, y: next.y });
       if (!hexMode) checkPassiveSecretDetection(pl);
       if (dynLight && !hexMode) revealAround(pl.x, pl.y, pl.luz || lightRadius);
     }
@@ -4365,7 +4308,7 @@ function onKey(e) {
   if (MOVE_KEYS[e.code] && !e.ctrlKey && !e.metaKey && !e.altKey) {
     if (isHexMap()) {
       e.preventDefault();
-      // No mapa-múndi, as setas só movem o personagem quando as ferramentas estão desativadas.
+
       if (tool !== 'select' || drag || !currentPlayer()) return;
       if (keyMoveRaf == null) stopWorldTravel(false);
     } else {
@@ -4432,11 +4375,6 @@ function setTool(t) {
   draw();
 }
 
-
-// ---------- Ações do personagem: ficha, rolagens automáticas e área de visão ----------
-// Lê a ficha montada no index.html (S, CL, BG e os mesmos cálculos usados na ficha).
-// O mapa e o criador de personagens são carregados na mesma página; não há cópia manual
-// dos bônus quando a ficha já está preenchida.
 var RPG_SKILL_ABILITIES = {
   'Acrobacia':'DES','Adestrar Animais':'SAB','Arcanismo':'INT','Atletismo':'FOR',
   'Atuação':'CAR','Enganação':'CAR','Furtividade':'DES','História':'INT',
@@ -4467,13 +4405,17 @@ function getCharacterSheetActionData() {
       scores[attr] = Math.min(20, base(attr) + originBonus(attr));
       abilityMods[attr] = Math.floor((scores[attr] - 10) / 2);
     });
-    var proficiencyBonus = cls ? 2 : 0; // a ficha atual do repositório está no nível 1.
+    var proficiencyBonus = cls ? 2 : 0;
     var proficiencies = new Set((Array.isArray(S.skills) ? S.skills : []).concat(bg && Array.isArray(bg.s) ? bg.s : []));
     var skillBonuses = {};
     Object.keys(RPG_SKILL_ABILITIES).forEach(function (skill) {
       var ability = RPG_SKILL_ABILITIES[skill];
       skillBonuses[skill] = abilityMods[ability] + (proficiencies.has(skill) ? proficiencyBonus : 0);
     });
+    var speedText = (typeof SP !== 'undefined' && Array.isArray(SP) && S.sp != null && SP[S.sp]) ? String(SP[S.sp].mov || '9 m') : '9 m';
+    var speedMatch = speedText.match(/(\d+(?:[.,]\d+)?)/);
+    var speedMeters = speedMatch ? Number(speedMatch[1].replace(',', '.')) : 9;
+    var speedCells = Math.max(1, Math.round((speedMeters || 9) / 1.5));
     var toolsBonus = abilityMods.DES + (bg && normalizeRpgText(bg.i || '') === 'ferramentas de ladrao' ? proficiencyBonus : 0);
     return {
       name: String(S.name || 'Personagem'), className: cls.n || '',
@@ -4484,7 +4426,10 @@ function getCharacterSheetActionData() {
       rangedAttack: abilityMods.DES + proficiencyBonus,
       toolsBonus: toolsBonus,
       hp: Math.max(1, Number(cls.d || 0) + abilityMods.CON),
-      armorClass: 10 + abilityMods.DES
+      armorClass: 10 + abilityMods.DES,
+      saveProficiencies: Array.isArray(cls.s) ? cls.s : [],
+      hitDie: Number(cls.d) || 8,
+      speedCells: speedCells
     };
   } catch (e) { return null; }
 }
@@ -4496,17 +4441,17 @@ function playerActionProfile(player) {
   var defaults = {
     perception: 0, investigation: 0, attack: 0, athletics: 0, tools: 0,
     skillBonuses: {}, damage: '1d8+0', attackRange: 0, weaponId: '', weaponMode: 'melee', damageOverride: '',
-    useSheet: true, configVersion: 2
+    useSheet: true, configVersion: 2, armorId: '', shield: false, maestria: null, ataquesPorAcao: 1
   };
   Object.keys(defaults).forEach(function (key) {
     if (profile[key] == null) profile[key] = defaults[key];
   });
   if (!profile.skillBonuses || typeof profile.skillBonuses !== 'object') profile.skillBonuses = {};
-  // Migra os três bônus que versões anteriores guardavam separadamente.
+
   if (profile.skillBonuses['Percepção'] == null) profile.skillBonuses['Percepção'] = Number(profile.perception) || 0;
   if (profile.skillBonuses['Investigação'] == null) profile.skillBonuses['Investigação'] = Number(profile.investigation) || 0;
   if (profile.skillBonuses['Atletismo'] == null) profile.skillBonuses['Atletismo'] = Number(profile.athletics) || 0;
-  // Migra o perfil antigo: 1d8+0 e 6 quadrículas eram apenas valores padrão.
+
   if (previousConfigVersion !== 2) {
     if (profile.damage && profile.damage !== '1d8+0') profile.damageOverride = profile.damage;
     if (Number(profile.attackRange) === 6) profile.attackRange = 0;
@@ -4547,8 +4492,7 @@ function playerWeaponRange(item, weaponMode) {
   if (ammo) return { normal: cells(ammo[1]), max: cells(ammo[2]), ranged: true, thrown: false };
   var listedAsRanged = /a distancia|ataque a distancia/.test(use);
   if (thrown && (listedAsRanged || weaponMode === 'thrown')) {
-    // Armas corpo a corpo com Arremesso usam o alcance de arremesso só quando esse modo é escolhido.
-    // O atributo continua sendo o mesmo do ataque corpo a corpo (Força, salvo Acuidade).
+
     return { normal: cells(thrown[1]), max: cells(thrown[2]), ranged: listedAsRanged, thrown: true };
   }
   var reach = props.indexOf('alcance') >= 0 ? 2 : 1;
@@ -4620,9 +4564,7 @@ function playerVisionRadius(player) {
 }
 function edgeInPlayerVision(edge, player, range) {
   if (!edge || !player || isHexMap()) return false;
-  // A própria parede/porta bloqueia a visão para a célula do outro lado, então o ponto médio
-  // (que cai exatamente na divisa) não pode ser usado sozinho. A estrutura é visível se ao
-  // menos uma das células que encostam nela estiver visível ao personagem.
+
   var cells = [];
   if (edge.custom) {
     var c = edge.custom, mid = edgeMidpoint(edge);
@@ -4685,7 +4627,7 @@ function configurePlayerActionProfile(player) {
     var caption = document.createElement('span'); caption.textContent = captionText; label.appendChild(caption);
     var input = document.createElement('input'); input.type = type; input.value = value == null ? '' : value;
     input.style.cssText = 'width:100%;min-width:0;box-sizing:border-box;padding:8px;border:1px solid #555d6c;border-radius:6px;background:#252a34;color:#fff;';
-    if (type === 'number') { input.step = '1'; input.min = key === 'attackRange' ? '0' : '-20'; input.max = key === 'attackRange' ? '120' : '30'; }
+    if (type === 'number') { input.step = '1'; input.min = key === 'attackRange' ? '0' : '-20'; input.max = key === 'attackRange' ? '120' : '30'; if (key === 'ataquesPorAcao') { input.min = '1'; input.max = '4'; } }
     inputs[key] = input; label.appendChild(input); form.appendChild(label);
   }
   if (sheet) {
@@ -4737,6 +4679,18 @@ function configurePlayerActionProfile(player) {
     preview.textContent = 'Cálculo da arma: ataque ' + signed(resolved.bonus) + ', dano ' + resolved.damage + ', alcance normal ' + resolved.normalRange + ' e máximo ' + resolved.maxRange + ' quadrículas.';
   });
   weaponModeSelect.addEventListener('change', function () { weaponSelect.dispatchEvent(new Event('change')); });
+  function addSelectField(captionText, key, options, value) {
+    var label = document.createElement('label');
+    label.style.cssText = 'display:flex;flex-direction:column;gap:4px;color:#d5d9e2;font-size:12px;';
+    var caption = document.createElement('span'); caption.textContent = captionText; label.appendChild(caption);
+    var select = document.createElement('select'); select.style.cssText = 'width:100%;padding:8px;border:1px solid #555d6c;border-radius:6px;background:#252a34;color:#fff;';
+    options.forEach(function (o) { var op = document.createElement('option'); op.value = o[0]; op.textContent = o[1]; select.appendChild(op); });
+    select.value = value; inputs[key] = select; label.appendChild(select); form.appendChild(label);
+  }
+  addSelectField('Armadura', 'armorId', [['', 'Sem armadura']].concat(combatArmorCatalog().filter(function (a) { return a.tipo !== 'Escudo'; }).map(function (a) { return [a.id, a.n + ' (' + a.classeArmadura + ')']; })), profile.armorId || '');
+  addSelectField('Escudo', 'shield', [['0', 'Não'], ['1', 'Sim (+2 CA)']], profile.shield ? '1' : '0');
+  addSelectField('Maestria de arma', 'maestria', [['auto', 'Automático pela classe'], ['1', 'Ativada'], ['0', 'Desativada']], profile.maestria == null ? 'auto' : (profile.maestria ? '1' : '0'));
+  addField('Ataques por ação Atacar', 'ataquesPorAcao', 'number', profile.ataquesPorAcao || 1);
   var note = document.createElement('p');
   note.style.cssText = 'grid-column:1/-1;margin:0;color:#aeb5c0;font-size:11px;line-height:1.4;';
   note.textContent = 'As ações usam a área iluminada/visível ao redor do personagem e respeitam paredes e linha de visão. Ataque faz uma rolagem para cada criatura visível no alcance.';
@@ -4765,6 +4719,10 @@ function configurePlayerActionProfile(player) {
     profile.weaponId = String(inputs.weaponId.value || '');
     profile.weaponMode = String(inputs.weaponMode.value || 'melee');
     profile.attackRange = Math.max(0, Math.min(120, Math.round(Number(inputs.attackRange.value) || 0)));
+    profile.armorId = String(inputs.armorId.value || '');
+    profile.shield = inputs.shield.value === '1';
+    profile.maestria = inputs.maestria.value === 'auto' ? null : inputs.maestria.value === '1';
+    profile.ataquesPorAcao = Math.max(1, Math.min(4, Math.round(Number(inputs.ataquesPorAcao.value) || 1)));
     profile.damageOverride = String(inputs.damageOverride.value || '').trim();
     if (profile.damageOverride && !rollDamageExpression(profile.damageOverride, false)) {
       appAlertMessage('msg014', 'Informe um dano válido, como 1d8+3 ou 2d6.'); return;
@@ -4845,54 +4803,11 @@ function rollAttackCheck(bonus, disadvantage) {
   return { die: die, dice: disadvantage ? [first, second] : [first], bonus: Number(bonus) || 0, total: die + (Number(bonus) || 0), disadvantage: !!disadvantage };
 }
 function runPlayerAttack(player, profile, visionRange) {
-  var attackData = resolvePlayerAttackData(player, profile);
-  if (!attackData.weapon && !profile.damageOverride) {
-    configurePlayerActionProfile(player);
-    return;
-  }
-  var range = Math.max(1, Math.min(Number(attackData.maxRange) || 1, Number(visionRange) || 1));
-  var targets = state.tokens.filter(function (token) {
-    return isAttackableNpc(token) && tokenInPlayerVision(token, player, range);
-  });
-  var lines = [];
-  if (!targets.length) {
-    playerActionResult('⚔ Ataque', ['Nenhuma criatura inimiga está dentro do alcance e da linha de visão (' + range + ' quadrículas).']);
-    return;
-  }
-  targets.forEach(function (target) {
-    var monster = monsterStatsForToken(target);
-    var ac = Number(target.classeArmadura || target.ca || (monster && monster.classeArmadura) || 10);
-    var distance = tokenDistanceInCells(target, player);
-    var longRange = distance > attackData.normalRange + 0.01;
-    var check = rollAttackCheck(attackData.bonus, longRange);
-    var hit = check.die === 20 || (check.die !== 1 && check.total >= ac);
-    var rollText = '1d20 (' + check.dice.join(' e ') + (check.disadvantage ? ', desvantagem: menor' : '') + ') + ' + check.bonus + ' = ' + check.total;
-    if (!hit) {
-      lines.push((target.nome || 'Criatura') + ': ' + rollText + ' contra CA ' + ac + ' — errou.');
-      return;
-    }
-    var critical = check.die === 20;
-    var damage = rollDamageExpression(attackData.damage, critical);
-    if (!damage) {
-      lines.push((target.nome || 'Criatura') + ': acertou, mas a expressão de dano configurada é inválida.');
-      return;
-    }
-    if (target.hpMax == null && monster && Number(monster.pontosVida) > 0) {
-      target.hpMax = Number(monster.pontosVida); target.hp = target.hp == null ? target.hpMax : target.hp;
-    }
-    var hpText = '';
-    if (target.hpMax != null) {
-      target.hp = Math.max(0, Number(target.hp == null ? target.hpMax : target.hp) - damage.total);
-      hpText = ' PV: ' + target.hp + '/' + target.hpMax + (target.hp <= 0 ? ' — derrotado.' : '.');
-    } else hpText = ' Dano rolado; este token não possui PV cadastrados.';
-    lines.push((target.nome || 'Criatura') + ': ' + rollText + ' contra CA ' + ac + ' — acertou; dano ' + damage.formula + ' (' + damage.rolls.join(' + ') + (critical ? ', crítico: dados dobrados' : '') + ') = ' + damage.total + '.' + hpText);
-  });
-  save(); draw();
-  playerActionResult('⚔ Ataque automático na área visível' + (attackData.weapon ? ' — ' + attackData.weapon.n : ''), lines);
+  if (!getCombat()) { playerActionResult('⚔ Ataque', ['O módulo de combate (combate.js) não foi carregado.']); return; }
+  combatAttackFlow(player);
 }
 function runPlayerDoorCheck(player, profile, range, useTools) {
-  // Forçar ou destrancar exige proximidade física: procura portas adjacentes visíveis,
-  // sem exigir que o jogador clique em cada uma.
+
   var edges = visibleEdgesForPlayer(player, Math.min(1.5, range)), relevant = edges.filter(function (item) {
     return useTools ? item.val === EDGE_LOCKED_DOOR : (item.val === EDGE_LOCKED_DOOR || item.val === EDGE_JAMMED_DOOR);
   });
@@ -4960,12 +4875,791 @@ function runPlayerAction(action) {
   if (action === 'perception') runPlayerPerception(player, profile, range);
   else if (action === 'investigation') runPlayerInvestigation(player, profile, range);
   else if (action === 'attack') runPlayerAttack(player, profile, range);
+  else if (action === 'combat') openCombatMenu();
   else if (action === 'athletics') runPlayerDoorCheck(player, profile, range, false);
   else if (action === 'tools') runPlayerDoorCheck(player, profile, range, true);
   else if (action === 'interact') runPlayerInteract(player, range);
   else if (action === 'skill') runPlayerSkill(player, profile);
 }
 
+var combatEngine = null, combatHudSig = '', combatToastTimer = null, combatCostPending = 1;
+var COMBAT_COND_ABBR = { cego: 'CG', surdo: 'SD', enfeiticado: 'EF', amedrontado: 'AM', agarrado: 'AG', incapacitado: 'IN', invisivel: 'IV', paralisado: 'PA', petrificado: 'PE', envenenado: 'EN', caido: 'CD', contido: 'CT', atordoado: 'AT', inconsciente: 'IC' };
+var COMBAT_DAMAGE_TYPES = [['cortante', 'Cortante'], ['perfurante', 'Perfurante'], ['contundente', 'Contundente'], ['fogo', 'Fogo'], ['gelo', 'Gelo'], ['acido', 'Ácido'], ['eletrico', 'Elétrico'], ['trovejante', 'Trovejante'], ['venenoso', 'Venenoso'], ['necrotico', 'Necrótico'], ['radiante', 'Radiante'], ['psiquico', 'Psíquico'], ['energetico', 'Energético']];
+var COMBAT_SPELL_ABILITY = { 'Bardo': 'CAR', 'Bruxo': 'CAR', 'Feiticeiro': 'CAR', 'Paladino': 'CAR', 'Clérigo': 'SAB', 'Druida': 'SAB', 'Guardião': 'SAB', 'Mago': 'INT', 'Artífice': 'INT' };
+
+function combatState() {
+  if (!state.combate || typeof state.combate !== 'object') state.combate = { ativo: false, rodada: 0, turno: 0, ordem: [], registro: [], autoIA: true };
+  return state.combate;
+}
+function combatItemById(id) {
+  var items = window.ITEMS || window.EQUIPMENT || [];
+  return Array.isArray(items) ? items.find(function (item) { return item && item.id === id; }) || null : null;
+}
+function combatArmorCatalog() {
+  var items = window.ITEMS || window.EQUIPMENT || [];
+  return Array.isArray(items) ? items.filter(function (item) { return item && item.categoria === 'Armaduras' && !item.magico; }) : [];
+}
+function combatArmorClassFor(sheet, profile) {
+  var des = sheet.abilityMods.DES, base = 10 + des;
+  var armor = profile.armorId ? combatItemById(profile.armorId) : null;
+  var shield = !!profile.shield;
+  if (armor && armor.tipo !== 'Escudo') {
+    var text = String(armor.classeArmadura || '');
+    var m = text.match(/(\d+)/);
+    if (m) {
+      var value = Number(m[1]);
+      if (/DES/.test(text)) {
+        var cap = text.match(/m[áa]x\.\s*\+?(\d+)/i);
+        value += cap ? Math.min(des, Number(cap[1])) : des;
+      }
+      base = value;
+    }
+  } else if (sheet.className === 'Bárbaro') base = 10 + des + sheet.abilityMods.CON;
+  else if (sheet.className === 'Monge' && !shield) base = 10 + des + sheet.abilityMods.SAB;
+  return base + (shield ? 2 : 0);
+}
+function combatPcStats(token) {
+  var sheet = getCharacterSheetActionData();
+  if (!sheet || !token || token.tipo !== 'player') return null;
+  var profile = playerActionProfile(token);
+  var saves = {};
+  ['FOR', 'DES', 'CON', 'INT', 'SAB', 'CAR'].forEach(function (attr) {
+    saves[attr] = sheet.abilityMods[attr] + (sheet.saveProficiencies.indexOf(attr) >= 0 ? sheet.proficiencyBonus : 0);
+  });
+  var masteryDefault = ['Bárbaro', 'Guerreiro', 'Paladino', 'Guardião', 'Ladino'].indexOf(sheet.className) >= 0;
+  return {
+    atrib: sheet.scores, prof: sheet.proficiencyBonus, salvas: saves, ca: combatArmorClassFor(sheet, profile), pvMax: sheet.hp,
+    veloc: sheet.speedCells, classe: sheet.className, maestria: profile.maestria == null ? masteryDefault : !!profile.maestria,
+    nivel: 1, ataquesPorAcao: Math.max(1, Math.min(4, Number(profile.ataquesPorAcao) || 1)), pericias: sheet.skillBonuses, dadoVida: sheet.hitDie
+  };
+}
+function combatWeaponAttack(token, weapon, mode, opts) {
+  opts = opts || {};
+  var sheet = getCharacterSheetActionData(), profile = playerActionProfile(token);
+  var range = playerWeaponRange(weapon, mode);
+  var props = normalizeRpgText(weapon.propriedades || '');
+  var finesse = props.indexOf('acuidade') >= 0;
+  var ability = range.ranged ? 'DES' : 'FOR';
+  if (finesse && sheet) ability = sheet.abilityMods.DES > sheet.abilityMods.FOR ? 'DES' : 'FOR';
+  var abilityMod = sheet ? sheet.abilityMods[ability] : 0;
+  var bonus = sheet ? abilityMod + sheet.proficiencyBonus : Number(profile.attack) || 0;
+  var dice = playerWeaponDamageDice(weapon) || '1d4';
+  if (opts.duasMaos) {
+    var versatile = String(weapon.propriedades || '').match(/Vers[áa]til\s*\((\d*d\d+)\)/i);
+    if (versatile) dice = versatile[1];
+  }
+  var damageMod = opts.semMod ? Math.min(0, abilityMod) : abilityMod;
+  var damage = dice + (damageMod > 0 ? '+' + damageMod : damageMod < 0 ? String(damageMod) : '');
+  if (profile.damageOverride && !opts.semMod && profile.weaponId === weapon.id) damage = profile.damageOverride;
+  var type = RPGCombate.util.canonicoDano(weapon.dano) || 'contundente';
+  var thrown = mode === 'thrown' && range.thrown;
+  var normal = range.normal, max = range.max;
+  if (profile.weaponId === weapon.id && Number(profile.attackRange) > 0) normal = max = Number(profile.attackRange);
+  return {
+    nome: weapon.n, bonus: bonus, distancia: !!(range.ranged || thrown), alcanceNormal: normal, alcanceMax: max,
+    dano: [{ dados: damage, tipo: type }], arma: true, leve: /\bleve\b/.test(props), acuidade: finesse, pesada: props.indexOf('pesada') >= 0,
+    maestria: weapon.maestria || '', atributoMod: ability, modAtributo: abilityMod, magico: false, melee: !range.ranged
+  };
+}
+function combatUnarmedAttack(token) {
+  var sheet = getCharacterSheetActionData();
+  var monk = sheet && sheet.className === 'Monge';
+  var ability = monk && sheet.abilityMods.DES > sheet.abilityMods.FOR ? 'DES' : 'FOR';
+  var mod = sheet ? sheet.abilityMods[ability] : 0;
+  var bonus = sheet ? mod + sheet.proficiencyBonus : 0;
+  var damage = monk ? '1d6' + (mod > 0 ? '+' + mod : mod < 0 ? String(mod) : '') : String(Math.max(1, 1 + mod));
+  return { nome: 'Golpe desarmado', bonus: bonus, distancia: false, alcanceNormal: 1, alcanceMax: 1, dano: [{ dados: damage, tipo: 'contundente' }], arma: true, leve: false, acuidade: monk, pesada: false, maestria: '', atributoMod: ability, modAtributo: mod, magico: false, melee: true, desarmado: true };
+}
+function combatDefaultAttack(token) {
+  var profile = playerActionProfile(token);
+  var weapon = playerWeaponById(profile.weaponId);
+  if (weapon) return combatWeaponAttack(token, weapon, profile.weaponMode === 'thrown' ? 'thrown' : 'melee', {});
+  return combatUnarmedAttack(token);
+}
+function combatTokenCenter(t) {
+  var sq = Math.max(1, t.raio || 1);
+  return { x: Math.round(t.x + (sq - 1) / 2), y: Math.round(t.y + (sq - 1) / 2) };
+}
+function combatLineOfSight(a, b) {
+  if (isHexMap()) return true;
+  var ca = combatTokenCenter(a), cb = combatTokenCenter(b);
+  return hasLOS(ca.x, ca.y, cb.x, cb.y);
+}
+function combatOccupied(x, y, sq, ignore) {
+  return state.tokens.some(function (o) {
+    if (o === ignore || o.morto) return false;
+    var os = Math.max(1, o.raio || 1);
+    return x < o.x + os && x + sq > o.x && y < o.y + os && y + sq > o.y;
+  });
+}
+function combatPath(token, target, reach, maxSteps) {
+  var C = getCombat(), sq = Math.max(1, token.raio || 1);
+  function key(x, y) { return x + ',' + y; }
+  var start = { x: token.x, y: token.y }, seen = {}, prev = {}, queue = [start], head = 0, best = null, bestScore = Infinity;
+  seen[key(start.x, start.y)] = 0;
+  var dirs = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
+  function goal(x, y) {
+    var ghost = { x: x, y: y, raio: sq };
+    return C.dist(ghost, target) <= reach && combatLineOfSight(ghost, target);
+  }
+  var goalCell = null;
+  while (head < queue.length && queue.length < 30000) {
+    var cur = queue[head++], depth = seen[key(cur.x, cur.y)];
+    if (depth > 0 && goal(cur.x, cur.y)) { goalCell = cur; break; }
+    var score = C.dist({ x: cur.x, y: cur.y, raio: sq }, target) * 1000 + depth;
+    if (score < bestScore) { bestScore = score; best = cur; }
+    if (depth >= (maxSteps || 200)) continue;
+    for (var i = 0; i < dirs.length; i++) {
+      var nx = cur.x + dirs[i][0], ny = cur.y + dirs[i][1], k = key(nx, ny);
+      if (seen[k] != null) continue;
+      if (!canStep(cur.x, cur.y, nx, ny, token, false)) continue;
+      if (combatOccupied(nx, ny, sq, token)) continue;
+      seen[k] = depth + 1; prev[k] = cur; queue.push({ x: nx, y: ny });
+    }
+  }
+  var end = goalCell || best;
+  if (!end || (end.x === start.x && end.y === start.y)) return [];
+  var path = [], node = end;
+  while (node && !(node.x === start.x && node.y === start.y)) { path.unshift({ x: node.x, y: node.y }); node = prev[key(node.x, node.y)]; }
+  return path;
+}
+function combatPush(target, from, cells) {
+  var sq = Math.max(1, target.raio || 1), moved = 0;
+  var dx = Math.sign(target.x - from.x), dy = Math.sign(target.y - from.y);
+  if (!dx && !dy) return 0;
+  for (var i = 0; i < cells; i++) {
+    var nx = target.x + dx, ny = target.y + dy;
+    if (!canStep(target.x, target.y, nx, ny, target, false) || combatOccupied(nx, ny, sq, target)) break;
+    target.x = nx; target.y = ny; moved++;
+  }
+  return moved;
+}
+function getCombat() {
+  if (combatEngine) return combatEngine;
+  if (!window.RPGCombate) return null;
+  combatEngine = window.RPGCombate.criar({
+    estado: combatState,
+    tokens: function () { return state.tokens; },
+    monstros: function () { return window.MONSTERS || []; },
+    pcStats: combatPcStats,
+    pcAtaquePadrao: combatDefaultAttack,
+    linhaVisao: combatLineOfSight,
+    mover: function (t, x, y) { t.x = x; t.y = y; },
+    caminho: combatPath,
+    empurrar: combatPush,
+    armaduraDesvantagem: function (t) {
+      var profile = t.tipo === 'player' ? playerActionProfile(t) : null;
+      var armor = profile && profile.armorId ? combatItemById(profile.armorId) : null;
+      return !!(armor && armor.furtividade === 'Desvantagem');
+    }
+  });
+  return combatEngine;
+}
+function combatAvailable() { return !!getCombat() && !isHexMap(); }
+function combatActive() { return combatAvailable() && !!combatState().ativo; }
+function combatActor() {
+  var C = getCombat();
+  if (!C) return null;
+  if (appMode === 'editor') return C.ativo() ? C.atual() : (selected && selected.tipo !== undefined ? selected : null);
+  return currentPlayer();
+}
+
+function combatDialog(title, description, width) {
+  var dlg = createPortalDialog(title, description || '');
+  if (!dlg) return null;
+  dlg.panel.style.width = 'min(' + (width || 480) + 'px,100%)';
+  dlg.panel.style.maxHeight = '88%';
+  dlg.panel.style.overflow = 'auto';
+  return dlg;
+}
+function combatButton(label, onclick, options) {
+  options = options || {};
+  var b = document.createElement('button');
+  b.type = 'button'; b.className = 'mp-cb-btn' + (options.primary ? ' primary' : '');
+  b.textContent = label;
+  if (options.title) b.title = options.title;
+  if (options.disabled) { b.disabled = true; b.classList.add('off'); }
+  else b.onclick = onclick;
+  return b;
+}
+function combatClose(dlg) { if (dlg) closePortalDialog(dlg.overlay); }
+function combatRefreshUi() {
+  combatHudSig = '';
+  renderCombatHud();
+  save(); draw();
+}
+function combatShowLog(title, lines, onClose, extraButtons) {
+  var dlg = combatDialog(title, '', 620);
+  if (!dlg) { if (onClose) onClose(); return; }
+  var list = document.createElement('div');
+  list.className = 'mp-cb-log';
+  (lines || []).forEach(function (line) {
+    var item = document.createElement('div');
+    item.textContent = String(line);
+    if (/^—/.test(line)) item.className = 'mp-cb-head';
+    list.appendChild(item);
+  });
+  dlg.panel.appendChild(list);
+  var actions = document.createElement('div'); actions.className = 'mp-portal-dialog-actions';
+  (extraButtons || []).forEach(function (b) { actions.appendChild(combatButton(b.label, function () { combatClose(dlg); b.run(); }, { primary: !!b.primary })); });
+  actions.appendChild(combatButton('Fechar', function () { combatClose(dlg); if (onClose) onClose(); }, { primary: !extraButtons || !extraButtons.length }));
+  dlg.panel.appendChild(actions);
+  list.scrollTop = list.scrollHeight;
+}
+function combatToast(text) {
+  var hud = R && R.querySelector('#mp-combat-toast');
+  if (!hud) return;
+  hud.textContent = text; hud.style.display = 'block';
+  if (combatToastTimer) window.clearTimeout(combatToastTimer);
+  combatToastTimer = window.setTimeout(function () { hud.style.display = 'none'; }, 2600);
+}
+function combatTokenLabel(t) {
+  var C = getCombat();
+  var conds = C.condicoesDe(t).map(function (c) { return C.CONDICOES[c]; });
+  return (t.nome || 'Criatura') + ' — ' + C.pontosDeVidaTexto(t) + (conds.length ? ' · ' + conds.join(', ') : '');
+}
+function combatPickToken(title, description, candidates, onPick) {
+  var dlg = combatDialog(title, description, 460);
+  if (!dlg) return;
+  var C = getCombat();
+  if (!candidates.length) {
+    var p = document.createElement('p'); p.textContent = 'Nenhum alvo válido (alcance, linha de visão e cobertura).'; dlg.panel.appendChild(p);
+  }
+  var list = document.createElement('div'); list.className = 'mp-cb-list';
+  candidates.forEach(function (c) {
+    var t = c.token || c;
+    var label = combatTokenLabel(t) + (c.distancia != null ? ' · ' + (Math.round(c.distancia * 15) / 10).toString().replace('.', ',') + ' m' : '');
+    list.appendChild(combatButton(label, function () { combatClose(dlg); onPick(t); }));
+  });
+  dlg.panel.appendChild(list);
+  var actions = document.createElement('div'); actions.className = 'mp-portal-dialog-actions';
+  actions.appendChild(combatButton('Cancelar', function () { combatClose(dlg); }));
+  dlg.panel.appendChild(actions);
+}
+function combatSelect(options, value) {
+  var s = document.createElement('select');
+  s.className = 'mp-cb-input';
+  options.forEach(function (o) { var op = document.createElement('option'); op.value = o[0]; op.textContent = o[1]; s.appendChild(op); });
+  if (value != null) s.value = value;
+  return s;
+}
+function combatField(dlgPanel, label, control) {
+  var wrap = document.createElement('label'); wrap.className = 'mp-cb-field';
+  var span = document.createElement('span'); span.textContent = label;
+  wrap.appendChild(span); wrap.appendChild(control); dlgPanel.appendChild(wrap);
+  return control;
+}
+function combatInput(type, value) {
+  var i = document.createElement('input'); i.type = type; i.value = value == null ? '' : value; i.className = 'mp-cb-input';
+  return i;
+}
+function combatFinishAction(res, extraButtons) {
+  var C = getCombat();
+  combatRefreshUi();
+  combatShowLog('Resultado', res.linhas || [], function () {
+    if (C.ativo() && appMode === 'player') combatAfterPlayerAction();
+    combatRefreshUi();
+  }, extraButtons);
+}
+function combatAfterPlayerAction() {
+  var C = getCombat();
+  if (!C.ativo()) return;
+  var cur = C.atual();
+  if (cur && C.controladoPorIA(cur)) {
+    var lines = C.executarTurnosAutomaticos();
+    if (lines.length) combatShowLog('Turnos dos monstros', lines, combatRefreshUi);
+  }
+}
+
+function combatWeaponDialog(actor, title, filter, semMod, onChosen) {
+  var dlg = combatDialog(title, 'Escolha a arma do ataque.', 480);
+  if (!dlg) return;
+  var profile = playerActionProfile(actor);
+  var weapons = playerWeaponCatalog().filter(filter || function () { return true; });
+  var options = weapons.map(function (w) { return [w.id, w.n + ' — ' + w.dano + (w.maestria ? ' · ' + w.maestria : '')]; });
+  if (!filter) options.unshift(['', 'Golpe desarmado']);
+  var sel = combatField(dlg.panel, 'Arma', combatSelect(options, profile.weaponId && options.some(function (o) { return o[0] === profile.weaponId; }) ? profile.weaponId : options[0][0]));
+  var mode = combatField(dlg.panel, 'Modo', combatSelect([['melee', 'Corpo a corpo / padrão'], ['thrown', 'Arremessar']], 'melee'));
+  var two = combatField(dlg.panel, 'Empunhadura versátil', combatSelect([['0', 'Uma mão'], ['1', 'Duas mãos']], '0'));
+  var actions = document.createElement('div'); actions.className = 'mp-portal-dialog-actions';
+  actions.appendChild(combatButton('Cancelar', function () { combatClose(dlg); }));
+  actions.appendChild(combatButton('Escolher alvo', function () {
+    var weapon = sel.value ? playerWeaponById(sel.value) : null;
+    var atq = weapon ? combatWeaponAttack(actor, weapon, mode.value, { semMod: semMod, duasMaos: two.value === '1' }) : combatUnarmedAttack(actor);
+    combatClose(dlg); onChosen(atq);
+  }, { primary: true }));
+  dlg.panel.appendChild(actions);
+}
+function combatPayAttack(actor, st) {
+  var C = getCombat();
+  if (!C.ativo()) return { ok: true, novo: false };
+  if (!actor.eco) C.preparar(actor);
+  if (actor.eco.emAtaque && actor.eco.ataquesRestantes > 0) return { ok: true, novo: false };
+  var g = C.gastar(actor, 'acao');
+  if (!g.ok) return g;
+  actor.eco.emAtaque = true;
+  var multi = (st.ataques || []).find(function (a) { return a.tipo === 'multi'; });
+  actor.eco.ataquesRestantes = st.tipo === 'monstro' ? (multi ? Math.max(1, (multi.qtd && multi.qtd.n) || 2) : 1) : st.ataquesPorAcao;
+  return { ok: true, novo: true };
+}
+function combatPerformAttack(actor, atq, bonusMode) {
+  var C = getCombat(), st = C.stats(actor), pay = { ok: true, novo: false };
+  if (!bonusMode) {
+    pay = combatPayAttack(actor, st);
+    if (!pay.ok) { combatShowLog('Ataque', [pay.motivo]); return; }
+  } else if (C.ativo()) {
+    var g = bonusMode === 'nick' ? { ok: !actor.eco.nick } : C.gastar(actor, 'bonus');
+    if (!g.ok) { combatShowLog('Ataque', [g.motivo || 'Esta opção já foi usada neste turno.']); return; }
+    if (bonusMode === 'nick') actor.eco.nick = true;
+  }
+  var candidates = C.alvosPossiveis(actor, atq, false);
+  if (!candidates.length && pay.novo) { actor.eco.acao = true; actor.eco.emAtaque = false; actor.eco.ataquesRestantes = 0; }
+  if (!candidates.length && bonusMode === 'nick') actor.eco.nick = false;
+  if (!candidates.length && bonusMode === 'bonus') actor.eco.bonus = true;
+  combatPickToken('Alvo de ' + atq.nome, 'Criaturas visíveis dentro do alcance.', candidates, function (target) {
+    var res = C.atacar(actor, target, atq, {});
+    if (res.ok && !bonusMode) {
+      actor.eco.atacou = true;
+      if (C.ativo()) {
+        actor.eco.ataquesRestantes = Math.max(0, actor.eco.ataquesRestantes - 1);
+        if (atq.leve && atq.melee) actor.eco.leve = true;
+      }
+    }
+    C.registrar(res.linhas);
+    var buttons = [];
+    var nick = C.stats(actor).maestria && atq.maestria && C.util.norm(atq.maestria) === 'nick';
+    if (res.ok && !bonusMode && atq.leve && atq.melee && nick && !actor.eco.nick && C.ativo()) {
+      buttons.push({ label: 'Ataque extra (Nick)', run: function () { combatLightExtra(actor, 'nick'); } });
+    }
+    if (res.ok && !bonusMode && C.ativo() && actor.eco.ataquesRestantes > 0) {
+      buttons.push({ label: 'Próximo ataque (' + actor.eco.ataquesRestantes + ')', primary: true, run: function () { combatAttackFlow(actor); } });
+    }
+    combatFinishAction(res, buttons);
+  });
+}
+function combatLightExtra(actor, mode) {
+  combatWeaponDialog(actor, mode === 'nick' ? 'Ataque extra (Nick)' : 'Ataque com arma Leve (ação bônus)', function (w) {
+    var props = normalizeRpgText(w.propriedades || '');
+    return /\bleve\b/.test(props) && (w.tipo || '').indexOf('corpo a corpo') >= 0;
+  }, true, function (atq) { combatPerformAttack(actor, atq, mode); });
+}
+function combatMonsterAttackFlow(actor) {
+  var C = getCombat(), st = C.stats(actor);
+  var attacks = st.ataques.filter(function (a) { return a.tipo === 'ataque'; });
+  if (!attacks.length) { combatShowLog('Ataque', [actor.nome + ' não possui ataques cadastrados.']); return; }
+  var dlg = combatDialog('Ataque de ' + actor.nome, 'Escolha a ação de ataque.', 480);
+  if (!dlg) return;
+  var list = document.createElement('div'); list.className = 'mp-cb-list';
+  attacks.forEach(function (a) {
+    list.appendChild(combatButton(a.nome + ' — ' + (a.bonus >= 0 ? '+' : '') + a.bonus + ' · ' + a.dano.map(function (d) { return d.dados; }).join(' + '), function () {
+      combatClose(dlg);
+      var modo = a.modo === 'ambos' ? 'corpo' : (a.modo === 'distancia' ? 'distancia' : 'corpo');
+      var atq = {
+        nome: a.nome, bonus: a.bonus, distancia: modo === 'distancia',
+        alcanceNormal: modo === 'corpo' ? a.alcanceCorpo : (a.alcanceNormal || a.alcanceCorpo), alcanceMax: modo === 'corpo' ? a.alcanceCorpo : (a.alcanceMax || a.alcanceCorpo),
+        dano: a.modo === 'ambos' && a.dano.length > 1 ? [a.dano[0]] : a.dano, extra: a.extra, magico: !!a.magico, arma: false
+      };
+      if (a.modo === 'ambos') {
+        var alt = Object.assign({}, atq, { nome: a.nome + ' (distância)', distancia: true, alcanceNormal: a.alcanceNormal, alcanceMax: a.alcanceMax, dano: a.dano.length > 1 ? [a.dano[1]] : a.dano });
+        combatPickMode(actor, atq, alt);
+      } else combatPerformAttack(actor, atq, null);
+    }));
+  });
+  dlg.panel.appendChild(list);
+  var actions = document.createElement('div'); actions.className = 'mp-portal-dialog-actions';
+  actions.appendChild(combatButton('Cancelar', function () { combatClose(dlg); }));
+  dlg.panel.appendChild(actions);
+}
+function combatPickMode(actor, melee, ranged) {
+  var dlg = combatDialog('Modo do ataque', 'Corpo a corpo ou à distância?', 380);
+  if (!dlg) return;
+  var actions = document.createElement('div'); actions.className = 'mp-portal-dialog-actions';
+  actions.appendChild(combatButton('Corpo a corpo', function () { combatClose(dlg); combatPerformAttack(actor, melee, null); }, { primary: true }));
+  actions.appendChild(combatButton('À distância', function () { combatClose(dlg); combatPerformAttack(actor, ranged, null); }));
+  dlg.panel.appendChild(actions);
+}
+function combatAttackFlow(actor) {
+  var C = getCombat();
+  if (!C) return;
+  var st = C.stats(actor);
+  if (st.tipo === 'monstro') { combatMonsterAttackFlow(actor); return; }
+  if (C.ativo() && !C.podeAgir(actor, 'acao') && !(actor.eco.emAtaque && actor.eco.ataquesRestantes > 0)) {
+    combatShowLog('Ataque', [actor !== C.atual() ? 'Não é o turno de ' + actor.nome + '.' : 'A ação deste turno já foi usada.']);
+    return;
+  }
+  combatWeaponDialog(actor, 'Ação Atacar', null, false, function (atq) { combatPerformAttack(actor, atq, null); });
+}
+
+function combatSpellDialog(actor) {
+  var C = getCombat(), st = C.stats(actor);
+  var abil = COMBAT_SPELL_ABILITY[st.classe] || 'INT';
+  var mod = st.mods[abil], dc = 8 + st.prof + mod, atk = st.prof + mod;
+  var dlg = combatDialog('Conjurar magia', 'CD de magia ' + dc + ' · bônus de ataque ' + (atk >= 0 ? '+' : '') + atk + ' (' + C.NOME_ATTR[abil] + ').', 520);
+  if (!dlg) return;
+  var nome = combatField(dlg.panel, 'Nome da magia', combatInput('text', ''));
+  var efeito = combatField(dlg.panel, 'Efeito', combatSelect([['ataque', 'Ataque de magia'], ['salva', 'Salvaguarda'], ['cura', 'Cura'], ['nenhum', 'Sem dano (utilitária)']], 'ataque'));
+  var dados = combatField(dlg.panel, 'Dano ou cura (ex.: 3d6)', combatInput('text', '1d10'));
+  var tipo = combatField(dlg.panel, 'Tipo de dano', combatSelect(COMBAT_DAMAGE_TYPES, 'fogo'));
+  var attr = combatField(dlg.panel, 'Salvaguarda do alvo', combatSelect(C.ATRIBUTOS.map(function (a) { return [a, C.NOME_ATTR[a]]; }), 'DES'));
+  var metade = combatField(dlg.panel, 'Em sucesso na salvaguarda', combatSelect([['1', 'Metade do dano'], ['0', 'Nenhum dano']], '1'));
+  var alcance = combatField(dlg.panel, 'Alcance (m)', combatInput('number', '18'));
+  var acao = combatField(dlg.panel, 'Tempo de conjuração', combatSelect([['acao', 'Ação'], ['bonus', 'Ação bônus']], 'acao'));
+  var conc = combatField(dlg.panel, 'Concentração', combatSelect([['0', 'Não'], ['1', 'Sim']], '0'));
+  var list = document.createElement('div'); list.className = 'mp-cb-list';
+  var alvoChecks = [];
+  state.tokens.forEach(function (t) {
+    if (t.morto) return;
+    var row = document.createElement('label'); row.className = 'mp-cb-check';
+    var cb = document.createElement('input'); cb.type = 'checkbox';
+    cb.checked = t !== actor && C.hostis(actor, t) && combatLineOfSight(actor, t);
+    row.appendChild(cb); row.appendChild(document.createTextNode(' ' + combatTokenLabel(t) + ' · ' + (Math.round(C.dist(actor, t) * 15) / 10).toString().replace('.', ',') + ' m'));
+    list.appendChild(row); alvoChecks.push({ cb: cb, token: t });
+  });
+  var cap = document.createElement('p'); cap.textContent = 'Alvos:'; dlg.panel.appendChild(cap); dlg.panel.appendChild(list);
+  var actions = document.createElement('div'); actions.className = 'mp-portal-dialog-actions';
+  actions.appendChild(combatButton('Cancelar', function () { combatClose(dlg); }));
+  actions.appendChild(combatButton('Conjurar', function () {
+    var alvos = alvoChecks.filter(function (x) { return x.cb.checked; }).map(function (x) { return x.token; });
+    var cells = Math.max(1, Math.round((Number(alcance.value) || 18) / 1.5));
+    var ef = efeito.value;
+    if (ef !== 'nenhum' && ef !== 'cura' && ef !== 'ataque' && ef !== 'salva') ef = 'nenhum';
+    if ((ef === 'ataque' || ef === 'salva') && alvos.length) {
+      alvos = alvos.filter(function (t) { return C.dist(actor, t) <= cells; });
+    }
+    var res = C.magia(actor, {
+      nome: nome.value.trim() || 'Magia', efeito: ef, dados: dados.value.trim(), tipoDano: tipo.value, atributo: attr.value, cd: dc, bonus: atk,
+      metade: metade.value === '1', alcance: cells, alvos: alvos, concentracao: conc.value === '1', tipoAcao: acao.value
+    });
+    combatClose(dlg);
+    combatFinishAction(res);
+  }, { primary: true }));
+  dlg.panel.appendChild(actions);
+}
+function combatSkillDialog(actor, title, skills, kind) {
+  var C = getCombat();
+  var dlg = combatDialog(title, 'Rolagem automática com o bônus da ficha.', 420);
+  if (!dlg) return;
+  var sel = combatField(dlg.panel, 'Perícia', combatSelect(skills.map(function (s) { return [s, s + ' (' + RPG_SKILL_ABILITIES[s] + ')']; }), skills[0]));
+  var cd = combatField(dlg.panel, 'CD (opcional)', combatInput('number', '15'));
+  var actions = document.createElement('div'); actions.className = 'mp-portal-dialog-actions';
+  actions.appendChild(combatButton('Cancelar', function () { combatClose(dlg); }));
+  actions.appendChild(combatButton('Rolar', function () {
+    var skill = sel.value, value = Number(cd.value) || 0;
+    combatClose(dlg);
+    combatFinishAction(C.testePericia(actor, skill, RPG_SKILL_ABILITIES[skill], value, 'acao', title));
+  }, { primary: true }));
+  dlg.panel.appendChild(actions);
+}
+function combatTextDialog(title, label, placeholder, onOk) {
+  var dlg = combatDialog(title, '', 420);
+  if (!dlg) return;
+  var input = combatField(dlg.panel, label, combatInput('text', placeholder || ''));
+  var actions = document.createElement('div'); actions.className = 'mp-portal-dialog-actions';
+  actions.appendChild(combatButton('Cancelar', function () { combatClose(dlg); }));
+  actions.appendChild(combatButton('Confirmar', function () { var v = input.value.trim(); combatClose(dlg); onOk(v); }, { primary: true }));
+  dlg.panel.appendChild(actions);
+}
+function combatNumberDialog(title, label, value, min, max, onOk) {
+  var dlg = combatDialog(title, '', 380);
+  if (!dlg) return;
+  var input = combatField(dlg.panel, label, combatInput('number', value));
+  input.min = min; input.max = max;
+  var actions = document.createElement('div'); actions.className = 'mp-portal-dialog-actions';
+  actions.appendChild(combatButton('Cancelar', function () { combatClose(dlg); }));
+  actions.appendChild(combatButton('Confirmar', function () { var v = Math.max(min, Math.min(max, Math.round(Number(input.value) || min))); combatClose(dlg); onOk(v); }, { primary: true }));
+  dlg.panel.appendChild(actions);
+}
+function combatNearby(actor, filter) {
+  var C = getCombat();
+  return state.tokens.filter(function (t) { return t !== actor && !t.morto && (!filter || filter(t)); }).map(function (t) { return { token: t, distancia: C.dist(actor, t) }; }).sort(function (a, b) { return a.distancia - b.distancia; });
+}
+
+function openCombatMenu() {
+  var C = getCombat();
+  if (!C) { appAlertMessage('msg014', 'O módulo de combate não foi carregado (combate.js).'); return; }
+  if (isHexMap()) { combatToast('O combate funciona nos mapas de masmorra (grade quadrada).'); return; }
+  var actor = combatActor();
+  if (!actor) { combatShowLog('Combate', ['Selecione um token para agir (modo Editor) ou crie o personagem jogador.']); return; }
+  C.preparar(actor);
+  var live = C.ativo(), st = C.stats(actor);
+  var info = C.pontosDeVidaTexto(actor) + ' · CA ' + (actor.ca || st.ca) + (live ? ' · Movimento ' + (Math.round(C.movimentoRestante(actor) * 15) / 10).toString().replace('.', ',') + ' m' : '');
+  var dlg = combatDialog('⚔ ' + actor.nome, info, 560);
+  if (!dlg) return;
+  function section(title) {
+    var h = document.createElement('div'); h.className = 'mp-cb-section'; h.textContent = title; dlg.panel.appendChild(h);
+    var g = document.createElement('div'); g.className = 'mp-cb-grid'; dlg.panel.appendChild(g);
+    return g;
+  }
+  function add(grid, label, kind, run, extraOff, hint) {
+    var off = false, why = '';
+    if (extraOff) { off = true; why = extraOff; }
+    else if (live && kind && !C.podeAgir(actor, kind)) {
+      off = true;
+      why = actor !== C.atual() && kind !== 'reacao' ? 'Não é o turno desta criatura.' : kind === 'acao' ? 'Ação já usada.' : kind === 'bonus' ? 'Ação bônus já usada.' : 'Reação já usada.';
+      if (kind === 'acao' && actor.eco.emAtaque && actor.eco.ataquesRestantes > 0 && label === 'Atacar') { off = false; why = ''; }
+    }
+    grid.appendChild(combatButton(label, function () { combatClose(dlg); run(); }, { disabled: off, title: off ? why : hint }));
+  }
+  var acao = section('Ação');
+  add(acao, 'Atacar', 'acao', function () { combatAttackFlow(actor); }, null, 'Ataque com arma, golpe desarmado ou ação do monstro');
+  if (st.tipo === 'monstro') {
+    st.ataques.filter(function (a) { return a.tipo === 'salva'; }).forEach(function (a) {
+      var off = a.recarga && actor.recargas && actor.recargas[a.nome] === false ? 'Aguardando recarga.' : null;
+      add(acao, a.nome.replace(/\s*\(Recarga[^)]*\)/, ''), 'acao', function () {
+        var area = a.area || 6;
+        var alvos = state.tokens.filter(function (t) { return t !== actor && !t.morto && C.hostis(actor, t) && t.hp > 0 && C.dist(actor, t) <= area && combatLineOfSight(actor, t); });
+        if (!alvos.length) { combatShowLog(a.nome, ['Nenhum inimigo na área (' + (Math.round(area * 15) / 10).toString().replace('.', ',') + ' m).']); return; }
+        var g = C.gastar(actor, 'acao');
+        if (!g.ok) { combatShowLog(a.nome, [g.motivo]); return; }
+        if (a.recarga) actor.recargas[a.nome] = false;
+        var lines = [actor.nome + ' usa ' + a.nome + '.'];
+        alvos.forEach(function (t) { lines = lines.concat(C.aplicarAcaoSalva(actor, t, a)); });
+        C.registrar(lines); combatFinishAction({ linhas: lines });
+      }, off, a.descricao);
+    });
+  }
+  add(acao, 'Agarrar', 'acao', function () {
+    combatPickToken('Agarrar', 'Alvo adjacente (CD 8 + Força + proficiência).', combatNearby(actor, function (t) { return C.hostis(actor, t) && C.dist(actor, t) <= 1; }), function (t) {
+      var g = C.gastar(actor, 'acao'); if (!g.ok) { combatShowLog('Agarrar', [g.motivo]); return; }
+      var r = C.agarrar(actor, t); C.registrar(r.linhas); combatFinishAction(r);
+    });
+  });
+  add(acao, 'Empurrar', 'acao', function () {
+    combatPickToken('Empurrar', 'Alvo adjacente (CD 8 + Força + proficiência).', combatNearby(actor, function (t) { return C.hostis(actor, t) && C.dist(actor, t) <= 1; }), function (t) {
+      var dlg2 = combatDialog('Empurrar', 'Escolha o efeito.', 380);
+      var actions = document.createElement('div'); actions.className = 'mp-portal-dialog-actions';
+      [['afastar', 'Afastar 1,5 m'], ['derrubar', 'Derrubar']].forEach(function (o) {
+        actions.appendChild(combatButton(o[1], function () {
+          combatClose(dlg2);
+          var g = C.gastar(actor, 'acao'); if (!g.ok) { combatShowLog('Empurrar', [g.motivo]); return; }
+          var r = C.empurrar(actor, t, o[0]); C.registrar(r.linhas); combatFinishAction(r);
+        }, { primary: o[0] === 'afastar' }));
+      });
+      dlg2.panel.appendChild(actions);
+    });
+  });
+  add(acao, 'Disparada', 'acao', function () { combatFinishAction(C.disparada(actor)); });
+  add(acao, 'Desengajar', 'acao', function () { combatFinishAction(C.desengajar(actor)); });
+  add(acao, 'Esquivar', 'acao', function () { combatFinishAction(C.esquivar(actor)); });
+  add(acao, 'Ajudar', 'acao', function () {
+    combatPickToken('Ajudar', 'Aliado (ataque ou teste) ou inimigo adjacente (distrair).', combatNearby(actor, function (t) { return C.hostis(actor, t) ? C.dist(actor, t) <= 1 : true; }), function (t) {
+      combatFinishAction(C.ajudar(actor, t, C.hostis(actor, t) ? 'distrair' : 'aliado'));
+    });
+  });
+  add(acao, 'Esconder', 'acao', function () { combatFinishAction(C.esconder(actor)); });
+  add(acao, 'Procurar', 'acao', function () { combatFinishAction(C.procurar(actor)); });
+  add(acao, 'Preparar', 'acao', function () {
+    combatTextDialog('Preparar ação', 'Gatilho e ação (ex.: atacar quando o goblin entrar na sala)', '', function (v) { combatFinishAction(C.preparar_acao(actor, v)); });
+  });
+  add(acao, 'Utilizar', 'acao', function () {
+    combatTextDialog('Utilizar objeto', 'O que será utilizado?', '', function (v) { combatFinishAction(C.utilizar(actor, v)); });
+  });
+  if (st.tipo === 'pc') {
+    add(acao, 'Magia', 'acao', function () { combatSpellDialog(actor); });
+    add(acao, 'Influenciar', 'acao', function () { combatSkillDialog(actor, 'Influenciar', ['Enganação', 'Intimidação', 'Atuação', 'Persuasão', 'Adestrar Animais'], 'influenciar'); });
+    add(acao, 'Estudar', 'acao', function () { combatSkillDialog(actor, 'Estudar', ['Arcanismo', 'História', 'Investigação', 'Natureza', 'Religião'], 'estudar'); });
+  }
+  add(acao, 'Escapar de agarrão', 'acao', function () { combatFinishAction(C.escapar(actor)); }, C.tem(actor, 'agarrado') ? null : 'Não está agarrado.');
+  add(acao, 'Estabilizar', 'acao', function () {
+    combatPickToken('Estabilizar', 'Criatura adjacente com 0 PV (Medicina CD 10).', combatNearby(actor, function (t) { return t.hp <= 0 && C.dist(actor, t) <= 1; }), function (t) { combatFinishAction(C.estabilizar(actor, t)); });
+  });
+  var bonus = section('Ação bônus');
+  add(bonus, 'Ataque com arma Leve', 'bonus', function () { combatLightExtra(actor, 'bonus'); }, st.tipo !== 'pc' ? 'Somente personagens.' : (live && !actor.eco.leve ? 'Ataque antes com uma arma corpo a corpo Leve.' : null));
+  if (st.classe === 'Monge') add(bonus, 'Artes Marciais (golpe desarmado)', 'bonus', function () { combatPerformAttack(actor, combatUnarmedAttack(actor), 'bonus'); }, live && !actor.eco.atacou ? 'Use a ação Atacar antes.' : null);
+  C.caracteristicas(actor).forEach(function (car) {
+    add(bonus, car.nome + ' (' + car.restante + ')', car.custo, function () {
+      if (car.id === 'maos') {
+        combatPickToken('Mãos Consagradas', 'Criatura tocada.', [{ token: actor, distancia: 0 }].concat(combatNearby(actor, function (t) { return C.dist(actor, t) <= 1 && !C.hostis(actor, t); })), function (t) {
+          combatNumberDialog('Mãos Consagradas', 'Pontos gastos (reserva ' + car.restante + ')', 1, 1, car.restante, function (q) { combatFinishAction(C.usarCaracteristica(actor, car.id, { alvo: t, quantidade: q })); });
+        });
+      } else combatFinishAction(C.usarCaracteristica(actor, car.id));
+    }, null, car.desc);
+  });
+  var mov = section('Movimento e interação');
+  add(mov, 'Levantar-se', null, function () { var l = C.levantar(actor); C.registrar(l); combatFinishAction({ linhas: l }); }, C.tem(actor, 'caido') ? null : 'Não está caído.');
+  add(mov, 'Interagir com objeto', null, function () {
+    combatTextDialog('Interagir com objeto', 'Qual objeto? (1 interação gratuita por turno)', '', function (v) { combatFinishAction(C.interagirObjeto(actor, v)); });
+  });
+  add(mov, 'Ação preparada (reação)', 'reacao', function () { combatFinishAction(C.usarPreparada(actor)); }, actor.preparada ? null : 'Nenhuma ação preparada.');
+  if (!live && st.tipo === 'pc') {
+    var rest = section('Descanso');
+    add(rest, 'Descanso curto', null, function () {
+      var l = C.descansarCurto(actor, st.dadoVida || 8); combatFinishAction({ linhas: l });
+    });
+    add(rest, 'Descanso longo', null, function () { var l = C.descansarLongo(actor); combatFinishAction({ linhas: l }); });
+  }
+  var actions = document.createElement('div'); actions.className = 'mp-portal-dialog-actions';
+  actions.appendChild(combatButton('Fechar', function () { combatClose(dlg); }, { primary: true }));
+  dlg.panel.appendChild(actions);
+}
+
+function combatStart() {
+  var C = getCombat();
+  if (!combatAvailable()) { combatToast('O combate funciona nos mapas de masmorra (grade quadrada).'); return; }
+  if (C.ativo()) { combatToast('O combate já está em andamento.'); return; }
+  var lines = C.iniciarCombate();
+  combatRefreshUi();
+  combatShowLog('⚔ Início do combate', lines, combatRefreshUi);
+}
+function combatEndTurn() {
+  var C = getCombat();
+  if (!combatActive()) return;
+  var cur = C.atual();
+  if (appMode === 'player' && cur && cur.tipo !== 'player') { combatToast('Aguarde: não é o turno do personagem.'); return; }
+  var lines = C.encerrarTurnoAtual();
+  combatRefreshUi();
+  combatShowLog('Fim do turno', lines, combatRefreshUi);
+}
+function combatStop() {
+  var C = getCombat();
+  if (!combatActive()) return;
+  var lines = C.encerrar('manual');
+  combatRefreshUi();
+  combatShowLog('Combate encerrado', lines, combatRefreshUi);
+}
+function combatShowRegistry() {
+  var C = getCombat();
+  if (!C) return;
+  var lines = combatState().registro || [];
+  combatShowLog('Registro do combate', lines.length ? lines.slice(-60) : ['Nenhum evento registrado ainda.']);
+}
+function combatStepAllowed(token, next) {
+  var C = getCombat();
+  if (!C || isHexMap() || !combatState().ativo) return true;
+  var r = C.podeMover(token, { x: token.x, y: token.y }, next);
+  if (!r.ok) { combatToast(r.motivo); return false; }
+  combatCostPending = r.custo || 1;
+  return true;
+}
+function combatAfterStep(token, from, to) {
+  var C = getCombat();
+  if (!C || isHexMap() || !combatState().ativo) return;
+  var lines = C.aposMover(token, from, to, combatCostPending);
+  combatCostPending = 1;
+  if (lines.length) {
+    stopKeyMove();
+    window.setTimeout(function () {
+      combatShowLog('Ataque de oportunidade', lines, combatRefreshUi);
+      save(); draw();
+    }, 0);
+  }
+}
+
+function renderCombatHud() {
+  var hud = R && R.querySelector('#mp-combat-hud');
+  if (!hud) return;
+  var C = getCombat();
+  if (!C || isHexMap() || !combatState().ativo) {
+    if (hud.dataset.on !== '0') { hud.dataset.on = '0'; hud.style.display = 'none'; }
+    combatHudSig = '';
+    return;
+  }
+  var cur = C.atual();
+  var parts = [combatState().rodada, cur ? cur.id : '', cur && cur.eco ? [cur.eco.acao, cur.eco.bonus, cur.eco.reacao, C.movimentoRestante(cur)].join(',') : '', C.resumoOrdem().map(function (o) { return o.id + o.morto + o.caido; }).join('|'), appMode];
+  var sig = parts.join('#');
+  if (sig === combatHudSig) return;
+  combatHudSig = sig;
+  hud.dataset.on = '1'; hud.style.display = 'flex';
+  var order = C.resumoOrdem().map(function (o) {
+    return '<span class="mp-cb-chip' + (o.atual ? ' now' : '') + (o.morto ? ' dead' : '') + (o.caido ? ' down' : '') + '" data-id="' + esc(o.id) + '">' + esc(o.nome.slice(0, 12)) + ' <small>' + o.valor + '</small></span>';
+  }).join('');
+  var eco = '';
+  if (cur && cur.eco) {
+    eco = '<span class="mp-cb-eco' + (cur.eco.acao ? ' ok' : '') + '">Ação</span><span class="mp-cb-eco' + (cur.eco.bonus ? ' ok' : '') + '">Bônus</span><span class="mp-cb-eco' + (cur.eco.reacao ? ' ok' : '') + '">Reação</span><span class="mp-cb-eco ok">Mov ' + (Math.round(C.movimentoRestante(cur) * 15) / 10).toString().replace('.', ',') + ' m</span>';
+  }
+  hud.innerHTML = '<div class="mp-cb-order">' + order + '</div><div class="mp-cb-row"><strong>Rodada ' + combatState().rodada + ' · ' + esc(cur ? cur.nome : '—') + '</strong>' + eco + '</div>' +
+    '<div class="mp-cb-row"><button type="button" data-cb="menu">⚔ Ações</button><button type="button" data-cb="end">⏭ Fim do turno</button><button type="button" data-cb="log">📜</button></div>';
+}
+
+function combatDrawOverlay(t, c, r) {
+  var C = getCombat();
+  if (!C || isHexMap()) return;
+  var s = combatState();
+  if (t.morto) {
+    cx.save();
+    cx.fillStyle = 'rgba(0,0,0,0.55)'; cx.beginPath(); cx.arc(c.x, c.y, r, 0, Math.PI * 2); cx.fill();
+    cx.fillStyle = '#fff'; cx.font = 'bold ' + Math.max(12, r * 1.1) + 'px sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
+    cx.fillText('✝', c.x, c.y); cx.restore();
+    return;
+  }
+  var cur = s.ativo ? C.atual() : null;
+  if (cur === t) {
+    cx.save(); cx.strokeStyle = '#ffd54f'; cx.lineWidth = 3.5 / zoom; cx.setLineDash([6 / zoom, 4 / zoom]);
+    cx.beginPath(); cx.arc(c.x, c.y, r + 5 / zoom, 0, Math.PI * 2); cx.stroke(); cx.restore();
+  }
+  var tags = [];
+  if (t.hp != null && t.hp <= 0 && C.ehJogador(t)) tags.push('💤');
+  if (t.efeitos && t.efeitos.furia) tags.push('🔥');
+  if (t.concentracao) tags.push('C');
+  if (t.escondido) tags.push('👁');
+  (t.condicoes || []).forEach(function (cd) { if (tags.length < 5) tags.push(COMBAT_COND_ABBR[cd.id] || '?'); });
+  if (t.exaustao) tags.push('E' + t.exaustao);
+  if (tags.length) {
+    cx.save();
+    var fs = Math.max(8, 9 / zoom * (zoom < 0.6 ? 0.8 : 1));
+    cx.font = 'bold ' + fs + 'px sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
+    var text = tags.join(' '), w = cx.measureText(text).width + 6 / zoom, h = fs + 4 / zoom;
+    var y = c.y - r - h / 2 - 2 / zoom;
+    cx.fillStyle = 'rgba(15,15,20,0.82)'; cx.fillRect(c.x - w / 2, y - h / 2, w, h);
+    cx.fillStyle = '#ffe082'; cx.fillText(text, c.x, y);
+    cx.restore();
+  }
+}
+
+function combatDetailHtml(t) {
+  var C = getCombat();
+  if (!C || isHexMap()) return '';
+  C.preparar(t);
+  var conds = Object.keys(C.CONDICOES).map(function (id) {
+    var on = (t.condicoes || []).some(function (c) { return c.id === id; });
+    return '<button type="button" class="mp-cb-cond' + (on ? ' on' : '') + '" data-cond="' + id + '">' + esc(C.CONDICOES[id]) + '</button>';
+  }).join('');
+  var inOrder = combatState().ativo && combatState().ordem.some(function (o) { return o.id === t.id; });
+  return '<div class="mp-cb-detail"><b>Combate</b>' +
+    '<div class="mp-hp-row"><label>CA <input type="number" id="mp-cb-ca" value="' + esc(t.ca || C.stats(t).ca) + '" style="width:52px"></label>' +
+    '<label>PV temp. <input type="number" id="mp-cb-temp" value="' + (t.hpTemp || 0) + '" min="0" style="width:52px"></label>' +
+    '<label>Exaustão <input type="number" id="mp-cb-exa" value="' + (t.exaustao || 0) + '" min="0" max="6" style="width:44px"></label></div>' +
+    '<div class="mp-hp-row"><label>Cobertura <select id="mp-cb-cob"><option value="0">Nenhuma</option><option value="2">Parcial (+2)</option><option value="5">¾ (+5)</option><option value="99">Total</option></select></label>' +
+    '<label>Lado <select id="mp-cb-fac"><option value="jogadores">Jogadores</option><option value="monstros">Monstros</option></select></label></div>' +
+    '<div class="mp-cb-conds">' + conds + '</div>' +
+    '<div class="mp-detail-tools"><button type="button" id="mp-cb-dmg">Causar dano</button><button type="button" id="mp-cb-heal">Curar</button>' +
+    (combatState().ativo && !inOrder ? '<button type="button" id="mp-cb-join">Pôr no combate</button>' : '') +
+    (t.morto ? '<button type="button" id="mp-cb-revive">Reviver</button>' : '') + '</div></div>';
+}
+function combatDetailBind(box, t) {
+  var C = getCombat();
+  if (!C || isHexMap()) return;
+  var cob = box.querySelector('#mp-cb-cob'), fac = box.querySelector('#mp-cb-fac');
+  if (cob) { cob.value = String(t.cobertura || 0); cob.onchange = function () { t.cobertura = Number(cob.value) || 0; save(); }; }
+  if (fac) { fac.value = C.faccao(t); fac.onchange = function () { t.faccao = fac.value; save(); }; }
+  var ca = box.querySelector('#mp-cb-ca'); if (ca) ca.onchange = function () { t.ca = Math.max(0, Math.round(Number(ca.value) || 0)) || undefined; save(); };
+  var temp = box.querySelector('#mp-cb-temp'); if (temp) temp.onchange = function () { t.hpTemp = Math.max(0, Math.round(Number(temp.value) || 0)); save(); draw(); };
+  var exa = box.querySelector('#mp-cb-exa'); if (exa) exa.onchange = function () { t.exaustao = Math.max(0, Math.min(6, Math.round(Number(exa.value) || 0))); if (t.exaustao >= 6) { t.hp = 0; t.morto = true; } save(); draw(); };
+  box.querySelectorAll('.mp-cb-cond').forEach(function (b) {
+    b.onclick = function () {
+      var id = b.getAttribute('data-cond');
+      if ((t.condicoes || []).some(function (c) { return c.id === id; })) C.removerCondicao(t, id);
+      else C.aplicarCondicao(t, id, {});
+      save(); draw(); updateDetailPanel();
+    };
+  });
+  var dmg = box.querySelector('#mp-cb-dmg');
+  if (dmg) dmg.onclick = function () {
+    combatNumberDialog('Causar dano', 'Dano (sem tipo, aplicado integralmente)', 1, 0, 999, function (v) {
+      var r = C.aplicarDano(t, [{ valor: v, tipo: null }], {}); C.registrar(r.linhas); combatRefreshUi(); updateDetailPanel(); combatShowLog('Dano', r.linhas);
+    });
+  };
+  var heal = box.querySelector('#mp-cb-heal');
+  if (heal) heal.onclick = function () {
+    combatNumberDialog('Curar', 'PV recuperados', 1, 1, 999, function (v) {
+      var l = C.curar(t, v); C.registrar(l); combatRefreshUi(); updateDetailPanel(); combatShowLog('Cura', l);
+    });
+  };
+  var join = box.querySelector('#mp-cb-join');
+  if (join) join.onclick = function () { var l = C.entrarNoCombate(t); combatRefreshUi(); updateDetailPanel(); combatShowLog('Combate', l); };
+  var revive = box.querySelector('#mp-cb-revive');
+  if (revive) revive.onclick = function () { t.morto = false; t.hp = 1; t.mortes = { s: 0, f: 0 }; t.estavel = false; C.removerCondicao(t, 'inconsciente'); save(); draw(); updateDetailPanel(); };
+}
 
 function updateModeUi() {
   if (!R) return;
@@ -4974,8 +5668,7 @@ function updateModeUi() {
     root.classList.toggle('player-mode', appMode === 'player');
     root.classList.toggle('editor-mode', appMode === 'editor');
   }
-  // A barra de ferramentas e todos os controles de edição devem sumir no Jogador.
-  // O estilo inline com !important evita que regras de layout do grid reexibam a barra.
+
   var editorOnlyNodes = R.querySelectorAll('.mp-editor-only');
   editorOnlyNodes.forEach(function (node) {
     if (appMode === 'player') {
@@ -5012,10 +5705,10 @@ function updateModeUi() {
 
 function setMode(nextMode) {
   appMode = nextMode === 'editor' ? 'editor' : 'player';
-  // Presets de visão pedidos: Jogador sem grade/segredos; Editor com visão completa.
+
   showGrid = appMode === 'editor';
   showSecrets = appMode === 'editor';
-  // Editor: sem névoa e sem luz por padrão (continuam podendo ser ligadas pelos botões Névoa/Luz).
+
   showFog = appMode === 'player';
   dynLight = appMode === 'player';
   showWalls = true;
@@ -5068,7 +5761,6 @@ function mount(el) {
     });
   });
 }
-
 
 function closeMessageEditor(overlay) {
   if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
@@ -5183,6 +5875,7 @@ function mountNow(el) {
     '<div class="mp-wrap vtt-wrap">' +
     '<div class="mp-main">' +
     '<canvas id="mp-cv"></canvas>' +
+    '<div id="mp-combat-hud" class="mp-combat-hud" style="display:none"></div><div id="mp-combat-toast" class="mp-combat-toast" style="display:none"></div>' +
     '<button type="button" id="mp-burger" class="mp-burger" title="Menu" aria-label="Abrir menu" aria-expanded="false" aria-controls="mp-drawer"><span></span><span></span><span></span></button>' +
     '<div class="mp-mode-switch" role="group" aria-label="Modo do mapa"><button type="button" id="mp-mode-player" class="active" title="Modo Jogador: sem ferramentas de edição">♟ Jogador</button><button type="button" id="mp-mode-editor" title="Modo Editor: liberar ferramentas e câmera livre">✎ Editor</button></div>' +
     '<div id="mp-drawer" class="mp-drawer" aria-hidden="true">' +
@@ -5195,8 +5888,12 @@ function mountNow(el) {
     '<button type="button" data-player-action="athletics">💪 Atletismo</button>' +
     '<button type="button" data-player-action="tools">🗝 Ferramentas</button>' +
     '<button type="button" data-player-action="interact">✋ Interagir</button>' +
+    '<button type="button" data-player-action="combat">⚔ Menu de combate</button>' +
     '</div><div class="mp-player-skill-row"><select id="mp-player-skill" aria-label="Escolher perícia">' + playerSkillOptionsHtml() + '</select><button type="button" data-player-action="skill">🎲 Rolar perícia</button></div>' +
-    '<small>Percepção, Investigação e ações de interação verificam automaticamente os objetos na visão. Ataque aplica rolagens e dano às criaturas visíveis no alcance.</small></section>' +
+    '<small>Percepção, Investigação e ações de interação verificam automaticamente os objetos na visão. Ataque abre a escolha de arma e de alvo seguindo as regras de combate do D&D 2024.</small></section>' +
+    '<section id="mp-combat-panel" class="mp-player-actions mp-combat-panel" aria-label="Combate"><div class="mp-player-actions-head"><strong>⚔ Combate (D&D 2024)</strong></div><div class="mp-player-actions-buttons">' +
+    '<button type="button" data-cb="start">▶ Iniciar combate</button><button type="button" data-cb="menu">⚔ Ações</button><button type="button" data-cb="end">⏭ Fim do turno</button><button type="button" data-cb="stop">⏹ Encerrar</button><button type="button" data-cb="log">📜 Registro</button></div>' +
+    '<label class="mp-editor-only mp-cb-ai"><input type="checkbox" id="mp-cb-ai" checked> IA automática dos monstros</label></section>' +
     '<div class="mp-bar">' +
     '<div class="mp-map-selector"><select id="mp-map" class="mp-title" title="Trocar de mapa">' + mapOptions() + '</select>' +
     '<button type="button" id="mp-add-map" class="mp-map-add" title="Adicionar imagem ou pacote ZIP de mapa" aria-label="Adicionar mapa">＋</button></div>' +
@@ -5239,7 +5936,7 @@ function mountNow(el) {
     (isHexMap() ? '<b>Parede</b> = hexágono bloqueado.<br><b>Flanaess</b> usa deslocamento e medição em hexágonos; muros e portas lineares ficam desativados.' : '<b>Parede</b> = quadrícula bloqueada.<br><b>Segredos:</b> Percepção passiva/Busca ativa encontra; Investigação descobre o mecanismo.<br><b>Trancadas:</b> Ferramentas de Ladrão; <b>emperradas:</b> Atletismo.<br><b>Estruturas:</b> Atacar estrutura usa CA, PV e limiar de dano. Ilusões não bloqueiam; Muralha de Energia só cai com Desintegrar.') + '</small>' +
     '</aside>' +
     '<div class="mp-menu-footer"><button type="button" id="mp-delete-map" class="mp-delete-map" title="Excluir somente mapas adicionados pelo botão +">🗑 Excluir mapa</button></div>' +
-    '</div>' + // fim do menu lateral (drawer)
+    '</div>' +
     '</div></div></div>';
 
   var menuStyle = document.createElement('style');
@@ -5310,6 +6007,35 @@ function mountNow(el) {
     '#mp-root .mp-portal-dialog p{margin:0 0 14px;color:#c5c9d2;font-size:13px;line-height:1.45;}' +
     '#mp-root .mp-portal-color-input{display:block;width:100%;height:48px;margin:4px 0 16px;padding:3px;border:1px solid rgba(255,255,255,.22);border-radius:8px;background:#252832;cursor:pointer;}' +
     '#mp-root .mp-portal-dialog-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;}' +
+    '#mp-root .mp-combat-hud{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:60;max-width:calc(100% - 24px);flex-direction:column;gap:6px;padding:8px 10px;border:1px solid rgba(255,213,79,.5);border-radius:11px;background:rgba(14,16,22,.92);color:#f4f6fb;font-size:12px;box-shadow:0 4px 18px rgba(0,0,0,.5);}' +
+    '#mp-root .mp-cb-order{display:flex;gap:4px;overflow-x:auto;max-width:86vw;}' +
+    '#mp-root .mp-cb-chip{flex:0 0 auto;padding:3px 7px;border-radius:12px;background:#2b303b;border:1px solid transparent;white-space:nowrap;cursor:pointer;}' +
+    '#mp-root .mp-cb-chip.now{border-color:#ffd54f;background:#4a3d12;}' +
+    '#mp-root .mp-cb-chip.dead{opacity:.35;text-decoration:line-through;}' +
+    '#mp-root .mp-cb-chip.down{color:#ff8a80;}' +
+    '#mp-root .mp-cb-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center;}' +
+    '#mp-root .mp-cb-eco{padding:2px 7px;border-radius:9px;background:#3a2326;color:#d9aaaa;}' +
+    '#mp-root .mp-cb-eco.ok{background:#1f4430;color:#c8f3d8;}' +
+    '#mp-root .mp-combat-hud button{min-height:32px;padding:5px 10px;border:1px solid rgba(255,255,255,.25);border-radius:8px;background:#30343e;color:#fff;font-size:12px;font-weight:600;cursor:pointer;}' +
+    '#mp-root .mp-combat-toast{position:absolute;left:50%;top:60px;transform:translateX(-50%);z-index:70;padding:8px 14px;border-radius:9px;background:rgba(160,40,40,.95);color:#fff;font-size:13px;}' +
+    '#mp-root .mp-cb-btn{min-height:36px;padding:7px 10px;border:1px solid rgba(255,255,255,.22);border-radius:8px;background:#2b303b;color:#fff;font-size:13px;cursor:pointer;text-align:left;}' +
+    '#mp-root .mp-cb-btn.primary{background:#24536b;border-color:rgba(90,180,220,.55);font-weight:700;}' +
+    '#mp-root .mp-cb-btn.off{opacity:.38;cursor:not-allowed;}' +
+    '#mp-root .mp-cb-list{display:flex;flex-direction:column;gap:6px;margin:8px 0;}' +
+    '#mp-root .mp-cb-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:4px 0 10px;}' +
+    '#mp-root .mp-cb-section{margin-top:8px;font-size:12px;font-weight:700;color:#ffd54f;text-transform:uppercase;letter-spacing:.04em;}' +
+    '#mp-root .mp-cb-log{display:flex;flex-direction:column;gap:5px;max-height:55vh;overflow:auto;margin:8px 0 12px;font-size:13px;line-height:1.45;}' +
+    '#mp-root .mp-cb-log div{padding:6px 9px;border:1px solid rgba(255,255,255,.12);border-radius:7px;background:rgba(255,255,255,.045);white-space:pre-wrap;}' +
+    '#mp-root .mp-cb-log .mp-cb-head{border-color:rgba(255,213,79,.5);color:#ffe082;font-weight:700;}' +
+    '#mp-root .mp-cb-field{display:flex;flex-direction:column;gap:4px;margin:0 0 9px;color:#d5d9e2;font-size:12px;}' +
+    '#mp-root .mp-cb-input{width:100%;box-sizing:border-box;padding:8px;border:1px solid #555d6c;border-radius:6px;background:#252a34;color:#fff;}' +
+    '#mp-root .mp-cb-check{display:block;padding:6px 8px;border:1px solid rgba(255,255,255,.14);border-radius:7px;margin-bottom:5px;font-size:12px;}' +
+    '#mp-root .mp-cb-conds{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0;}' +
+    '#mp-root .mp-cb-cond{padding:3px 7px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:#2a2e38;color:#ccd;font-size:11px;cursor:pointer;}' +
+    '#mp-root .mp-cb-cond.on{background:#7a3030;color:#fff;border-color:#e57373;}' +
+    '#mp-root .mp-cb-detail{margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.15);}' +
+    '#mp-root .mp-cb-ai{display:block;margin-top:8px;font-size:12px;color:#d5d9e2;}' +
+    '#mp-root.editor-mode .mp-combat-panel{display:block !important;}' +
     '#mp-root .mp-portal-dialog-actions-stack{flex-direction:column;}' +
     '#mp-root .mp-portal-dialog-actions button{min-height:38px;padding:8px 12px;border:1px solid rgba(255,255,255,.2);border-radius:7px;background:#30343e;color:#fff;cursor:pointer;}' +
     '#mp-root .mp-portal-dialog-actions button.primary{border-color:#3c9bc7;background:#17688f;}' +
@@ -5337,7 +6063,6 @@ function mountNow(el) {
     '#mp-root .mp-portal-dialog-actions button.danger{border-color:#9a3b3b;background:#742d35;}';
   R.querySelector('#mp-root').appendChild(menuStyle);
 
-  // Tudo que altera o mapa ou seus dados fica disponível apenas no Editor.
   [
     '.mp-map-selector', '#mp-add-map', '#mp-add-map-file', '#mp-export', '#mp-export-catalog',
     '#mp-tools', '#mp-tile-size-wrap', '#mp-grid', '#mp-fog', '#mp-light', '#mp-walls-vis', '#mp-secret-view',
@@ -5365,11 +6090,35 @@ function mountNow(el) {
     });
   }
 
+  var combatRoot = R.querySelector('#mp-root');
+  combatRoot.addEventListener('click', function (event) {
+    var cbButton = event.target.closest('[data-cb]');
+    if (cbButton) {
+      var cbAction = cbButton.getAttribute('data-cb');
+      setMenu(false);
+      if (cbAction === 'start') combatStart();
+      else if (cbAction === 'menu') openCombatMenu();
+      else if (cbAction === 'end') combatEndTurn();
+      else if (cbAction === 'stop') combatStop();
+      else if (cbAction === 'log') combatShowRegistry();
+      return;
+    }
+    var chip = event.target.closest('.mp-cb-chip');
+    if (chip) {
+      var chipToken = state.tokens.find(function (tk) { return tk.id === chip.getAttribute('data-id'); });
+      if (chipToken && appMode === 'editor') { selected = chipToken; updateDetailPanel(); draw(); }
+    }
+  });
+  var combatAi = R.querySelector('#mp-cb-ai');
+  if (combatAi) {
+    combatAi.checked = combatState().autoIA !== false;
+    combatAi.addEventListener('change', function () { combatState().autoIA = combatAi.checked; save(); });
+  }
+
   cv = $('#mp-cv');
   cx = cv.getContext('2d');
   if ('imageSmoothingQuality' in cx) cx.imageSmoothingQuality = 'high';
 
-  // Se o menu estiver aberto, o primeiro toque no mapa só fecha o menu (não pinta/move nada).
   cv.addEventListener('pointerdown', function (e) {
     if (menuIsOpen()) { e.preventDefault(); e.stopImmediatePropagation(); setMenu(false); }
   });
@@ -5485,7 +6234,7 @@ function mountNow(el) {
     var speedWrap = $('#mp-speed-wrap'); if (speedWrap) speedWrap.style.display = 'none';
     if (appMode !== 'editor') zoom = FLANAESS_ZOOM;
   }
-  // O Flanaess não oferece mais seletor: o tamanho pequeno é fixo.
+
   if ($('#mp-speed')) $('#mp-speed').oninput = function () {
     travelSpeedMilesPerDay = Math.max(0, Number(this.value) || 0);
     draw();
@@ -5570,7 +6319,7 @@ function mountNow(el) {
   });
   var clearEdgesButton = $('#mp-clear-edges');
   if (clearEdgesButton) clearEdgesButton.style.display = isHexMap() ? 'none' : '';
-  // A página abre em Jogador; ao trocar de mapa o modo atual é preservado.
+
   setMode(appMode);
   $('#mp-grid').classList.toggle('on', showGrid);
   $('#mp-fog').classList.toggle('on', showFog);
