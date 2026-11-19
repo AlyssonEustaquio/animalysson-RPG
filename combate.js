@@ -231,6 +231,7 @@
   function criar(env) {
     var C = {};
     var cacheMonstros = null;
+    var cacheVersao = -1;
 
     function est() {
       var s = env.estado();
@@ -242,7 +243,7 @@
     function porId(id) { return toks().find(function (t) { return t.id === id; }) || null; }
     function monstro(t) {
       if (!t || !t.monsterId) return null;
-      if (!cacheMonstros) { cacheMonstros = {}; (env.monstros() || []).forEach(function (m) { cacheMonstros[m.id] = m; }); }
+      if (!cacheMonstros || cacheVersao !== window.MONSTERS_VERSION) { cacheMonstros = {}; cacheVersao = window.MONSTERS_VERSION; (env.monstros() || []).forEach(function (m) { cacheMonstros[m.id] = m; }); }
       return cacheMonstros[t.monsterId] || null;
     }
     function ehJogador(t) { return !!t && (t.tipo === 'player' || t.heroi === true); }

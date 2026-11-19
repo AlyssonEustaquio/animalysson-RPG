@@ -3592,7 +3592,7 @@ function updateDetailPanel() {
     (t.nd != null ? '<span class="card-tag">ND ' + esc(t.nd) + '</span>' : '') + '</div>' +
     hpHtml + passiveHtml + extra +
     '<div class="mp-detail-tools">' +
-    (t.tipo !== 'player' ? '<button type="button" id="mp-del-tok">Remover token</button>' : '') +
+    (t.tipo !== 'player' ? '<button type="button" id="mp-edit-tok">✎ Editar monstro/NPC</button><button type="button" id="mp-del-tok">Remover token</button>' : '') +
     '</div>';
 
   if (appMode === 'editor' && combatAvailable()) { box.insertAdjacentHTML('beforeend', combatDetailHtml(t)); combatDetailBind(box, t); }
@@ -3606,11 +3606,37 @@ function updateDetailPanel() {
   };
   var hpFull = $('#mp-hp-full');
   if (hpFull) hpFull.onclick = function () { t.hp = t.hpMax; save(); draw(); };
+  var editTok = $('#mp-edit-tok');
+  if (editTok) editTok.onclick = function () { openBestiary(t); };
   var del = $('#mp-del-tok');
   if (del) del.onclick = function () {
     state.tokens = state.tokens.filter(function (x) { return x !== t; });
     selected = null; save(); draw();
   };
+}
+
+var bestiaryHooked = false;
+
+function bestiaryContext(token) {
+  return {
+    token: token || null,
+    tokens: function () { return state.tokens || []; },
+    sizeSquares: sizeSquares,
+    place: function (id) {
+      var m = (window.MONSTERS || []).find(function (x) { return x.id === id; });
+      if (!m) return;
+      pendingMonster = m;
+      setTool('token');
+      setMenu(false);
+    },
+    changed: function () { save(); draw(); updateDetailPanel(); }
+  };
+}
+
+function openBestiary(token) {
+  if (!window.Bestiary) return;
+  var id = token && token.monsterId ? token.monsterId : (pendingMonster ? pendingMonster.id : null);
+  window.Bestiary.open({ id: id, ctx: bestiaryContext(token) });
 }
 
 function renderMonsterList(query) {
@@ -5927,9 +5953,7 @@ function mountNow(el) {
     '<button id="mp-zo">−</button><button id="mp-zi">+</button>' +
     '</div>' +
     '<aside class="mp-side" id="mp-side">' +
-    '<h4>Bestiário</h4>' +
-    '<input id="mp-q" type="search" placeholder="Buscar monstro…" style="width:100%;margin-bottom:6px">' +
-    '<div id="mp-ml" class="mp-ml"></div>' +
+    '<button type="button" id="mp-bestiary" title="Abrir o Bestiário: buscar, colocar no mapa, criar e editar monstros e NPCs" style="width:100%;box-sizing:border-box;padding:10px;font-weight:700;cursor:pointer">👹 Bestiário · editar monstros e NPCs</button>' +
     '<h4 style="margin-top:12px">Token selecionado</h4>' +
     '<div id="mp-detail" class="mp-detail"><div class="mp-detail-empty">Selecione um token.</div></div>' +
     '<small style="display:block;margin-top:10px;color:var(--mute)">' +
@@ -6291,17 +6315,13 @@ function mountNow(el) {
   $('#mp-zo').onclick = function () { if (appMode === 'editor') changeCameraZoom(1 / 1.2); else if (isHexMap()) { zoom = FLANAESS_ZOOM; draw(); } else changeCameraZoom(1 / 1.2); };
   $('#mp-zi').onclick = function () { if (appMode === 'editor') changeCameraZoom(1.2); else if (isHexMap()) { zoom = FLANAESS_ZOOM; draw(); } else changeCameraZoom(1.2); };
 
-  $('#mp-q').oninput = function () { renderMonsterList(this.value); };
-  $('#mp-ml').onclick = function (e) {
-    var b = e.target.closest('button[data-id]');
-    if (!b) return;
-    var m = (window.MONSTERS || []).find(function (x) { return x.id === b.dataset.id; });
-    if (!m) return;
-    pendingMonster = m;
-    setTool('token');
-    R.querySelectorAll('#mp-ml button').forEach(function (btn) { btn.classList.toggle('on', btn === b); });
-    setMenu(false);
-  };
+  $('#mp-bestiary').onclick = function () { openBestiary(null); };
+  if (window.Bestiary && !bestiaryHooked) {
+    bestiaryHooked = true;
+    window.Bestiary.onChange(function () {
+      try { if (R && cv) { updateDetailPanel(); draw(); } } catch (err) {}
+    });
+  }
 
   document.addEventListener('keydown', onKey);
   document.addEventListener('keyup', onKeyUp);

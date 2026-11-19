@@ -301,7 +301,7 @@ main{flex:1 1 auto;min-width:0;min-height:0;max-width:none;margin:0;padding:10px
 <div id="modal-root"></div>
 <script>
 
-['especies.js','classes.js','antecedentes.js','spells.js','itens.js','monsters.js','combate.js','mapa.js'].forEach(function(f){
+['especies.js','classes.js','antecedentes.js','spells.js','itens.js','monsters.js','bestiario.js','combate.js','mapa.js'].forEach(function(f){
   document.write('<script src="'+f+'?v='+Date.now()+'"><\/script>');
 });
 </script>
@@ -748,7 +748,7 @@ function monsterAttrEntries(m){
 }
 function renderMonsterCard(row){
  const m=row.monster;
- return `<button class="catalog-card${(m.id||m.nomeEn)===SELECTED_MONSTER_ID?' sel':''}" onclick="selectMonster(${row.index})"><div class="card-topline"><span class="card-icon">♜</span><span class="card-tag">ND ${escHtml(m.nd||'—')}</span></div><strong>${escHtml(m.nome||'Criatura')}</strong><small>${escHtml(m.tipo||'')}</small><div class="card-stats"><span>CA ${escHtml(m.classeArmadura??'—')}</span><span>PV ${escHtml(m.pontosVida??'—')}</span><span>${escHtml(m.tamanho||'')}</span></div></button>`;
+ return `<button class="catalog-card${(m.id||m.nomeEn)===SELECTED_MONSTER_ID?' sel':''}" onclick="selectMonster(${row.index})"><div class="card-topline"><span class="card-icon">♜</span><span class="card-tag">${m.personalizado?escHtml(m.categoria||'Personalizado')+' · ':m.editado?'Editado · ':''}ND ${escHtml(m.nd||'—')}</span></div><strong>${escHtml(m.nome||'Criatura')}</strong><small>${escHtml(m.tipo||'')}</small><div class="card-stats"><span>CA ${escHtml(m.classeArmadura??'—')}</span><span>PV ${escHtml(m.pontosVida??'—')}</span><span>${escHtml(m.tamanho||'')}</span></div></button>`;
 }
 function formatMonsterValue(value,context){
  if(value===null||value===undefined||value==='')return '—';
@@ -786,7 +786,7 @@ function renderMonsterEntries(title,entries){
 }
 function renderMonsterDetail(m){
  if(!m)return '<div class="empty-state">Clique em um monstro para abrir sua ficha.</div>';
- let h=`<div class="card-topline"><span class="card-icon">♜</span><span class="card-tag">ND ${escHtml(m.nd||'—')}</span></div><h2 style="margin-top:10px">${escHtml(m.nome||m.nomeEn)}</h2><p class="detail-sub">${escHtml(m.tamanho||'')} ${escHtml(m.tipo||'')}</p><div class="detail-grid"><div class="detail-stat"><b>${escHtml(m.classeArmadura??'—')}</b><small>Classe de Armadura</small></div><div class="detail-stat"><b>${escHtml(m.pontosVida??'—')}</b><small>Pontos de Vida</small></div><div class="detail-stat"><b>${escHtml(m.nd||'—')}</b><small>Nível de Desafio</small></div></div>`;
+ let h=`<div class="card-topline"><span class="card-icon">♜</span><span class="card-tag">ND ${escHtml(m.nd||'—')}</span></div><div class="row" style="margin:10px 0 0"><button class="btn" onclick="Bestiary.edit(${escHtml(JSON.stringify(m.id))})">✎ Editar monstro/NPC</button><button class="btn alt" onclick="Bestiary.create()">＋ Novo</button></div><h2 style="margin-top:10px">${escHtml(m.nome||m.nomeEn)}</h2><p class="detail-sub">${escHtml(m.tamanho||'')} ${escHtml(m.tipo||'')}</p><div class="detail-grid"><div class="detail-stat"><b>${escHtml(m.classeArmadura??'—')}</b><small>Classe de Armadura</small></div><div class="detail-stat"><b>${escHtml(m.pontosVida??'—')}</b><small>Pontos de Vida</small></div><div class="detail-stat"><b>${escHtml(m.nd||'—')}</b><small>Nível de Desafio</small></div></div>`;
  h+=`<div class="detail-line"><b>Iniciativa:</b> ${formatMonsterValue(m.iniciativa)}</div><div class="detail-line"><b>Deslocamento:</b> ${formatMonsterValue(m.deslocamento)}</div>`;
  h+='<h3>Atributos</h3><div class="detail-grid">'+monsterAttrEntries(m).map(function(a){return `<div class="detail-stat"><b>${escHtml(a.value)}</b><small>${escHtml(a.name)}</small></div>`}).join('')+'</div>';
  [['Salvaguardas',m.salvaguardas,'saving'],['Perícias',m.pericias,'skills'],['Sentidos',m.sentidos,'senses'],['Idiomas',m.idiomas,'languages'],['Resistências a dano',m.resistenciasDano,'damage'],['Vulnerabilidades a dano',m.vulnerabilidadesDano,'damage'],['Imunidades a dano',m.imunidadesDano,'damage'],['Imunidades a condições',m.imunidadesCondicao,'conditions']].forEach(function(pair){if(pair[1]&&((Array.isArray(pair[1])&&pair[1].length)||(!Array.isArray(pair[1])&&Object.keys(pair[1]).length)))h+=`<div class="detail-line"><b>${escHtml(pair[0])}:</b> ${formatMonsterValue(pair[1],pair[2])}</div>`});
@@ -813,7 +813,7 @@ function monsterSearch(value){MONSTER_QUERY=value;updateMonsterResults()}
 function monsterType(value){MONSTER_TYPE=value;updateMonsterResults()}
 async function renderMonstersPage(){
  const types=monsterTypeList();
- let h=`<div class="catalog-head"><div><h2>Monstros</h2><p>Selecione uma criatura para abrir sua ficha e suas ações.</p></div><span class="card-tag">${MONSTER_CACHE.length||'…'} criaturas</span></div><div class="catalog-tools"><input type="search" placeholder="Buscar monstro por nome, tipo ou ND…" value="${escHtml(MONSTER_QUERY)}" oninput="monsterSearch(this.value)"><select onchange="monsterType(this.value)">${types.map(t=>`<option value="${escHtml(t)}"${t===MONSTER_TYPE?' selected':''}>${escHtml(t)}</option>`).join('')}</select></div><div id="monsters-count" class="catalog-count">Carregando bestiário…</div><div class="catalog-layout"><section><div class="catalog-grid" id="monsters-grid"><div class="empty-state">Carregando bestiário…</div></div></section><aside class="catalog-detail" id="monster-detail"><div class="empty-state">As fichas aparecerão aqui quando o catálogo terminar de carregar.</div></aside></div>`;
+ let h=`<div class="catalog-head"><div><h2>Monstros</h2><p>Selecione uma criatura para abrir sua ficha e suas ações.</p></div><span class="card-tag">${MONSTER_CACHE.length||'…'} criaturas</span><button class="btn" onclick="Bestiary.create()">＋ Novo monstro/NPC</button></div><div class="catalog-tools"><input type="search" placeholder="Buscar monstro por nome, tipo ou ND…" value="${escHtml(MONSTER_QUERY)}" oninput="monsterSearch(this.value)"><select onchange="monsterType(this.value)">${types.map(t=>`<option value="${escHtml(t)}"${t===MONSTER_TYPE?' selected':''}>${escHtml(t)}</option>`).join('')}</select></div><div id="monsters-count" class="catalog-count">Carregando bestiário…</div><div class="catalog-layout"><section><div class="catalog-grid" id="monsters-grid"><div class="empty-state">Carregando bestiário…</div></div></section><aside class="catalog-detail" id="monster-detail"><div class="empty-state">As fichas aparecerão aqui quando o catálogo terminar de carregar.</div></aside></div>`;
  document.getElementById('app').innerHTML=h;
  renderModal();
  try{
@@ -843,6 +843,7 @@ function render(){
  else if(ACTIVE_VIEW==='items')renderItemsPage();
  else renderMonstersPage();
 }
+if(window.Bestiary)Bestiary.onChange(function(){if(ACTIVE_VIEW==='monsters'&&document.querySelector('.catalog-layout'))updateMonsterResults()});
 setRail(false);
 render();
 </script>
