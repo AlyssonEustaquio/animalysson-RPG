@@ -829,6 +829,7 @@
       opts = opts || {};
       var s = est(), L = [];
       var lista = toks().filter(function (t) { return !t.morto && (t.tipo === 'player' || t.monsterId || t.tipo === 'npc' || t.tipo === 'enemy' || t.hpMax != null); });
+      if (typeof opts.filtro === 'function') lista = lista.filter(opts.filtro);
       if (!lista.length) return ['Não há criaturas no mapa para entrar em combate.'];
       var rolagens = lista.map(function (t) {
         var st = preparar(t);
@@ -838,6 +839,15 @@
         return { id: t.id, nome: nomeDe(t), valor: r.dado + bonus, des: st.mods.DES, desempate: Math.random() };
       });
       rolagens.sort(function (a, b) { return b.valor - a.valor || b.des - a.des || b.desempate - a.desempate; });
+      if (opts.primeiro) {
+        var ip = rolagens.findIndex(function (x) { return x.id === opts.primeiro; });
+        if (ip > 0) {
+          var topo = Math.max.apply(null, rolagens.map(function (x) { return x.valor; }));
+          var pri = rolagens.splice(ip, 1)[0];
+          pri.valor = topo;
+          rolagens.unshift(pri);
+        }
+      }
       s.ativo = true; s.rodada = 1; s.turno = 0;
       s.ordem = rolagens.map(function (x) { return { id: x.id, valor: x.valor }; });
       s.registro = [];
@@ -1436,8 +1446,8 @@
       if (est().ativo) L.push.apply(L, C.executarTurnosAutomaticos());
       return L;
     };
-    C.iniciarCombate = function () {
-      var L = C.iniciar();
+    C.iniciarCombate = function (opts) {
+      var L = C.iniciar(opts);
       if (est().ativo) L.push.apply(L, C.executarTurnosAutomaticos());
       return L;
     };

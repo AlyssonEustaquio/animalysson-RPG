@@ -5243,6 +5243,14 @@ function combatPerformAttack(actor, atq, bonusMode) {
   if (!candidates.length && bonusMode === 'nick') actor.eco.nick = false;
   if (!candidates.length && bonusMode === 'bonus') actor.eco.bonus = true;
   combatPickToken('Alvo de ' + atq.nome, 'Criaturas visíveis dentro do alcance.', candidates, function (target) {
+    var started = null;
+    if (!C.ativo() && actor.tipo === 'player') {
+      started = autoCombatBegin({ player: actor, victims: [target], first: actor, reason: '⚔ O personagem atacou ' + target.nome + '! O combate começou.' });
+      if (started && !bonusMode) {
+        var pay2 = combatPayAttack(actor, st);
+        if (!pay2.ok) { combatShowLog('Ataque', started.concat([pay2.motivo])); return; }
+      }
+    }
     var res = C.atacar(actor, target, atq, {});
     if (res.ok && !bonusMode) {
       actor.eco.atacou = true;
@@ -5252,6 +5260,7 @@ function combatPerformAttack(actor, atq, bonusMode) {
       }
     }
     C.registrar(res.linhas);
+    if (started) res.linhas = started.concat(res.linhas);
     var buttons = [];
     var nick = C.stats(actor).maestria && atq.maestria && C.util.norm(atq.maestria) === 'nick';
     if (res.ok && !bonusMode && atq.leve && atq.melee && nick && !actor.eco.nick && C.ativo()) {
@@ -5352,11 +5361,16 @@ function combatSpellDialog(actor) {
     if ((ef === 'ataque' || ef === 'salva') && alvos.length) {
       alvos = alvos.filter(function (t) { return C.dist(actor, t) <= cells; });
     }
+    var autoLines = null;
+    if (!C.ativo() && actor.tipo === 'player' && (ef === 'ataque' || ef === 'salva') && alvos.length) {
+      autoLines = autoCombatBegin({ player: actor, victims: alvos.filter(function (t) { return t !== actor; }), first: actor, reason: '⚔ O personagem atacou com ' + (nome.value.trim() || 'uma magia') + '! O combate começou.' });
+    }
     var res = C.magia(actor, {
       nome: nome.value.trim() || 'Magia', efeito: ef, dados: dados.value.trim(), tipoDano: tipo.value, atributo: attr.value, cd: dc, bonus: atk,
       metade: metade.value === '1', alcance: cells, alvos: alvos, concentracao: conc.value === '1', tipoAcao: acao.value
     });
     combatClose(dlg);
+    if (autoLines) res.linhas = autoLines.concat(res.linhas || []);
     combatFinishAction(res);
   }, { primary: true }));
   dlg.panel.appendChild(actions);
@@ -5519,6 +5533,65 @@ function openCombatMenu() {
   dlg.panel.appendChild(actions);
 }
 
+var autoCombatTimer = null, autoCombatBusy = false, autoCombatWasActive = false, autoCombatCooldown = 0;
+var AUTO_COMBAT_SIGHT = 12, AUTO_COMBAT_JOIN = 6;
+
+function autoCombatAggressive(t) {
+  var C = getCombat();
+  if (!C || !t || t.tipo === 'player' || t.morto || t.agressivo === false) return false;
+  if (t.hp != null && t.hp <= 0) return false;
+  if (t.aliado || (t.faccao && t.faccao !== 'monstros')) return false;
+  if (C.incapacitado(t)) return false;
+  if (t.agressivo === true) return true;
+  var m = t.monsterId ? C.monstro(t) : null;
+  return !!m && m.categoria !== 'NPC';
+}
+function autoCombatSees(mon, pl) {
+  var C = getCombat();
+  if (pl.escondido || (pl.condicoes || []).some(function (c) { return c.id === 'invisivel'; })) return false;
+  if (C.dist(mon, pl) > AUTO_COMBAT_SIGHT) return false;
+  return combatLineOfSight(mon, pl);
+}
+function autoCombatBegin(opts) {
+  var C = getCombat();
+  if (!C || !combatAvailable() || C.ativo()) return null;
+  var join = {}, seeds = (opts.aggressors || []).concat(opts.victims || []);
+  (opts.victims || []).forEach(function (v) {
+    if (v.tipo !== 'player' && C.faccao(v) !== 'monstros') { v.faccao = 'monstros'; delete v.aliado; }
+  });
+  seeds.forEach(function (sd) { join[sd.id] = true; });
+  state.tokens.forEach(function (o) {
+    if (o.morto || join[o.id]) return;
+    if (o.tipo === 'player') { join[o.id] = true; return; }
+    if (o.hp != null && o.hp <= 0) return;
+    if (autoCombatAggressive(o) && seeds.some(function (sd) { return C.dist(sd, o) <= AUTO_COMBAT_JOIN; })) join[o.id] = true;
+    else if (o.aliado && opts.player && C.dist(o, opts.player) <= AUTO_COMBAT_SIGHT) join[o.id] = true;
+  });
+  var lines = C.iniciarCombate({ filtro: function (t) { return !!join[t.id]; }, primeiro: opts.first ? opts.first.id : null });
+  if (!C.ativo()) return null;
+  stopKeyMove(); clickMovePath = []; clickMoveExitPending = false;
+  if (opts.reason) lines.unshift(opts.reason);
+  combatRefreshUi();
+  return lines;
+}
+function autoCombatTick() {
+  if (!R || !cv || autoCombatBusy || appMode !== 'player' || !combatAvailable()) return;
+  var C = getCombat();
+  if (C.ativo()) { autoCombatWasActive = true; return; }
+  if (autoCombatWasActive) { autoCombatWasActive = false; autoCombatCooldown = Date.now() + 15000; }
+  if (Date.now() < autoCombatCooldown || R.querySelector('.mp-portal-dialog-overlay')) return;
+  var pl = currentPlayer();
+  if (!pl || pl.tipo !== 'player' || (pl.hp != null && pl.hp <= 0)) return;
+  var seers = state.tokens.filter(function (t) { return autoCombatAggressive(t) && autoCombatSees(t, pl); });
+  if (!seers.length) return;
+  autoCombatBusy = true;
+  try {
+    var names = seers.slice(0, 3).map(function (t) { return t.nome; }).join(', ') + (seers.length > 3 ? ' e outros' : '');
+    var lines = autoCombatBegin({ player: pl, aggressors: seers, reason: '⚔ ' + names + (seers.length > 1 ? ' viram' : ' viu') + ' o personagem! O combate começou.' });
+    if (lines) combatShowLog('⚔ Combate iniciado', lines, combatRefreshUi);
+  } finally { autoCombatBusy = false; }
+}
+
 function combatStart() {
   var C = getCombat();
   if (!combatAvailable()) { combatToast('O combate funciona nos mapas de masmorra (grade quadrada).'); return; }
@@ -5559,6 +5632,7 @@ function combatStepAllowed(token, next) {
 }
 function combatAfterStep(token, from, to) {
   var C = getCombat();
+  if (token && token.tipo === 'player') window.setTimeout(autoCombatTick, 0);
   if (!C || isHexMap() || !combatState().ativo) return;
   var lines = C.aposMover(token, from, to, combatCostPending);
   combatCostPending = 1;
@@ -6060,6 +6134,7 @@ function mountNow(el) {
     '#mp-root .mp-cb-detail{margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.15);}' +
     '#mp-root .mp-cb-ai{display:block;margin-top:8px;font-size:12px;color:#d5d9e2;}' +
     '#mp-root.editor-mode .mp-combat-panel{display:block !important;}' +
+    '#mp-root:not(.editor-mode) .mp-combat-panel{display:none !important;}' +
     '#mp-root .mp-portal-dialog-actions-stack{flex-direction:column;}' +
     '#mp-root .mp-portal-dialog-actions button{min-height:38px;padding:8px 12px;border:1px solid rgba(255,255,255,.2);border-radius:7px;background:#30343e;color:#fff;cursor:pointer;}' +
     '#mp-root .mp-portal-dialog-actions button.primary{border-color:#3c9bc7;background:#17688f;}' +
@@ -6133,6 +6208,8 @@ function mountNow(el) {
       if (chipToken && appMode === 'editor') { selected = chipToken; updateDetailPanel(); draw(); }
     }
   });
+  if (autoCombatTimer) window.clearInterval(autoCombatTimer);
+  autoCombatTimer = window.setInterval(autoCombatTick, 600);
   var combatAi = R.querySelector('#mp-cb-ai');
   if (combatAi) {
     combatAi.checked = combatState().autoIA !== false;
@@ -6370,6 +6447,7 @@ function mountNow(el) {
 
 function unmount() {
   mountRequestId++;
+  if (autoCombatTimer) { window.clearInterval(autoCombatTimer); autoCombatTimer = null; }
   stopWorldTravel(false);
   stopKeyMove();
   pendingLocalPortal = null;

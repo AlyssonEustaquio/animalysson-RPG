@@ -317,6 +317,7 @@
       '<label class="bst-f">CA (deste token)<input data-t="ca" type="number" value="' + e(t.ca != null ? t.ca : '') + '" placeholder="da ficha"></label>' +
       '<label class="bst-f">Tamanho (quadrados)<input data-t="raio" type="number" min="1" max="8" value="' + e(t.raio || 1) + '"></label>' +
       '<label class="bst-f">Cor<input data-t="cor" type="color" value="' + e(/^#[0-9a-f]{6}$/i.test(t.cor || '') ? t.cor : '#e57373') + '"></label>' +
+      '<label class="bst-f">Agressivo (ataca ao ver)<select data-t="agressivo"><option value=""' + (t.agressivo == null ? ' selected' : '') + '>Padrão (monstros sim, NPCs não)</option><option value="sim"' + (t.agressivo === true ? ' selected' : '') + '>Sim</option><option value="nao"' + (t.agressivo === false ? ' selected' : '') + '>Não</option></select></label>' +
       '</div><div class="bst-bar" style="margin:8px 0 0"><button type="button" class="pri" data-a="tok-apply">Aplicar ao token</button></div></div>';
   }
 
@@ -569,6 +570,8 @@
     if (ca !== '') t.ca = toInt(ca, 10, 0); else delete t.ca;
     t.raio = Math.max(1, Math.min(8, toInt(v('raio'), t.raio || 1, 1)));
     t.cor = v('cor');
+    var ag = v('agressivo');
+    if (ag === 'sim') t.agressivo = true; else if (ag === 'nao') t.agressivo = false; else delete t.agressivo;
     if (ui.ctx.changed) ui.ctx.changed();
     renderPane();
   }
