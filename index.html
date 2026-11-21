@@ -278,6 +278,10 @@ main{flex:1 1 auto;min-width:0;min-height:0;max-width:none;margin:0;padding:10px
   main,#app{overflow:visible;display:block}
 }
 
+#app.view-inventory{display:flex;flex-direction:column;overflow:hidden}
+#app #inv-host{flex:1 1 0;min-height:0}
+#app .inv-resumo{padding-right:48px}
+@media(max-width:900px){#app.view-inventory{display:block;overflow:auto}#app #inv-host{height:auto}}
 </style>
 </head>
 <body>
@@ -288,6 +292,7 @@ main{flex:1 1 auto;min-width:0;min-height:0;max-width:none;margin:0;padding:10px
   <div class="rail-items" id="rail-items">
   <button id="tab-character" class="section-tab on" onclick="switchView('character')"><span>♙</span> Personagem</button>
   <button id="tab-items" class="section-tab" onclick="switchView('items')"><span>⚒</span> Itens</button>
+  <button id="tab-inventory" class="section-tab" onclick="switchView('inventory')"><span>🎒</span> Inventário</button>
   <button id="tab-monsters" class="section-tab" onclick="switchView('monsters')"><span>♜</span> Monstros</button>
   <button id="tab-maps" class="section-tab" onclick="switchView('maps')"><span>▦</span> Mapas</button>
   </div>
@@ -301,7 +306,7 @@ main{flex:1 1 auto;min-width:0;min-height:0;max-width:none;margin:0;padding:10px
 <div id="modal-root"></div>
 <script>
 
-['especies.js','classes.js','antecedentes.js','spells.js','itens.js','monsters.js','bestiario.js','combate.js','mapa.js'].forEach(function(f){
+['especies.js','classes.js','antecedentes.js','spells.js','itens.js','monsters.js','bestiario.js','combate.js','inventario.js','mapa.js'].forEach(function(f){
   document.write('<script src="'+f+'?v='+Date.now()+'"><\/script>');
 });
 </script>
@@ -425,7 +430,7 @@ function vFicha(){
  const pb = c ? 2 : 0;
  const prof = new Set([...S.skills,...(b?b.s:[])]);
  const hp = c ? Math.max(1, c.d+mod(score('CON'))) : 0;
- const ac = c ? 10+mod(score('DES')) : 0;
+ const ac = c ? (window.Inventario&&S.inventario?Inventario.calcularCA(S.inventario.itens,score('DES')):10+mod(score('DES'))) : 0;
  const per = 10+mod(score('SAB'))+(prof.has('Percepção')?pb:0);
  const ini = fmt(mod(score('DES')));
 
@@ -504,7 +509,7 @@ function vFicha(){
     </div>
     <div class="box">
      <span class="lbl">Ataques</span>
-     <p>Corpo a corpo: ${fmt(mod(score('FOR'))+pb)} · À distância: ${fmt(mod(score('DES'))+pb)}</p>
+     <p>Corpo a corpo: ${fmt(mod(score('FOR'))+pb)} · À distância: ${fmt(mod(score('DES'))+pb)}</p>${equippedAttacksHtml(pb)}
     </div>
    </div>
   </div>
@@ -600,7 +605,7 @@ function switchView(view){
  render();
 }
 function updateTabs(){
- ['character','items','monsters','maps'].forEach(function(v){
+ ['character','items','inventory','monsters','maps'].forEach(function(v){
   const el=document.getElementById('tab-'+v);
   if(el)el.classList.toggle('on',ACTIVE_VIEW===v);
  });
@@ -689,7 +694,7 @@ function renderItemDetail(index){
  if(!x)return '<div class="empty-state">Selecione um item para ver seus dados.</div>';
  const price=x.magico?magicPriceByRarity(x):(x.preco||'Não informado');
  const weight=x.peso||'Não especificado';
- let h=`<div class="card-topline"><span class="card-icon">${itemIcon(x)}</span><span class="card-tag">${escHtml(x.raridade||x.categoria||'Item')}</span></div><h2 style="margin-top:10px">${escHtml(x.n||x.en)}</h2><p class="detail-sub">${escHtml(x.en||'')}</p>`;
+ let h=`<div class="card-topline"><span class="card-icon">${itemIcon(x)}</span><span class="card-tag">${escHtml(x.raridade||x.categoria||'Item')}</span></div><h2 style="margin-top:10px">${escHtml(x.n||x.en)}</h2><p class="detail-sub">${escHtml(x.en||'')}</p><button class="btn alt" style="margin:6px 0 10px" onclick="addToInventory(${index},this)">Adicionar ao inventário</button>`;
  h+=`<div class="detail-grid"><div class="detail-stat"><b>${escHtml(formatItemPrice(price))}</b><small>Preço / valor</small></div><div class="detail-stat"><b>${escHtml(formatItemWeight(weight))}</b><small>${String(weight).startsWith('Carga')?'Capacidade de carga':'Peso'}</small></div><div class="detail-stat"><b>${escHtml(x.raridade|| (x.magico?'Não informado':'—'))}</b><small>Raridade</small></div></div>`;
  if(x.tipo)h+=`<div class="detail-line"><b>Tipo:</b> ${escHtml(x.tipo)}</div>`;
  if(x.dano)h+=`<div class="detail-line"><b>Dano:</b> ${escHtml(x.dano)}</div>`;
@@ -827,6 +832,32 @@ async function renderMonstersPage(){
   }
  }catch(e){const grid=document.getElementById('monsters-grid');if(grid)grid.innerHTML='<div class="empty-state">Não foi possível abrir o bestiário.</div>';}
 }
+const INV_OPTS={chaveLocal:'animalysson-inventario',getForca:function(){return score('FOR')},getDestreza:function(){return score('DES')},catalogo:null};
+function equippedAttacksHtml(pb){
+ if(!window.Inventario||!S.inventario)return '';
+ const armas=S.inventario.itens.filter(function(i){return i.tipo==='arma'&&i.equipado});
+ if(!armas.length)return '';
+ return armas.map(function(w){
+  const prop=norm(w.propriedades);
+  const f=mod(score('FOR')),d=mod(score('DES'));
+  const m=/municao|ammunition/.test(prop)?d:/acuidade|finesse/.test(prop)?Math.max(f,d):f;
+  const b=+w.bonus||0;
+  return '<p><b>'+escHtml(w.nome)+'</b>: '+fmt(m+pb+b)+' para acertar'+(w.dano?' · '+escHtml(w.dano)+' '+fmt(m+b):'')+'</p>';
+ }).join('');
+}
+function addToInventory(index,btn){
+ const x=ITEMS[index];
+ if(!x||!window.Inventario)return;
+ Inventario.adicionarDireto(S,Inventario.deCatalogo(x),INV_OPTS);
+ if(btn){const old=btn.textContent;btn.textContent='Adicionado ✓';btn.disabled=true;setTimeout(function(){btn.textContent=old;btn.disabled=false},1400)}
+}
+function renderInventoryPage(){
+ const app=document.getElementById('app');
+ if(!window.Inventario){app.innerHTML='<div class="empty-state">inventario.js não encontrado.</div>';return}
+ if(!INV_OPTS.catalogo)INV_OPTS.catalogo=ITEMS.map(function(x){return Inventario.deCatalogo(x)});
+ app.innerHTML='<div id="inv-host"></div>';
+ Inventario.montar(document.getElementById('inv-host'),S,INV_OPTS);
+}
 function renderMapsPage(){
   var app=document.getElementById('app');
   app.innerHTML='';
@@ -841,10 +872,12 @@ function render(){
  if(ACTIVE_VIEW==='maps'){renderMapsPage();return}
  if(ACTIVE_VIEW==='character')renderCharacterPage();
  else if(ACTIVE_VIEW==='items')renderItemsPage();
+ else if(ACTIVE_VIEW==='inventory')renderInventoryPage();
  else renderMonstersPage();
 }
 if(window.Bestiary)Bestiary.onChange(function(){if(ACTIVE_VIEW==='monsters'&&document.querySelector('.catalog-layout'))updateMonsterResults()});
 setRail(false);
+if(window.Inventario)Inventario.carregar(S,INV_OPTS);
 render();
 </script>
 </body>
