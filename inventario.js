@@ -225,6 +225,7 @@
       valor: valorDe(x.preco),
       descricao: x.descricao ? String(x.descricao).trim() : '',
       busca: norm(nome + ' ' + (x.en || '')),
+      grupo: x.categoria ? String(x.categoria) : '',
       requerSintonia
     };
     if (x.raridade) item.raridade = x.raridade;
@@ -521,19 +522,40 @@
       renderMoedas();
     };
 
+    const reunir = (it, excluir) => {
+      const outro = inv.itens.find(
+        (o) => o !== it && o !== excluir && !o.equipado && o.nome === it.nome && !o.requerSintonia && !o.sintonizado && !it.sintonizado && num(o.bonus) === num(it.bonus)
+      );
+      if (outro) {
+        outro.qtd = num(outro.qtd, 1) + num(it.qtd, 1);
+        inv.itens = inv.itens.filter((x) => x !== it);
+      }
+    };
+
+    const desequipar = (it, excluir) => {
+      it.equipado = '';
+      reunir(it, excluir);
+    };
+
     const equipar = (item, slotId) => {
+      if (num(item.qtd, 1) > 1) {
+        const unidade = Object.assign({}, item, { id: uid(), qtd: 1, equipado: '', sintonizado: false });
+        item.qtd = num(item.qtd, 1) - 1;
+        inv.itens.splice(inv.itens.indexOf(item) + 1, 0, unidade);
+        item = unidade;
+      }
       const candidatos = slotsDoItem(item);
       if (!candidatos.length) return;
       let alvo = slotId && candidatos.includes(slotId) ? slotId : candidatos.find((s) => !emSlot(s)) || candidatos[0];
       const ocupante = emSlot(alvo);
-      if (ocupante) ocupante.equipado = '';
+      if (ocupante) desequipar(ocupante, item);
       if (item.duasMaos) {
         const sec = emSlot('maoSecundaria');
-        if (sec) sec.equipado = '';
+        if (sec) desequipar(sec, item);
       }
       if (alvo === 'maoSecundaria') {
         const prin = emSlot('maoPrincipal');
-        if (prin && prin.duasMaos) prin.equipado = '';
+        if (prin && prin.duasMaos) desequipar(prin, item);
       }
       item.equipado = alvo;
     };
@@ -618,11 +640,18 @@
     };
 
     const abrirCatalogo = () => {
-      const montarLista = (b) => {
-        const t = norm(b).trim();
-        const achados = catalogo.filter((c) => !t || (c.busca || norm(c.nome)).includes(t));
-        const html = achados.slice(0, 80).map((c) => {
-          const orig = catalogo.indexOf(c);
+      const grupos = Array.from(new Set(catalogo.map((c) => c.grupo).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+      const estadoCat = { busca: '', grupo: '', limite: 100 };
+      const desenhar = () => {
+        const t = norm(estadoCat.busca).trim();
+        const achados = [];
+        catalogo.forEach((c, idx) => {
+          if (estadoCat.grupo && c.grupo !== estadoCat.grupo) return;
+          if (t && !(c.busca || norm(c.nome)).includes(t)) return;
+          achados.push([c, idx]);
+        });
+        const html = achados.slice(0, estadoCat.limite).map((par) => {
+          const c = par[0];
           const info = [
             c.dano,
             c.tipo === 'armadura' ? 'CA ' + c.caBase : '',
@@ -632,20 +661,25 @@
             c.valor ? fmt(c.valor) + ' PO' : ''
           ].filter(Boolean).join(' · ');
           return `<div class="inv-cat"><div><b>${esc(c.nome)}</b><br><small>${esc(info)}</small></div>
-            <button class="inv-btn mini" data-d="cat" data-i="${orig}">Adicionar</button></div>`;
+            <button class="inv-btn mini" data-d="cat" data-i="${par[1]}">Adicionar</button></div>`;
         }).join('');
-        const resto = achados.length > 80 ? `<div class="inv-vazio">Mostrando 80 de ${achados.length}. Refine a busca.</div>` : '';
-        return html ? html + resto : '<div class="inv-vazio">Nada encontrado.</div>';
+        const mais = achados.length > estadoCat.limite
+          ? `<button class="inv-btn" data-d="mais-cat">Mostrar mais (${achados.length - estadoCat.limite} restantes)</button>` : '';
+        dlg.querySelector('[data-d="lista-cat"]').innerHTML = (html || '<div class="inv-vazio">Nada encontrado.</div>') + mais;
+        dlg.querySelector('[data-d="total-cat"]').textContent = achados.length + ' de ' + catalogo.length + ' itens';
       };
       abrir(`
         <h3>Adicionar item</h3>
         <div class="inv-barra-ferr" style="padding:0;border:0">
           <input type="search" data-d="busca-cat" placeholder="Buscar no catálogo" aria-label="Buscar no catálogo">
+          <select data-d="grupo-cat" aria-label="Filtrar por categoria"><option value="">Todas</option>${grupos.map((g) => `<option value="${esc(g)}">${esc(g)}</option>`).join('')}</select>
           <button class="inv-btn pri" data-d="novo">Item personalizado</button>
         </div>
-        <div data-d="lista-cat" style="display:flex;flex-direction:column;gap:6px;overflow:auto;max-height:50vh">${montarLista('')}</div>
+        <div class="inv-meta" data-d="total-cat"></div>
+        <div data-d="lista-cat" style="display:flex;flex-direction:column;gap:6px;overflow:auto;max-height:50vh"></div>
         <div class="inv-dlg-rod"><button class="inv-btn" data-d="fechar">Fechar</button></div>`);
-      dlg._montarLista = montarLista;
+      dlg._cat = { estado: estadoCat, desenhar };
+      desenhar();
     };
 
     const abrirSlot = (slotId) => {
@@ -722,7 +756,7 @@
         it.qtd = Math.max(0, num(it.qtd, 1) - 1);
         if (it.qtd === 0) inv.itens = inv.itens.filter((x) => x !== it);
       }
-      if (a === 'equipar') { if (it.equipado) it.equipado = ''; else equipar(it); }
+      if (a === 'equipar') { if (it.equipado) desequipar(it); else equipar(it); }
       if (a === 'sintonizar') {
         if (it.sintonizado) it.sintonizado = false;
         else if (sintonias() >= MAX_SINTONIA) {
@@ -744,8 +778,18 @@
     });
 
     dlg.addEventListener('input', (e) => {
-      if (e.target.dataset.d === 'busca-cat' && dlg._montarLista) {
-        dlg.querySelector('[data-d="lista-cat"]').innerHTML = dlg._montarLista(e.target.value);
+      if (e.target.dataset.d === 'busca-cat' && dlg._cat) {
+        dlg._cat.estado.busca = e.target.value;
+        dlg._cat.estado.limite = 100;
+        dlg._cat.desenhar();
+      }
+    });
+
+    dlg.addEventListener('change', (e) => {
+      if (e.target.dataset.d === 'grupo-cat' && dlg._cat) {
+        dlg._cat.estado.grupo = e.target.value;
+        dlg._cat.estado.limite = 100;
+        dlg._cat.desenhar();
       }
     });
 
@@ -755,10 +799,11 @@
       const d = b.dataset.d;
       if (d === 'fechar') return fechar();
       if (d === 'novo') return formItem(null, true);
+      if (d === 'mais-cat' && dlg._cat) { dlg._cat.estado.limite += 100; dlg._cat.desenhar(); return; }
       if (d === 'salvar-item') return salvarForm();
       if (d === 'cat') { adicionarItem(catalogo[+b.dataset.i]); const novoBtn = dlg.querySelector(`[data-d="cat"][data-i="${b.dataset.i}"]`); if (novoBtn) novoBtn.textContent = 'Adicionado ✓'; return; }
       const it = b.dataset.id ? inv.itens.find((x) => x.id === b.dataset.id) : null;
-      if (d === 'desequipar' && it) { it.equipado = ''; fechar(); return salvar(); }
+      if (d === 'desequipar' && it) { desequipar(it); fechar(); return salvar(); }
       if (d === 'equipar-em' && it) { equipar(it, b.dataset.s); fechar(); return salvar(); }
       if (d === 'confirmar-remover' && it) { inv.itens = inv.itens.filter((x) => x !== it); fechar(); return salvar(); }
       if (d === 'confirmar-pagar') {
