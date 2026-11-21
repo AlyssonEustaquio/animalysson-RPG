@@ -3918,7 +3918,7 @@ function onPointerDown(e) {
     }
     selected = hit;
     if (hit) {
-      if (appMode === 'editor' || hit.tipo === 'player') {
+      if (appMode === 'editor' && hit.tipo !== 'player') {
         drag = { moveToken: hit, fromX: hit.x, fromY: hit.y };
       }
     } else {
