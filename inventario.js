@@ -643,7 +643,7 @@
         const it = emSlot(s.id);
         return `<button class="inv-slot ${it ? 'cheio' : ''}" data-a="slot" data-s="${s.id}">
           <span>${s.nome}</span><b>${it ? esc(it.nome) : 'Vazio'}</b></button>`;
-      }).join('') + `<button class="inv-btn" data-a="regras" style="width:100%;margin-top:6px">Regras de 2024</button>`;
+      }).join('');
     };
 
     const renderAbas = () => {
@@ -1050,46 +1050,6 @@
         <div class="inv-dlg-rod"><button class="inv-btn" data-d="fechar">Fechar</button></div>`);
     };
 
-    const abrirRegras = () => {
-      abrir(`
-        <h3>Regras de 2024 usadas aqui</h3>
-        <h4>Carga</h4>
-        <ul>
-          <li>Capacidade de carga: 15 × valor de Força (em libras, mostrado em kg). Empurrar, arrastar ou levantar: 30 × Força.</li>
-          <li>Criaturas Miúdas contam metade; Grandes, o dobro; Enormes, o triplo; Imensas, o quádruplo.</li>
-          <li>50 moedas pesam 0,45 kg (1 lb).</li>
-        </ul>
-        <h4>Armaduras e escudos</h4>
-        <ul>
-          <li>Só uma armadura e um escudo por vez. Sem armadura, CA = 10 + Des (Bárbaro soma Con; Monge soma Sab e perde isso com escudo).</li>
-          <li>Armadura leve soma Des inteira; média soma Des até +2; pesada não soma Des. Escudo dá +2.</li>
-          <li>Sem treinamento: desvantagem em testes de D20 com Força ou Destreza e sem conjurar magias.</li>
-          <li>Armadura pesada com Força mínima: sem ela, o deslocamento cai 3 m. Algumas impõem desvantagem em Furtividade.</li>
-          <li>Tempo para vestir e retirar: leve 1 min; média 5 min para vestir e 1 min para retirar; pesada 10 min para vestir e 5 min para retirar; escudo usa a ação Utilizar.</li>
-        </ul>
-        <h4>Armas</h4>
-        <ul>
-          <li>O bônus de proficiência só entra se a classe for proficiente na categoria da arma.</li>
-          <li>Duas mãos ocupa as duas mãos. Leve permite um ataque extra com ação bônus usando outra arma Leve, sem somar o modificador ao dano. Acuidade usa o melhor entre Força e Destreza. Munição usa Destreza.</li>
-          <li>Maestria de armas aparece só para classes que têm essa característica.</li>
-          <li>Sacar ou guardar uma arma pode ser parte da ação Atacar, e você pode interagir com um objeto por turno sem custo.</li>
-        </ul>
-        <h4>Itens mágicos</h4>
-        <ul>
-          <li>No máximo 3 itens sintonizados. Sintonizar leva um descanso curto estudando o item. A sintonia termina se o item ficar a mais de 30 m por 24 horas.</li>
-          <li>O catálogo não informa quais itens exigem sintonia, então o botão Sintonizar fica disponível em todo item mágico não consumível. Confira a descrição.</li>
-        </ul>
-        <h4>Montaria</h4>
-        <ul>
-          <li>A montaria precisa estar disposta, ter anatomia adequada e ser pelo menos um tamanho maior que você.</li>
-          <li>Montar ou desmontar uma vez por movimento custa metade do seu deslocamento. Montado, você usa o deslocamento da montaria.</li>
-          <li>Montaria controlada: age na sua iniciativa e só pode Correr (Dash), Desengajar ou Esquivar; já pode agir no turno em que você monta. Independente: mantém a própria iniciativa e age como quiser.</li>
-          <li>Se um ataque de oportunidade for provocado, o atacante escolhe entre você e a montaria. Se a montaria for movida à força ou você cair no chão, faça salvaguarda de Destreza CD 10 ou caia ao lado dela, caído.</li>
-          <li>A capacidade de carga da montaria vem do catálogo. Itens carregados por ela não pesam em você; o Mestre decide se o seu peso conta.</li>
-        </ul>
-        <div class="inv-dlg-rod"><button class="inv-btn pri" data-d="fechar">Fechar</button></div>`);
-    };
-
     const gastar = (po) => {
       const restante = Math.round(po * 100);
       const total = Math.round(totalPO() * 100);
@@ -1145,7 +1105,6 @@
       if (a === 'aba') { estado.aba = b.dataset.v; renderPainel(); return; }
       if (a === 'catalogo') return abrirCatalogo('');
       if (a === 'catalogo-montaria') return abrirCatalogo('montaria');
-      if (a === 'regras') return abrirRegras();
       if (a === 'slot') return abrirSlot(b.dataset.s);
       if (a === 'consolidar') {
         let cp = MOEDAS.reduce((s, m) => s + num(inv.moedas[m.id]) * m.cp, 0);
