@@ -126,7 +126,7 @@ function loadStoredCustomMaps() {
     });
   } catch (e) {}
 }
-var FLANAESS_GRID_MODE = 'hex-small-6mi';
+var FLANAESS_GRID_MODE = 'hex-profile-v1';
 var FLANAESS_ZOOM = 3;
 var MESSAGE_SETTINGS_KEY = 'animalysson-vtt-messages-v1';
 var MESSAGE_CATALOG = [{"id":"msg001","type":"alert","dynamic":false,"default":"Ainda não há mapas adicionados pelo botão +.","pattern":"Ainda não há mapas adicionados pelo botão +."},{"id":"msg002","type":"alert","dynamic":false,"default":"Os mapas originais do projeto não podem ser excluídos. Este botão remove somente mapas adicionados pelo botão +.","pattern":"Os mapas originais do projeto não podem ser excluídos. Este botão remove somente mapas adicionados pelo botão +."},{"id":"msg003","type":"confirm","dynamic":true,"default":"{mensagem}","pattern":"Excluir o mapa \" / \"? / Ele será removido do seletor e os dados salvos deste mapa serão apagados deste navegador. / Um novo mapas.json será baixado para atualizar o catálogo no GitHub. Os arquivos já publicados na pasta mapas/ / / não são apagados automaticamente; remova essa pasta do GitHub se também quiser excluir as imagens e o JSON. …"},{"id":"msg004","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"Mapa excluído do seletor neste navegador. O catálogo mapas.json atualizado foi baixado. Publique esse arquivo em mapas/mapas.json no GitHub e, se desejar apagar também as imagens e dados antigos, exclua a pasta mapas/ … / do repositório. …"},{"id":"msg005","type":"alert","dynamic":false,"default":"Selecione um arquivo de imagem válido.","pattern":"Selecione um arquivo de imagem válido."},{"id":"msg006","type":"prompt","dynamic":false,"default":"Nome do novo mapa:","pattern":"Nome do novo mapa:"},{"id":"msg007","type":"prompt","dynamic":false,"default":"Tamanho da célula da grade em pixels:","pattern":"Tamanho da célula da grade em pixels:"},{"id":"msg008","type":"alert","dynamic":false,"default":"Informe um tamanho de célula entre 8 e 512 pixels.","pattern":"Informe um tamanho de célula entre 8 e 512 pixels."},{"id":"msg009","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"Mapa adicionado e otimizado! … Extraia o ZIP dentro de \" … \". Depois baixe o catálogo mapas.json pelo menu e coloque-o em \"mapas/mapas.json\". Use Salvar mapa para baixar \" … \" na mesma pasta. …"},{"id":"msg010","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"Não foi possível otimizar a imagem do mapa. …"},{"id":"msg011","type":"alert","dynamic":false,"default":"Não foi possível abrir essa imagem.","pattern":"Não foi possível abrir essa imagem."},{"id":"msg012","type":"alert","dynamic":false,"default":"Escolha dois cantos diferentes do grid.","pattern":"Escolha dois cantos diferentes do grid."},{"id":"msg013","type":"prompt","dynamic":true,"default":"{mensagem}","pattern":"Texto variável (definido pelo contexto)"},{"id":"msg014","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"Informe um valor entre … e … . …"},{"id":"msg015","type":"prompt","dynamic":true,"default":"{mensagem}","pattern":"Texto variável (definido pelo contexto)"},{"id":"msg016","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"Percepção passiva / : você percebe / e / . Encontrar não revela como abrir; investigue o mecanismo. …"},{"id":"msg017","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"Sucesso! Você encontrou: / , / . Ainda é necessário descobrir o mecanismo. / Nenhuma passagem secreta foi encontrada nesta seção de aproximadamente 3 metros. …"},{"id":"msg018","type":"alert","dynamic":false,"default":"Você identifica a ilusão. Ela não bloqueia passagem.","pattern":"Você identifica a ilusão. Ela não bloqueia passagem."},{"id":"msg019","type":"alert","dynamic":false,"default":"Não há um mecanismo secreto nesta linha.","pattern":"Não há um mecanismo secreto nesta linha."},{"id":"msg020","type":"alert","dynamic":false,"default":"Primeiro encontre a passagem com Percepção.","pattern":"Primeiro encontre a passagem com Percepção."},{"id":"msg021","type":"alert","dynamic":false,"default":"O mecanismo desta passagem já foi descoberto.","pattern":"O mecanismo desta passagem já foi descoberto."},{"id":"msg022","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"Mecanismo descoberto! Agora você pode acionar a passagem. …"},{"id":"msg023","type":"confirm","dynamic":false,"default":"Já existe uma parede ou porta nesta linha. Substituir?","pattern":"Já existe uma parede ou porta nesta linha. Substituir?"},{"id":"msg024","type":"prompt","dynamic":false,"default":"Descreva como o mecanismo é acionado (ex.: girar uma tocha, puxar um livro, apertar uma pedra):","pattern":"Descreva como o mecanismo é acionado (ex.: girar uma tocha, puxar um livro, apertar uma pedra):"},{"id":"msg025","type":"prompt","dynamic":false,"default":"Complexidade: 1 = simples (1 ação); 2 = complexa (1 minuto).","pattern":"Complexidade: 1 = simples (1 ação); 2 = complexa (1 minuto)."},{"id":"msg026","type":"prompt","dynamic":false,"default":"Nome da chave que abre esta porta (deixe em branco se não houver chave específica):","pattern":"Nome da chave que abre esta porta (deixe em branco se não houver chave específica):"},{"id":"msg027","type":"confirm","dynamic":false,"default":"Esta fechadura possui Tranca Arcana? (Cancelar = não)","pattern":"Esta fechadura possui Tranca Arcana? (Cancelar = não)"},{"id":"msg028","type":"prompt","dynamic":false,"default":"Tipo de bloqueio: 1 = emperrada (Força/Atletismo); 2 = barrada por dentro (ação Utilizar do lado da barra).","pattern":"Tipo de bloqueio: 1 = emperrada (Força/Atletismo); 2 = barrada por dentro (ação Utilizar do lado da barra)."},{"id":"msg029","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"Estrutura criada: / parede secreta / porta secreta / porta trancada / porta emperrada / parede ilusória / Muralha de Energia / parede mágica / . …"},{"id":"msg030","type":"alert","dynamic":false,"default":"Você não percebe nada incomum nesta parte da parede.","pattern":"Você não percebe nada incomum nesta parte da parede."},{"id":"msg031","type":"alert","dynamic":false,"default":"Você encontrou a passagem, mas ainda não descobriu como acioná-la. Use Investigar mecanismo.","pattern":"Você encontrou a passagem, mas ainda não descobriu como acioná-la. Use Investigar mecanismo."},{"id":"msg032","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"O mecanismo foi acionado e a passagem secreta se abriu. / A passagem secreta foi fechada. …"},{"id":"msg033","type":"alert","dynamic":false,"default":"A porta foi fechada.","pattern":"A porta foi fechada."},{"id":"msg034","type":"alert","dynamic":false,"default":"A Tranca Arcana está suprimida; a porta pode ser aberta durante os 10 minutos restantes.","pattern":"A Tranca Arcana está suprimida; a porta pode ser aberta durante os 10 minutos restantes."},{"id":"msg035","type":"prompt","dynamic":true,"default":"{mensagem}","pattern":"Como deseja abrir a porta trancada? 1 = Ferramentas de Ladrão (Destreza/Prestidigitação) — / complex / 1 minuto / 1 ação / 2 = Forçar fisicamente (Força/Atletismo) / CHAVE = usar a chave ( / ) / Digite ARROMBAR para usar a magia Knock/Arrombar. …"},{"id":"msg036","type":"alert","dynamic":false,"default":"Arrombar abriu a porta. A Tranca Arcana fica suprimida por 10 minutos.","pattern":"Arrombar abriu a porta. A Tranca Arcana fica suprimida por 10 minutos."},{"id":"msg037","type":"alert","dynamic":false,"default":"Arrombar abriu instantaneamente a fechadura mundana.","pattern":"Arrombar abriu instantaneamente a fechadura mundana."},{"id":"msg038","type":"prompt","dynamic":false,"default":"Digite o nome da chave utilizada:","pattern":"Digite o nome da chave utilizada:"},{"id":"msg039","type":"alert","dynamic":false,"default":"A chave física não supera a Tranca Arcana. Use um teste com CD +10 ou a magia Arrombar.","pattern":"A chave física não supera a Tranca Arcana. Use um teste com CD +10 ou a magia Arrombar."},{"id":"msg040","type":"alert","dynamic":false,"default":"A chave correta destranca e abre a porta.","pattern":"A chave correta destranca e abre a porta."},{"id":"msg041","type":"alert","dynamic":false,"default":"Esta chave não corresponde à fechadura.","pattern":"Esta chave não corresponde à fechadura."},{"id":"msg042","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"Sucesso! Você força a porta e consegue abri-la. / Sucesso! Você vence a fechadura e abre a porta. …"},{"id":"msg043","type":"alert","dynamic":false,"default":"Falha. A porta continua trancada.","pattern":"Falha. A porta continua trancada."},{"id":"msg044","type":"alert","dynamic":false,"default":"A porta foi fechada.","pattern":"A porta foi fechada."},{"id":"msg045","type":"confirm","dynamic":false,"default":"O personagem está do lado em que consegue alcançar e levantar a barra? (OK = ação Utilizar)","pattern":"O personagem está do lado em que consegue alcançar e levantar a barra? (OK = ação Utilizar)"},{"id":"msg046","type":"alert","dynamic":false,"default":"Você levanta a barra com uma ação Utilizar e abre a porta.","pattern":"Você levanta a barra com uma ação Utilizar e abre a porta."},{"id":"msg047","type":"alert","dynamic":false,"default":"Você força a porta e consegue abri-la.","pattern":"Você força a porta e consegue abri-la."},{"id":"msg048","type":"alert","dynamic":false,"default":"Muralha de Energia: invisível, imune a dano comum e bloqueia a passagem. Só Desintegrar a destrói; teletransporte pode atravessá-la.","pattern":"Muralha de Energia: invisível, imune a dano comum e bloqueia a passagem. Só Desintegrar a destrói; teletransporte pode atravessá-la."},{"id":"msg049","type":"alert","dynamic":false,"default":"Você percebe a ilusão: ela não bloqueia a passagem.","pattern":"Você percebe a ilusão: ela não bloqueia a passagem."},{"id":"msg050","type":"alert","dynamic":true,"default":"{mensagem}","pattern":". Use Atacar estrutura para tentar destruí-la. …"},{"id":"msg051","type":"prompt","dynamic":false,"default":"Muralha de Energia só pode ser destruída por Desintegrar. Digite DESINTEGRAR para aplicar a magia:","pattern":"Muralha de Energia só pode ser destruída por Desintegrar. Digite DESINTEGRAR para aplicar a magia:"},{"id":"msg052","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"foi dissipada. …"},{"id":"msg053","type":"alert","dynamic":false,"default":"A barreira é ilusória; não há estrutura física para destruir.","pattern":"A barreira é ilusória; não há estrutura física para destruir."},{"id":"msg054","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"Ataque não atingiu a CA … . …"},{"id":"msg055","type":"prompt","dynamic":false,"default":"Tipo de dano (cortante, contundente, perfurante, fogo, ácido, elétrico, psíquico, venenoso etc.):","pattern":"Tipo de dano (cortante, contundente, perfurante, fogo, ácido, elétrico, psíquico, venenoso etc.):"},{"id":"msg056","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"Este material é imune a dano … . …"},{"id":"msg057","type":"confirm","dynamic":false,"default":"Ferro/aço resiste a perfuração comum. Este ataque é mágico? (Cancelar = não)","pattern":"Ferro/aço resiste a perfuração comum. Este ataque é mágico? (Cancelar = não)"},{"id":"msg058","type":"alert","dynamic":false,"default":"A estrutura é imune a perfuração não mágica.","pattern":"A estrutura é imune a perfuração não mágica."},{"id":"msg059","type":"confirm","dynamic":false,"default":"O ataque é mágico? (Cancelar = não)","pattern":"O ataque é mágico? (Cancelar = não)"},{"id":"msg060","type":"alert","dynamic":false,"default":"Este material não sofre dano de armas não mágicas.","pattern":"Este material não sofre dano de armas não mágicas."},{"id":"msg061","type":"confirm","dynamic":false,"default":"O personagem é proficiente com Ferramentas de Pedreiro?","pattern":"O personagem é proficiente com Ferramentas de Pedreiro?"},{"id":"msg062","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"O golpe não alcançou o limiar de dano … . Nenhum PV foi removido. …"},{"id":"msg063","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"foi destruído! …"},{"id":"msg064","type":"alert","dynamic":false,"default":"Não há parede ou porta nesta linha.","pattern":"Não há parede ou porta nesta linha."},{"id":"msg065","type":"alert","dynamic":false,"default":"A barreira é uma ilusão e não possui PV.","pattern":"A barreira é uma ilusão e não possui PV."},{"id":"msg066","type":"alert","dynamic":false,"default":"Não há uma parede nesta quadrícula.","pattern":"Não há uma parede nesta quadrícula."},{"id":"msg067","type":"confirm","dynamic":false,"default":"Remover o teleporte deste hexágono?","pattern":"Remover o teleporte deste hexágono?"},{"id":"msg068","type":"confirm","dynamic":false,"default":"Remover este par de teleporte? Os pontos A e B serão apagados.","pattern":"Remover este par de teleporte? Os pontos A e B serão apagados."},{"id":"msg069","type":"alert","dynamic":false,"default":"Este local já faz parte de outro teleporte. Escolha um ponto B diferente.","pattern":"Este local já faz parte de outro teleporte. Escolha um ponto B diferente."},{"id":"msg070","type":"alert","dynamic":false,"default":"Este local já possui um teleporte para outro mapa. Escolha outro ponto.","pattern":"Este local já possui um teleporte para outro mapa. Escolha outro ponto."},{"id":"msg071","type":"alert","dynamic":false,"default":"Não é possível criar um teleporte em uma célula bloqueada. Escolha um espaço livre.","pattern":"Não é possível criar um teleporte em uma célula bloqueada. Escolha um espaço livre."},{"id":"msg072","type":"alert","dynamic":false,"default":"Ponto A definido. Agora clique no local do ponto B para concluir o teleporte. Pressione Esc para cancelar.","pattern":"Ponto A definido. Agora clique no local do ponto B para concluir o teleporte. Pressione Esc para cancelar."},{"id":"msg073","type":"alert","dynamic":false,"default":"Escolha um ponto B diferente do ponto A.","pattern":"Escolha um ponto B diferente do ponto A."},{"id":"msg074","type":"alert","dynamic":false,"default":"Este local já possui um teleporte. Escolha outro ponto para B.","pattern":"Este local já possui um teleporte. Escolha outro ponto para B."},{"id":"msg075","type":"alert","dynamic":false,"default":"Adicione outro mapa primeiro usando o botão + do seletor.","pattern":"Adicione outro mapa primeiro usando o botão + do seletor."},{"id":"msg076","type":"prompt","dynamic":true,"default":"{mensagem}","pattern":"Escolha o mapa de destino digitando o número: …"},{"id":"msg077","type":"alert","dynamic":false,"default":"Destino inválido. Nenhum teleporte foi criado.","pattern":"Destino inválido. Nenhum teleporte foi criado."},{"id":"msg078","type":"alert","dynamic":false,"default":"O mapa de destino deste teleporte não está disponível. Atualize o catálogo mapas/mapas.json.","pattern":"O mapa de destino deste teleporte não está disponível. Atualize o catálogo mapas/mapas.json."},{"id":"msg079","type":"alert","dynamic":false,"default":"Ao tocar a parede, você percebe que ela é uma ilusão e pode atravessá-la.","pattern":"Ao tocar a parede, você percebe que ela é uma ilusão e pode atravessá-la."},{"id":"msg080","type":"alert","dynamic":false,"default":"Você toca uma barreira invisível: Muralha de Energia.","pattern":"Você toca uma barreira invisível: Muralha de Energia."},{"id":"msg081","type":"alert","dynamic":false,"default":"Não é possível iniciar em cima de uma parede.","pattern":"Não é possível iniciar em cima de uma parede."},{"id":"msg082","type":"prompt","dynamic":false,"default":"Nome do token:","pattern":"Nome do token:"},{"id":"msg083","type":"confirm","dynamic":false,"default":"Cobrir o mapa com névoa novamente?","pattern":"Cobrir o mapa com névoa novamente?"},{"id":"msg084","type":"confirm","dynamic":false,"default":"Revelar o mapa inteiro? A névoa será removida de todas as células.","pattern":"Revelar o mapa inteiro? A névoa será removida de todas as células."},{"id":"msg085","type":"confirm","dynamic":false,"default":"Apagar todas as paredes das células?","pattern":"Apagar todas as paredes das células?"},{"id":"msg086","type":"confirm","dynamic":false,"default":"Apagar todos os muros e portas de linha?","pattern":"Apagar todos os muros e portas de linha?"},{"id":"msg087","type":"alert","dynamic":false,"default":"Você não conseguiu identificar a ilusão.","pattern":"Você não conseguiu identificar a ilusão."},{"id":"msg088","type":"alert","dynamic":false,"default":"Você encontrou a passagem, mas ainda não descobriu como abri-la.","pattern":"Você encontrou a passagem, mas ainda não descobriu como abri-la."},{"id":"msg089","type":"alert","dynamic":false,"default":"A porta não cede.","pattern":"A porta não cede."},{"id":"msg090","type":"alert","dynamic":false,"default":"Nenhum dano foi causado.","pattern":"Nenhum dano foi causado."},{"id":"msg091","type":"alert","dynamic":true,"default":"{mensagem}","pattern":"[nome da estrutura] sofreu [dano] de dano. PV restantes: [PV atual]/[PV máximo]."},{"id":"msg092","type":"confirm","dynamic":false,"default":"Restaurar os textos originais de todas as mensagens?","pattern":"Restaurar os textos originais de todas as mensagens?"},{"id":"msg093","type":"alert","dynamic":false,"default":"Não foi possível salvar as mensagens neste navegador.","pattern":"Não foi possível salvar as mensagens neste navegador."}];
@@ -181,6 +181,56 @@ function saveMapTileSize(id, value) {
     return true;
   } catch (e) { return false; }
 }
+function readSavedHexGridProfile() {
+  try {
+    var raw = localStorage.getItem(HEX_SIZE_KEY);
+    if (!raw) return null;
+    var value = JSON.parse(raw);
+    if (typeof value === 'number') value = { width: value };
+    if (!value || typeof value !== 'object') return null;
+    var width = Number(value.width), miles = Number(value.miles);
+    if (!isFinite(width) || width < 4 || width > 240) return null;
+    return { width: width, miles: isFinite(miles) && miles > 0 ? miles : null };
+  } catch (e) { return null; }
+}
+function saveHexGridProfile(width, miles) {
+  try {
+    localStorage.setItem(HEX_SIZE_KEY, JSON.stringify({ width: Number(width), miles: Number(miles), updatedAt: new Date().toISOString() }));
+    return true;
+  } catch (e) { return false; }
+}
+function applySavedHexGridProfile() {
+  var saved = readSavedHexGridProfile();
+  var info = MAPS.flanaess;
+  if (!saved || !info || !info.scale || !info.scale.hexagons) return;
+  var scale = info.scale;
+  var factor = Number(scale.referencePixelsPerLogicalPixel) || 4;
+  var ppm = Number(scale.pixelsPerMile) || 8;
+  var miles = saved.miles || (saved.width * factor / ppm);
+  info.scale.hexagons.small = { miles: miles, referenceWidthPixels: saved.width * factor };
+}
+function hexGridSnapshot() {
+  if (!isHexMap()) return null;
+  var hm = hexMetrics();
+  return { width: hm.width, miles: hm.miles };
+}
+function applyExportedHexGridProfile(payload) {
+  if (!isHexMap() || !payload || !payload.mapConfig || !payload.mapConfig.scale) return false;
+  var remoteScale = payload.mapConfig.scale;
+  var profile = remoteScale.hexagons && remoteScale.hexagons.small;
+  if (!profile) return false;
+  var factor = Number(MAPINFO.scale.referencePixelsPerLogicalPixel) || 4;
+  var ppm = Number(MAPINFO.scale.pixelsPerMile) || 8;
+  var referenceWidth = Number(profile.referenceWidthPixels);
+  var miles = Number(profile.miles);
+  var width = referenceWidth / factor;
+  if (!isFinite(width) || width < 4 || width > 240 || !isFinite(miles) || miles <= 0) return false;
+  MAPINFO.scale.hexagons.small = { referenceWidthPixels: referenceWidth, miles: miles };
+  saveHexGridProfile(width, miles);
+  applyMap(mapId);
+  return true;
+}
+applySavedHexGridProfile();
 function applyMap(id) {
   if (!MAPS[id]) id = 'tumba';
   mapId = id; MAPINFO = MAPS[id];
@@ -266,35 +316,58 @@ function worldTravelStepDurationMs() {
 
 var state = loadCurrentMapState();
 
+function savedHexMetricsForState(s) {
+  if (s && s.gridMetrics && isFinite(Number(s.gridMetrics.width)) && Number(s.gridMetrics.width) > 0) {
+    var w = Number(s.gridMetrics.width);
+    return { width: w, height: w * 2 / Math.sqrt(3), rowStep: w * Math.sqrt(3) / 2, miles: Number(s.gridMetrics.miles) || (w / 2) };
+  }
+  var mode = s && String(s.gridMode || '');
+  if (mode === 'hex-small-6mi') return { width: 12, height: 24 / Math.sqrt(3), rowStep: 18 / Math.sqrt(3), miles: 6 };
+  if (mode === 'hex-large-30mi') return { width: 60, height: 120 / Math.sqrt(3), rowStep: 90 / Math.sqrt(3), miles: 30 };
+  if (mode === 'hex-small') return { width: 24, height: 48 / Math.sqrt(3), rowStep: 36 / Math.sqrt(3), miles: 6 };
+  if (mode === 'hex-large') return { width: 60, height: 120 / Math.sqrt(3), rowStep: 90 / Math.sqrt(3), miles: 30 };
+  return null;
+}
+function worldPointFromHexCell(point, metrics) {
+  if (!point || !metrics) return null;
+  var x = Number(point.x), y = Number(point.y);
+  return {
+    x: metrics.width / 2 + x * metrics.width + (y & 1) * metrics.width / 2,
+    y: metrics.height / 2 + y * metrics.rowStep
+  };
+}
 function migrateFlanaessState(s) {
   if (!isHexMap() || !s) return s;
-  if (s._legacySquareTokens) {
-    (s.tokens || []).forEach(function (t) {
-      var oldWorldX = (Number(t.x) + 0.5) * MAPS.flanaess.cell;
-      var oldWorldY = (Number(t.y) + 0.5) * MAPS.flanaess.cell;
-      var migrated = worldToCell(oldWorldX, oldWorldY);
-      t.x = migrated.x; t.y = migrated.y;
-    });
-    delete s._legacySquareTokens;
-  } else if (s.gridMode && s.gridMode !== FLANAESS_GRID_MODE) {
-    var oldMode = s.gridMode === 'hex-small' ? 'small' : (s.gridMode === 'hex-large' ? 'large' : null);
-    if (oldMode) {
-
-      var oldReferenceWidth = oldMode === 'small' ? 96 : 240;
-      var oldWidth = oldReferenceWidth / MAPINFO.scale.referencePixelsPerLogicalPixel;
-      var oldHeight = oldWidth * 2 / Math.sqrt(3), oldStep = oldHeight * 0.75;
-      (s.tokens || []).forEach(function (t) {
-        var oldWorldX = oldWidth / 2 + t.x * oldWidth + (t.y & 1) * oldWidth / 2;
-        var oldWorldY = oldHeight / 2 + t.y * oldStep;
-        var migrated = worldToCell(oldWorldX, oldWorldY);
-        t.x = migrated.x; t.y = migrated.y;
-      });
-    }
+  var oldMetrics = savedHexMetricsForState(s);
+  var legacySquare = !!s._legacySquareTokens;
+  var oldSquareCell = Number(MAPS.flanaess.cell) || 40;
+  var points = [];
+  function rememberPoint(object, xKey, yKey) {
+    if (!object || !isFinite(Number(object[xKey])) || !isFinite(Number(object[yKey]))) return;
+    var world;
+    if (legacySquare) world = { x: (Number(object[xKey]) + 0.5) * oldSquareCell, y: (Number(object[yKey]) + 0.5) * oldSquareCell };
+    else world = worldPointFromHexCell({ x: object[xKey], y: object[yKey] }, oldMetrics);
+    if (world) points.push({ object: object, xKey: xKey, yKey: yKey, world: world });
   }
+  if (legacySquare || (oldMetrics && Math.abs(oldMetrics.width - hexMetrics().width) > 0.001)) {
+    (s.tokens || []).forEach(function (token) { rememberPoint(token, 'x', 'y'); });
+    rememberPoint(s.spawn, 'x', 'y');
+    (s.portals || []).forEach(function (portal) {
+      rememberPoint(portal, 'x', 'y');
+      if (!portal.destMapId) rememberPoint(portal, 'destX', 'destY');
+    });
+  }
+  points.forEach(function (entry) {
+    var mapped = worldToCell(entry.world.x, entry.world.y);
+    entry.object[entry.xKey] = mapped.x;
+    entry.object[entry.yKey] = mapped.y;
+  });
+  delete s._legacySquareTokens;
   s.gridMode = FLANAESS_GRID_MODE;
+  s.gridMetrics = hexGridSnapshot();
   s.fog = []; s.walls = []; s.wallMeta = []; s.hEdges = []; s.vEdges = []; s.hEdgeMeta = []; s.vEdgeMeta = [];
+  if (s.spawn) MAPINFO.spawn = { x: s.spawn.x, y: s.spawn.y };
   state = s;
-
   return s;
 }
 state = migrateFlanaessState(state);
@@ -307,6 +380,7 @@ function defaultState() {
     v: 4,
     nome: MAPINFO.nome,
     gridMode: isHexMap() ? FLANAESS_GRID_MODE : 'square',
+    gridMetrics: isHexMap() ? hexGridSnapshot() : null,
     spawn: { x: MAPINFO.spawn.x, y: MAPINFO.spawn.y },
     portals: [],
     tokens: [
@@ -654,6 +728,7 @@ function loadRepositoryMapState(done) {
       if (payload.format !== 'animalysson-rpg-map' || payload.mapId !== requestedMapId || !payload.state) return;
       var remoteSavedAt = Date.parse(payload.exportedAt) || 0;
       if (remoteSavedAt <= localSavedAt) return;
+      if (isHexMap()) applyExportedHexGridProfile(payload);
       var remoteState = normalizeMapState(payload.state);
       if (!remoteState) return;
       remoteState._savedAt = remoteSavedAt;
@@ -702,7 +777,7 @@ function exportMapFile() {
     }
   }
   var exportedState = isHexMap()
-    ? { v: 4, nome: MAPINFO.nome, gridMode: FLANAESS_GRID_MODE, spawn: state.spawn || MAPINFO.spawn, portals: state.portals || [], tokens: state.tokens || [] }
+    ? { v: 4, nome: MAPINFO.nome, gridMode: FLANAESS_GRID_MODE, gridMetrics: hexGridSnapshot(), spawn: state.spawn || MAPINFO.spawn, portals: state.portals || [], tokens: state.tokens || [] }
     : JSON.parse(JSON.stringify(state));
   if (exportedState && Object.prototype.hasOwnProperty.call(exportedState, '_savedAt')) delete exportedState._savedAt;
   var payload = {
@@ -743,7 +818,7 @@ async function exportMapPackage() {
       entries.push({ name: config.parts[i].src, blob: imageBlob });
     }
     var exportedState = isHexMap()
-      ? { v: 4, nome: MAPINFO.nome, gridMode: FLANAESS_GRID_MODE, spawn: state.spawn || MAPINFO.spawn, portals: state.portals || [], tokens: state.tokens || [] }
+      ? { v: 4, nome: MAPINFO.nome, gridMode: FLANAESS_GRID_MODE, gridMetrics: hexGridSnapshot(), spawn: state.spawn || MAPINFO.spawn, portals: state.portals || [], tokens: state.tokens || [] }
       : JSON.parse(JSON.stringify(state));
     if (exportedState && Object.prototype.hasOwnProperty.call(exportedState, '_savedAt')) delete exportedState._savedAt;
     var manifest = {
@@ -1311,7 +1386,7 @@ function save() {
     if (isHexMap()) {
       state.gridMode = FLANAESS_GRID_MODE;
       localStorage.setItem(KEY, JSON.stringify({
-        v: 4, nome: MAPINFO.nome, gridMode: state.gridMode,
+        v: 4, nome: MAPINFO.nome, gridMode: state.gridMode, gridMetrics: hexGridSnapshot(),
         spawn: state.spawn || MAPINFO.spawn,
         portals: state.portals || [],
         tokens: state.tokens || [], _savedAt: state._savedAt
@@ -2844,6 +2919,66 @@ function isTokenVisible(t) {
 
 function currentPlayer() {
   return state.tokens.find(function (t) { return t.tipo === 'player'; }) || state.tokens[0] || null;
+}
+
+function resizeHexGridSize(requestedWidth) {
+  if (!isHexMap() || !MAPINFO || !MAPINFO.scale || !MAPINFO.scale.hexagons) return false;
+  var newWidth = Math.round(Number(requestedWidth) * 100) / 100;
+  if (!isFinite(newWidth) || newWidth < 4 || newWidth > 240) {
+    appAlertMessage('msg010', 'Informe uma largura de hexágono entre 4 e 240 pixels.');
+    return false;
+  }
+  var oldMetrics = hexMetrics();
+  if (Math.abs(newWidth - oldMetrics.width) < 0.001) return true;
+  var referenceFactor = Number(MAPINFO.scale.referencePixelsPerLogicalPixel) || 4;
+  var pixelsPerMile = Number(MAPINFO.scale.pixelsPerMile) || 8;
+  var newMiles = newWidth * referenceFactor / pixelsPerMile;
+  if (!saveHexGridProfile(newWidth, newMiles)) {
+    appAlertMessage('msg010', 'O navegador não permitiu salvar o tamanho dos hexágonos. Verifique o armazenamento local do site.');
+    return false;
+  }
+
+  function rememberWorldPoint(point) {
+    if (!point || !isFinite(Number(point.x)) || !isFinite(Number(point.y))) return null;
+    var x = Number(point.x), y = Number(point.y);
+    return {
+      x: oldMetrics.width / 2 + x * oldMetrics.width + (y & 1) * oldMetrics.width / 2,
+      y: oldMetrics.height / 2 + y * oldMetrics.rowStep
+    };
+  }
+  var tokenPoints = (state.tokens || []).map(function (token) { return { token: token, world: rememberWorldPoint(token) }; });
+  var oldSpawn = rememberWorldPoint(state.spawn || MAPINFO.spawn);
+  var portalPoints = (state.portals || []).map(function (portal) {
+    return { portal: portal, world: rememberWorldPoint(portal), destination: !portal.destMapId ? rememberWorldPoint({ x: portal.destX, y: portal.destY }) : null };
+  });
+
+  MAPINFO.scale.hexagons.small = { miles: newMiles, referenceWidthPixels: newWidth * referenceFactor };
+  hexSize = 'small';
+  applyMap(mapId);
+
+  tokenPoints.forEach(function (entry) {
+    if (!entry.world) return;
+    var cell = worldToCell(entry.world.x, entry.world.y);
+    entry.token.x = cell.x; entry.token.y = cell.y;
+  });
+  if (oldSpawn) state.spawn = worldToCell(oldSpawn.x, oldSpawn.y);
+  if (state.spawn) MAPINFO.spawn = { x: state.spawn.x, y: state.spawn.y };
+  portalPoints.forEach(function (entry) {
+    if (entry.world) {
+      var point = worldToCell(entry.world.x, entry.world.y);
+      entry.portal.x = point.x; entry.portal.y = point.y;
+    }
+    if (entry.destination) {
+      var destination = worldToCell(entry.destination.x, entry.destination.y);
+      entry.portal.destX = destination.x; entry.portal.destY = destination.y;
+    }
+  });
+
+  state.gridMode = FLANAESS_GRID_MODE;
+  state.gridMetrics = hexGridSnapshot();
+  save();
+  if (cv) draw();
+  return true;
 }
 
 function resizeMapTileSize(requestedCell) {
@@ -6380,13 +6515,13 @@ function mountNow(el) {
     '<input type="file" id="mp-add-map-file" accept=".zip,application/zip,image/*" hidden>' +
     '<button type="button" id="mp-export" title="Baixar pacote ZIP atualizado (mapas personalizados) ou dados JSON (mapas originais)">⬇ Salvar mapa</button>' +
     '<button type="button" id="mp-export-catalog" title="Baixar o catálogo para publicar os mapas adicionados">🗂 Baixar catálogo de mapas</button>' +
-    '<label id="mp-hex-wrap" class="mp-luz" style="display:none">Hexágono <select id="mp-hex-size" disabled><option value="small" selected>Pequeno · 6 mi</option></select></label>' +
+    '<label id="mp-hex-wrap" class="mp-luz mp-editor-only" title="Ajusta a largura dos hexágonos em pixels do mapa; o zoom da câmera não é alterado">Hexágono (px) <input id="mp-hex-size" type="number" min="4" max="240" step="1" inputmode="numeric" style="width:76px" aria-label="Largura do hexágono em pixels"><button type="button" id="mp-apply-hex-size">Aplicar</button><small id="mp-hex-miles" aria-live="polite"></small></label>' +
     '<label id="mp-speed-wrap" class="mp-luz" style="display:none">Velocidade <input id="mp-speed" type="number" min="0.1" step="0.1" placeholder="mi/dia" style="width:62px"></label>' +
     '<button type="button" id="mp-world-move" class="mp-world-action active" title="Desativa os modos de início e teleporte; use as setas ou clique para mover o personagem">🧭 Desativar ferramentas</button>' +
     '<button type="button" id="mp-world-spawn" class="mp-world-action" title="Definir o ponto de início deste mapa">📍 Definir início</button>' +
     '<button type="button" id="mp-world-portal" class="mp-world-action" title="No modo Editor: adicionar um teleporte para outro mapa">🌀 Teleporte para outro mapa</button>' +
     '<button type="button" id="mp-world-local-portal" class="mp-world-action" title="No modo Editor: clique no ponto A e depois no ponto B para criar um teleporte dentro deste mapa">🌀 Teleporte neste mapa</button>' +
-    '<label id="mp-tile-size-wrap" class="mp-luz mp-editor-only" style="display:none" title="Ajusta o tamanho de cada quadrícula deste mapa">Tile (px) <input id="mp-tile-size" type="number" min="8" max="512" step="1" inputmode="numeric" style="width:76px" aria-label="Tamanho do tile em pixels"><button type="button" id="mp-apply-tile-size">Aplicar</button></label>' +
+    '<label id="mp-tile-size-wrap" class="mp-luz mp-editor-only" title="Ajusta o tamanho de cada quadrícula deste mapa">Tile (px) <input id="mp-tile-size" type="number" min="8" max="512" step="1" inputmode="numeric" style="width:76px" aria-label="Tamanho do tile em pixels"><button type="button" id="mp-apply-tile-size">Aplicar</button></label>' +
     '<div class="mp-g" id="mp-tools">' +
     '<button data-t="wall" title="Posicionar parede em uma quadrícula">🧱 Parede</button>' +
     '<button data-t="muro" title="Desenhar muro: clique em um canto e depois em outro">─ Muro</button>' +
@@ -6488,10 +6623,12 @@ function mountNow(el) {
     '#mp-root .mp-world-action:hover{background:rgba(35,155,180,.3);}' +
     '#mp-root .mp-world-action.active{background:rgba(35,155,180,.48);border-color:#55e6ff;}' +
     '#mp-root.editor-mode:not(.mp-world-map) #mp-world-spawn{display:block !important;}' +
-    '#mp-root #mp-tile-size-wrap{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:7px 9px;border:1px solid rgba(255,255,255,.14);border-radius:7px;background:rgba(255,255,255,.035);}' +
-    '#mp-root #mp-tile-size-wrap[hidden]{display:none!important;}' +
+    '#mp-root #mp-tile-size-wrap,#mp-root #mp-hex-wrap{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:7px 9px;border:1px solid rgba(255,255,255,.14);border-radius:7px;background:rgba(255,255,255,.035);}' +
+    '#mp-root #mp-tile-size-wrap[hidden],#mp-root #mp-hex-wrap[hidden]{display:none!important;}' +
     '#mp-root #mp-tile-size{max-width:80px;box-sizing:border-box;padding:6px;border:1px solid rgba(255,255,255,.2);border-radius:6px;background:#252a34;color:#fff;}' +
-    '#mp-root #mp-apply-tile-size{min-height:30px;padding:5px 9px;border:1px solid rgba(90,180,220,.45);border-radius:6px;background:#24536b;color:#fff;cursor:pointer;}' +
+    '#mp-root #mp-apply-tile-size,#mp-root #mp-apply-hex-size{min-height:30px;padding:5px 9px;border:1px solid rgba(90,180,220,.45);border-radius:6px;background:#24536b;color:#fff;cursor:pointer;}' +
+    '#mp-root #mp-hex-size{max-width:80px;box-sizing:border-box;padding:6px;border:1px solid rgba(255,255,255,.2);border-radius:6px;background:#252a34;color:#fff;}' +
+    '#mp-root #mp-hex-miles{font-size:11px;color:#aeb6c4;white-space:nowrap;}' +
     '#mp-root .mp-delete-map{display:block;width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid rgba(220,70,70,.65);border-radius:8px;' +
       'background:rgba(150,35,35,.2);color:#ffb6b6;font-weight:600;cursor:pointer;}' +
     '#mp-root .mp-delete-map:hover:not(:disabled){background:rgba(180,45,45,.38);}' +
@@ -6571,7 +6708,7 @@ function mountNow(el) {
 
   [
     '.mp-map-selector', '#mp-add-map', '#mp-add-map-file', '#mp-export', '#mp-export-catalog',
-    '#mp-tools', '#mp-tile-size-wrap', '#mp-grid', '#mp-fog', '#mp-light', '#mp-walls-vis', '#mp-secret-view',
+    '#mp-tools', '#mp-tile-size-wrap', '#mp-hex-wrap', '#mp-grid', '#mp-fog', '#mp-light', '#mp-walls-vis', '#mp-secret-view',
     '#mp-block', '#mp-lr', '#mp-reset-fog', '#mp-clear-fog', '#mp-clear-walls', '#mp-clear-edges',
     '#mp-zo', '#mp-zi', '#mp-side', '#mp-delete-map', '.mp-menu-footer',
     '#mp-world-move', '#mp-world-spawn', '#mp-world-portal', '#mp-world-local-portal'
@@ -6673,8 +6810,7 @@ function mountNow(el) {
   var tileSizeInput = $('#mp-tile-size');
   var applyTileSizeButton = $('#mp-apply-tile-size');
   if (tileSizeWrap && tileSizeInput && applyTileSizeButton) {
-    // O controle fica disponível em qualquer mapa de grade quadrada, não só nos personalizados.
-    // O atributo hidden mantém o controle oculto no mapa hexagonal mesmo após alternar de modo.
+    // Tile (px) controla somente mapas de grade quadrada.
     tileSizeWrap.hidden = isHexMap();
     tileSizeInput.value = String(MAPINFO.cell || CELL);
     function applyRequestedTileSize() {
@@ -6699,6 +6835,42 @@ function mountNow(el) {
       if (event.key === 'Enter') { event.preventDefault(); applyRequestedTileSize(); }
     });
   }
+  var hexSizeWrap = $('#mp-hex-wrap');
+  var hexSizeInput = $('#mp-hex-size');
+  var applyHexSizeButton = $('#mp-apply-hex-size');
+  var hexMilesLabel = $('#mp-hex-miles');
+  if (hexSizeWrap && hexSizeInput && applyHexSizeButton) {
+    hexSizeWrap.hidden = !isHexMap();
+    if (isHexMap()) hexSizeInput.value = String(Math.round(hexMetrics().width * 100) / 100);
+    function updateHexSizeLabel() {
+      if (!hexMilesLabel || !isHexMap()) return;
+      hexMilesLabel.textContent = '· ' + (Math.round(hexMetrics().miles * 100) / 100).toLocaleString('pt-BR') + ' mi/hex';
+    }
+    updateHexSizeLabel();
+    function applyRequestedHexSize() {
+      var nextSize = Number(hexSizeInput.value);
+      if (!isFinite(nextSize) || nextSize < 4 || nextSize > 240) {
+        appAlertMessage('msg010', 'Informe uma largura de hexágono entre 4 e 240 pixels.');
+        hexSizeInput.value = String(Math.round(hexMetrics().width * 100) / 100);
+        return;
+      }
+      var previousSize = hexMetrics().width;
+      if (resizeHexGridSize(nextSize)) {
+        hexSizeInput.value = String(Math.round(hexMetrics().width * 100) / 100);
+        updateHexSizeLabel();
+        if (Math.abs(nextSize - previousSize) > 0.001) {
+          appAlertMessage('msg009', 'Hexágonos ajustados para ' + hexSizeInput.value + ' px (' + (Math.round(hexMetrics().miles * 100) / 100).toLocaleString('pt-BR') + ' milhas por hexágono). A posição dos tokens e teleportes foi preservada. Clique em Salvar mapa para exportar o ajuste para o GitHub.');
+        }
+      } else {
+        hexSizeInput.value = String(Math.round(hexMetrics().width * 100) / 100);
+        updateHexSizeLabel();
+      }
+    }
+    applyHexSizeButton.onclick = applyRequestedHexSize;
+    hexSizeInput.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') { event.preventDefault(); applyRequestedHexSize(); }
+    });
+  }
   cv.addEventListener('pointerdown', onPointerDown);
   cv.addEventListener('pointermove', onPointerMove);
   cv.addEventListener('pointerleave', onPointerLeave);
@@ -6721,7 +6893,7 @@ function mountNow(el) {
     selected = null; pendingMonster = null; measurePts = null; drag = null;
     mount(host);
   };
-  if ($('#mp-hex-wrap')) $('#mp-hex-wrap').style.display = 'none';
+  if ($('#mp-hex-wrap')) $('#mp-hex-wrap').hidden = !isHexMap();
   if ($('#mp-speed-wrap')) $('#mp-speed-wrap').style.display = isHexMap() ? 'inline-flex' : 'none';
   if (isHexMap()) {
     var worldRoot = $('#mp-root');
@@ -6738,8 +6910,7 @@ function mountNow(el) {
       '#mp-root.mp-world-map #mp-clear-walls,' +
       '#mp-root.mp-world-map #mp-clear-edges,' +
       '#mp-root.mp-world-map #mp-block,' +
-      '#mp-root.mp-world-map #mp-lr,'+
-      '#mp-root.mp-world-map #mp-hex-wrap {display:none !important;}' +
+      '#mp-root.mp-world-map #mp-lr {display:none !important;}' +
       '#mp-root.mp-world-map.editor-mode .mp-world-action {display:block !important;}' +
       '#mp-root.editor-mode #mp-world-local-portal {display:block !important;}' +
       '#mp-root:not(.mp-world-map).editor-mode #mp-world-move,' +
