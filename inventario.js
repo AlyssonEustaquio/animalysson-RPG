@@ -571,6 +571,9 @@
 
   const montar = (container, personagem, opcoes) => {
     opcoes = opcoes || {};
+    // No mapa, o modo jogador permite apenas ações de jogo; o editor mantém todas as ferramentas.
+    // Chamadas antigas sem modo definido preservam o comportamento completo.
+    const editorMode = opcoes.modo !== 'player';
     if (!document.getElementById('inv-css')) {
       const st = document.createElement('style');
       st.id = 'inv-css';
@@ -682,13 +685,13 @@
           <div class="inv-barra-ferr" style="padding:10px;border-bottom:1px solid var(--b)">
             <input type="search" placeholder="Buscar item" data-r="busca" aria-label="Buscar item" value="${esc(estado.busca)}">
             <select data-r="filtro" aria-label="Filtrar por tipo"><option value="">Todos</option>${TIPOS.filter((t) => t[0] !== 'montaria').map((t) => `<option value="${t[0]}" ${estado.tipo === t[0] ? 'selected' : ''}>${t[1]}</option>`).join('')}<option value="__eq" ${estado.tipo === '__eq' ? 'selected' : ''}>Equipados</option></select>
-            <button class="inv-btn pri" data-a="catalogo">Adicionar item</button>
+            ${editorMode ? '<button class="inv-btn pri" data-a="catalogo">Adicionar item</button>' : ''}
           </div>
           <div class="inv-rolagem" data-r="lista"></div>`;
       } else {
         q('painel').innerHTML = `
           <div class="inv-barra-ferr" style="padding:10px;border-bottom:1px solid var(--b)">
-            <button class="inv-btn pri" data-a="catalogo-montaria">Adicionar montaria</button>
+            ${editorMode ? '<button class="inv-btn pri" data-a="catalogo-montaria">Adicionar montaria</button>' : ''}
             <span class="inv-meta">Monte, carregue equipamento e controle sua montaria.</span>
           </div>
           <div class="inv-rolagem" data-r="lista"></div>`;
@@ -745,7 +748,7 @@
         return `<div class="inv-item ${i.equipado ? 'eqp' : ''}" data-id="${i.id}">
           <div class="inv-linha1">
             <span class="inv-nome" title="${esc(i.nome)}">${esc(i.nome)}${i.equipado ? `<span class="inv-tag">${nomeSlot(i.equipado)}</span>` : ''}${i.sintonizado ? '<span class="inv-tag sint">Sintonizado</span>' : ''}</span>
-            <span class="inv-qtd"><button class="inv-btn mini" data-a="menos" aria-label="Diminuir">−</button><span>${i.qtd}</span><button class="inv-btn mini" data-a="mais" aria-label="Aumentar">+</button></span>
+            <span class="inv-qtd">${editorMode ? '<button class="inv-btn mini" data-a="menos" aria-label="Diminuir">−</button>' : ''}<span>${i.qtd}</span>${editorMode ? '<button class="inv-btn mini" data-a="mais" aria-label="Aumentar">+</button>' : ''}</span>
           </div>
           <div class="inv-meta">${detalhesItem(i)}</div>
           ${descricaoItem(i)}
@@ -753,8 +756,7 @@
             ${podeEquipar ? `<button class="inv-btn mini ${i.equipado ? 'on' : ''}" data-a="equipar">${i.equipado ? 'Desequipar' : 'Equipar'}</button>` : ''}
             ${podeSintonizar ? `<button class="inv-btn mini ${i.sintonizado ? 'on' : ''}" data-a="sintonizar">${i.sintonizado ? 'Romper sintonia' : 'Sintonizar'}</button>` : ''}
             ${i.tipo === 'consumivel' ? '<button class="inv-btn mini" data-a="usar">Usar</button>' : ''}
-            <button class="inv-btn mini" data-a="editar">Editar</button>
-            <button class="inv-btn mini perigo" data-a="remover">Descartar</button>
+            ${editorMode ? '<button class="inv-btn mini" data-a="editar">Editar</button><button class="inv-btn mini perigo" data-a="remover">Descartar</button>' : ''}
           </div>
         </div>`;
       }).join('');
@@ -789,8 +791,7 @@
             <button class="inv-btn mini ${m.montado ? 'on' : ''}" data-a="montar">${m.montado ? 'Desmontar' : 'Montar'}</button>
             <button class="inv-btn mini" data-a="controle">Controle: ${m.controle === 'independente' ? 'independente' : 'controlada'}</button>
             <button class="inv-btn mini" data-a="carregar">Carregar item</button>
-            <button class="inv-btn mini" data-a="editar">Editar</button>
-            <button class="inv-btn mini perigo" data-a="remover">Descartar</button>
+            ${editorMode ? '<button class="inv-btn mini" data-a="editar">Editar</button><button class="inv-btn mini perigo" data-a="remover">Descartar</button>' : ''}
           </div>
           ${itens.map((i) => `<div class="inv-item" data-id="${i.id}">
             <div class="inv-linha1"><span class="inv-nome">${esc(i.nome)}</span><span class="inv-meta">× ${i.qtd} · ${fmt(num(i.peso) * num(i.qtd, 1))} kg</span></div>
@@ -806,11 +807,12 @@
     };
 
     const renderMoedas = () => {
-      q('moedas').innerHTML = MOEDAS.map((m) => `
+      q('moedas').innerHTML = MOEDAS.map((m) => editorMode ? `
         <div class="inv-moeda"><label for="inv-m-${m.id}">${m.nome} (${m.sigla})</label>
-        <input id="inv-m-${m.id}" type="number" min="0" step="1" value="${num(inv.moedas[m.id])}" data-a="moeda" data-m="${m.id}"></div>`).join('') + `
+        <input id="inv-m-${m.id}" type="number" min="0" step="1" value="${num(inv.moedas[m.id])}" data-a="moeda" data-m="${m.id}"></div>` : `
+        <div class="inv-moeda"><label>${m.nome} (${m.sigla})</label><strong>${num(inv.moedas[m.id])}</strong></div>`).join('') + `
         <div class="inv-meta" style="margin:10px 0">Total: ${fmt(totalPO())} PO · 50 moedas pesam ${fmt(kg(1))} kg</div>
-        <button class="inv-btn" data-a="consolidar" style="width:100%;margin-bottom:6px">Consolidar moedas</button>
+        ${editorMode ? '<button class="inv-btn" data-a="consolidar" style="width:100%;margin-bottom:6px">Consolidar moedas</button>' : ''}
         <button class="inv-btn" data-a="pagar" style="width:100%">Gastar ouro</button>`;
     };
 
@@ -1116,6 +1118,7 @@
       const el = e.target;
       if (el.dataset.r === 'filtro') { estado.tipo = el.value; renderLista(); }
       if (el.dataset.a === 'moeda') {
+        if (!editorMode) return;
         inv.moedas[el.dataset.m] = Math.max(0, Math.floor(num(el.value)));
         salvar();
       }
@@ -1125,6 +1128,7 @@
       const b = e.target.closest('[data-a]');
       if (!b || b.tagName === 'INPUT') return;
       const a = b.dataset.a;
+      if (!editorMode && ['catalogo', 'catalogo-montaria', 'consolidar', 'mais', 'menos', 'editar', 'remover'].includes(a)) return;
       if (a === 'aba') { estado.aba = b.dataset.v; renderPainel(); return; }
       if (a === 'catalogo') return abrirCatalogo('');
       if (a === 'catalogo-montaria') return abrirCatalogo('montaria');
@@ -1194,6 +1198,7 @@
       if (!b || b.tagName === 'INPUT' || b.tagName === 'SELECT') return;
       const d = b.dataset.d;
       if (d === 'fechar') return fechar();
+      if (!editorMode && ['novo', 'salvar-item', 'cat', 'confirmar-remover'].includes(d)) return;
       if (d === 'novo') {
         formItem(b.dataset.t === 'montaria' ? { nome: '', tipo: 'montaria', qtd: 1, peso: 0, valor: 0, slot: '', capacidade: 0 } : null, true);
         return;

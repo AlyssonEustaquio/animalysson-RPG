@@ -193,6 +193,8 @@ var SIZE_SQ = {
 };
 
 var R = null, cv = null, cx = null;
+var mapInventoryInstance = null;
+var mapInventoryMode = null;
 var zoom = 0.35, ox = 40, oy = 40;
 var tool = 'select';
 var appMode = 'player';
@@ -225,6 +227,15 @@ var keyMoveLastSave = 0;
 var clickMovePath = [];
 var WORLD_TRAVEL_STEP_MS = 2000;
 var HEX_KEY_STEP_MS = WORLD_TRAVEL_STEP_MS;
+
+function worldTravelStepDurationMs() {
+  var speed = typeof invSpeedMeters === 'function' ? invSpeedMeters() : null;
+  var base = speed && Number(speed.base) > 0 ? Number(speed.base) : 9;
+  var current = speed && Number(speed.atual) > 0 ? Number(speed.atual) : base;
+  var ratio = current / base;
+  if (!isFinite(ratio) || ratio <= 0) ratio = 1;
+  return Math.max(150, Math.round(WORLD_TRAVEL_STEP_MS / ratio));
+}
 
 var state = loadCurrentMapState();
 
@@ -2442,12 +2453,14 @@ function worldTravelFrame(now) {
       var toPt = cellCenter(next.x, next.y);
       worldTravelStep = {
         from: cellCenter(player.x, player.y), to: next, toPt: toPt,
+        dur: worldTravelStepDurationMs(),
         t0: worldTravelCarry != null ? worldTravelCarry : now
       };
       worldTravelCarry = null;
     }
     var st = worldTravelStep;
-    var p = (now - st.t0) / WORLD_TRAVEL_STEP_MS;
+    var stepDuration = Number(st.dur) > 0 ? Number(st.dur) : WORLD_TRAVEL_STEP_MS;
+    var p = (now - st.t0) / stepDuration;
     if (p >= 1) {
 
       player.x = st.to.x; player.y = st.to.y;
@@ -2472,7 +2485,7 @@ function worldTravelFrame(now) {
         teleportThroughWorldPortal(reachedPortal);
         return;
       }
-      worldTravelCarry = st.t0 + WORLD_TRAVEL_STEP_MS;
+      worldTravelCarry = st.t0 + stepDuration;
       worldTravelStep = null;
       continue;
     }
@@ -4271,7 +4284,7 @@ function keyMoveFrame(now) {
       if (!hexMode && !combatStepAllowed(pl, next)) { clickMovePath = []; clickMoveExitPending = false; break; }
       var from = tokenAnchor(pl, pl.x, pl.y), to = tokenAnchor(pl, next.x, next.y);
       var cells = Math.sqrt(Math.pow(next.x - pl.x, 2) + Math.pow(next.y - pl.y, 2));
-      keyMoveStep = { from: from, to: to, dur: (hexMode ? HEX_KEY_STEP_MS : KEY_STEP_MS) * cells, t0: keyMoveCarry != null ? keyMoveCarry : now };
+      keyMoveStep = { from: from, to: to, dur: (hexMode ? worldTravelStepDurationMs() : KEY_STEP_MS) * cells, t0: keyMoveCarry != null ? keyMoveCarry : now };
       keyMoveCarry = null;
 
       var combatFrom = { x: pl.x, y: pl.y };
@@ -6006,8 +6019,56 @@ function setMode(nextMode) {
   if (R) {
     setTool('select');
     updateModeUi();
+    var inventoryOverlay = R.querySelector('#mp-inventory-overlay');
+    if (inventoryOverlay && inventoryOverlay.classList.contains('open')) mountMapInventory(true);
+    else if (mapInventoryInstance) {
+      mapInventoryInstance.destruir();
+      mapInventoryInstance = null;
+      mapInventoryMode = null;
+    }
     draw();
   }
+}
+
+function mapInventoryOptions() {
+  var base = typeof INV_OPTS !== 'undefined' ? INV_OPTS : { chaveLocal: 'animalysson-inventario' };
+  var options = Object.assign({}, base, { modo: appMode });
+  options.aoMudar = function () { if (R && cv) draw(); };
+  return options;
+}
+
+function mountMapInventory(force) {
+  if (!R || typeof Inventario === 'undefined' || typeof S === 'undefined' || !S) return false;
+  var host = R.querySelector('#mp-inventory-host');
+  if (!host) return false;
+  if (!force && mapInventoryInstance && mapInventoryMode === appMode) {
+    mapInventoryInstance.atualizar();
+    return true;
+  }
+  if (mapInventoryInstance) mapInventoryInstance.destruir();
+  mapInventoryInstance = Inventario.montar(host, S, mapInventoryOptions());
+  mapInventoryMode = appMode;
+  return true;
+}
+
+function openMapInventory() {
+  if (!R) return;
+  var overlay = R.querySelector('#mp-inventory-overlay');
+  if (!overlay) return;
+  if (!mountMapInventory(false)) {
+    appAlertMessage('msg093', 'Não foi possível abrir o inventário: verifique se o personagem e inventario.js estão carregados.');
+    return;
+  }
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden', 'false');
+}
+
+function closeMapInventory() {
+  if (!R) return;
+  var overlay = R.querySelector('#mp-inventory-overlay');
+  if (!overlay) return;
+  overlay.classList.remove('open');
+  overlay.setAttribute('aria-hidden', 'true');
 }
 
 function menuIsOpen() {
@@ -6160,6 +6221,7 @@ function mountNow(el) {
     '<button type="button" id="mp-burger" class="mp-burger" title="Menu" aria-label="Abrir menu" aria-expanded="false" aria-controls="mp-drawer"><span></span><span></span><span></span></button>' +
     '<div class="mp-mode-switch" role="group" aria-label="Modo do mapa"><button type="button" id="mp-mode-player" class="active" title="Modo Jogador: sem ferramentas de edição">♟ Jogador</button><button type="button" id="mp-mode-editor" title="Modo Editor: liberar ferramentas e câmera livre">✎ Editor</button></div>' +
     '<div id="mp-drawer" class="mp-drawer" aria-hidden="true">' +
+    '<section class="mp-inventory-entry" aria-label="Inventário"><button type="button" id="mp-open-inventory">🎒 Abrir inventário</button></section>' +
     '<section id="mp-player-actions" class="mp-player-actions" aria-label="Ações do personagem">' +
     '<div class="mp-player-actions-head"><strong>🎲 Ações do personagem</strong><button type="button" id="mp-action-config" title="Configurar bônus e dano">⚙</button></div>' +
     '<div class="mp-player-actions-buttons">' +
@@ -6216,6 +6278,11 @@ function mountNow(el) {
     '</aside>' +
     '<div class="mp-menu-footer"><button type="button" id="mp-delete-map" class="mp-delete-map" title="Excluir somente mapas adicionados pelo botão +">🗑 Excluir mapa</button></div>' +
     '</div>' +
+    '<div id="mp-inventory-overlay" class="mp-inventory-overlay" aria-hidden="true">' +
+    '<section class="mp-inventory-dialog" role="dialog" aria-modal="true" aria-labelledby="mp-inventory-title">' +
+    '<header class="mp-inventory-head"><strong id="mp-inventory-title">🎒 Inventário do personagem</strong><button type="button" id="mp-close-inventory" aria-label="Fechar inventário">✕ Fechar</button></header>' +
+    '<div id="mp-inventory-host" class="mp-inventory-host"></div>' +
+    '</section></div>' +
     '</div></div></div>';
 
   var menuStyle = document.createElement('style');
@@ -6241,6 +6308,17 @@ function mountNow(el) {
     '#mp-root .mp-player-skill-row{display:flex;gap:6px;margin-top:7px;}' +
     '#mp-root .mp-player-skill-row select{flex:1;min-width:0;padding:7px;border:1px solid rgba(255,255,255,.2);border-radius:7px;background:#252a34;color:#eef8ff;font-size:12px;}' +
     '#mp-root .mp-player-skill-row button{padding:7px 10px;border:1px solid rgba(100,180,220,.35);border-radius:7px;background:rgba(38,92,125,.28);color:#eef8ff;font-size:12px;font-weight:600;cursor:pointer;}' +
+    '#mp-root .mp-inventory-entry{margin:0 0 12px;padding:0;}' +
+    '#mp-root #mp-open-inventory{display:block;width:100%;min-height:42px;padding:9px 12px;border:1px solid rgba(90,190,140,.55);border-radius:8px;background:rgba(35,125,85,.28);color:#e7fff1;font-size:14px;font-weight:700;cursor:pointer;}' +
+    '#mp-root #mp-open-inventory:hover{background:rgba(35,155,100,.42);}' +
+    '#mp-root .mp-inventory-overlay{position:absolute;inset:10px;z-index:32;display:none;align-items:stretch;justify-content:center;padding:clamp(4px,2vw,18px);background:rgba(5,7,10,.88);backdrop-filter:blur(5px);}' +
+    '#mp-root .mp-inventory-overlay.open{display:flex;}' +
+    '#mp-root .mp-inventory-dialog{display:flex;flex-direction:column;width:min(1180px,100%);height:100%;min-height:0;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:12px;background:#141519;box-shadow:0 18px 60px rgba(0,0,0,.65);overflow:hidden;}' +
+    '#mp-root .mp-inventory-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex:none;padding:0 0 10px;border-bottom:1px solid rgba(255,255,255,.14);color:#f3f6fb;}' +
+    '#mp-root #mp-close-inventory{padding:7px 11px;border:1px solid rgba(255,255,255,.2);border-radius:7px;background:#30343e;color:#fff;cursor:pointer;}' +
+    '#mp-root .mp-inventory-host{flex:1;min-height:0;overflow:auto;padding-top:10px;}' +
+    '#mp-root .mp-inventory-host>.inv{min-height:100%;}' +
+    '@media(max-width:700px){#mp-root .mp-inventory-overlay{inset:4px;padding:4px;}#mp-root .mp-inventory-dialog{padding:8px;border-radius:8px;}#mp-root .mp-inventory-head{font-size:13px;}}' +
     '#mp-root.editor-mode .mp-player-actions{display:none !important;}' +
     '#mp-root.player-mode .mp-editor-only{display:none !important;}' +
     '#mp-root.player-mode .mp-drawer .mp-g.mp-editor-only{display:none !important;}' +
@@ -6361,6 +6439,10 @@ function mountNow(el) {
   if (editStructureButton) editStructureButton.onclick = function () { setTool('editStructure'); setMenu(false); };
   $('#mp-mode-player').onclick = function () { setMode('player'); setMenu(false); };
   $('#mp-mode-editor').onclick = function () { setMode('editor'); setMenu(false); };
+  var inventoryOpenButton = R.querySelector('#mp-open-inventory');
+  var inventoryCloseButton = R.querySelector('#mp-close-inventory');
+  if (inventoryOpenButton) inventoryOpenButton.onclick = function () { setMenu(false); openMapInventory(); };
+  if (inventoryCloseButton) inventoryCloseButton.onclick = closeMapInventory;
   var playerActionTray = R.querySelector('#mp-player-actions');
   if (playerActionTray) {
     playerActionTray.addEventListener('click', function (event) {
@@ -6629,6 +6711,7 @@ function mountNow(el) {
 function unmount() {
   mountRequestId++;
   if (autoCombatTimer) { window.clearInterval(autoCombatTimer); autoCombatTimer = null; }
+  if (mapInventoryInstance) { mapInventoryInstance.destruir(); mapInventoryInstance = null; mapInventoryMode = null; }
   stopWorldTravel(false);
   stopKeyMove();
   pendingLocalPortal = null;
