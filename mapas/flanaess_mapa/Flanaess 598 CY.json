@@ -86,7 +86,7 @@
     "icone": "🌍",
     "key": "animalysson-vtt-flanaess-v1",
     "stateFile": "mapas/flanaess_mapa/Flanaess 598 CY.json",
-    "cell": 40,
+    "cell": 80,
     "cols": 220,
     "rows": 262,
     "w": 8800,
