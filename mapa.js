@@ -4442,10 +4442,10 @@ function getCharacterSheetActionData() {
     var speedText = (typeof SP !== 'undefined' && Array.isArray(SP) && S.sp != null && SP[S.sp]) ? String(SP[S.sp].mov || '9 m') : '9 m';
     var speedMatch = speedText.match(/(\d+(?:[.,]\d+)?)/);
     var speedMeters = speedMatch ? Number(speedMatch[1].replace(',', '.')) : 9;
-    if (typeof invStats === 'function') {
-      var invSt = invStats();
-      if (invSt && invSt.montaria && Number(invSt.montaria.deslocamento) > 0) speedMeters = Number(invSt.montaria.deslocamento);
-      else if (invSt && invSt.penalidadeDeslocamento) speedMeters = Math.max(1.5, speedMeters - invSt.penalidadeDeslocamento);
+    if (invAtivo()) {
+      var invSp = invSpeedMeters();
+      if (invSp.montado) speedMeters = invSp.atual;
+      else if (invSp.penalidade) speedMeters = Math.max(1.5, speedMeters - invSp.penalidade);
     }
     var speedCells = Math.max(1, Math.round((speedMeters || 9) / 1.5));
     var toolsBonus = abilityMods.DES + (bg && normalizeRpgText(bg.i || '') === 'ferramentas de ladrao' ? proficiencyBonus : 0);
@@ -4507,7 +4507,7 @@ function normalizeRpgText(value) {
 }
 function invAtivo() {
   try {
-    return typeof Inventario !== 'undefined' && typeof invCtx === 'function' && typeof S !== 'undefined' && !!S &&
+    return typeof Inventario !== 'undefined' && typeof S !== 'undefined' && !!S &&
       !!S.inventario && Array.isArray(S.inventario.itens) && S.inventario.itens.length > 0;
   } catch (e) { return false; }
 }
@@ -4536,21 +4536,61 @@ function invWeaponProf(weapon, sheet) {
   return Inventario.proficienteArma(sheet.className, weapon._inv) ? sheet.proficiencyBonus : 0;
 }
 function invWeaponMagic(weapon) { return weapon && weapon._inv ? Number(weapon._inv.bonus) || 0 : 0; }
+function invOpts() {
+  return typeof INV_OPTS !== 'undefined' ? INV_OPTS : { chaveLocal: 'animalysson-inventario' };
+}
+function invMov() {
+  var sp = typeof S !== 'undefined' && S && S.sp != null && typeof SP !== 'undefined' ? SP[S.sp] : null;
+  var m = String((sp && sp.mov) || '9 m').match(/\d+(?:[.,]\d+)?/);
+  return m ? parseFloat(m[0].replace(',', '.')) : 9;
+}
+function invCtx() {
+  var sc = function (k) { try { return typeof score === 'function' ? score(k) : 10; } catch (e) { return 10; } };
+  var sp = typeof S !== 'undefined' && S && S.sp != null && typeof SP !== 'undefined' ? SP[S.sp] : null;
+  var cl = typeof S !== 'undefined' && S && S.cls != null && typeof CL !== 'undefined' ? CL[S.cls] : null;
+  return { FOR: sc('FOR'), DES: sc('DES'), CON: sc('CON'), SAB: sc('SAB'), pb: 2, classe: cl ? cl.n : '', tamanho: sp ? sp.sz : 'Médio', deslocamento: invMov() };
+}
+function invStats() {
+  if (typeof Inventario === 'undefined' || typeof S === 'undefined' || !S) return null;
+  Inventario.carregar(S, invOpts());
+  return Inventario.estatisticas(S, invCtx());
+}
+function invSpeedMeters() {
+  var base = invMov();
+  var atual = base;
+  var st = invStats();
+  var montado = !!(st && st.montaria && Number(st.montaria.deslocamento) > 0);
+  var pen = st ? st.penalidadeDeslocamento : 0;
+  if (montado) atual = Number(st.montaria.deslocamento);
+  else if (pen) atual = Math.max(1.5, base - pen);
+  return { base: base, atual: atual, montado: montado, montaria: montado ? st.montaria.nome : '', penalidade: pen };
+}
 function invOwnSpeedCells() {
-  var m = (typeof invMov === 'function' ? invMov() : 9) || 9;
-  var st = typeof invStats === 'function' ? invStats() : null;
+  var m = invMov();
+  var st = invStats();
   if (st && st.penalidadeDeslocamento) m = Math.max(0, m - st.penalidadeDeslocamento);
   return Math.max(1, Math.round(m / 1.5));
 }
 function travelSpeedEffective() {
-  if (travelSpeedMilesPerDay > 0) return travelSpeedMilesPerDay;
-  if (typeof S === 'undefined' || !S || S.cls == null || typeof invMov !== 'function') return 0;
-  var meters = invMov() || 9;
-  var st = typeof invStats === 'function' ? invStats() : null;
-  if (st && st.montaria && Number(st.montaria.deslocamento) > 0) meters = Number(st.montaria.deslocamento);
-  else if (st && st.penalidadeDeslocamento) meters = Math.max(1.5, meters - st.penalidadeDeslocamento);
-  return Math.round(24 * meters / 9 * 10) / 10;
+  var sp = invSpeedMeters();
+  var ratio = sp.base > 0 ? sp.atual / sp.base : 1;
+  if (travelSpeedMilesPerDay > 0) return Math.round(travelSpeedMilesPerDay * ratio * 10) / 10;
+  if (typeof S === 'undefined' || !S || S.cls == null) return 0;
+  return Math.round(24 * sp.atual / 9 * 10) / 10;
 }
+window.invDiagnostico = function () {
+  var sp = invSpeedMeters();
+  return {
+    inventarioAtivo: invAtivo(),
+    itensNoInventario: typeof S !== 'undefined' && S && S.inventario ? S.inventario.itens.length : 0,
+    velocidadeBaseM: sp.base,
+    velocidadeAtualM: sp.atual,
+    celulasPorTurno: Math.max(1, Math.round(sp.atual / 1.5)),
+    montaria: sp.montaria || null,
+    penalidadeForcaM: sp.penalidade,
+    viagemMundoMiPorDia: travelSpeedEffective()
+  };
+};
 function playerWeaponCatalog() {
   var items = window.ITEMS || window.EQUIPMENT || [];
   return Array.isArray(items) ? items.filter(function (item) {
@@ -4697,7 +4737,7 @@ function configurePlayerActionProfile(player) {
   var profile = playerActionProfile(player);
   var sheet = getCharacterSheetActionData();
   var dlg = createPortalDialog('Configurar ações do personagem', sheet
-    ? 'Os bônus de perícias e atributos vêm diretamente da ficha aberta no site.' + (invAtivo() ? ' Arma, armadura, escudo e velocidade vêm do Inventário (itens equipados e montaria).' : ' Escolha a arma usada no Ataque; dano e alcance serão calculados pelo catálogo.')
+    ? 'Os bônus de perícias e atributos vêm diretamente da ficha aberta no site.' + (invAtivo() ? ' Arma, armadura, escudo e velocidade vêm do Inventário (itens equipados e montaria). Velocidade atual: ' + String(invSpeedMeters().atual).replace('.', ',') + ' m' + (invSpeedMeters().montado ? ' (montado em ' + invSpeedMeters().montaria + ')' : '') + '.' : ' Escolha a arma usada no Ataque; dano e alcance serão calculados pelo catálogo.')
     : 'Preencha os bônus manuais ou conclua a ficha do personagem para sincronizar os atributos e perícias automaticamente.');
   if (!dlg) return;
   dlg.panel.style.width = 'min(560px,100%)';
@@ -5078,7 +5118,7 @@ function combatToggleMount(actor) {
         return;
       }
     }
-    var r = Inventario.alternarMontaria(S, alvo.id, invCtx(), INV_OPTS);
+    var r = Inventario.alternarMontaria(S, alvo.id, invCtx(), invOpts());
     if (!r.ok) { combatShowLog('Montaria', [r.erro]); return; }
     var linhas = [actor.nome + (r.montado ? ' monta em ' : ' desmonta de ') + r.nome + (live ? '. Custo: ' + combatMtsTxt(custo) + ' m de movimento.' : '.')];
     if (r.montado && r.deslocamento) linhas.push('Montado, o deslocamento passa a ser ' + String(r.deslocamento).replace('.', ',') + ' m.');
