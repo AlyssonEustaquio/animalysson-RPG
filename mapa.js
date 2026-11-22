@@ -48,6 +48,8 @@ var MAPS = {
 };
 var MAP_ID_KEY = 'animalysson-vtt-mapa-atual';
 var HEX_SIZE_KEY = 'animalysson-vtt-flanaess-hex-size';
+// Guarda o tamanho da grade quadrada por mapa, inclusive nos mapas originais.
+var MAP_TILE_SIZE_KEY = 'animalysson-vtt-tile-sizes-v1';
 var CUSTOM_MAPS_KEY = 'animalysson-vtt-mapas-customizados-v1';
 var DELETED_CUSTOM_MAPS_KEY = 'animalysson-vtt-mapas-excluidos-v1';
 var MAP_CATALOG_FILE = 'mapas/mapas.json';
@@ -161,6 +163,24 @@ function hexMetrics() {
   var height = width * 2 / Math.sqrt(3);
   return { width: width, height: height, rowStep: height * 0.75, miles: h.miles };
 }
+function readMapTileSizes() {
+  try {
+    var saved = JSON.parse(localStorage.getItem(MAP_TILE_SIZE_KEY) || '{}');
+    return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {};
+  } catch (e) { return {}; }
+}
+function getSavedMapTileSize(id) {
+  var value = Number(readMapTileSizes()[id]);
+  return isFinite(value) && value >= 8 && value <= 512 ? Math.round(value) : null;
+}
+function saveMapTileSize(id, value) {
+  try {
+    var saved = readMapTileSizes();
+    saved[id] = Math.round(Number(value));
+    localStorage.setItem(MAP_TILE_SIZE_KEY, JSON.stringify(saved));
+    return true;
+  } catch (e) { return false; }
+}
 function applyMap(id) {
   if (!MAPS[id]) id = 'tumba';
   mapId = id; MAPINFO = MAPS[id];
@@ -172,7 +192,14 @@ function applyMap(id) {
     COLS = Math.ceil(MAP_W / hm.width) + 1;
     ROWS = Math.ceil(MAP_H / hm.rowStep) + 1;
   } else {
-    CELL = MAPINFO.cell; COLS = MAPINFO.cols; ROWS = MAPINFO.rows;
+    var savedCell = getSavedMapTileSize(id);
+    if (savedCell) MAPINFO.cell = savedCell;
+    CELL = Math.max(8, Math.min(512, Math.round(Number(MAPINFO.cell) || 36)));
+    COLS = Math.ceil(MAP_W / CELL);
+    ROWS = Math.ceil(MAP_H / CELL);
+    MAPINFO.cell = CELL;
+    MAPINFO.cols = COLS;
+    MAPINFO.rows = ROWS;
   }
 }
 function mapOptions() {
@@ -2819,9 +2846,9 @@ function currentPlayer() {
   return state.tokens.find(function (t) { return t.tipo === 'player'; }) || state.tokens[0] || null;
 }
 
-function resizeCustomMapTiles(requestedCell) {
-  if (!MAPINFO || !MAPINFO.custom || isHexMap()) {
-    appAlertMessage('msg010', 'O ajuste de tile está disponível para mapas personalizados com grade quadrada.');
+function resizeMapTileSize(requestedCell) {
+  if (!MAPINFO || isHexMap()) {
+    appAlertMessage('msg010', 'O ajuste de Tile (px) está disponível nos mapas com grade quadrada. O mapa-múndi usa grade hexagonal.');
     return false;
   }
   var newCell = Math.round(Number(requestedCell));
@@ -2931,6 +2958,12 @@ function resizeCustomMapTiles(requestedCell) {
         }
       }
     }
+  }
+
+  // Salva a preferência antes de alterar o estado, evitando uma mudança parcial caso o navegador bloqueie o armazenamento.
+  if (!saveMapTileSize(mapId, newCell)) {
+    appAlertMessage('msg010', 'O navegador não permitiu salvar o tamanho do tile. Verifique o armazenamento local do site e tente novamente.');
+    return false;
   }
 
   (state.tokens || []).forEach(function (token) {
@@ -6353,7 +6386,7 @@ function mountNow(el) {
     '<button type="button" id="mp-world-spawn" class="mp-world-action" title="Definir o ponto de início deste mapa">📍 Definir início</button>' +
     '<button type="button" id="mp-world-portal" class="mp-world-action" title="No modo Editor: adicionar um teleporte para outro mapa">🌀 Teleporte para outro mapa</button>' +
     '<button type="button" id="mp-world-local-portal" class="mp-world-action" title="No modo Editor: clique no ponto A e depois no ponto B para criar um teleporte dentro deste mapa">🌀 Teleporte neste mapa</button>' +
-    '<label id="mp-tile-size-wrap" class="mp-luz mp-editor-only" style="display:none">Tile (px) <input id="mp-tile-size" type="number" min="8" max="512" step="1" style="width:68px" aria-label="Tamanho do tile em pixels"><button type="button" id="mp-apply-tile-size">Aplicar</button></label>' +
+    '<label id="mp-tile-size-wrap" class="mp-luz mp-editor-only" style="display:none" title="Ajusta o tamanho de cada quadrícula deste mapa">Tile (px) <input id="mp-tile-size" type="number" min="8" max="512" step="1" inputmode="numeric" style="width:76px" aria-label="Tamanho do tile em pixels"><button type="button" id="mp-apply-tile-size">Aplicar</button></label>' +
     '<div class="mp-g" id="mp-tools">' +
     '<button data-t="wall" title="Posicionar parede em uma quadrícula">🧱 Parede</button>' +
     '<button data-t="muro" title="Desenhar muro: clique em um canto e depois em outro">─ Muro</button>' +
@@ -6455,7 +6488,8 @@ function mountNow(el) {
     '#mp-root .mp-world-action:hover{background:rgba(35,155,180,.3);}' +
     '#mp-root .mp-world-action.active{background:rgba(35,155,180,.48);border-color:#55e6ff;}' +
     '#mp-root.editor-mode:not(.mp-world-map) #mp-world-spawn{display:block !important;}' +
-    '#mp-root #mp-tile-size-wrap{align-items:center;gap:7px;flex-wrap:wrap;padding:7px 9px;border:1px solid rgba(255,255,255,.14);border-radius:7px;background:rgba(255,255,255,.035);}' +
+    '#mp-root #mp-tile-size-wrap{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:7px 9px;border:1px solid rgba(255,255,255,.14);border-radius:7px;background:rgba(255,255,255,.035);}' +
+    '#mp-root #mp-tile-size-wrap[hidden]{display:none!important;}' +
     '#mp-root #mp-tile-size{max-width:80px;box-sizing:border-box;padding:6px;border:1px solid rgba(255,255,255,.2);border-radius:6px;background:#252a34;color:#fff;}' +
     '#mp-root #mp-apply-tile-size{min-height:30px;padding:5px 9px;border:1px solid rgba(90,180,220,.45);border-radius:6px;background:#24536b;color:#fff;cursor:pointer;}' +
     '#mp-root .mp-delete-map{display:block;width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid rgba(220,70,70,.65);border-radius:8px;' +
@@ -6639,22 +6673,31 @@ function mountNow(el) {
   var tileSizeInput = $('#mp-tile-size');
   var applyTileSizeButton = $('#mp-apply-tile-size');
   if (tileSizeWrap && tileSizeInput && applyTileSizeButton) {
-    tileSizeWrap.style.display = MAPINFO.custom && !isHexMap() ? 'flex' : 'none';
+    // O controle fica disponível em qualquer mapa de grade quadrada, não só nos personalizados.
+    // O atributo hidden mantém o controle oculto no mapa hexagonal mesmo após alternar de modo.
+    tileSizeWrap.hidden = isHexMap();
     tileSizeInput.value = String(MAPINFO.cell || CELL);
-    applyTileSizeButton.onclick = function () {
+    function applyRequestedTileSize() {
       var nextSize = Number(tileSizeInput.value);
       if (!isFinite(nextSize) || nextSize < 8 || nextSize > 512) {
         appAlertMessage('msg010', 'Informe um tamanho de tile entre 8 e 512 pixels.');
         tileSizeInput.value = String(MAPINFO.cell || CELL);
         return;
       }
-      if (resizeCustomMapTiles(nextSize)) {
+      var previousSize = Number(MAPINFO.cell) || CELL;
+      if (resizeMapTileSize(nextSize)) {
         tileSizeInput.value = String(MAPINFO.cell || CELL);
-        appAlertMessage('msg009', 'Tamanho do tile atualizado para ' + MAPINFO.cell + ' px. As posições dos tokens, o ponto de início, a névoa, as paredes e os muros/portas foram ajustados para a nova grade.');
+        if (Math.round(nextSize) !== previousSize) {
+          appAlertMessage('msg009', 'Tamanho do tile atualizado para ' + MAPINFO.cell + ' px. A alteração foi salva neste navegador para este mapa. As posições dos tokens, o início, a névoa, as paredes e os muros/portas foram ajustados.');
+        }
       } else {
         tileSizeInput.value = String(MAPINFO.cell || CELL);
       }
-    };
+    }
+    applyTileSizeButton.onclick = applyRequestedTileSize;
+    tileSizeInput.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') { event.preventDefault(); applyRequestedTileSize(); }
+    });
   }
   cv.addEventListener('pointerdown', onPointerDown);
   cv.addEventListener('pointermove', onPointerMove);
