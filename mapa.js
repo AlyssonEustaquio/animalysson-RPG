@@ -48,7 +48,6 @@ var MAPS = {
 };
 var MAP_ID_KEY = 'animalysson-vtt-mapa-atual';
 var HEX_SIZE_KEY = 'animalysson-vtt-flanaess-hex-size';
-// Guarda o tamanho da grade quadrada por mapa, inclusive nos mapas originais.
 var MAP_TILE_SIZE_KEY = 'animalysson-vtt-tile-sizes-v1';
 var CUSTOM_MAPS_KEY = 'animalysson-vtt-mapas-customizados-v1';
 var DELETED_CUSTOM_MAPS_KEY = 'animalysson-vtt-mapas-excluidos-v1';
@@ -716,7 +715,6 @@ function loadRepositoryMapState(done) {
   var requestedMapId = mapId;
   var file = MAPINFO && MAPINFO.stateFile;
   if (!file || typeof window.fetch !== 'function') { done(); return; }
-
   var localSavedAt = Number(state && state._savedAt) || 0;
   fetch(encodeURI(file) + '?v=' + Date.now(), { cache: 'no-store' })
     .then(function (response) {
@@ -727,15 +725,24 @@ function loadRepositoryMapState(done) {
       if (mapId !== requestedMapId || !payload) return;
       if (payload.format !== 'animalysson-rpg-map' || payload.mapId !== requestedMapId || !payload.state) return;
       var remoteSavedAt = Date.parse(payload.exportedAt) || 0;
-      if (remoteSavedAt <= localSavedAt) return;
+      if (!remoteSavedAt || remoteSavedAt <= localSavedAt) {
+        try {
+          console.info('[Mapa] Mantendo estado local (' + mapId + '). local=' + localSavedAt + ' remote=' + remoteSavedAt);
+        } catch (e) {}
+        return;
+      }
       if (isHexMap()) applyExportedHexGridProfile(payload);
       var remoteState = normalizeMapState(payload.state);
       if (!remoteState) return;
       remoteState._savedAt = remoteSavedAt;
       state = migrateFlanaessState(remoteState);
+      try { save(); } catch (e) {}
+      try {
+        console.info('[Mapa] Estado do GitHub aplicado (' + mapId + '). exportedAt=' + payload.exportedAt);
+      } catch (e) {}
     })
-    .catch(function () {
-
+    .catch(function (err) {
+      try { console.warn('[Mapa] Falha ao carregar estado do repositório:', err); } catch (e) {}
     })
     .then(function () { done(); });
 }
