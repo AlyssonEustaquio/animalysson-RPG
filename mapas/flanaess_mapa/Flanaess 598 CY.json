@@ -3,12 +3,12 @@
   "version": 1,
   "mapId": "flanaess",
   "mapName": "Flanaess 598 CY",
-  "exportedAt": "2026-11-19T12:39:12.387Z",
+  "exportedAt": "2026-11-22T20:15:57.093Z",
   "dimensions": {
     "width": 8800,
     "height": 10480,
-    "columns": 735,
-    "rows": 1010
+    "columns": 368,
+    "rows": 506
   },
   "imageFolder": "mapas/flanaess_mapa/",
   "images": [
@@ -86,14 +86,14 @@
     "icone": "🌍",
     "key": "animalysson-vtt-flanaess-v1",
     "stateFile": "mapas/flanaess_mapa/Flanaess 598 CY.json",
-    "cell": 80,
+    "cell": 40,
     "cols": 220,
     "rows": 262,
     "w": 8800,
     "h": 10480,
     "spawn": {
-      "x": 518,
-      "y": 705
+      "x": 258,
+      "y": 353
     },
     "fit": true,
     "maxZoom": 4,
@@ -118,8 +118,8 @@
           "referenceWidthPixels": 240
         },
         "small": {
-          "miles": 6,
-          "referenceWidthPixels": 48
+          "miles": 12,
+          "referenceWidthPixels": 96
         }
       }
     },
@@ -163,16 +163,20 @@
   "state": {
     "v": 4,
     "nome": "Flanaess 598 CY",
-    "gridMode": "hex-small-6mi",
+    "gridMode": "hex-profile-v1",
+    "gridMetrics": {
+      "width": 24,
+      "miles": 12
+    },
     "spawn": {
-      "x": 518,
-      "y": 705
+      "x": 258,
+      "y": 353
     },
     "portals": [
       {
         "id": "portal-mwnj4zxa",
-        "x": 519,
-        "y": 703,
+        "x": 259,
+        "y": 351,
         "color": "#6c0094",
         "destMapId": "tumba"
       }
@@ -182,8 +186,8 @@
         "id": "p1",
         "nome": "Aventureiro",
         "tipo": "player",
-        "x": 520,
-        "y": 704,
+        "x": 258,
+        "y": 353,
         "cor": "#4fc3f7",
         "raio": 1,
         "luz": 6,
