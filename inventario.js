@@ -789,10 +789,11 @@
           ${exotica ? '<div class="inv-meta">Sela exótica: necessária para montarias aquáticas ou voadoras.</div>' : ''}
           <div class="inv-acoes">
             <button class="inv-btn mini ${m.montado ? 'on' : ''}" data-a="montar">${m.montado ? 'Desmontar' : 'Montar'}</button>
-            <button class="inv-btn mini" data-a="controle">Controle: ${m.controle === 'independente' ? 'independente' : 'controlada'}</button>
+            <button class="inv-btn mini" data-a="controle" title="O modo independente ainda não recebe iniciativa própria no motor de combate desta versão">Controle: ${m.controle === 'independente' ? 'independente' : 'controlada'}</button>
             <button class="inv-btn mini" data-a="carregar">Carregar item</button>
             ${editorMode ? '<button class="inv-btn mini" data-a="editar">Editar</button><button class="inv-btn mini perigo" data-a="remover">Descartar</button>' : ''}
           </div>
+          ${m.controle === 'independente' ? '<div class="inv-meta" style="color:#f0bd75">Atenção: o modo Independente ainda não cria um turno de iniciativa separado nesta versão.</div>' : ''}
           ${itens.map((i) => `<div class="inv-item" data-id="${i.id}">
             <div class="inv-linha1"><span class="inv-nome">${esc(i.nome)}</span><span class="inv-meta">× ${i.qtd} · ${fmt(num(i.peso) * num(i.qtd, 1))} kg</span></div>
             <div class="inv-acoes"><button class="inv-btn mini" data-a="tirar">Pegar de volta</button></div>
@@ -1091,6 +1092,7 @@
     };
 
     const alternarMontaria = (m) => {
+      if (typeof opcoes.aoAlternarMontaria === 'function' && opcoes.aoAlternarMontaria(m, personagem) === true) return;
       if (m.montado) {
         m.montado = false;
         salvar();
@@ -1106,7 +1108,7 @@
       inv.itens.forEach((i) => { if (i.tipo === 'montaria') i.montado = false; });
       m.montado = true;
       salvar();
-      aviso('Você montou', `Montar custa metade do seu deslocamento${c.deslocamento != null ? ' (' + fmt(Math.floor(num(c.deslocamento) / 2 * 10) / 10) + ' m)' : ''}. Montado, você usa o deslocamento da montaria${m.deslocamento ? ' (' + fmt(num(m.deslocamento)) + ' m)' : ''}. ${m.controle === 'independente' ? 'Montaria independente: mantém a própria iniciativa e age como quiser.' : 'Montaria controlada: age na sua iniciativa e só pode Correr (Dash), Desengajar ou Esquivar.'}`);
+      aviso('Você montou', `Montar custa metade do seu deslocamento${c.deslocamento != null ? ' (' + fmt(Math.floor(num(c.deslocamento) / 2 * 10) / 10) + ' m)' : ''}. Montado, você usa o deslocamento da montaria${m.deslocamento ? ' (' + fmt(num(m.deslocamento)) + ' m)' : ''}. ${m.controle === 'independente' ? 'Modo independente selecionado. Atenção: esta versão do motor ainda não cria uma iniciativa separada para a montaria; ela não recebe um turno autônomo.' : 'Montaria controlada: age na sua iniciativa e só pode Correr (Dash), Desengajar ou Esquivar.'}`);
     };
 
     raiz.addEventListener('input', (e) => {
@@ -1166,7 +1168,10 @@
       }
       if (a === 'editar') return formItem(it, false);
       if (a === 'montar') return alternarMontaria(it);
-      if (a === 'controle') it.controle = it.controle === 'independente' ? 'controlada' : 'independente';
+      if (a === 'controle') {
+        if (typeof opcoes.aoAlternarControleMontaria === 'function' && opcoes.aoAlternarControleMontaria(it, personagem) === true) return;
+        it.controle = it.controle === 'independente' ? 'controlada' : 'independente';
+      }
       if (a === 'carregar') return abrirCarregar(it);
       if (a === 'tirar') mover(it, num(it.qtd, 1), '');
       if (a === 'remover') {

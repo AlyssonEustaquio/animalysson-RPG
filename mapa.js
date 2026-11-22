@@ -5009,7 +5009,8 @@ function runPlayerAction(action) {
     playerActionResult('Ações do personagem', ['Não há um personagem jogador neste mapa.']); return;
   }
   var profile = playerActionProfile(player), range = playerVisionRadius(player);
-  if (action === 'perception') runPlayerPerception(player, profile, range);
+  if (action === 'menu') openPlayerActionMenu();
+  else if (action === 'perception') runPlayerPerception(player, profile, range);
   else if (action === 'investigation') runPlayerInvestigation(player, profile, range);
   else if (action === 'attack') runPlayerAttack(player, profile, range);
   else if (action === 'combat') openCombatMenu();
@@ -5017,6 +5018,46 @@ function runPlayerAction(action) {
   else if (action === 'tools') runPlayerDoorCheck(player, profile, range, true);
   else if (action === 'interact') runPlayerInteract(player, range);
   else if (action === 'skill') runPlayerSkill(player, profile);
+}
+
+function openPlayerActionMenu() {
+  var player = currentPlayer();
+  if (!player || player.tipo !== 'player') {
+    playerActionResult('Ações do personagem', ['Não há um personagem jogador neste mapa.']);
+    return;
+  }
+  var profile = playerActionProfile(player), range = playerVisionRadius(player);
+  var dlg = combatDialog('Ações do personagem', 'Escolha uma ação. As opções estão agrupadas por finalidade.', 500);
+  if (!dlg) return;
+  function group(title) {
+    var box = document.createElement('section');
+    box.className = 'mp-action-group';
+    var heading = document.createElement('h4');
+    heading.textContent = title;
+    box.appendChild(heading);
+    var grid = document.createElement('div');
+    grid.className = 'mp-cb-grid';
+    box.appendChild(grid);
+    dlg.panel.appendChild(box);
+    return grid;
+  }
+  function add(grid, label, hint, fn) {
+    grid.appendChild(combatButton(label, function () { combatClose(dlg); fn(); }, { title: hint || '' }));
+  }
+  var combat = group('Combate');
+  add(combat, '⚔ Ataque', 'Escolher arma e alvo', function () { runPlayerAttack(player, profile, range); });
+  if (!combatActive()) add(combat, '🛡 Ações avançadas de combate', 'Magias, ações, bônus, movimento e descanso', function () { openCombatMenu(); });
+  var explore = group('Exploração');
+  add(explore, '👁 Percepção', 'Observar o ambiente e procurar detalhes visíveis', function () { runPlayerPerception(player, profile, range); });
+  add(explore, '🔎 Investigação', 'Examinar objetos, pistas e mecanismos próximos', function () { runPlayerInvestigation(player, profile, range); });
+  var interact = group('Obstáculos e interação');
+  add(interact, '💪 Atletismo', 'Forçar portas e obstáculos', function () { runPlayerDoorCheck(player, profile, range, false); });
+  add(interact, '🗝 Ferramentas', 'Abrir fechaduras e mecanismos com ferramentas', function () { runPlayerDoorCheck(player, profile, range, true); });
+  add(interact, '✋ Interagir', 'Acionar mecanismos secretos já descobertos', function () { runPlayerInteract(player, range); });
+  var footer = document.createElement('div');
+  footer.className = 'mp-portal-dialog-actions';
+  footer.appendChild(combatButton('Fechar', function () { combatClose(dlg); }, { primary: true }));
+  dlg.panel.appendChild(footer);
 }
 
 var combatEngine = null, combatHudSig = '', combatToastTimer = null, combatCostPending = 1;
@@ -5115,13 +5156,30 @@ function combatDefaultAttack(token) {
   return combatUnarmedAttack(token);
 }
 function combatMtsTxt(cells) { return (Math.round(cells * 15) / 10).toString().replace('.', ','); }
-function combatToggleMount(actor) {
+function combatToggleMount(actor, preferredId) {
   var C = getCombat();
   if (!C || !invAtivo()) return;
+  actor = actor && actor.tipo === 'player' ? actor : currentPlayer();
+  if (!actor || actor.tipo !== 'player') { combatToast('Não há personagem jogador vinculado ao inventário.'); return; }
   var live = C.ativo();
   var montarias = S.inventario.itens.filter(function (i) { return i.tipo === 'montaria'; });
   var atual = montarias.find(function (m) { return m.montado; });
+  var escolhido = preferredId ? montarias.find(function (m) { return m.id === preferredId; }) : null;
   var custo = Math.max(1, Math.floor(invOwnSpeedCells() / 2));
+  if (!montarias.length) return;
+  if (live && C.atual() !== actor) {
+    combatToast('A montaria só pode ser montada ou desmontada no turno do personagem.');
+    return;
+  }
+  var alvoParaMontar = escolhido || (!atual && montarias.length === 1 ? montarias[0] : null);
+  if (live && alvoParaMontar && !alvoParaMontar.montado && alvoParaMontar.controle === 'independente') {
+    combatShowLog('Montaria', ['O modo Independente ainda não possui iniciativa própria integrada ao motor de combate. Durante o combate, selecione o modo Controlada para usar as ações de montaria no turno do personagem.']);
+    return;
+  }
+  if (atual && escolhido && atual.id !== escolhido.id) {
+    combatShowLog('Montaria', ['Desmonte da montaria atual antes de montar outra. Cada mudança custa metade do deslocamento e só pode ocorrer uma vez por turno.']);
+    return;
+  }
   function aplicar(alvo) {
     if (live) {
       if (!actor.eco) C.preparar(actor);
@@ -5135,20 +5193,27 @@ function combatToggleMount(actor) {
     if (!r.ok) { combatShowLog('Montaria', [r.erro]); return; }
     var linhas = [actor.nome + (r.montado ? ' monta em ' : ' desmonta de ') + r.nome + (live ? '. Custo: ' + combatMtsTxt(custo) + ' m de movimento.' : '.')];
     if (r.montado && r.deslocamento) linhas.push('Montado, o deslocamento passa a ser ' + String(r.deslocamento).replace('.', ',') + ' m.');
-    if (r.montado) linhas.push(r.controle === 'independente' ? 'Montaria independente: age na própria iniciativa.' : 'Montaria controlada: age na sua iniciativa e só pode usar Disparada, Desengajar ou Esquivar.');
+    if (r.montado) linhas.push('Montaria controlada: age na sua iniciativa e só pode usar Disparada, Desengajar ou Esquivar.');
     if (live) { actor.eco.mov += custo; actor.eco.montou = true; actor.eco.montariaAgiu = false; C.registrar(linhas); }
     combatShowLog('Montaria', linhas);
     combatRefreshUi();
   }
   if (atual) { aplicar(atual); return; }
+  if (escolhido) { aplicar(escolhido); return; }
   if (montarias.length === 1) { aplicar(montarias[0]); return; }
-  var dlg = combatDialog('Montar', 'Escolha a montaria.', 420);
+  var dlg = combatDialog('Montar', 'Escolha a montaria controlada. Montar custa metade do deslocamento.', 420);
   if (!dlg) return;
-  var sel = combatField(dlg.panel, 'Montaria', combatSelect(montarias.map(function (m) { return [m.id, m.nome]; }), montarias[0].id));
+  var opcoesMontaria = montarias.filter(function (m) { return m.controle !== 'independente'; });
+  if (!opcoesMontaria.length) {
+    combatClose(dlg);
+    combatShowLog('Montaria', ['Todas as montarias estão no modo Independente, que ainda não possui turno autônomo integrado. Altere o controle fora do combate.']);
+    return;
+  }
+  var sel = combatField(dlg.panel, 'Montaria', combatSelect(opcoesMontaria.map(function (m) { return [m.id, m.nome]; }), opcoesMontaria[0].id));
   var actions = document.createElement('div'); actions.className = 'mp-portal-dialog-actions';
   actions.appendChild(combatButton('Cancelar', function () { combatClose(dlg); }));
   actions.appendChild(combatButton('Montar', function () {
-    var alvo = montarias.find(function (m) { return m.id === sel.value; });
+    var alvo = opcoesMontaria.find(function (m) { return m.id === sel.value; });
     combatClose(dlg);
     if (alvo) aplicar(alvo);
   }, { primary: true }));
@@ -5157,8 +5222,12 @@ function combatToggleMount(actor) {
 function combatMountAction(actor, tipo) {
   var C = getCombat();
   if (!C || !invAtivo() || !C.ativo()) return;
+  if (!actor || actor.tipo !== 'player' || C.atual() !== actor) {
+    combatToast('A montaria só pode agir durante o turno do personagem que a está conduzindo.');
+    return;
+  }
   var m = S.inventario.itens.find(function (i) { return i.tipo === 'montaria' && i.montado; });
-  if (!m) return;
+  if (!m || m.controle === 'independente') return;
   if (!actor.eco) C.preparar(actor);
   if (actor.eco.montariaAgiu) { combatShowLog('Montaria', ['A montaria já agiu neste turno.']); return; }
   var linha;
@@ -5291,7 +5360,27 @@ function combatClose(dlg) { if (dlg) closePortalDialog(dlg.overlay); }
 function combatRefreshUi() {
   combatHudSig = '';
   renderCombatHud();
+  updateCombatPanelUi();
   save(); draw();
+}
+function updateCombatPanelUi() {
+  if (!R) return;
+  var panel = R.querySelector('#mp-combat-panel');
+  if (!panel) return;
+  var C = getCombat();
+  var active = !!(C && !isHexMap() && combatState().ativo);
+  var start = panel.querySelector('[data-cb="start"]');
+  var stop = panel.querySelector('[data-cb="stop"]');
+  var status = panel.querySelector('#mp-cb-panel-status');
+  if (start) { start.hidden = active; start.disabled = !C || isHexMap(); }
+  if (stop) stop.hidden = !active;
+  if (status) {
+    if (!C || isHexMap()) status.textContent = 'O combate está disponível em mapas de masmorra com grade quadrada.';
+    else if (active) {
+      var current = C.atual();
+      status.textContent = 'Rodada ' + combatState().rodada + ' · turno de ' + (current ? current.nome : '—') + '. Ações e fim do turno ficam na barra do mapa.';
+    } else status.textContent = 'Nenhum combate ativo. Posicione os participantes e inicie quando estiver pronto.';
+  }
 }
 function combatShowLog(title, lines, onClose, extraButtons) {
   var dlg = combatDialog(title, '', 620);
@@ -5605,9 +5694,18 @@ function openCombatMenu() {
   var info = C.pontosDeVidaTexto(actor) + ' · CA ' + (actor.ca || st.ca) + (live ? ' · Movimento ' + (Math.round(C.movimentoRestante(actor) * 15) / 10).toString().replace('.', ',') + ' m' : '');
   var dlg = combatDialog('⚔ ' + actor.nome, info, 560);
   if (!dlg) return;
-  function section(title) {
-    var h = document.createElement('div'); h.className = 'mp-cb-section'; h.textContent = title; dlg.panel.appendChild(h);
-    var g = document.createElement('div'); g.className = 'mp-cb-grid'; dlg.panel.appendChild(g);
+  function section(title, openByDefault) {
+    var details = document.createElement('details');
+    details.className = 'mp-cb-accordion';
+    details.open = !!openByDefault;
+    var h = document.createElement('summary');
+    h.className = 'mp-cb-section';
+    h.textContent = title;
+    details.appendChild(h);
+    var g = document.createElement('div');
+    g.className = 'mp-cb-grid';
+    details.appendChild(g);
+    dlg.panel.appendChild(details);
     return g;
   }
   function add(grid, label, kind, run, extraOff, hint) {
@@ -5620,7 +5718,7 @@ function openCombatMenu() {
     }
     grid.appendChild(combatButton(label, function () { combatClose(dlg); run(); }, { disabled: off, title: off ? why : hint }));
   }
-  var acao = section('Ação');
+  var acao = section('Ação principal', true);
   add(acao, 'Atacar', 'acao', function () { combatAttackFlow(actor); }, null, 'Ataque com arma, golpe desarmado ou ação do monstro');
   if (st.tipo === 'monstro') {
     st.ataques.filter(function (a) { return a.tipo === 'salva'; }).forEach(function (a) {
@@ -5683,7 +5781,7 @@ function openCombatMenu() {
   add(acao, 'Estabilizar', 'acao', function () {
     combatPickToken('Estabilizar', 'Criatura adjacente com 0 PV (Medicina CD 10).', combatNearby(actor, function (t) { return t.hp <= 0 && C.dist(actor, t) <= 1; }), function (t) { combatFinishAction(C.estabilizar(actor, t)); });
   });
-  var bonus = section('Ação bônus');
+  var bonus = section('Ação bônus', false);
   add(bonus, 'Ataque com arma Leve', 'bonus', function () { combatLightExtra(actor, 'bonus'); }, st.tipo !== 'pc' ? 'Somente personagens.' : (live && !actor.eco.leve ? 'Ataque antes com uma arma corpo a corpo Leve.' : null));
   if (st.classe === 'Monge') add(bonus, 'Artes Marciais (golpe desarmado)', 'bonus', function () { combatPerformAttack(actor, combatUnarmedAttack(actor), 'bonus'); }, live && !actor.eco.atacou ? 'Use a ação Atacar antes.' : null);
   C.caracteristicas(actor).forEach(function (car) {
@@ -5695,7 +5793,7 @@ function openCombatMenu() {
       } else combatFinishAction(C.usarCaracteristica(actor, car.id));
     }, null, car.desc);
   });
-  var mov = section('Movimento e interação');
+  var mov = section('Movimento e interação', false);
   add(mov, 'Levantar-se', null, function () { var l = C.levantar(actor); C.registrar(l); combatFinishAction({ linhas: l }); }, C.tem(actor, 'caido') ? null : 'Não está caído.');
   if (st.tipo === 'pc' && invAtivo()) {
     var invMontarias = S.inventario.itens.filter(function (i) { return i.tipo === 'montaria'; });
@@ -5716,7 +5814,7 @@ function openCombatMenu() {
   });
   add(mov, 'Ação preparada (reação)', 'reacao', function () { combatFinishAction(C.usarPreparada(actor)); }, actor.preparada ? null : 'Nenhuma ação preparada.');
   if (!live && st.tipo === 'pc') {
-    var rest = section('Descanso');
+    var rest = section('Descanso', false);
     add(rest, 'Descanso curto', null, function () {
       var l = C.descansarCurto(actor, st.dadoVida || 8); combatFinishAction({ linhas: l });
     });
@@ -5846,6 +5944,7 @@ function renderCombatHud() {
   if (!C || isHexMap() || !combatState().ativo) {
     if (hud.dataset.on !== '0') { hud.dataset.on = '0'; hud.style.display = 'none'; }
     combatHudSig = '';
+    updateCombatPanelUi();
     return;
   }
   var cur = C.atual();
@@ -5862,7 +5961,8 @@ function renderCombatHud() {
     eco = '<span class="mp-cb-eco' + (cur.eco.acao ? ' ok' : '') + '">Ação</span><span class="mp-cb-eco' + (cur.eco.bonus ? ' ok' : '') + '">Bônus</span><span class="mp-cb-eco' + (cur.eco.reacao ? ' ok' : '') + '">Reação</span><span class="mp-cb-eco ok">Mov ' + (Math.round(C.movimentoRestante(cur) * 15) / 10).toString().replace('.', ',') + ' m</span>';
   }
   hud.innerHTML = '<div class="mp-cb-order">' + order + '</div><div class="mp-cb-row"><strong>Rodada ' + combatState().rodada + ' · ' + esc(cur ? cur.nome : '—') + '</strong>' + eco + '</div>' +
-    '<div class="mp-cb-row"><button type="button" data-cb="menu">⚔ Ações</button><button type="button" data-cb="end">⏭ Fim do turno</button><button type="button" data-cb="log">📜</button></div>';
+    '<div class="mp-cb-row"><button type="button" data-cb="menu">⚔ Ações</button><button type="button" data-cb="end">⏭ Fim do turno</button><button type="button" data-cb="log">📜 Registro</button></div>';
+  updateCombatPanelUi();
 }
 
 function combatDrawOverlay(t, c, r) {
@@ -6033,7 +6133,17 @@ function setMode(nextMode) {
 function mapInventoryOptions() {
   var base = typeof INV_OPTS !== 'undefined' ? INV_OPTS : { chaveLocal: 'animalysson-inventario' };
   var options = Object.assign({}, base, { modo: appMode });
-  options.aoMudar = function () { if (R && cv) draw(); };
+  options.aoMudar = function () { if (R && cv) { draw(); updateCombatPanelUi(); } };
+  options.aoAlternarMontaria = function (montaria) {
+    if (!combatActive()) return false;
+    combatToggleMount(currentPlayer(), montaria && montaria.id);
+    return true;
+  };
+  options.aoAlternarControleMontaria = function () {
+    if (!combatActive()) return false;
+    combatToast('O controle da montaria só pode ser alterado fora do combate.');
+    return true;
+  };
   return options;
 }
 
@@ -6224,18 +6334,12 @@ function mountNow(el) {
     '<section class="mp-inventory-entry" aria-label="Inventário"><button type="button" id="mp-open-inventory">🎒 Abrir inventário</button></section>' +
     '<section id="mp-player-actions" class="mp-player-actions" aria-label="Ações do personagem">' +
     '<div class="mp-player-actions-head"><strong>🎲 Ações do personagem</strong><button type="button" id="mp-action-config" title="Configurar bônus e dano">⚙</button></div>' +
-    '<div class="mp-player-actions-buttons">' +
-    '<button type="button" data-player-action="perception">👁 Percepção</button>' +
-    '<button type="button" data-player-action="investigation">🔎 Investigação</button>' +
-    '<button type="button" data-player-action="attack">⚔ Ataque</button>' +
-    '<button type="button" data-player-action="athletics">💪 Atletismo</button>' +
-    '<button type="button" data-player-action="tools">🗝 Ferramentas</button>' +
-    '<button type="button" data-player-action="interact">✋ Interagir</button>' +
-    '<button type="button" data-player-action="combat">⚔ Menu de combate</button>' +
-    '</div><div class="mp-player-skill-row"><select id="mp-player-skill" aria-label="Escolher perícia">' + playerSkillOptionsHtml() + '</select><button type="button" data-player-action="skill">🎲 Rolar perícia</button></div>' +
-    '<small>Percepção, Investigação e ações de interação verificam automaticamente os objetos na visão. Ataque abre a escolha de arma e de alvo seguindo as regras de combate do D&D 2024.</small></section>' +
-    '<section id="mp-combat-panel" class="mp-player-actions mp-combat-panel" aria-label="Combate"><div class="mp-player-actions-head"><strong>⚔ Combate (D&D 2024)</strong></div><div class="mp-player-actions-buttons">' +
-    '<button type="button" data-cb="start">▶ Iniciar combate</button><button type="button" data-cb="menu">⚔ Ações</button><button type="button" data-cb="end">⏭ Fim do turno</button><button type="button" data-cb="stop">⏹ Encerrar</button><button type="button" data-cb="log">📜 Registro</button></div>' +
+    '<div class="mp-player-actions-buttons"><button type="button" data-player-action="menu">🎲 Abrir ações e interações</button></div>' +
+    '<div class="mp-player-skill-row"><select id="mp-player-skill" aria-label="Escolher perícia">' + playerSkillOptionsHtml() + '</select><button type="button" data-player-action="skill">Rolar teste</button></div>' +
+    '<small>Ataque, exploração e interação ficam reunidos em Ações. Use o teste de perícia para rolagens diretas.</small></section>' +
+    '<section id="mp-combat-panel" class="mp-player-actions mp-combat-panel" aria-label="Combate"><div class="mp-player-actions-head"><strong>⚔ Controle do combate</strong></div>' +
+    '<div id="mp-cb-panel-status" class="mp-cb-panel-status">Verificando disponibilidade do combate…</div><div class="mp-player-actions-buttons">' +
+    '<button type="button" data-cb="start">▶ Iniciar combate</button><button type="button" data-cb="stop" hidden>⏹ Encerrar combate</button></div>' +
     '<label class="mp-editor-only mp-cb-ai"><input type="checkbox" id="mp-cb-ai" checked> IA automática dos monstros</label></section>' +
     '<div class="mp-bar">' +
     '<div class="mp-map-selector"><select id="mp-map" class="mp-title" title="Trocar de mapa">' + mapOptions() + '</select>' +
@@ -6302,7 +6406,7 @@ function mountNow(el) {
     '#mp-root .mp-player-actions-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;font-size:13px;}' +
     '#mp-root .mp-player-actions-head button{width:30px;height:28px;border:1px solid rgba(255,255,255,.2);border-radius:6px;background:#30343e;color:#fff;cursor:pointer;}' +
     '#mp-root .mp-player-actions-buttons{display:flex;flex-wrap:wrap;gap:6px;}' +
-    '#mp-root .mp-player-actions-buttons button{flex:1 1 calc(50% - 6px);min-width:0;min-height:34px;padding:7px 9px;border:1px solid rgba(100,180,220,.35);border-radius:7px;background:rgba(38,92,125,.28);color:#eef8ff;font-size:12px;font-weight:600;cursor:pointer;}' +
+    '#mp-root .mp-player-actions-buttons button{flex:1 1 100%;min-width:0;min-height:38px;padding:8px 10px;border:1px solid rgba(100,180,220,.35);border-radius:7px;background:rgba(38,92,125,.28);color:#eef8ff;font-size:13px;font-weight:700;cursor:pointer;}' +
     '#mp-root .mp-player-actions-buttons button:hover{background:rgba(48,125,165,.48);}' +
     '#mp-root .mp-player-actions small{display:block;margin-top:7px;color:#aab5c4;font-size:10px;line-height:1.35;}' +
     '#mp-root .mp-player-skill-row{display:flex;gap:6px;margin-top:7px;}' +
@@ -6380,7 +6484,17 @@ function mountNow(el) {
     '#mp-root .mp-cb-btn.off{opacity:.38;cursor:not-allowed;}' +
     '#mp-root .mp-cb-list{display:flex;flex-direction:column;gap:6px;margin:8px 0;}' +
     '#mp-root .mp-cb-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:4px 0 10px;}' +
-    '#mp-root .mp-cb-section{margin-top:8px;font-size:12px;font-weight:700;color:#ffd54f;text-transform:uppercase;letter-spacing:.04em;}' +
+    '#mp-root .mp-cb-accordion{margin:8px 0;border:1px solid rgba(255,255,255,.13);border-radius:8px;background:rgba(255,255,255,.025);overflow:hidden;}' +
+    '#mp-root .mp-cb-accordion>summary{list-style:none;cursor:pointer;padding:10px 12px;margin:0;background:rgba(255,255,255,.045);}' +
+    '#mp-root .mp-cb-accordion>summary::-webkit-details-marker{display:none;}' +
+    '#mp-root .mp-cb-accordion>summary:after{content:"＋";float:right;color:#ffd54f;font-weight:700;}' +
+    '#mp-root .mp-cb-accordion[open]>summary:after{content:"−";}' +
+    '#mp-root .mp-cb-accordion>.mp-cb-grid{padding:8px;margin:0;}' +
+    '#mp-root .mp-cb-section{font-size:12px;font-weight:700;color:#ffd54f;text-transform:uppercase;letter-spacing:.04em;}' +
+    '#mp-root .mp-action-group{margin:8px 0 12px;padding-bottom:4px;border-bottom:1px solid rgba(255,255,255,.12);}' +
+    '#mp-root .mp-action-group h4{margin:4px 0 6px;color:#ffd54f;font-size:11px;text-transform:uppercase;letter-spacing:.05em;}' +
+    '#mp-root .mp-cb-panel-status{padding:8px 10px;margin:0 0 8px;border-radius:7px;background:rgba(255,255,255,.045);color:#c5cbd6;font-size:12px;line-height:1.4;}' +
+    '#mp-root .mp-combat-panel button[hidden]{display:none !important;}' +
     '#mp-root .mp-cb-log{display:flex;flex-direction:column;gap:5px;max-height:55vh;overflow:auto;margin:8px 0 12px;font-size:13px;line-height:1.45;}' +
     '#mp-root .mp-cb-log div{padding:6px 9px;border:1px solid rgba(255,255,255,.12);border-radius:7px;background:rgba(255,255,255,.045);white-space:pre-wrap;}' +
     '#mp-root .mp-cb-log .mp-cb-head{border-color:rgba(255,213,79,.5);color:#ffe082;font-weight:700;}' +
