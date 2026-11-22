@@ -1604,8 +1604,9 @@ function formatMapDistance(a, b) {
     var steps = Math.max(0, route.length - 1), miles = steps * hexMetrics().miles;
     var label = steps.toLocaleString('pt-BR') + (steps === 1 ? ' hexágono' : ' hexágonos') + ' · ' +
       miles.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) + ' milhas';
-    if (travelSpeedMilesPerDay > 0) {
-      var days = miles / travelSpeedMilesPerDay;
+    var travelEff = travelSpeedEffective();
+    if (travelEff > 0) {
+      var days = miles / travelEff;
       label += ' · ' + days.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) + (days === 1 ? ' dia' : ' dias');
     }
     return label;
@@ -4441,6 +4442,11 @@ function getCharacterSheetActionData() {
     var speedText = (typeof SP !== 'undefined' && Array.isArray(SP) && S.sp != null && SP[S.sp]) ? String(SP[S.sp].mov || '9 m') : '9 m';
     var speedMatch = speedText.match(/(\d+(?:[.,]\d+)?)/);
     var speedMeters = speedMatch ? Number(speedMatch[1].replace(',', '.')) : 9;
+    if (typeof invStats === 'function') {
+      var invSt = invStats();
+      if (invSt && invSt.montaria && Number(invSt.montaria.deslocamento) > 0) speedMeters = Number(invSt.montaria.deslocamento);
+      else if (invSt && invSt.penalidadeDeslocamento) speedMeters = Math.max(1.5, speedMeters - invSt.penalidadeDeslocamento);
+    }
     var speedCells = Math.max(1, Math.round((speedMeters || 9) / 1.5));
     var toolsBonus = abilityMods.DES + (bg && normalizeRpgText(bg.i || '') === 'ferramentas de ladrao' ? proficiencyBonus : 0);
     return {
@@ -4499,14 +4505,65 @@ function playerActionProfile(player) {
 function normalizeRpgText(value) {
   return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
+function invAtivo() {
+  try {
+    return typeof Inventario !== 'undefined' && typeof invCtx === 'function' && typeof S !== 'undefined' && !!S &&
+      !!S.inventario && Array.isArray(S.inventario.itens) && S.inventario.itens.length > 0;
+  } catch (e) { return false; }
+}
+function invWeaponAsCatalog(it) {
+  var items = window.ITEMS || [];
+  var base = (it.itemId && items.find(function (x) { return x.id === it.itemId; })) ||
+    items.find(function (x) { return x.categoria === 'Armas' && x.n === it.nome; }) || null;
+  var out = base ? Object.assign({}, base) : {
+    n: it.nome, categoria: 'Armas', tipo: it.distancia ? 'Arma à distância' : 'Arma corpo a corpo',
+    uso: it.distancia ? 'Ataque à distância' : 'Ataque corpo a corpo', dano: it.dano || '1d4 contundente',
+    propriedades: it.propriedades || '', maestria: it.maestria || ''
+  };
+  out.id = 'inv:' + it.id;
+  out._inv = it;
+  return out;
+}
+function invEquippedWeapons() {
+  if (!invAtivo()) return [];
+  var list = S.inventario.itens.filter(function (i) { return i.tipo === 'arma' && i.equipado && !i.local; });
+  list.sort(function (a, b) { return (a.equipado === 'maoPrincipal' ? 0 : 1) - (b.equipado === 'maoPrincipal' ? 0 : 1); });
+  return list.map(invWeaponAsCatalog);
+}
+function invWeaponProf(weapon, sheet) {
+  if (!sheet) return 0;
+  if (!weapon || !weapon._inv || typeof Inventario === 'undefined') return sheet.proficiencyBonus;
+  return Inventario.proficienteArma(sheet.className, weapon._inv) ? sheet.proficiencyBonus : 0;
+}
+function invWeaponMagic(weapon) { return weapon && weapon._inv ? Number(weapon._inv.bonus) || 0 : 0; }
+function invOwnSpeedCells() {
+  var m = (typeof invMov === 'function' ? invMov() : 9) || 9;
+  var st = typeof invStats === 'function' ? invStats() : null;
+  if (st && st.penalidadeDeslocamento) m = Math.max(0, m - st.penalidadeDeslocamento);
+  return Math.max(1, Math.round(m / 1.5));
+}
+function travelSpeedEffective() {
+  if (travelSpeedMilesPerDay > 0) return travelSpeedMilesPerDay;
+  if (typeof S === 'undefined' || !S || S.cls == null || typeof invMov !== 'function') return 0;
+  var meters = invMov() || 9;
+  var st = typeof invStats === 'function' ? invStats() : null;
+  if (st && st.montaria && Number(st.montaria.deslocamento) > 0) meters = Number(st.montaria.deslocamento);
+  else if (st && st.penalidadeDeslocamento) meters = Math.max(1.5, meters - st.penalidadeDeslocamento);
+  return Math.round(24 * meters / 9 * 10) / 10;
+}
 function playerWeaponCatalog() {
   var items = window.ITEMS || window.EQUIPMENT || [];
   return Array.isArray(items) ? items.filter(function (item) {
     return item && item.categoria === 'Armas' && item.dano && !item.magico;
   }) : [];
 }
+function playerCurrentWeapon(profile) {
+  if (invAtivo()) { var eq = invEquippedWeapons(); return eq.length ? eq[0] : null; }
+  return playerWeaponById(profile.weaponId);
+}
 function playerWeaponById(id) {
   if (!id) return null;
+  if (String(id).indexOf('inv:') === 0) return invEquippedWeapons().find(function (w) { return w.id === id; }) || null;
   return playerWeaponCatalog().find(function (item) { return item.id === id; }) || null;
 }
 function playerWeaponRange(item, weaponMode) {
@@ -4531,7 +4588,7 @@ function playerWeaponDamageDice(item) {
 }
 function resolvePlayerAttackData(player, profile) {
   var sheet = getCharacterSheetActionData();
-  var weapon = playerWeaponById(profile.weaponId);
+  var weapon = playerCurrentWeapon(profile);
   if (!weapon) return {
     weapon: null, sheet: sheet,
     bonus: sheet ? sheet.meleeAttack : (Number(profile.attack) || 0),
@@ -4547,11 +4604,12 @@ function resolvePlayerAttackData(player, profile) {
   if (finesse && sheet) ability = sheet.abilityMods.DES > sheet.abilityMods.FOR ? 'DES' : 'FOR';
   var abilityMod = sheet ? sheet.abilityMods[ability] : 0;
   var dice = playerWeaponDamageDice(weapon) || '1d4';
-  var derivedDamage = dice + (abilityMod > 0 ? '+' + abilityMod : abilityMod < 0 ? String(abilityMod) : '');
+  var derivedMod = abilityMod + invWeaponMagic(weapon);
+  var derivedDamage = dice + (derivedMod > 0 ? '+' + derivedMod : derivedMod < 0 ? String(derivedMod) : '');
   var customRange = Number(profile.attackRange) > 0;
   return {
     weapon: weapon, sheet: sheet,
-    bonus: sheet ? abilityMod + sheet.proficiencyBonus : Number(profile.attack) || 0,
+    bonus: sheet ? abilityMod + invWeaponProf(weapon, sheet) + invWeaponMagic(weapon) : Number(profile.attack) || 0,
     damage: String(profile.damageOverride || derivedDamage),
     normalRange: customRange ? Number(profile.attackRange) : range.normal,
     maxRange: customRange ? Number(profile.attackRange) : range.max,
@@ -4639,7 +4697,7 @@ function configurePlayerActionProfile(player) {
   var profile = playerActionProfile(player);
   var sheet = getCharacterSheetActionData();
   var dlg = createPortalDialog('Configurar ações do personagem', sheet
-    ? 'Os bônus de perícias e atributos vêm diretamente da ficha aberta no site. Escolha a arma usada no Ataque; dano e alcance serão calculados pelo catálogo.'
+    ? 'Os bônus de perícias e atributos vêm diretamente da ficha aberta no site.' + (invAtivo() ? ' Arma, armadura, escudo e velocidade vêm do Inventário (itens equipados e montaria).' : ' Escolha a arma usada no Ataque; dano e alcance serão calculados pelo catálogo.')
     : 'Preencha os bônus manuais ou conclua a ficha do personagem para sincronizar os atributos e perícias automaticamente.');
   if (!dlg) return;
   dlg.panel.style.width = 'min(560px,100%)';
@@ -4926,6 +4984,7 @@ function combatArmorCatalog() {
   return Array.isArray(items) ? items.filter(function (item) { return item && item.categoria === 'Armaduras' && !item.magico; }) : [];
 }
 function combatArmorClassFor(sheet, profile) {
+  if (invAtivo()) return Inventario.calcularCA(S.inventario.itens, invCtx());
   var des = sheet.abilityMods.DES, base = 10 + des;
   var armor = profile.armorId ? combatItemById(profile.armorId) : null;
   var shield = !!profile.shield;
@@ -4968,13 +5027,13 @@ function combatWeaponAttack(token, weapon, mode, opts) {
   var ability = range.ranged ? 'DES' : 'FOR';
   if (finesse && sheet) ability = sheet.abilityMods.DES > sheet.abilityMods.FOR ? 'DES' : 'FOR';
   var abilityMod = sheet ? sheet.abilityMods[ability] : 0;
-  var bonus = sheet ? abilityMod + sheet.proficiencyBonus : Number(profile.attack) || 0;
+  var bonus = sheet ? abilityMod + invWeaponProf(weapon, sheet) + invWeaponMagic(weapon) : Number(profile.attack) || 0;
   var dice = playerWeaponDamageDice(weapon) || '1d4';
   if (opts.duasMaos) {
     var versatile = String(weapon.propriedades || '').match(/Vers[áa]til\s*\((\d*d\d+)\)/i);
     if (versatile) dice = versatile[1];
   }
-  var damageMod = opts.semMod ? Math.min(0, abilityMod) : abilityMod;
+  var damageMod = (opts.semMod ? Math.min(0, abilityMod) : abilityMod) + invWeaponMagic(weapon);
   var damage = dice + (damageMod > 0 ? '+' + damageMod : damageMod < 0 ? String(damageMod) : '');
   if (profile.damageOverride && !opts.semMod && profile.weaponId === weapon.id) damage = profile.damageOverride;
   var type = RPGCombate.util.canonicoDano(weapon.dano) || 'contundente';
@@ -4998,9 +5057,73 @@ function combatUnarmedAttack(token) {
 }
 function combatDefaultAttack(token) {
   var profile = playerActionProfile(token);
-  var weapon = playerWeaponById(profile.weaponId);
+  var weapon = playerCurrentWeapon(profile);
   if (weapon) return combatWeaponAttack(token, weapon, profile.weaponMode === 'thrown' ? 'thrown' : 'melee', {});
   return combatUnarmedAttack(token);
+}
+function combatMtsTxt(cells) { return (Math.round(cells * 15) / 10).toString().replace('.', ','); }
+function combatToggleMount(actor) {
+  var C = getCombat();
+  if (!C || !invAtivo()) return;
+  var live = C.ativo();
+  var montarias = S.inventario.itens.filter(function (i) { return i.tipo === 'montaria'; });
+  var atual = montarias.find(function (m) { return m.montado; });
+  var custo = Math.max(1, Math.floor(invOwnSpeedCells() / 2));
+  function aplicar(alvo) {
+    if (live) {
+      if (!actor.eco) C.preparar(actor);
+      if (actor.eco.montou) { combatShowLog('Montaria', ['Você já montou ou desmontou neste turno.']); return; }
+      if (C.movimentoRestante(actor) < custo) {
+        combatShowLog('Montaria', ['Movimento insuficiente: montar ou desmontar custa metade do seu deslocamento (' + combatMtsTxt(custo) + ' m).']);
+        return;
+      }
+    }
+    var r = Inventario.alternarMontaria(S, alvo.id, invCtx(), INV_OPTS);
+    if (!r.ok) { combatShowLog('Montaria', [r.erro]); return; }
+    var linhas = [actor.nome + (r.montado ? ' monta em ' : ' desmonta de ') + r.nome + (live ? '. Custo: ' + combatMtsTxt(custo) + ' m de movimento.' : '.')];
+    if (r.montado && r.deslocamento) linhas.push('Montado, o deslocamento passa a ser ' + String(r.deslocamento).replace('.', ',') + ' m.');
+    if (r.montado) linhas.push(r.controle === 'independente' ? 'Montaria independente: age na própria iniciativa.' : 'Montaria controlada: age na sua iniciativa e só pode usar Disparada, Desengajar ou Esquivar.');
+    if (live) { actor.eco.mov += custo; actor.eco.montou = true; actor.eco.montariaAgiu = false; C.registrar(linhas); }
+    combatShowLog('Montaria', linhas);
+    combatRefreshUi();
+  }
+  if (atual) { aplicar(atual); return; }
+  if (montarias.length === 1) { aplicar(montarias[0]); return; }
+  var dlg = combatDialog('Montar', 'Escolha a montaria.', 420);
+  if (!dlg) return;
+  var sel = combatField(dlg.panel, 'Montaria', combatSelect(montarias.map(function (m) { return [m.id, m.nome]; }), montarias[0].id));
+  var actions = document.createElement('div'); actions.className = 'mp-portal-dialog-actions';
+  actions.appendChild(combatButton('Cancelar', function () { combatClose(dlg); }));
+  actions.appendChild(combatButton('Montar', function () {
+    var alvo = montarias.find(function (m) { return m.id === sel.value; });
+    combatClose(dlg);
+    if (alvo) aplicar(alvo);
+  }, { primary: true }));
+  dlg.panel.appendChild(actions);
+}
+function combatMountAction(actor, tipo) {
+  var C = getCombat();
+  if (!C || !invAtivo() || !C.ativo()) return;
+  var m = S.inventario.itens.find(function (i) { return i.tipo === 'montaria' && i.montado; });
+  if (!m) return;
+  if (!actor.eco) C.preparar(actor);
+  if (actor.eco.montariaAgiu) { combatShowLog('Montaria', ['A montaria já agiu neste turno.']); return; }
+  var linha;
+  if (tipo === 'disparada') {
+    var extra = Math.max(0, C._interno.veloc(actor));
+    actor.eco.movExtra += extra;
+    linha = actor.nome + ' e ' + m.nome + ' usam Disparada: ' + combatMtsTxt(extra) + ' m adicionais de movimento neste turno.';
+  } else if (tipo === 'desengajar') {
+    actor.eco.desengajou = true;
+    linha = m.nome + ' usa Desengajar: o movimento não provoca ataques de oportunidade neste turno.';
+  } else {
+    actor.eco.esquiva = true;
+    linha = m.nome + ' usa Esquivar: ataques contra o conjunto têm desvantagem até o início do próximo turno.';
+  }
+  actor.eco.montariaAgiu = true;
+  C.registrar([linha]);
+  combatShowLog('Montaria', [linha]);
+  combatRefreshUi();
 }
 function combatTokenCenter(t) {
   var sq = Math.max(1, t.raio || 1);
@@ -5074,6 +5197,9 @@ function getCombat() {
     caminho: combatPath,
     empurrar: combatPush,
     armaduraDesvantagem: function (t) {
+      if (t.tipo === 'player' && invAtivo()) {
+        return S.inventario.itens.some(function (i) { return i.tipo === 'armadura' && i.equipado === 'corpo' && !i.local && i.furtividade; });
+      }
       var profile = t.tipo === 'player' ? playerActionProfile(t) : null;
       var armor = profile && profile.armorId ? combatItemById(profile.armorId) : null;
       return !!(armor && armor.furtividade === 'Desvantagem');
@@ -5201,10 +5327,11 @@ function combatWeaponDialog(actor, title, filter, semMod, onChosen) {
   var dlg = combatDialog(title, 'Escolha a arma do ataque.', 480);
   if (!dlg) return;
   var profile = playerActionProfile(actor);
-  var weapons = playerWeaponCatalog().filter(filter || function () { return true; });
+  var weapons = (invAtivo() ? invEquippedWeapons() : playerWeaponCatalog()).filter(filter || function () { return true; });
   var options = weapons.map(function (w) { return [w.id, w.n + ' — ' + w.dano + (w.maestria ? ' · ' + w.maestria : '')]; });
   if (!filter) options.unshift(['', 'Golpe desarmado']);
-  var sel = combatField(dlg.panel, 'Arma', combatSelect(options, profile.weaponId && options.some(function (o) { return o[0] === profile.weaponId; }) ? profile.weaponId : options[0][0]));
+  if (!options.length) { combatClose(dlg); combatShowLog(title, ['Nenhuma arma equipada serve para este ataque.']); return; }
+  var sel = combatField(dlg.panel, 'Arma', combatSelect(options, invAtivo() && weapons.length ? weapons[0].id : (profile.weaponId && options.some(function (o) { return o[0] === profile.weaponId; }) ? profile.weaponId : options[0][0])));
   var mode = combatField(dlg.panel, 'Modo', combatSelect([['melee', 'Corpo a corpo / padrão'], ['thrown', 'Arremessar']], 'melee'));
   var two = combatField(dlg.panel, 'Empunhadura versátil', combatSelect([['0', 'Uma mão'], ['1', 'Duas mãos']], '0'));
   var actions = document.createElement('div'); actions.className = 'mp-portal-dialog-actions';
@@ -5517,6 +5644,20 @@ function openCombatMenu() {
   });
   var mov = section('Movimento e interação');
   add(mov, 'Levantar-se', null, function () { var l = C.levantar(actor); C.registrar(l); combatFinishAction({ linhas: l }); }, C.tem(actor, 'caido') ? null : 'Não está caído.');
+  if (st.tipo === 'pc' && invAtivo()) {
+    var invMontarias = S.inventario.itens.filter(function (i) { return i.tipo === 'montaria'; });
+    var invAtual = invMontarias.find(function (m) { return m.montado; });
+    if (invMontarias.length) {
+      add(mov, invAtual ? 'Desmontar' : 'Montar', null, function () { combatToggleMount(actor); },
+        live && actor.eco && actor.eco.montou ? 'Já montou ou desmontou neste turno.' : null, 'Custa metade do seu deslocamento.');
+      if (invAtual && invAtual.controle !== 'independente') {
+        var montOff = !live ? 'Disponível durante o combate.' : (actor.eco && actor.eco.montariaAgiu ? 'A montaria já agiu neste turno.' : null);
+        add(mov, 'Montaria: Disparada', null, function () { combatMountAction(actor, 'disparada'); }, montOff, 'A montaria controlada age na sua iniciativa.');
+        add(mov, 'Montaria: Desengajar', null, function () { combatMountAction(actor, 'desengajar'); }, montOff, 'A montaria controlada age na sua iniciativa.');
+        add(mov, 'Montaria: Esquivar', null, function () { combatMountAction(actor, 'esquivar'); }, montOff, 'A montaria controlada age na sua iniciativa.');
+      }
+    }
+  }
   add(mov, 'Interagir com objeto', null, function () {
     combatTextDialog('Interagir com objeto', 'Qual objeto? (1 interação gratuita por turno)', '', function (v) { combatFinishAction(C.interagirObjeto(actor, v)); });
   });

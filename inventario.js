@@ -245,6 +245,7 @@
       busca: norm(nome + ' ' + (x.en || '')),
       grupo: x.categoria ? String(x.categoria) : ''
     };
+    if (x.id) item.itemId = x.id;
     if (x.raridade) item.raridade = x.raridade;
     const bonus = bonusDe(nome, x.en);
 
@@ -444,6 +445,28 @@
       av.push({ nivel: 'alerta', texto: 'Sem proficiência com ' + i.nome + ': não soma o bônus de proficiência no ataque.' });
     });
     return av;
+  };
+
+  const erroMontar = (m, c) =>
+    m.tamanho && tamIdx(m.tamanho) < tamanhoDe(c.tamanho) + 1
+      ? `${m.nome} é ${tamNome(m.tamanho)}. A montaria precisa ser pelo menos um tamanho maior que o seu e ter anatomia adequada.`
+      : '';
+
+  const alternarMontaria = (p, id, ctx, o) => {
+    const inv = carregarLocal(p, o);
+    const m = inv.itens.find((i) => i.id === id && i.tipo === 'montaria');
+    if (!m) return { ok: false, erro: 'Montaria não encontrada.' };
+    if (m.montado) {
+      m.montado = false;
+      persistir(p, o);
+      return { ok: true, montado: false, nome: m.nome };
+    }
+    const erro = erroMontar(m, ctx || {});
+    if (erro) return { ok: false, erro };
+    inv.itens.forEach((i) => { if (i.tipo === 'montaria') i.montado = false; });
+    m.montado = true;
+    persistir(p, o);
+    return { ok: true, montado: true, nome: m.nome, deslocamento: m.deslocamento, controle: m.controle };
   };
 
   const montadoDe = (p) => {
@@ -1233,6 +1256,7 @@
     calcularCA,
     calcularAtaque,
     estatisticas,
+    alternarMontaria,
     montadoDe,
     proficienteArma,
     slots: SLOTS,
