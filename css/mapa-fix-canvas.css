@@ -1,82 +1,107 @@
-/*
- * Animalysson RPG — ajuste de área do mapa.
- * O módulo de montagem define .mp-wrap com height:auto, enquanto .mp-main
- * é posicionado de forma absoluta. Isso pode deixar a área do canvas sem
- * altura útil. Este arquivo redefine o espaço do mapa para 95% da janela.
- */
-html body #mp-root {
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  box-sizing: border-box !important;
-}
-
-html body #mp-root .mp-wrap {
-  display: block !important;
-  position: relative !important;
-  box-sizing: border-box !important;
-  width: 95% !important;
-  max-width: 95% !important;
-  height: 95vh !important;
-  max-height: 95vh !important;
-  min-height: min(480px, 95vh) !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  flex: 1 1 auto !important;
-  overflow: hidden !important;
-}
-
-html body #mp-root .mp-main {
-  position: absolute !important;
-  top: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  left: 0 !important;
+/* Animalysson RPG — mapa sem corte: mantém a coluna lateral e o canvas lado a lado. */
+html body #app.view-maps,
+html body #app.view-maps #mp-root {
+  display: flex !important;
+  flex: 1 1 0 !important;
+  flex-direction: column !important;
   width: 100% !important;
   height: 100% !important;
+  max-height: 100% !important;
   min-width: 0 !important;
   min-height: 0 !important;
   overflow: hidden !important;
 }
 
-html body #mp-root #mp-cv {
+html body #app.view-maps #mp-root .mp {
+  display: flex !important;
+  flex: 1 1 0 !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Barra de ferramentas ocupa apenas a altura do seu conteúdo. */
+html body #app.view-maps #mp-root .mp-bar {
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+}
+
+/* Área do mapa usa o espaço restante, sem ultrapassar a área disponível. */
+html body #app.view-maps #mp-root .mp-wrap,
+html body #app.view-maps #mp-root .vtt-wrap {
+  display: flex !important;
+  flex: 1 1 0 !important;
+  width: 95% !important;
+  max-width: 95% !important;
+  height: auto !important;
+  max-height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 auto !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+/* A barra lateral dos mapas tem rolagem própria. */
+html body #app.view-maps #mp-root .mp-side {
+  flex: 0 0 250px !important;
+  width: 250px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+html body #app.view-maps #mp-root .vtt-wrap .mp-side {
+  flex-basis: 260px !important;
+  width: 260px !important;
+}
+
+/* Canvas permanece visível e não cria rolagem global. */
+html body #app.view-maps #mp-root .mp-main {
+  position: relative !important;
+  flex: 1 1 0 !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+html body #app.view-maps #mp-root #mp-cv {
   display: block !important;
   width: 100% !important;
   height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
 }
 
-@supports (height: 95dvh) {
-  html body #mp-root .mp-wrap {
-    height: 95dvh !important;
-    max-height: 95dvh !important;
-    min-height: min(480px, 95dvh) !important;
+@media (max-width: 800px) {
+  html body #app.view-maps #mp-root .mp-wrap,
+  html body #app.view-maps #mp-root .vtt-wrap {
+    flex-direction: column-reverse !important;
   }
-}
 
-@media (max-width: 700px) {
-  html body #mp-root .mp-wrap {
-    width: 95% !important;
-    max-width: 95% !important;
-    height: 95vh !important;
-    max-height: 95vh !important;
-    min-height: min(360px, 95vh) !important;
+  html body #app.view-maps #mp-root .mp-main {
+    flex: 1 1 58% !important;
+    width: 100% !important;
+    min-height: 0 !important;
   }
-}
 
-@media (max-width: 700px) and (supports: (height: 95dvh)) {
-  html body #mp-root .mp-wrap {
-    height: 95dvh !important;
-    max-height: 95dvh !important;
-    min-height: min(360px, 95dvh) !important;
-  }
-}
-
-@supports (height: 95dvh) {
-  @media (max-width: 700px) {
-    html body #mp-root .mp-wrap {
-      height: 95dvh !important;
-      max-height: 95dvh !important;
-      min-height: min(360px, 95dvh) !important;
-    }
+  html body #app.view-maps #mp-root .mp-side,
+  html body #app.view-maps #mp-root .vtt-wrap .mp-side {
+    flex: 0 1 42% !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    border-right: 0 !important;
+    border-top: 1px solid var(--line) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
   }
 }

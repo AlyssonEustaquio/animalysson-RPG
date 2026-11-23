@@ -1,0 +1,153 @@
+/* Animalysson RPG — impede a rolagem global e dá rolagem independente às colunas. */
+html,
+body {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+
+html body .shell {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-height: 0 !important;
+  max-height: 100vh !important;
+  max-height: 100dvh !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+html body .shell > main {
+  display: flex !important;
+  flex: 1 1 0 !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+html body #app {
+  display: flex !important;
+  flex: 1 1 0 !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Itens e monstros: cabeçalho/filtros ficam parados; cada coluna rola sozinha. */
+html body #app.view-items,
+html body #app.view-monsters {
+  overflow: hidden !important;
+}
+
+html body #app.view-items .catalog-head,
+html body #app.view-items .catalog-tools,
+html body #app.view-items .catalog-count,
+html body #app.view-monsters .catalog-head,
+html body #app.view-monsters .catalog-tools,
+html body #app.view-monsters .catalog-count {
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+}
+
+html body #app.view-items .catalog-layout,
+html body #app.view-monsters .catalog-layout,
+html body #app.view-monsters .monster-layout,
+html body #app.view-monsters .monsters-layout,
+html body #app.view-monsters .bestiary-layout {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 34%) !important;
+  flex: 1 1 0 !important;
+  width: 100% !important;
+  height: auto !important;
+  max-height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  align-items: stretch !important;
+}
+
+html body #app.view-items .catalog-layout > section,
+html body #app.view-items .catalog-layout > aside,
+html body #app.view-monsters .catalog-layout > section,
+html body #app.view-monsters .catalog-layout > aside,
+html body #app.view-monsters .monster-layout > section,
+html body #app.view-monsters .monster-layout > aside,
+html body #app.view-monsters .monsters-layout > section,
+html body #app.view-monsters .monsters-layout > aside,
+html body #app.view-monsters .bestiary-layout > section,
+html body #app.view-monsters .bestiary-layout > aside {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+html body #app.view-items .catalog-grid,
+html body #app.view-monsters .catalog-grid {
+  min-width: 0 !important;
+  min-height: min-content !important;
+  align-content: start !important;
+}
+
+html body #app.view-items .catalog-detail,
+html body #app.view-monsters .catalog-detail {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+/* Monstros: aplica a rolagem às duas colunas caso a marcação use IDs próprios. */
+html body #app.view-monsters :is(#monsters-grid, #monster-grid, #monsters-list, #monster-list) {
+  min-height: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+}
+
+html body #app.view-monsters :is(#monster-detail, #monsters-detail) {
+  min-height: 0 !important;
+  max-height: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+}
+
+/* No celular as colunas ficam empilhadas, mas continuam com scroll separado. */
+@media (max-width: 700px) {
+  html body #app.view-items .catalog-layout,
+  html body #app.view-monsters .catalog-layout,
+  html body #app.view-monsters .monster-layout,
+  html body #app.view-monsters .monsters-layout,
+  html body #app.view-monsters .bestiary-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) minmax(130px, 38%) !important;
+  }
+}
+
+/* Nenhuma página com rolagem no body: páginas simples rolam dentro do app. */
+html body #app:not(.view-items):not(.view-monsters):not(.view-maps) {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+}
