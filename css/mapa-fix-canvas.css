@@ -1,13 +1,29 @@
 /*
- * Correção de layout do canvas dos mapas do Animalysson RPG.
- * O módulo 21-montagem.js injeta #mp-root .mp-wrap { height:auto !important }
- * enquanto .mp-main é absoluto. A combinação pode deixar o wrapper sem altura.
- * A especificidade maior deste seletor mantém uma altura real para o canvas.
+ * Animalysson RPG — ajuste de área do mapa.
+ * O módulo de montagem define .mp-wrap com height:auto, enquanto .mp-main
+ * é posicionado de forma absoluta. Isso pode deixar a área do canvas sem
+ * altura útil. Este arquivo redefine o espaço do mapa para 95% da janela.
  */
+html body #mp-root {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
 html body #mp-root .mp-wrap {
-  height: calc(100vh - 180px) !important;
-  min-height: 480px !important;
+  display: block !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+  width: 95% !important;
+  max-width: 95% !important;
+  height: 95vh !important;
+  max-height: 95vh !important;
+  min-height: min(480px, 95vh) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
   flex: 1 1 auto !important;
+  overflow: hidden !important;
 }
 
 html body #mp-root .mp-main {
@@ -16,8 +32,8 @@ html body #mp-root .mp-main {
   right: 0 !important;
   bottom: 0 !important;
   left: 0 !important;
-  width: auto !important;
-  height: auto !important;
+  width: 100% !important;
+  height: 100% !important;
   min-width: 0 !important;
   min-height: 0 !important;
   overflow: hidden !important;
@@ -29,9 +45,38 @@ html body #mp-root #mp-cv {
   height: 100% !important;
 }
 
+@supports (height: 95dvh) {
+  html body #mp-root .mp-wrap {
+    height: 95dvh !important;
+    max-height: 95dvh !important;
+    min-height: min(480px, 95dvh) !important;
+  }
+}
+
 @media (max-width: 700px) {
   html body #mp-root .mp-wrap {
-    height: calc(100dvh - 150px) !important;
-    min-height: 360px !important;
+    width: 95% !important;
+    max-width: 95% !important;
+    height: 95vh !important;
+    max-height: 95vh !important;
+    min-height: min(360px, 95vh) !important;
+  }
+}
+
+@media (max-width: 700px) and (supports: (height: 95dvh)) {
+  html body #mp-root .mp-wrap {
+    height: 95dvh !important;
+    max-height: 95dvh !important;
+    min-height: min(360px, 95dvh) !important;
+  }
+}
+
+@supports (height: 95dvh) {
+  @media (max-width: 700px) {
+    html body #mp-root .mp-wrap {
+      height: 95dvh !important;
+      max-height: 95dvh !important;
+      min-height: min(360px, 95dvh) !important;
+    }
   }
 }

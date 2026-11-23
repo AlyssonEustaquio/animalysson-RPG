@@ -12,20 +12,21 @@
 <link rel="stylesheet" href="css/ficha.css">
 <link rel="stylesheet" href="css/catalogo.css">
 <link rel="stylesheet" href="css/mapa.css">
-<link rel="stylesheet" href="css/mapa-fix-canvas.css?v=20261122">
+<link rel="stylesheet" href="css/mapa-fix-canvas.css?v=20261123-95">
+<link rel="stylesheet" href="css/seletor-topo.css?v=20261123-top5">
 </head>
 <body>
 <div class="shell">
 <div class="rail-slot collapsed" id="rail-slot">
 <nav class="section-tabs" aria-label="Seções principais">
-  <button type="button" class="rail-toggle" id="rail-toggle" onclick="toggleRail()" aria-expanded="false" aria-controls="rail-items" aria-label="Mostrar seções" title="Mostrar seções">&lt;</button>
-  <div class="rail-items" id="rail-items">
-  <button id="tab-character" class="section-tab on" onclick="switchView('character')"><span>♙</span> Personagem</button>
-  <button id="tab-items" class="section-tab" onclick="switchView('items')"><span>⚒</span> Itens</button>
-  <button id="tab-inventory" class="section-tab" onclick="switchView('inventory')"><span>⛁</span> Inventário</button>
-  <button id="tab-monsters" class="section-tab" onclick="switchView('monsters')"><span>♜</span> Monstros</button>
-  <button id="tab-maps" class="section-tab" onclick="switchView('maps')"><span>▦</span> Mapas</button>
-  </div>
+<button type="button" class="rail-toggle" id="rail-toggle" onclick="toggleRail()" aria-expanded="false" aria-controls="rail-items" aria-label="Mostrar seções" title="Mostrar seções">&lt;</button>
+<div class="rail-items" id="rail-items">
+<button id="tab-character" class="section-tab on" onclick="switchView('character')"><span>♙</span> Personagem</button>
+<button id="tab-items" class="section-tab" onclick="switchView('items')"><span>⚒</span> Itens</button>
+<button id="tab-inventory" class="section-tab" onclick="switchView('inventory')"><span>🎒</span> Inventário</button>
+<button id="tab-monsters" class="section-tab" onclick="switchView('monsters')"><span>♜</span> Monstros</button>
+<button id="tab-maps" class="section-tab" onclick="switchView('maps')"><span>▦</span> Mapas</button>
+</div>
 </nav>
 </div>
 <main>
