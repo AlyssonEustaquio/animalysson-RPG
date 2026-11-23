@@ -107,3 +107,39 @@
   box-shadow: none !important;
   background: transparent !important;
 }
+
+
+/* Dado fora de TODO o conjunto do campo Nome do personagem, no canto direito. */
+#app .ficha-nome-dado-externo {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: .15rem 0 .35rem !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+#app .ficha-nome-dado-externo > .sortear-personagem-icone {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: static !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 1.25rem !important;
+  line-height: 1 !important;
+}

@@ -74,39 +74,52 @@
 
   function posicionarDadoAoLadoDoNome(root) {
     if (!root || !root.querySelector) return;
-
-    var app = root.querySelector ? root.querySelector("#app") : null;
-    var botao = root.querySelector("#app .sortear-personagem-icone");
+    var app = root.querySelector('#app');
+    var botao = root.querySelector('#app .sortear-personagem-icone');
     var titulo = encontrarTituloNome(root);
     if (!app || !botao || !titulo) return;
 
-    // O título pode ser um span dentro de um <label>. Nesse caso, o dado
-    // precisa ficar fora do label, como irmão do rótulo, e não dentro do texto.
-    var ancora = titulo.closest ? (titulo.closest("label") || titulo) : titulo;
-    if (!app.contains(ancora) || ancora === botao) {
-      ancora = titulo;
+    // Localiza o bloco completo do campo (rótulo + editor), não apenas o texto.
+    // O dado será um irmão FORA desse bloco, alinhado ao extremo direito.
+    var campo = titulo;
+    var atual = titulo.parentElement;
+    while (atual && atual !== app) {
+      var temEditor = !!atual.querySelector('input,textarea,[contenteditable="true"],select');
+      var classe = String(atual.className || '');
+      var pareceCampo = /(field|form-group|input-group|char-name|nome-personagem|ficha-field|stat-row)/i.test(classe);
+      if (temEditor || pareceCampo) {
+        campo = atual;
+        // Continua subindo enquanto o pai também é claramente o agrupador do campo.
+        var pai = atual.parentElement;
+        if (!pai || pai === app) break;
+        var paiTemEditor = !!pai.querySelector('input,textarea,[contenteditable="true"],select');
+        var paiClasse = String(pai.className || '');
+        if (paiTemEditor && /(field|form-group|input-group|char-name|nome-personagem|ficha-field)/i.test(paiClasse)) {
+          campo = pai;
+          atual = pai;
+          continue;
+        }
+        break;
+      }
+      campo = atual;
+      atual = atual.parentElement;
     }
 
-    // Reutiliza a linha se ela já tiver sido criada numa execução anterior.
-    var linha = botao.closest ? botao.closest(".ficha-nome-titulo-row") : null;
-    if (!linha && ancora.closest) linha = ancora.closest(".ficha-nome-titulo-row");
-
+    // Cria uma linha de ação separada depois do campo inteiro. O dado nunca
+    // será filho do label, do input ou do wrapper que contém o texto editável.
+    var linha = botao.closest('.ficha-nome-dado-externo');
     if (!linha) {
-      linha = document.createElement("div");
-      linha.className = "ficha-nome-titulo-row";
-      ancora.parentNode.insertBefore(linha, ancora);
-      linha.appendChild(ancora);
-    } else if (ancora.parentNode !== linha) {
-      linha.insertBefore(ancora, linha.firstChild);
+      linha = document.createElement('div');
+      linha.className = 'ficha-nome-dado-externo';
     }
-
-    // Garante a ordem DOM: [rótulo do nome] [dado], como elementos irmãos.
-    if (botao.parentNode !== linha || linha.lastElementChild !== botao) {
-      linha.appendChild(botao);
+    if (campo.parentNode && linha.parentNode !== campo.parentNode) {
+      campo.parentNode.insertBefore(linha, campo.nextSibling);
     }
+    if (botao.parentNode !== linha) linha.appendChild(botao);
 
-    ancora.classList.add("ficha-nome-personagem-titulo");
-    titulo.classList.add("ficha-nome-personagem-texto");
+    // Se o código original colocou o botão dentro do campo, removê-lo dali
+    // ocorre ao movê-lo para a linha externa acima.
+    titulo.classList.add('ficha-nome-personagem-texto');
   }
 
   function removerCaixaExterna(root) {
