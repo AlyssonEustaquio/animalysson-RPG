@@ -57,9 +57,64 @@
     });
   }
 
+  function encontrarTituloNome(root) {
+    if (!root || !root.querySelectorAll) return null;
+    var seletor = "h1,h2,h3,h4,h5,h6,label,strong,b,span,div,p";
+    var prioridade = { H1: 0, H2: 1, H3: 2, H4: 3, H5: 4, H6: 5, LABEL: 6, STRONG: 7, B: 8, SPAN: 9, DIV: 10, P: 11 };
+    return Array.from(root.querySelectorAll(seletor))
+      .filter(function (el) {
+        var texto = normalizar(el.textContent).replace(/[：:]$/, "");
+        return texto.toLowerCase() === "nome do personagem" && el.getClientRects().length > 0;
+      })
+      .sort(function (a, b) {
+        return (Object.prototype.hasOwnProperty.call(prioridade, a.tagName) ? prioridade[a.tagName] : 99) -
+          (Object.prototype.hasOwnProperty.call(prioridade, b.tagName) ? prioridade[b.tagName] : 99);
+      })[0] || null;
+  }
+
+  function posicionarDadoAoLadoDoNome(root) {
+    if (!root || !root.querySelector) return;
+    var botao = root.querySelector("#app .sortear-personagem-icone");
+    var titulo = encontrarTituloNome(root);
+    if (!botao || !titulo) return;
+
+    var linha = titulo.closest ? titulo.closest(".ficha-nome-titulo-row") : null;
+    if (!linha) {
+      linha = document.createElement("span");
+      linha.className = "ficha-nome-titulo-row";
+      titulo.parentNode.insertBefore(linha, titulo);
+      linha.appendChild(titulo);
+    }
+    if (botao.parentNode !== linha) linha.appendChild(botao);
+    titulo.classList.add("ficha-nome-personagem-titulo");
+  }
+
+  function removerCaixaExterna(root) {
+    var titulo = encontrarTituloNome(root);
+    if (!titulo) return;
+
+    var candidatos = [];
+    var atual = titulo.parentElement;
+    while (atual && atual !== root && atual.id !== "app") {
+      var estilo = window.getComputedStyle(atual);
+      var borda = ["Top", "Right", "Bottom", "Left"].some(function (lado) {
+        return parseFloat(estilo["border" + lado + "Width"]) > 0 && estilo["border" + lado + "Style"] !== "none";
+      });
+      var sombra = estilo.boxShadow && estilo.boxShadow !== "none";
+      var classeDeCaixa = /(^|[-_ ])(card|panel|sheet|ficha)([-_ ]|$)/i.test(String(atual.className || ""));
+      if (borda || sombra || classeDeCaixa) candidatos.push(atual);
+      atual = atual.parentElement;
+    }
+
+    // Retira somente a moldura externa mais abrangente, preservando os campos internos.
+    if (candidatos.length) candidatos[candidatos.length - 1].classList.add("ficha-sem-caixa-externa");
+  }
+
   function aplicar() {
     removerAjuda(document.body);
     transformarBotao(document.body);
+    posicionarDadoAoLadoDoNome(document.body);
+    removerCaixaExterna(document.getElementById("app"));
   }
 
   aplicar();
