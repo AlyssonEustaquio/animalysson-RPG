@@ -1,0 +1,44 @@
+/* Ajustes visuais da ficha: botão de sorteio apenas como ícone. */
+#app .sortear-personagem-icone {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  margin: 0 0.2rem !important;
+  padding: 0.1rem 0.25rem !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: inherit !important;
+  font: inherit !important;
+  font-size: 1.2em !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+  cursor: pointer !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+}
+
+#app .sortear-personagem-icone::before,
+#app .sortear-personagem-icone::after {
+  content: none !important;
+  display: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+#app .sortear-personagem-icone:focus:not(:focus-visible) {
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+#app .sortear-personagem-icone:focus-visible {
+  outline: 2px solid currentColor !important;
+  outline-offset: 3px !important;
+}
