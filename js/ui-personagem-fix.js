@@ -74,19 +74,39 @@
 
   function posicionarDadoAoLadoDoNome(root) {
     if (!root || !root.querySelector) return;
+
+    var app = root.querySelector ? root.querySelector("#app") : null;
     var botao = root.querySelector("#app .sortear-personagem-icone");
     var titulo = encontrarTituloNome(root);
-    if (!botao || !titulo) return;
+    if (!app || !botao || !titulo) return;
 
-    var linha = titulo.closest ? titulo.closest(".ficha-nome-titulo-row") : null;
-    if (!linha) {
-      linha = document.createElement("span");
-      linha.className = "ficha-nome-titulo-row";
-      titulo.parentNode.insertBefore(linha, titulo);
-      linha.appendChild(titulo);
+    // O título pode ser um span dentro de um <label>. Nesse caso, o dado
+    // precisa ficar fora do label, como irmão do rótulo, e não dentro do texto.
+    var ancora = titulo.closest ? (titulo.closest("label") || titulo) : titulo;
+    if (!app.contains(ancora) || ancora === botao) {
+      ancora = titulo;
     }
-    if (botao.parentNode !== linha) linha.appendChild(botao);
-    titulo.classList.add("ficha-nome-personagem-titulo");
+
+    // Reutiliza a linha se ela já tiver sido criada numa execução anterior.
+    var linha = botao.closest ? botao.closest(".ficha-nome-titulo-row") : null;
+    if (!linha && ancora.closest) linha = ancora.closest(".ficha-nome-titulo-row");
+
+    if (!linha) {
+      linha = document.createElement("div");
+      linha.className = "ficha-nome-titulo-row";
+      ancora.parentNode.insertBefore(linha, ancora);
+      linha.appendChild(ancora);
+    } else if (ancora.parentNode !== linha) {
+      linha.insertBefore(ancora, linha.firstChild);
+    }
+
+    // Garante a ordem DOM: [rótulo do nome] [dado], como elementos irmãos.
+    if (botao.parentNode !== linha || linha.lastElementChild !== botao) {
+      linha.appendChild(botao);
+    }
+
+    ancora.classList.add("ficha-nome-personagem-titulo");
+    titulo.classList.add("ficha-nome-personagem-texto");
   }
 
   function removerCaixaExterna(root) {

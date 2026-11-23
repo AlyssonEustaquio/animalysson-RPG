@@ -60,11 +60,12 @@
 
 /* Cabeçalho do nome com o dado imediatamente à direita. */
 #app .ficha-nome-titulo-row {
-  display: inline-flex !important;
+  display: flex !important;
+  flex-flow: row nowrap !important;
   align-items: center !important;
   justify-content: flex-start !important;
   gap: .35rem !important;
-  width: auto !important;
+  width: max-content !important;
   max-width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -75,10 +76,27 @@
   vertical-align: middle !important;
 }
 
-#app .ficha-nome-personagem-titulo {
+/* O título/rótulo e o dado são irmãos diretos na linha. */
+#app .ficha-nome-titulo-row > .ficha-nome-personagem-titulo {
   display: inline-block !important;
+  position: static !important;
+  flex: 0 1 auto !important;
+  width: auto !important;
+  max-width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#app .ficha-nome-titulo-row > .sortear-personagem-icone {
+  display: inline-flex !important;
+  position: static !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
 }
 
 /* Remove apenas o contorno do cartão externo da ficha; os campos ficam intactos. */
