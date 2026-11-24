@@ -180,6 +180,7 @@
       c.doneAt = 0;
       c.grace = 0;
       c.alpha = 1;
+      c.lockedFace = false;
       if (!(c.hold > Date.now()) && c.h <= 0 && Math.hypot(c.vx, c.vy) < 80) {
         calmar(c);
         c.vz = 260;
@@ -190,7 +191,8 @@
       kind: kind, shape: shape, R: R, delay: delay, x: sx, y: sy, h: 90, vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed, vz: rnd(600, 850),
       q: qrandom(), w: [rnd(-1, 1) * 22, rnd(-1, 1) * 22, rnd(-1, 1) * 22], qt: qt, age: 0, done: false, doneAt: 0, alpha: 1,
       color: color, hold: holdAte > Date.now() ? holdAte : 0, calm: false, pend: false, grace: 0, born: Date.now(),
-      phase: holdAte > Date.now() ? "shake" : "", shakeEnd: shakeAte, shakeStart: Date.now(), st: 0, swt: 0, ph: rnd(0, Math.PI * 2), dir: 1
+      phase: holdAte > Date.now() ? "shake" : "", shakeEnd: shakeAte, shakeStart: Date.now(), st: 0, swt: 0, ph: rnd(0, Math.PI * 2), dir: 1,
+      lockedFace: false
     };
     dice.push(nd);
     if (nd.phase === "shake" && shakeAte > Date.now()) {
@@ -350,19 +352,38 @@
       var rate = d.h === 0 ? (1 - Math.min(1, speed / 350)) * 5 : 0;
       if (!d.pend && remS < 1) rate = Math.max(rate, (1 - Math.max(0, remS)) * 6);
       if (rate > 0) {
+        // Durante o hold: se ainda não capturou face física, usa a face de baixo
+        if (!d.lockedFace) {
+          d.qt = faceMaisBaixa(d);
+        }
         d.q = qnlerp(d.q, d.pend ? faceMaisBaixa(d) : d.qt, 1 - Math.exp(-dt * rate));
         d.w = mul(d.w, Math.exp(-dt * rate * 0.5));
       }
-    } else if (!holding && !d.pend && d.h === 0 && speed < 110) {
-      d.q = qnlerp(d.q, d.qt, 1 - Math.exp(-dt * 5));
-      d.w = mul(d.w, Math.exp(-4 * dt));
+    } else if (!holding && !d.pend && d.h === 0 && speed < 140) {
+      // Quando o dado fica lento no chão, captura a face física uma única vez
+      // (em vez de forçar a face pré-escolhida e "virar" no final)
+      if (!d.lockedFace) {
+        d.qt = faceMaisBaixa(d);
+        d.lockedFace = true;
+      }
+      d.q = qnlerp(d.q, d.qt, 1 - Math.exp(-dt * 4.2));
+      d.w = mul(d.w, Math.exp(-3.8 * dt));
     }
-    if (!d.done && !holding && !d.pend && d.h === 0 && speed < 8 && Math.abs(dot4(d.q, d.qt)) > 0.9995) {
+    if (!d.done && !holding && !d.pend && d.h === 0 && speed < 8 && d.lockedFace && Math.abs(dot4(d.q, d.qt)) > 0.999) {
       d.done = true;
       d.doneAt = 0;
       d.q = d.qt;
     }
-    if (!d.done && !holding && !d.pend && d.age > 9) { d.done = true; d.q = d.qt; d.vx = d.vy = 0; d.h = 0; }
+    if (!d.done && !holding && !d.pend && d.age > 9) {
+      if (!d.lockedFace) {
+        d.qt = faceMaisBaixa(d);
+        d.lockedFace = true;
+      }
+      d.done = true;
+      d.q = d.qt;
+      d.vx = d.vy = 0;
+      d.h = 0;
+    }
     if (d.done) {
       d.doneAt += dt;
       if (d.doneAt > 2.6) d.alpha = Math.max(0, 1 - (d.doneAt - 2.6) / 0.6);
@@ -469,9 +490,11 @@
       if (dice.length >= MAX_DICE && !dice.some(function (x) { return x.pend; })) return;
       ensure();
       var now = performance.now();
-      if (now - burstAt > 60) burstN = 0;
+      // Espaçamento maior entre dados consecutivos para parecer etapas
+      // (ataque → dano, ou vários d20 de iniciativa um atrás do outro)
+      if (now - burstAt > 900) burstN = 0;
       burstAt = now;
-      var delay = burstN * 0.06;
+      var delay = burstN * 0.55;
       burstN++;
       if (sides === 100) {
         var tens = value >= 100 ? "00" : String(Math.floor(value / 10) * 10 || "00");
