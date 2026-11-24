@@ -34,9 +34,13 @@
   function qFromTo(a, b) {
     var d = dot(a, b);
     if (d > 0.999999) return [0, 0, 0, 1];
-    if (d < -0.999999) return [1, 0, 0, 0];
-    var ax = cross(a, b);
-    return qnorm([ax[0], ax[1], ax[2], 1 + d]);
+    if (d < -0.999999) {
+      var perp = Math.abs(a[0]) < 0.9 ? [1, 0, 0] : [0, 1, 0];
+      var ax = norm(cross(a, perp));
+      return [ax[0], ax[1], ax[2], 0];
+    }
+    var ax2 = cross(a, b);
+    return qnorm([ax2[0], ax2[1], ax2[2], 1 + d]);
   }
   function qnlerp(a, b, k) {
     if (dot4(a, b) < 0) b = [-b[0], -b[1], -b[2], -b[3]];
@@ -150,6 +154,13 @@
     H = window.innerHeight;
     cv.width = Math.round(W * dpr);
     cv.height = Math.round(H * dpr);
+    for (var i = 0; i < dice.length; i++) {
+      var d = dice[i];
+      if (d.R) {
+        d.x = Math.min(Math.max(d.x, d.R), W - d.R);
+        d.y = Math.min(Math.max(d.y, d.R), H - d.R);
+      }
+    }
   }
 
   function spawn(kind, value, delay) {
@@ -180,6 +191,7 @@
       c.doneAt = 0;
       c.grace = 0;
       c.alpha = 1;
+      c.age = 0;
       c.lockedFace = false;
       if (!(c.hold > Date.now()) && c.h <= 0 && Math.hypot(c.vx, c.vy) < 80) {
         calmar(c);
@@ -288,6 +300,13 @@
       d.hold = 0;
       holding = false;
       d.age = 0;
+      if (d.pend) {
+        d.pend = false;
+        d.done = true;
+        d.doneAt = 2.6;
+        d.alpha = 0;
+        return;
+      }
       if (d.phase === "shake") lancarDoCopo(d);
       if (d.pend) d.grace = 0.3;
     }
@@ -392,7 +411,7 @@
   }
 
   function render(d) {
-    if (d.delay > 0) return;
+    if (d.delay > 0 || d.alpha <= 0) return;
     var S = d.R * (1 + d.h / 500), px = d.x, py = d.y - d.h * 0.4;
     cx.save();
     cx.globalAlpha = d.alpha;
@@ -471,11 +490,10 @@
       if (dice.length >= MAX_DICE && !dice.some(function (x) { return x.pend; })) return;
       ensure();
       var now = performance.now();
-      // Espaçamento maior entre dados consecutivos para parecer etapas
-      // (ataque → dano, ou vários d20 de iniciativa um atrás do outro)
-      if (now - burstAt > 900) burstN = 0;
+      var gap = now - burstAt;
+      if (gap > 900 || burstN >= 4) burstN = 0;
       burstAt = now;
-      var delay = burstN * 0.55;
+      var delay = Math.min(burstN * 0.55, 1.65);
       burstN++;
       if (sides === 100) {
         var tens = value >= 100 ? "00" : String(Math.floor(value / 10) * 10 || "00");
@@ -485,6 +503,13 @@
       } else if ([4, 6, 8, 10, 12, 20].indexOf(sides) >= 0) {
         spawn(sides, sides === 10 && value === 10 ? "0" : String(value), delay);
       } else return;
+      for (var i = 0; i < dice.length; i++) {
+        if (dice[i].pend && !(dice[i].hold > Date.now())) {
+          dice[i].pend = false;
+          dice[i].alpha = 0;
+        }
+      }
+      dice = dice.filter(function (d) { return d.alpha > 0; });
       start();
     } catch (e) {
     }
@@ -503,6 +528,7 @@
       var list = dice.filter(function (d) {
         return d.pend || d.hold > now || now - d.born < 1500;
       });
+      if (list.length > 1) list = [list[list.length - 1]];
       list.forEach(function (d) {
         d.hold = until;
         d.calm = false;
@@ -511,7 +537,7 @@
         d.grace = 0;
         d.alpha = 1;
         d.delay = 0;
-        if (d.phase === "throw") return;
+        d.pend = true;
         d.phase = "shake";
         d.shakeEnd = shakeAte;
         if (d.ax === undefined) ancoraBaixo(d);
