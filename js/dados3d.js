@@ -218,22 +218,37 @@
     return qmul(qFromTo(rot(d.q, best.n), [0, 0, 1]), d.q);
   }
 
+  function ancoraBaixo(d) {
+    d.tax = rnd(W * 0.1, W * 0.9);
+    d.tay = H - d.R * rnd(1.4, 2.8);
+    d.tt = rnd(0.9, 1.6);
+  }
+
   function agitar(d, dt) {
     d.st += dt;
     if (d.ax === undefined) {
-      d.ax = W * 0.5 + rnd(-1, 1) * d.R * 3;
-      d.ay = H * 0.7 + rnd(-1, 1) * d.R;
+      ancoraBaixo(d);
+      d.ax = d.tax;
+      d.ay = d.tay;
     }
+    d.tt -= dt;
+    if (d.tt <= 0) ancoraBaixo(d);
+    var e = Math.min(1, dt * 1.6);
+    d.ax += (d.tax - d.ax) * e;
+    d.ay += (d.tay - d.ay) * e;
     var t = d.st;
-    d.x = d.ax + Math.sin(t * 37) * d.R * 0.35 + Math.sin(t * 23 + 1.3) * d.R * 0.2;
-    d.y = d.ay + Math.sin(t * 31 + 0.7) * d.R * 0.25 + Math.sin(t * 19) * d.R * 0.15;
-    d.h = 40 + Math.abs(Math.sin(t * 27)) * d.R * 1.4;
+    d.x = d.ax + Math.sin(t * 8) * d.R * 0.5 + Math.sin(t * 5.1 + 1.3) * d.R * 0.3;
+    d.y = d.ay + Math.sin(t * 6.3 + 0.7) * d.R * 0.15;
+    d.h = 26 + (0.5 + 0.5 * Math.sin(t * 10)) * d.R * 0.9;
     d.vx = d.vy = d.vz = 0;
     d.swt -= dt;
     if (d.swt <= 0) {
-      d.swt = rnd(0.04, 0.09);
-      d.w = mul(aleatorio3(), rnd(18, 30));
+      d.swt = rnd(0.3, 0.6);
+      d.wt = mul(aleatorio3(), rnd(5, 11));
     }
+    if (!d.wt) d.wt = [0, 0, 0];
+    var k = Math.min(1, dt * 4);
+    d.w = [d.w[0] + (d.wt[0] - d.w[0]) * k, d.w[1] + (d.wt[1] - d.w[1]) * k, d.w[2] + (d.wt[2] - d.w[2]) * k];
     girar(d, dt);
   }
 
@@ -241,12 +256,12 @@
     d.phase = "throw";
     d.age = 0;
     if (d.ax === undefined) return;
-    var tx = rnd(W * 0.15, W * 0.85), ty = rnd(H * 0.22, H * 0.7);
-    var dx = tx - d.x, dy = ty - d.y, dist = Math.hypot(dx, dy) || 1, sp = dist * 2.2 * rnd(0.85, 1.15);
+    var tx = rnd(W * 0.15, W * 0.85), ty = rnd(H * 0.12, H * 0.55);
+    var dx = tx - d.x, dy = ty - d.y, dist = Math.hypot(dx, dy) || 1, sp = dist * 3 * rnd(0.9, 1.15);
     d.vx = dx / dist * sp;
     d.vy = dy / dist * sp;
-    d.vz = rnd(380, 600);
-    d.w = mul(aleatorio3(), rnd(18, 28));
+    d.vz = rnd(750, 1000);
+    d.w = mul(aleatorio3(), rnd(22, 34));
   }
 
   function calmar(d) {
@@ -285,8 +300,8 @@
     if (d.h <= 0) {
       d.h = 0;
       if (Math.abs(d.vz) > 130 && !d.calm) {
-        d.vz = -d.vz * 0.42;
-        var bk = holding ? 0.92 : 0.78;
+        d.vz = -d.vz * (holding ? 0.55 : 0.42);
+        var bk = holding ? 0.95 : 0.78;
         d.vx *= bk;
         d.vy *= bk;
         d.w = mul(aleatorio3(), Math.min(30, 8 + Math.hypot(d.vx, d.vy) / 70));
@@ -309,7 +324,7 @@
       speed = ns;
       d.w = mul(d.w, Math.exp(-3.5 * dt));
     }
-    var S = d.R, wr2 = holding ? 0.85 : 0.6;
+    var S = d.R, wr2 = holding ? 0.9 : 0.6;
     if (d.x < S) { d.x = S; d.vx = Math.abs(d.vx) * wr2; }
     if (d.x > W - S) { d.x = W - S; d.vx = -Math.abs(d.vx) * wr2; }
     if (d.y < S) { d.y = S; d.vy = Math.abs(d.vy) * wr2; }
@@ -469,7 +484,7 @@
       if (!isFinite(ms) || ms <= 0) return;
       ensure();
       var now = Date.now(), until = now + ms;
-      var throwMs = Math.min(2200, Math.max(800, ms * 0.6));
+      var throwMs = Math.min(3600, Math.max(1400, ms * 0.65));
       holdAte = until;
       shakeAte = Math.max(now + 150, until - throwMs);
       var list = dice.filter(function (d) {
@@ -486,8 +501,10 @@
         if (d.phase === "throw") return;
         d.phase = "shake";
         d.shakeEnd = shakeAte;
-        d.ax = W * 0.5 + (i - (list.length - 1) / 2) * d.R * 2.4;
-        d.ay = H * 0.7;
+        ancoraBaixo(d);
+        d.tax = Math.min(W - d.R, Math.max(d.R, d.tax + (i - (list.length - 1) / 2) * d.R * 2.4));
+        d.ax = d.tax;
+        d.ay = d.tay;
       });
       if (!list.length && dice.length < MAX_DICE) {
         var p = spawn(20, 20, 0);
