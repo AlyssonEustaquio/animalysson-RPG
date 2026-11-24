@@ -1,3 +1,14 @@
+var portalClickTarget = null;
+var pendingTouchMove = null;
+
+function runOrDeferMove(e, fn) {
+    if (e && e.pointerType === "touch") {
+      pendingTouchMove = { id: e.pointerId, x0: e.clientX, y0: e.clientY, fn: fn };
+      return;
+    }
+    fn();
+  }
+
 function attachTouchGestures() {
     var pts = {}, ignored = {}, g = null, hold = null;
     cv.style.webkitTouchCallout = "none";
@@ -17,6 +28,7 @@ function attachTouchGestures() {
         if (!h || !pts[h.id] || Object.keys(pts).length !== 1 || g) return;
         if (appMode !== "editor" || tool !== "select" && tool !== "pan") return;
         if (drag && (drag.moveToken || drag.wall || drag.brush || drag.edgePaint || drag.pan)) return;
+        pendingTouchMove = null;
         clickMovePath = [];
         clickMoveExitPending = false;
         if (isHexMap()) stopWorldTravel(false);
@@ -44,6 +56,7 @@ function attachTouchGestures() {
       e.preventDefault();
     }
     function cancelFirstFinger() {
+      pendingTouchMove = null;
       drag = null;
       clickMovePath = [];
       clickMoveExitPending = false;
@@ -97,6 +110,7 @@ function attachTouchGestures() {
         hold.cy = e.clientY;
         if (Math.hypot(e.clientX - hold.x0, e.clientY - hold.y0) > 10) clearHold();
       }
+      if (pendingTouchMove && pendingTouchMove.id === e.pointerId && Math.hypot(e.clientX - pendingTouchMove.x0, e.clientY - pendingTouchMove.y0) > 10) pendingTouchMove = null;
       if (!ignored[e.pointerId]) return;
       if (g) applyGesture();
       block(e);
@@ -105,6 +119,11 @@ function attachTouchGestures() {
       if (e.pointerType !== "touch") return;
       var wasIgnored = ignored[e.pointerId];
       if (hold && hold.id === e.pointerId) clearHold();
+      if (pendingTouchMove && pendingTouchMove.id === e.pointerId) {
+        var move = pendingTouchMove;
+        pendingTouchMove = null;
+        if (e.type === "pointerup" && !wasIgnored && !g) move.fn();
+      }
       delete pts[e.pointerId];
       delete ignored[e.pointerId];
       if (Object.keys(pts).length < 2) g = null;

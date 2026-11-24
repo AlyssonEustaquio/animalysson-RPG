@@ -27,7 +27,8 @@ function worldTravelFrame(now) {
         player.y = st.to.y;
         selected = player;
         save();
-        var reachedLocalPortal = findLocalPortalAt(player.x, player.y);
+        var arrivedAtTarget = worldTravelPath.length === 0 && !!worldTravelTarget && worldTravelTarget.x === player.x && worldTravelTarget.y === player.y;
+        var reachedLocalPortal = arrivedAtTarget ? findLocalPortalAt(player.x, player.y) : null;
         if (reachedLocalPortal) {
           var localDestination = localPortalDestination(reachedLocalPortal, player.x, player.y);
           if (localDestination) {
@@ -44,7 +45,7 @@ function worldTravelFrame(now) {
             return;
           }
         }
-        var reachedPortal = findWorldPortalAt(player.x, player.y);
+        var reachedPortal = arrivedAtTarget ? findWorldPortalAt(player.x, player.y) : null;
         if (reachedPortal) {
           worldTravelPath = [];
           worldTravelTarget = null;

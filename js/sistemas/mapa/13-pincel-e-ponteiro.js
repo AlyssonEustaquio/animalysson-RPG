@@ -112,7 +112,9 @@ function onPointerDown(e) {
         draw();
         return;
       }
-      if (tool === "select") startWorldTravel(worldCell);
+      if (tool === "select") runOrDeferMove(e, function() {
+        startWorldTravel(worldCell);
+      });
       return;
     }
     cv.setPointerCapture(e.pointerId);
@@ -146,7 +148,9 @@ function onPointerDown(e) {
       return;
     }
     if (!isHexMap() && tool === "select" && !pendingMonster && currentPlayer() && (world.x < 0 || world.y < 0 || world.x >= MAP_W || world.y >= MAP_H)) {
-      startClickExit(world);
+      runOrDeferMove(e, function() {
+        startClickExit(world);
+      });
       return;
     }
     if (!isHexMap() && ["muro", "porta", "paredeSecreta", "portaSecreta", "portaTrancada", "portaEmperrada", "paredeIlusoria", "muralhaForca", "paredeMagica"].indexOf(tool) >= 0) {
@@ -257,10 +261,18 @@ function onPointerDown(e) {
         if (appMode === "editor" && hit.tipo !== "player") {
           drag = { moveToken: hit, fromX: hit.x, fromY: hit.y };
         }
+        if (hit.tipo === "player" && hit.x === cell.x && hit.y === cell.y) {
+          var standingLocalPortalClick = findLocalPortalAt(hit.x, hit.y);
+          if (standingLocalPortalClick) runOrDeferMove(e, function() {
+            teleportPlayerWithinMap(standingLocalPortalClick, hit);
+          });
+        }
       } else {
         var movingPlayer = currentPlayer();
         if (movingPlayer && isCurrentlyVisible(cell.x, cell.y, movingPlayer.x, movingPlayer.y, movingPlayer.luz || lightRadius)) {
-          startClickMove(cell);
+          runOrDeferMove(e, function() {
+            startClickMove(cell);
+          });
         }
       }
       draw();

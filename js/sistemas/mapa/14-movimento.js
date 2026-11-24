@@ -73,6 +73,7 @@ function startClickMove(destination, exitAfterArrival) {
       return false;
     }
     clickMovePath = path.slice(1);
+    portalClickTarget = exitAfterArrival ? null : { x: destination.x, y: destination.y };
     clickMoveExitPending = !!exitAfterArrival;
     if (keyMoveRaf == null) keyMoveRaf = window.requestAnimationFrame(keyMoveFrame);
     return true;
@@ -204,6 +205,7 @@ function stopKeyMove() {
     keyMoveVis = null;
     keyMoveCarry = null;
     clickMovePath = [];
+    portalClickTarget = null;
     keysHeld = {};
     clickMoveExitPending = false;
     worldTravelPos = null;
@@ -259,7 +261,8 @@ function keyMoveFrame(now) {
       if (p >= 1) {
         keyMoveCarry = st.t0 + st.dur;
         keyMoveStep = null;
-        var reachedLocalPortal = findLocalPortalAt(pl.x, pl.y);
+        var clickedHere = !hexMode && !heldDirection() && clickMovePath.length === 0 && !!portalClickTarget && portalClickTarget.x === pl.x && portalClickTarget.y === pl.y;
+        var reachedLocalPortal = clickedHere ? findLocalPortalAt(pl.x, pl.y) : null;
         if (reachedLocalPortal) {
           var localDestination = localPortalDestination(reachedLocalPortal, pl.x, pl.y);
           if (localDestination) {
@@ -281,7 +284,7 @@ function keyMoveFrame(now) {
         }
         if (hexMode) {
           worldTravelPos = null;
-          var reachedPortal = findWorldPortalAt(pl.x, pl.y);
+          var reachedPortal = null;
           if (reachedPortal) {
             stopKeyMove();
             teleportThroughWorldPortal(reachedPortal);
@@ -326,6 +329,7 @@ function onKey(e) {
         clickMoveExitPending = false;
       }
       keysHeld[e.code] = true;
+      portalClickTarget = null;
       if (keyMoveRaf == null) keyMoveRaf = window.requestAnimationFrame(keyMoveFrame);
       return;
     }
