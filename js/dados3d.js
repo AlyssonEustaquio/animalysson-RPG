@@ -180,19 +180,25 @@
       c.doneAt = 0;
       c.grace = 0;
       c.alpha = 1;
-      if (!(c.hold > Date.now())) {
+      if (!(c.hold > Date.now()) && c.h <= 0 && Math.hypot(c.vx, c.vy) < 80) {
         calmar(c);
-        if (c.h <= 0 && Math.hypot(c.vx, c.vy) < 80) c.vz = 260;
+        c.vz = 260;
       }
       return c;
     }
     var nd = {
-      kind: kind, shape: shape, R: R, delay: delay, x: sx, y: sy, h: 90, vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed, vz: rnd(480, 700),
+      kind: kind, shape: shape, R: R, delay: delay, x: sx, y: sy, h: 90, vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed, vz: rnd(600, 850),
       q: qrandom(), w: [rnd(-1, 1) * 22, rnd(-1, 1) * 22, rnd(-1, 1) * 22], qt: qt, age: 0, done: false, doneAt: 0, alpha: 1,
       color: color, hold: holdAte > Date.now() ? holdAte : 0, calm: false, pend: false, grace: 0, born: Date.now(),
       phase: holdAte > Date.now() ? "shake" : "", shakeEnd: shakeAte, shakeStart: Date.now(), st: 0, swt: 0, ph: rnd(0, Math.PI * 2), dir: 1
     };
     dice.push(nd);
+    if (nd.phase === "shake" && shakeAte > Date.now()) {
+      ancoraBaixo(nd);
+      nd.x = nd.ax;
+      nd.y = nd.ay;
+      nd.h = 40;
+    }
     return nd;
   }
 
@@ -219,8 +225,15 @@
   }
 
   function ancoraBaixo(d) {
-    d.ax = rnd(W * 0.12, W * 0.88);
-    d.ay = H - d.R * rnd(1.4, 2.8);
+    var par = null;
+    for (var i = 0; i < dice.length; i++) if (dice[i] !== d && dice[i].phase === "shake" && dice[i].ax !== undefined) { par = dice[i]; break; }
+    if (par) {
+      d.ax = Math.min(W - d.R * 2, Math.max(d.R * 2, par.ax + (Math.random() < 0.5 ? -1 : 1) * d.R * 2.6));
+      d.ay = par.ay;
+    } else {
+      d.ax = rnd(W * 0.12, W * 0.88);
+      d.ay = H - d.R * rnd(1.4, 2.8);
+    }
     d.dir = d.ax > W / 2 ? -1 : 1;
     d.shakeStart = Date.now();
   }
@@ -275,7 +288,6 @@
       d.age = 0;
       if (d.phase === "shake") lancarDoCopo(d);
       if (d.pend) d.grace = 0.3;
-      else calmar(d);
     }
     if (d.grace > 0) {
       d.grace -= dt;
@@ -297,8 +309,8 @@
     if (d.h <= 0) {
       d.h = 0;
       if (Math.abs(d.vz) > 130 && !d.calm) {
-        d.vz = -d.vz * (holding ? 0.55 : 0.42);
-        var bk = holding ? 0.95 : 0.78;
+        d.vz = -d.vz * (holding ? 0.55 : 0.5);
+        var bk = holding ? 0.95 : 0.88;
         d.vx *= bk;
         d.vy *= bk;
         d.w = mul(aleatorio3(), Math.min(30, 8 + Math.hypot(d.vx, d.vy) / 70));
@@ -314,14 +326,14 @@
         var rem = Math.max(0.2, (d.hold - Date.now()) / 1000);
         var kk = Math.min(6, Math.max(0.25, Math.log(Math.max(speed, 31) / 30) / rem));
         ns = speed * Math.exp(-kk * dt);
-      } else ns = Math.max(0, speed * Math.exp(-2.2 * dt) - 70 * dt);
+      } else ns = Math.max(0, speed * Math.exp(-1.1 * dt) - 45 * dt);
       var k = speed > 0 ? ns / speed : 0;
       d.vx *= k;
       d.vy *= k;
       speed = ns;
       d.w = mul(d.w, Math.exp(-3.5 * dt));
     }
-    var S = d.R, wr2 = holding ? 0.9 : 0.6;
+    var S = d.R, wr2 = holding ? 0.9 : 0.72;
     if (d.x < S) { d.x = S; d.vx = Math.abs(d.vx) * wr2; }
     if (d.x > W - S) { d.x = W - S; d.vx = -Math.abs(d.vx) * wr2; }
     if (d.y < S) { d.y = S; d.vy = Math.abs(d.vy) * wr2; }
@@ -341,16 +353,16 @@
         d.q = qnlerp(d.q, d.pend ? faceMaisBaixa(d) : d.qt, 1 - Math.exp(-dt * rate));
         d.w = mul(d.w, Math.exp(-dt * rate * 0.5));
       }
-    } else if (!holding && !d.pend && d.h === 0 && speed < 150) {
-      d.q = qnlerp(d.q, d.qt, 1 - Math.exp(-dt * 8));
-      d.w = mul(d.w, Math.exp(-6 * dt));
+    } else if (!holding && !d.pend && d.h === 0 && speed < 110) {
+      d.q = qnlerp(d.q, d.qt, 1 - Math.exp(-dt * 5));
+      d.w = mul(d.w, Math.exp(-4 * dt));
     }
     if (!d.done && !holding && !d.pend && d.h === 0 && speed < 8 && Math.abs(dot4(d.q, d.qt)) > 0.9995) {
       d.done = true;
       d.doneAt = 0;
       d.q = d.qt;
     }
-    if (!d.done && !holding && !d.pend && d.age > 6) { d.done = true; d.q = d.qt; d.vx = d.vy = 0; d.h = 0; }
+    if (!d.done && !holding && !d.pend && d.age > 9) { d.done = true; d.q = d.qt; d.vx = d.vy = 0; d.h = 0; }
     if (d.done) {
       d.doneAt += dt;
       if (d.doneAt > 2.6) d.alpha = Math.max(0, 1 - (d.doneAt - 2.6) / 0.6);
@@ -487,7 +499,7 @@
       var list = dice.filter(function (d) {
         return d.pend || d.hold > now || now - d.born < 1500;
       });
-      list.forEach(function (d, i) {
+      list.forEach(function (d) {
         d.hold = until;
         d.calm = false;
         d.done = false;
@@ -498,9 +510,7 @@
         if (d.phase === "throw") return;
         d.phase = "shake";
         d.shakeEnd = shakeAte;
-        ancoraBaixo(d);
-        d.ax = Math.min(W - d.R * 2, Math.max(d.R * 2, d.ax + (i - (list.length - 1) / 2) * d.R * 2.6));
-        d.dir = d.ax > W / 2 ? -1 : 1;
+        if (d.ax === undefined) ancoraBaixo(d);
       });
       if (!list.length && dice.length < MAX_DICE) {
         var p = spawn(20, 20, 0);
