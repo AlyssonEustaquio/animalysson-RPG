@@ -65,6 +65,7 @@
       "js/sistemas/mapa/20-combate-hud-e-modo.js",
       "js/sistemas/mapa/21-montagem.js",
       "js/sistemas/mapa/22-desmontagem.js",
+      "js/sistemas/mapa/22a-toque-e-gestos.js",
       "js/sistemas/mapa/23-fechamento.js"
     ] },
     { nome: "app", arquivos: [
@@ -102,6 +103,8 @@
     return Promise.all(modulo.arquivos.map(baixar));
   })).then(function (resultado) {
     modulos.forEach(function (modulo, i) { executar(modulo, resultado[i]); });
+    window.__appPronto = true;
+    window.dispatchEvent(new Event("animalysson:pronto"));
   }).catch(function (erro) {
     document.body.insertAdjacentHTML("beforeend", '<p style="padding:16px;color:#c53131">' + erro.message + "</p>");
     throw erro;

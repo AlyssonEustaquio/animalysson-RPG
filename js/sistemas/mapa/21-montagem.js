@@ -234,6 +234,8 @@ function mountNow(el) {
         }
       });
     }
+    attachTouchGestures();
+    attachDpad();
     cv.addEventListener("pointerdown", onPointerDown);
     cv.addEventListener("pointermove", onPointerMove);
     cv.addEventListener("pointerleave", onPointerLeave);
@@ -271,7 +273,7 @@ function mountNow(el) {
       var worldRoot = $("#mp-root");
       worldRoot.classList.add("mp-world-map");
       var worldStyle = document.createElement("style");
-      worldStyle.textContent = "#mp-root.mp-world-map #mp-fog,#mp-root.mp-world-map #mp-light,#mp-root.mp-world-map #mp-walls-vis,#mp-root.mp-world-map #mp-secret-view,#mp-root.mp-world-map #mp-speed-wrap,#mp-root.mp-world-map #mp-reset-fog,#mp-root.mp-world-map #mp-clear-fog,#mp-root.mp-world-map #mp-clear-walls,#mp-root.mp-world-map #mp-clear-edges,#mp-root.mp-world-map #mp-block,#mp-root.mp-world-map #mp-lr {display:none !important;}#mp-root.mp-world-map.editor-mode .mp-world-action {display:block !important;}#mp-root.editor-mode #mp-world-local-portal {display:block !important;}#mp-root:not(.mp-world-map).editor-mode #mp-world-move,#mp-root:not(.mp-world-map).editor-mode #mp-world-portal {display:none !important;}#mp-root.mp-world-map.editor-mode #mp-tools {display:grid !important;grid-template-columns:1fr 1fr;gap:6px;}#mp-root.mp-world-map.editor-mode #mp-tools button {width:100%;box-sizing:border-box;}#mp-root.mp-world-map #mp-side {display:none !important;}#mp-root.mp-world-map #mp-world-move.active{background:rgba(35,155,100,.32);border-color:#70d6a2;}#mp-root.mp-world-map #mp-cv {display:block;width:100%;height:100%;cursor:crosshair;touch-action:manipulation;}";
+      worldStyle.textContent = "#mp-root.mp-world-map #mp-fog,#mp-root.mp-world-map #mp-light,#mp-root.mp-world-map #mp-walls-vis,#mp-root.mp-world-map #mp-secret-view,#mp-root.mp-world-map #mp-speed-wrap,#mp-root.mp-world-map #mp-reset-fog,#mp-root.mp-world-map #mp-clear-fog,#mp-root.mp-world-map #mp-clear-walls,#mp-root.mp-world-map #mp-clear-edges,#mp-root.mp-world-map #mp-block,#mp-root.mp-world-map #mp-lr {display:none !important;}#mp-root.mp-world-map.editor-mode .mp-world-action {display:block !important;}#mp-root.editor-mode #mp-world-local-portal {display:block !important;}#mp-root:not(.mp-world-map).editor-mode #mp-world-move,#mp-root:not(.mp-world-map).editor-mode #mp-world-portal {display:none !important;}#mp-root.mp-world-map.editor-mode #mp-tools {display:grid !important;grid-template-columns:1fr 1fr;gap:6px;}#mp-root.mp-world-map.editor-mode #mp-tools button {width:100%;box-sizing:border-box;}#mp-root.mp-world-map #mp-side {display:none !important;}#mp-root.mp-world-map #mp-world-move.active{background:rgba(35,155,100,.32);border-color:#70d6a2;}#mp-root.mp-world-map #mp-cv {display:block;width:100%;height:100%;cursor:crosshair;touch-action:none;}";
       worldRoot.appendChild(worldStyle);
       var blockLabel = $("#mp-block");
       if (blockLabel && blockLabel.parentElement) blockLabel.parentElement.style.display = "none";
