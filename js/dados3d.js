@@ -6,9 +6,6 @@
   var cv = null, cx = null, dice = [], raf = null, last = 0, W = 0, H = 0, dpr = 1;
   var burstAt = 0, burstN = 0, holdAte = 0, shakeAte = 0;
   var shapes = {};
-  var filaRolagens = Promise.resolve();
-  var painelResultados = null;
-  var historicoResultados = [];
   var LIGHT = [-0.35, -0.5, 0.8];
   var COLORS = { 4: [67, 160, 71], 6: [211, 47, 47], 8: [30, 136, 229], 10: [142, 68, 173], 12: [239, 140, 20], 20: [0, 137, 123], tens: [94, 53, 177] };
 
@@ -19,24 +16,6 @@
   function cross(a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }
   function norm(a) { var l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; }
   function rnd(a, b) { return a + Math.random() * (b - a); }
-
-  // Sorteio uniforme antes da animação, como na referência do Club Martech.
-  // A amostragem por rejeição evita o viés de usar simplesmente resto (%) do uint32.
-  function inteiroAleatorio(max) {
-    max = Math.floor(Number(max));
-    if (!isFinite(max) || max < 1) throw new Error("Limite de sorteio inválido.");
-    if (window.crypto && typeof window.crypto.getRandomValues === "function") {
-      var limite = Math.floor(4294967296 / max) * max;
-      var buffer = new Uint32Array(1);
-      var valor;
-      do {
-        window.crypto.getRandomValues(buffer);
-        valor = buffer[0];
-      } while (valor >= limite);
-      return (valor % max) + 1;
-    }
-    return Math.floor(Math.random() * max) + 1;
-  }
 
   function qmul(a, b) {
     return [
@@ -64,38 +43,7 @@
     return qnorm([a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k, a[3] + (b[3] - a[3]) * k]);
   }
   function dot4(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3]; }
-  function qrandom() {
-    // Amostragem uniforme de orientações (Shoemake), sem escolher uma face-alvo.
-    var u1 = Math.random(), u2 = Math.random(), u3 = Math.random();
-    return [
-      Math.sqrt(1 - u1) * Math.sin(2 * Math.PI * u2),
-      Math.sqrt(1 - u1) * Math.cos(2 * Math.PI * u2),
-      Math.sqrt(u1) * Math.sin(2 * Math.PI * u3),
-      Math.sqrt(u1) * Math.cos(2 * Math.PI * u3)
-    ];
-  }
-
-  function valorDoRotulo(kind, label) {
-    var limpo = String(label).replace(/\./g, "");
-    if (kind === 10 && limpo === "0") return 10;
-    if (kind === "tens" && limpo === "00") return 0;
-    return Number(limpo);
-  }
-
-  function orientacaoDoResultado(kind, value, shape) {
-    var faceAlvo = null;
-    for (var i = 0; i < shape.faces.length; i++) {
-      if (valorDoRotulo(kind, shape.faces[i].label) === Number(value)) {
-        faceAlvo = shape.faces[i];
-        break;
-      }
-    }
-    if (!faceAlvo) return qrandom();
-    // Face sorteada voltada para cima, com giro aleatório em torno do eixo vertical.
-    var alinhamento = qFromTo(faceAlvo.n, [0, 0, 1]);
-    var torcao = rnd(0, Math.PI * 2);
-    return qnorm(qmul([0, 0, Math.sin(torcao / 2), Math.cos(torcao / 2)], alinhamento));
-  }
+  function qrandom() { return qnorm([rnd(-1, 1), rnd(-1, 1), rnd(-1, 1), rnd(-1, 1)]); }
 
   function buildShape(verts, strings, pairs, fontSize) {
     var maxLen = 0;
@@ -204,36 +152,21 @@
     cv.height = Math.round(H * dpr);
   }
 
-  function origemDoLancamento(origin, R) {
-    var x = W / 2, y = H - R * 1.5;
-    if (origin && typeof origin.getBoundingClientRect === "function") {
-      var rect = origin.getBoundingClientRect();
-      x = rect.left + rect.width / 2;
-      y = rect.top + rect.height / 2;
-    } else if (origin && isFinite(Number(origin.x)) && isFinite(Number(origin.y))) {
-      x = Number(origin.x);
-      y = Number(origin.y);
-    }
-    return {
-      x: Math.max(R, Math.min(W - R, x)),
-      y: Math.max(R, Math.min(H - R, y))
-    };
-  }
-
-  function spawn(kind, delay, options, resolve, onStop, targetValue) {
-    options = options || {};
+  function spawn(kind, value, delay) {
     var shape = getShape(kind);
+    var label = String(value);
+    var fi = 0;
+    for (var i = 0; i < shape.faces.length; i++) if (shape.faces[i].label.replace(".", "") === label) { fi = i; break; }
     var R = Math.max(20, Math.min(40, Math.min(W, H) * 0.055));
-    var origin = origemDoLancamento(options.origem || options.origin || options.element || options.source, R);
-    var sx = origin.x, sy = origin.y;
-    var tx = rnd(W * 0.15, W * 0.85), ty = rnd(H * 0.22, H * 0.68);
-    var dx = tx - sx, dy = ty - sy, dist = Math.hypot(dx, dy) || 1;
+    var sx = rnd(W * 0.12, W * 0.88), sy = H + R * 0.3;
+    var tx = rnd(W * 0.15, W * 0.85), ty = rnd(H * 0.22, H * 0.7);
+    var dx = tx - sx, dy = ty - sy, dist = Math.hypot(dx, dy);
     var speed = dist * 3.1 * rnd(0.85, 1.15);
     var ang = Math.atan2(dy, dx) + rnd(-0.12, 0.12);
+    var qAlign = qFromTo(shape.faces[fi].n, [0, 0, 1]);
+    var za = rnd(0, Math.PI * 2);
+    var qt = qmul([0, 0, Math.sin(za / 2), Math.cos(za / 2)], qAlign);
     var color = COLORS[kind === "units" ? 10 : kind];
-
-    // Um dado reservado pelo modo de agitação pode ser reaproveitado, mas
-    // nunca recebe uma face ou resultado pré-definido.
     for (var pi = 0; pi < dice.length; pi++) {
       if (!dice[pi].pend) continue;
       var c = dice[pi];
@@ -242,45 +175,22 @@
       c.shape = shape;
       c.color = color;
       c.R = R;
-      c.x = sx;
-      c.y = sy;
-      c.h = 90;
-      c.vx = Math.cos(ang) * speed;
-      c.vy = Math.sin(ang) * speed;
-      c.vz = rnd(600, 850);
-      c.q = qrandom();
-      c.qt = orientacaoDoResultado(kind, targetValue, shape);
-      c.targetValue = targetValue;
-      c.w = [rnd(-1, 1) * 22, rnd(-1, 1) * 22, rnd(-1, 1) * 22];
-      c.age = 0;
+      c.qt = qt;
       c.done = false;
       c.doneAt = 0;
-      c.alpha = 1;
-      c.calm = false;
-      c.delay = delay;
-      c.resolve = resolve;
-      c.onStop = onStop;
-      c.resultShown = false;
-      c.notified = false;
-      c.resolved = false;
       c.grace = 0;
-      c.born = Date.now();
-      c.phase = "throw";
+      c.alpha = 1;
+      if (!(c.hold > Date.now()) && c.h <= 0 && Math.hypot(c.vx, c.vy) < 80) {
+        calmar(c);
+        c.vz = 260;
+      }
       return c;
     }
-
     var nd = {
-      kind: kind, shape: shape, R: R, delay: delay, x: sx, y: sy, h: 90,
-      vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed, vz: rnd(600, 850),
-      q: qrandom(), qt: orientacaoDoResultado(kind, targetValue, shape),
-      targetValue: targetValue,
-      w: [rnd(-1, 1) * 22, rnd(-1, 1) * 22, rnd(-1, 1) * 22],
-      age: 0, done: false, doneAt: 0, alpha: 1, color: color,
-      hold: holdAte > Date.now() ? holdAte : 0, calm: false, pend: false,
-      grace: 0, born: Date.now(), phase: holdAte > Date.now() ? "shake" : "throw",
-      shakeEnd: shakeAte, shakeStart: Date.now(), st: 0, swt: 0,
-      ph: rnd(0, Math.PI * 2), dir: 1, resolve: resolve, onStop: onStop,
-      resultShown: false, notified: false, resolved: false
+      kind: kind, shape: shape, R: R, delay: delay, x: sx, y: sy, h: 90, vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed, vz: rnd(600, 850),
+      q: qrandom(), w: [rnd(-1, 1) * 22, rnd(-1, 1) * 22, rnd(-1, 1) * 22], qt: qt, age: 0, done: false, doneAt: 0, alpha: 1,
+      color: color, hold: holdAte > Date.now() ? holdAte : 0, calm: false, pend: false, grace: 0, born: Date.now(),
+      phase: holdAte > Date.now() ? "shake" : "", shakeEnd: shakeAte, shakeStart: Date.now(), st: 0, swt: 0, ph: rnd(0, Math.PI * 2), dir: 1
     };
     dice.push(nd);
     if (nd.phase === "shake" && shakeAte > Date.now()) {
@@ -290,86 +200,6 @@
       nd.h = 40;
     }
     return nd;
-  }
-
-  function valorDaFaceSuperior(d) {
-    var melhor = null, maiorZ = -Infinity;
-    d.shape.faces.forEach(function (face) {
-      var z = rot(d.q, face.n)[2];
-      if (z > maiorZ) { maiorZ = z; melhor = face; }
-    });
-    if (!melhor) return NaN;
-    var label = String(melhor.label).replace(/\./g, "");
-    var value = Number(label);
-    if (d.kind === 10 && label === "0") return 10;
-    if (d.kind === "tens" && label === "00") return 0;
-    return value;
-  }
-
-  function obterPainelResultados() {
-    if (painelResultados || !document || !document.body) return painelResultados;
-    painelResultados = document.createElement("div");
-    painelResultados.id = "dados3d-resultados";
-    painelResultados.setAttribute("role", "status");
-    painelResultados.setAttribute("aria-live", "polite");
-    painelResultados.style.cssText = [
-      "position:fixed", "left:50%", "bottom:22px", "transform:translateX(-50%)",
-      "z-index:100001", "padding:10px 16px", "border-radius:12px",
-      "background:rgba(18,22,30,.94)", "border:1px solid rgba(255,255,255,.25)",
-      "box-shadow:0 8px 28px rgba(0,0,0,.35)", "color:#fff",
-      "font:700 16px/1.35 Roboto,Arial,sans-serif", "text-align:center",
-      "pointer-events:none", "white-space:pre-line", "max-width:90vw"
-    ].join(";");
-    document.body.appendChild(painelResultados);
-    return painelResultados;
-  }
-
-  function registrarLinhaResultado(linha) {
-    historicoResultados.push(linha);
-    if (historicoResultados.length > 5) historicoResultados.shift();
-    var painel = obterPainelResultados();
-    if (painel) painel.textContent = historicoResultados.join("\n");
-  }
-
-  function mostrarResultado(tipo, valor, options) {
-    registrarLinhaResultado(tipo + " = " + valor);
-    if (typeof window.CustomEvent === "function") {
-      window.dispatchEvent(new window.CustomEvent("dados3d:resultado", {
-        detail: { dado: tipo, resultado: valor }
-      }));
-    }
-    if (options && typeof options.onResult === "function") {
-      try { options.onResult(valor, tipo); } catch (e) { setTimeout(function () { throw e; }, 0); }
-    }
-  }
-
-  function mostrarResumo(titulo, detalhe, total) {
-    var linha = total === undefined ? (titulo + ": " + detalhe) : (titulo + ": " + detalhe + " = " + total);
-    registrarLinhaResultado(linha);
-    if (typeof window.CustomEvent === "function") {
-      window.dispatchEvent(new window.CustomEvent("dados3d:resumo", {
-        detail: { titulo: titulo, detalhe: detalhe, total: total }
-      }));
-    }
-  }
-
-  function concluirRolagem(d) {
-    if (d.resolved) return;
-    // O valor já foi sorteado de forma uniforme; a física faz o dado repousar
-    // com essa face para cima, em vez de girar artificialmente depois de parar.
-    d.resolved = true;
-    d.result = isFinite(Number(d.targetValue)) ? Number(d.targetValue) : valorDaFaceSuperior(d);
-    if (!d.resultShown) {
-      d.resultShown = true;
-      if (typeof d.onStop === "function") d.onStop(d.result);
-    }
-  }
-
-  function entregarResultadoQuandoSumir(d) {
-    if (!d.notified && d.resolved && d.alpha <= 0) {
-      d.notified = true;
-      if (typeof d.resolve === "function") d.resolve(d.result);
-    }
   }
 
   function aleatorio3() {
@@ -509,37 +339,33 @@
     if (d.y < S) { d.y = S; d.vy = Math.abs(d.vy) * wr2; }
     if (d.y > H - S && d.age > 0.6) { d.y = H - S; d.vy = -Math.abs(d.vy) * wr2; }
     girar(d, dt);
-    if (holding) {
+    if (d.calm) {
+      var kc = Math.exp(-8 * dt);
+      d.vx *= kc;
+      d.vy *= kc;
+      d.w = mul(d.w, Math.exp(-7 * dt));
+      d.q = qnlerp(d.q, d.qt, 1 - Math.exp(-dt * 6));
+    } else if (holding) {
       var remS = (d.hold - Date.now()) / 1000;
-      if (d.h === 0 && remS < 0.7) d.w = mul(d.w, Math.exp(-dt * 1.5));
-    } else if (!d.pend && d.h === 0 && speed < 130) {
-      // Atrito de contato: desacelera a rotação enquanto a face sorteada
-      // se acomoda durante o rolamento, não depois que o dado já parou.
-      d.w = mul(d.w, Math.exp(-3.8 * dt));
+      var rate = d.h === 0 ? (1 - Math.min(1, speed / 350)) * 5 : 0;
+      if (!d.pend && remS < 1) rate = Math.max(rate, (1 - Math.max(0, remS)) * 6);
+      if (rate > 0) {
+        d.q = qnlerp(d.q, d.pend ? faceMaisBaixa(d) : d.qt, 1 - Math.exp(-dt * rate));
+        d.w = mul(d.w, Math.exp(-dt * rate * 0.5));
+      }
+    } else if (!holding && !d.pend && d.h === 0 && speed < 110) {
+      d.q = qnlerp(d.q, d.qt, 1 - Math.exp(-dt * 5));
+      d.w = mul(d.w, Math.exp(-4 * dt));
     }
-    var angularSpeed = Math.hypot(d.w[0], d.w[1], d.w[2]);
-    if (!holding && !d.pend && d.qt && d.h === 0) {
-      var taxaAcomodacao = 0.9 + 2.1 * (1 - Math.min(1, angularSpeed / 18));
-      d.q = qnlerp(d.q, d.qt, 1 - Math.exp(-taxaAcomodacao * dt));
-    }
-    if (!d.done && !holding && !d.pend && d.h === 0 && speed < 5 && angularSpeed < 0.12) {
+    if (!d.done && !holding && !d.pend && d.h === 0 && speed < 8 && Math.abs(dot4(d.q, d.qt)) > 0.9995) {
       d.done = true;
       d.doneAt = 0;
-      concluirRolagem(d);
+      d.q = d.qt;
     }
-    if (!d.done && !holding && !d.pend && d.age > 9) {
-      d.done = true;
-      d.vx = d.vy = d.vz = 0;
-      d.w = [0, 0, 0];
-      d.h = 0;
-      if (d.qt) d.q = d.qt;
-      d.doneAt = 0;
-      concluirRolagem(d);
-    }
+    if (!d.done && !holding && !d.pend && d.age > 9) { d.done = true; d.q = d.qt; d.vx = d.vy = 0; d.h = 0; }
     if (d.done) {
       d.doneAt += dt;
       if (d.doneAt > 2.6) d.alpha = Math.max(0, 1 - (d.doneAt - 2.6) / 0.6);
-      entregarResultadoQuandoSumir(d);
     }
   }
 
@@ -634,161 +460,30 @@
     }
   }
 
-  function lancarImediato(sides, options) {
-    sides = Number(sides);
-    // Compatibilidade com chamadas antigas lancar(lados, valor): o segundo
-    // argumento numérico não é aceito como resultado; o sorteio é independente.
-    if (!options || typeof options !== "object") options = {};
-    if ([4, 6, 8, 10, 12, 20, 100].indexOf(sides) < 0) {
-      return Promise.reject(new Error("Tipo de dado não suportado: d" + sides));
+  function lancar(sides, value) {
+    try {
+      if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      sides = Number(sides);
+      value = Number(value);
+      if (!isFinite(sides) || !isFinite(value)) return;
+      if (dice.length >= MAX_DICE && !dice.some(function (x) { return x.pend; })) return;
+      ensure();
+      var now = performance.now();
+      if (now - burstAt > 60) burstN = 0;
+      burstAt = now;
+      var delay = burstN * 0.06;
+      burstN++;
+      if (sides === 100) {
+        var tens = value >= 100 ? "00" : String(Math.floor(value / 10) * 10 || "00");
+        if (value < 10) tens = "00";
+        spawn("tens", tens, delay);
+        spawn("units", String(value % 10), delay + 0.03);
+      } else if ([4, 6, 8, 10, 12, 20].indexOf(sides) >= 0) {
+        spawn(sides, sides === 10 && value === 10 ? "0" : String(value), delay);
+      } else return;
+      start();
+    } catch (e) {
     }
-    return new Promise(function (resolve, reject) {
-      try {
-        ensure();
-        if (dice.length >= MAX_DICE && !dice.some(function (x) { return x.pend; })) {
-          reject(new Error("Limite de dados simultâneos atingido."));
-          return;
-        }
-        if (sides === 100) {
-          var target = inteiroAleatorio(100);
-          var tens = target === 100 ? 0 : Math.floor(target / 10) * 10;
-          var units = target === 100 ? 0 : target % 10;
-          var stopped = [false, false], completed = [false, false];
-          var values = [tens, units];
-          function onPartStop(index, value) {
-            values[index] = value;
-            stopped[index] = true;
-            if (stopped[0] && stopped[1]) mostrarResultado("d100", target, options);
-          }
-          function onPartFade(index, value) {
-            values[index] = value;
-            completed[index] = true;
-            if (completed[0] && completed[1]) resolve(target);
-          }
-          spawn("tens", 0, options, function (v) { onPartFade(0, v); }, function (v) { onPartStop(0, v); }, tens);
-          spawn("units", 0.04, options, function (v) { onPartFade(1, v); }, function (v) { onPartStop(1, v); }, units);
-        } else {
-          var targetValue = inteiroAleatorio(sides);
-          spawn(sides, 0, options, resolve, function (value) {
-            mostrarResultado("d" + sides, value, options);
-          }, targetValue);
-        }
-        start();
-      } catch (e) {
-        reject(e);
-      }
-    });
-  }
-
-  function lancar(sides, options) {
-    var executar = function () { return lancarImediato(sides, options); };
-    // Serializa chamadas simultâneas: uma jogada termina antes da próxima começar.
-    var proxima = filaRolagens.then(executar, executar);
-    filaRolagens = proxima.then(function () {}, function () {});
-    return proxima;
-  }
-
-  async function lancarVarios(quantidade, lados, options) {
-    quantidade = Math.floor(Number(quantidade));
-    if (!isFinite(quantidade) || quantidade < 1 || quantidade > 100) {
-      throw new Error("Quantidade de dados inválida (use de 1 a 100)." );
-    }
-    var resultados = [];
-    for (var i = 0; i < quantidade; i++) {
-      // Espera a rolagem atual terminar antes de lançar a próxima.
-      resultados.push(await lancar(lados, options || {}));
-    }
-    var total = resultados.reduce(function (a, b) { return a + b; }, 0);
-    mostrarResumo(quantidade + "d" + Number(lados), resultados.join(" + "), total);
-    return { quantidade: quantidade, lados: Number(lados), resultados: resultados, total: total };
-  }
-
-  async function rolarFormula(formula, options) {
-    var texto = String(formula || "").replace(/\s+/g, "");
-    var partes = texto.match(/[+-]?[^+-]+/g);
-    if (!partes || partes.join("") !== texto) throw new Error("Fórmula de dano inválida: " + formula);
-    var termos = [], total = 0;
-    for (var i = 0; i < partes.length; i++) {
-      var parte = partes[i], sinal = 1;
-      if (parte.charAt(0) === "-") { sinal = -1; parte = parte.slice(1); }
-      else if (parte.charAt(0) === "+") parte = parte.slice(1);
-      var match = parte.match(/^(\d*)d(4|6|8|10|12|20|100)$/i);
-      if (match) {
-        var qtd = match[1] ? Number(match[1]) : 1;
-        var lados = Number(match[2]);
-        var bloco = await lancarVarios(qtd, lados, options || {});
-        termos.push({ formula: (sinal < 0 ? "-" : "") + parte, resultados: bloco.resultados, total: bloco.total * sinal });
-        total += bloco.total * sinal;
-      } else if (/^\d+$/.test(parte)) {
-        var fixo = Number(parte) * sinal;
-        termos.push({ formula: (sinal < 0 ? "-" : "") + parte, resultados: [], total: fixo });
-        total += fixo;
-      } else {
-        throw new Error("Termo de dado inválido: " + parte);
-      }
-    }
-    var detalhe = termos.map(function (termo) {
-      return termo.formula + (termo.resultados.length ? " [" + termo.resultados.join(", ") + "]" : "");
-    }).join(" ");
-    mostrarResumo(texto, detalhe, total);
-    return { formula: texto, termos: termos, total: total };
-  }
-
-  async function rolarIniciativa(participantes, options) {
-    if (!Array.isArray(participantes) || !participantes.length) return [];
-    var resultados = [];
-    for (var i = 0; i < participantes.length; i++) {
-      var participante = participantes[i] || {};
-      var opts = Object.assign({}, options || {});
-      opts.origem = participante.origem || participante.elemento || opts.origem;
-      var dado = await lancar(20, opts);
-      var bonus = Number(participante.bonus || participante.modificador || 0);
-      resultados.push({ participante: participante.nome || participante.id || ("Participante " + (i + 1)), dado: dado, bonus: bonus, total: dado + bonus });
-    }
-    resultados.sort(function (a, b) { return b.total - a.total; });
-    mostrarResumo("Iniciativa", resultados.map(function (r) { return r.participante + " " + r.total; }).join(" | "));
-    return resultados;
-  }
-
-  async function rolarAtaque(options) {
-    options = options || {};
-    var quantidade = Number(options.quantidadeD20 || options.d20 || 1);
-    if (quantidade !== 1 && quantidade !== 2) throw new Error("Ataque deve rolar 1 ou 2d20.");
-    var valores = [];
-    for (var i = 0; i < quantidade; i++) valores.push(await lancar(20, options));
-    var dados = { quantidade: quantidade, lados: 20, resultados: valores, total: valores.reduce(function (a, b) { return a + b; }, 0) };
-    var escolhido = options.modo === "desvantagem" ? Math.min.apply(Math, dados.resultados) : Math.max.apply(Math, dados.resultados);
-    var bonus = Number(options.bonus || options.modificador || 0);
-    var total = escolhido + bonus;
-    var ca = Number(options.ca);
-    var temCA = isFinite(ca);
-    var acerto = temCA ? (escolhido === 20 ? true : escolhido === 1 ? false : total >= ca) : null;
-    mostrarResumo("Ataque", dados.resultados.join(" / ") + " → usado " + escolhido + (bonus ? (" + bônus " + bonus) : "") + (temCA ? (acerto ? " • ACERTO" : " • ERRO") : ""), total);
-    return {
-      resultados: dados.resultados,
-      escolhido: escolhido,
-      bonus: bonus,
-      total: total,
-      ca: temCA ? ca : null,
-      acerto: acerto,
-      critico: escolhido === 20,
-      falhaCritica: escolhido === 1
-    };
-  }
-
-  async function executarAtaque(options) {
-    options = options || {};
-    if (options.ca == null || !isFinite(Number(options.ca))) {
-      throw new Error("Informe a Classe de Armadura (CA) do alvo para resolver o acerto.");
-    }
-    var ataque = await rolarAtaque(options);
-    if (!ataque.acerto) {
-      mostrarResumo("Dano", "não rolado: ataque errou");
-      return { ataque: ataque, dano: null, acertou: false };
-    }
-    var dano = options.dano ? await rolarFormula(options.dano, options) : null;
-    if (dano) mostrarResumo("Dano aplicado", options.dano, dano.total);
-    return { ataque: ataque, dano: dano, acertou: true };
   }
 
   function segurar(ms) {
@@ -818,7 +513,7 @@
         if (d.ax === undefined) ancoraBaixo(d);
       });
       if (!list.length && dice.length < MAX_DICE) {
-        var p = spawn(20, 0, {}, null, null, 20);
+        var p = spawn(20, 20, 0);
         p.pend = true;
         p.hold = until;
         p.phase = "shake";
@@ -829,13 +524,5 @@
     }
   }
 
-  window.Dados3D = {
-    lancar: lancar,
-    lancarVarios: lancarVarios,
-    rolarFormula: rolarFormula,
-    rolarIniciativa: rolarIniciativa,
-    rolarAtaque: rolarAtaque,
-    executarAtaque: executarAtaque,
-    segurar: segurar
-  };
+  window.Dados3D = { lancar: lancar, segurar: segurar };
 })();
