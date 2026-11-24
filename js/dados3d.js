@@ -190,7 +190,7 @@
       kind: kind, shape: shape, R: R, delay: delay, x: sx, y: sy, h: 90, vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed, vz: rnd(480, 700),
       q: qrandom(), w: [rnd(-1, 1) * 22, rnd(-1, 1) * 22, rnd(-1, 1) * 22], qt: qt, age: 0, done: false, doneAt: 0, alpha: 1,
       color: color, hold: holdAte > Date.now() ? holdAte : 0, calm: false, pend: false, grace: 0, born: Date.now(),
-      phase: holdAte > Date.now() ? "shake" : "", shakeEnd: shakeAte, st: 0, swt: 0
+      phase: holdAte > Date.now() ? "shake" : "", shakeEnd: shakeAte, shakeStart: Date.now(), st: 0, swt: 0, ph: rnd(0, Math.PI * 2), dir: 1
     };
     dice.push(nd);
     return nd;
@@ -219,32 +219,28 @@
   }
 
   function ancoraBaixo(d) {
-    d.tax = rnd(W * 0.1, W * 0.9);
-    d.tay = H - d.R * rnd(1.4, 2.8);
-    d.tt = rnd(0.9, 1.6);
+    d.ax = rnd(W * 0.12, W * 0.88);
+    d.ay = H - d.R * rnd(1.4, 2.8);
+    d.dir = d.ax > W / 2 ? -1 : 1;
+    d.shakeStart = Date.now();
   }
 
   function agitar(d, dt) {
     d.st += dt;
-    if (d.ax === undefined) {
-      ancoraBaixo(d);
-      d.ax = d.tax;
-      d.ay = d.tay;
-    }
-    d.tt -= dt;
-    if (d.tt <= 0) ancoraBaixo(d);
-    var e = Math.min(1, dt * 1.6);
-    d.ax += (d.tax - d.ax) * e;
-    d.ay += (d.tay - d.ay) * e;
-    var t = d.st;
-    d.x = d.ax + Math.sin(t * 8) * d.R * 0.5 + Math.sin(t * 5.1 + 1.3) * d.R * 0.3;
-    d.y = d.ay + Math.sin(t * 6.3 + 0.7) * d.R * 0.15;
-    d.h = 26 + (0.5 + 0.5 * Math.sin(t * 10)) * d.R * 0.9;
+    if (d.ax === undefined) ancoraBaixo(d);
+    var span = Math.max(300, d.shakeEnd - d.shakeStart);
+    var ramp = Math.min(1, Math.max(0, (Date.now() - d.shakeStart) / span));
+    ramp = ramp * ramp;
+    d.ph += (7 + 5 * ramp) * dt;
+    var a = d.R * (0.35 + 1.15 * ramp);
+    d.x = d.ax + Math.sin(d.ph) * a;
+    d.y = d.ay + Math.sin(d.ph * 0.8 + 0.7) * d.R * 0.12;
+    d.h = 26 + (0.5 + 0.5 * Math.sin(d.ph * 1.25)) * d.R * (0.9 + 0.8 * ramp);
     d.vx = d.vy = d.vz = 0;
     d.swt -= dt;
     if (d.swt <= 0) {
       d.swt = rnd(0.3, 0.6);
-      d.wt = mul(aleatorio3(), rnd(5, 11));
+      d.wt = mul(aleatorio3(), 5 + 10 * ramp);
     }
     if (!d.wt) d.wt = [0, 0, 0];
     var k = Math.min(1, dt * 4);
@@ -256,7 +252,7 @@
     d.phase = "throw";
     d.age = 0;
     if (d.ax === undefined) return;
-    var tx = rnd(W * 0.15, W * 0.85), ty = rnd(H * 0.12, H * 0.55);
+    var tx = Math.min(W * 0.92, Math.max(W * 0.08, d.x + d.dir * rnd(0.3, 0.65) * W)), ty = rnd(H * 0.12, H * 0.5);
     var dx = tx - d.x, dy = ty - d.y, dist = Math.hypot(dx, dy) || 1, sp = dist * 3 * rnd(0.9, 1.15);
     d.vx = dx / dist * sp;
     d.vy = dy / dist * sp;
@@ -286,7 +282,8 @@
       if (d.grace <= 0 && d.pend) { d.done = true; d.doneAt = 2.6; }
     }
     if (holding && d.phase === "shake") {
-      if (Date.now() < d.shakeEnd) {
+      var agora = Date.now();
+      if (agora < d.shakeEnd || (d.ax !== undefined && -d.dir * Math.cos(d.ph) < 0.8 && agora < d.shakeEnd + 700)) {
         agitar(d, dt);
         return;
       }
@@ -502,9 +499,8 @@
         d.phase = "shake";
         d.shakeEnd = shakeAte;
         ancoraBaixo(d);
-        d.tax = Math.min(W - d.R, Math.max(d.R, d.tax + (i - (list.length - 1) / 2) * d.R * 2.4));
-        d.ax = d.tax;
-        d.ay = d.tay;
+        d.ax = Math.min(W - d.R * 2, Math.max(d.R * 2, d.ax + (i - (list.length - 1) / 2) * d.R * 2.6));
+        d.dir = d.ax > W / 2 ? -1 : 1;
       });
       if (!list.length && dice.length < MAX_DICE) {
         var p = spawn(20, 20, 0);
