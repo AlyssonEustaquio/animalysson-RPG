@@ -288,7 +288,7 @@ function runPlayerSkill(player, profile) {
       else if (skill === "Atletismo") bonus = Number(profile.athletics) || 0;
     }
     var check = rollCheck(bonus);
-    playerActionResult("🎲 " + skill, [skill + " (" + ability + "): 1d20 (" + check.die + ") + " + signed(check.bonus) + " = " + check.total + "."]);
+    playerActionResult("🎲 " + skill, [skill + " (" + ability + "): 1d20 (" + check.die + ") " + signed(check.bonus) + " = " + check.total + "."]);
   }
 
 function runPlayerInteract(player, range) {

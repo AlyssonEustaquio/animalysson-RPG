@@ -221,8 +221,9 @@
       d.h = 0;
       if (Math.abs(d.vz) > 130 && !d.calm) {
         d.vz = -d.vz * 0.42;
-        d.vx *= 0.78;
-        d.vy *= 0.78;
+        var bk = holding ? 0.92 : 0.78;
+        d.vx *= bk;
+        d.vy *= bk;
         d.w = [d.w[0] + rnd(-6, 6), d.w[1] + rnd(-6, 6), d.w[2] + rnd(-6, 6)];
       } else {
         d.vz = 0;
@@ -231,8 +232,12 @@
     }
     var speed = Math.hypot(d.vx, d.vy);
     if (onGround) {
-      var f = Math.exp(-2.2 * dt);
-      var ns = Math.max(0, speed * f - 70 * dt);
+      var ns;
+      if (holding) {
+        var rem = Math.max(0.2, (d.hold - Date.now()) / 1000);
+        var kk = Math.min(6, Math.max(0.25, Math.log(Math.max(speed, 31) / 30) / rem));
+        ns = speed * Math.exp(-kk * dt);
+      } else ns = Math.max(0, speed * Math.exp(-2.2 * dt) - 70 * dt);
       var k = speed > 0 ? ns / speed : 0;
       d.vx *= k;
       d.vy *= k;
@@ -241,18 +246,11 @@
       var bl = Math.min(1, dt * 5);
       d.w = [d.w[0] + (wr[0] - d.w[0]) * bl, d.w[1] + (wr[1] - d.w[1]) * bl, d.w[2] * Math.exp(-3 * dt)];
     }
-    if (holding && d.h === 0 && Math.hypot(d.vx, d.vy) < 260) {
-      var ka = rnd(0, Math.PI * 2), ks = rnd(380, 700);
-      d.vx = Math.cos(ka) * ks;
-      d.vy = Math.sin(ka) * ks;
-      d.vz = rnd(420, 680);
-      d.w = [rnd(-1, 1) * 22, rnd(-1, 1) * 22, rnd(-1, 1) * 22];
-    }
-    var m = 36, S = d.R;
-    if (d.x < S) { d.x = S; d.vx = Math.abs(d.vx) * 0.6; }
-    if (d.x > W - S) { d.x = W - S; d.vx = -Math.abs(d.vx) * 0.6; }
-    if (d.y < S) { d.y = S; d.vy = Math.abs(d.vy) * 0.6; }
-    if (d.y > H - S && d.age > 0.6) { d.y = H - S; d.vy = -Math.abs(d.vy) * 0.6; }
+    var S = d.R, wr2 = holding ? 0.85 : 0.6;
+    if (d.x < S) { d.x = S; d.vx = Math.abs(d.vx) * wr2; }
+    if (d.x > W - S) { d.x = W - S; d.vx = -Math.abs(d.vx) * wr2; }
+    if (d.y < S) { d.y = S; d.vy = Math.abs(d.vy) * wr2; }
+    if (d.y > H - S && d.age > 0.6) { d.y = H - S; d.vy = -Math.abs(d.vy) * wr2; }
     var wl = Math.hypot(d.w[0], d.w[1], d.w[2]);
     if (wl > 1e-6) {
       var half = 0.5 * dt;
@@ -264,7 +262,11 @@
       d.vx *= kc;
       d.vy *= kc;
       d.w = mul(d.w, Math.exp(-7 * dt));
-      d.q = qnlerp(d.q, d.qt, 1 - Math.exp(-dt * 9));
+      d.q = qnlerp(d.q, d.qt, 1 - Math.exp(-dt * 6));
+    } else if (holding && !d.pend && (d.hold - Date.now()) < 1000) {
+      var ease = 1 - Math.max(0, (d.hold - Date.now()) / 1000);
+      d.q = qnlerp(d.q, d.qt, 1 - Math.exp(-dt * ease * 6));
+      d.w = mul(d.w, Math.exp(-3 * dt * ease));
     } else if (!holding && !d.pend && d.h === 0 && speed < 150) {
       d.q = qnlerp(d.q, d.qt, 1 - Math.exp(-dt * 8));
       d.w = mul(d.w, Math.exp(-6 * dt));
