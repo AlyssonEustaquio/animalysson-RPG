@@ -525,30 +525,32 @@
       var throwMs = Math.min(3600, Math.max(1400, ms * 0.65));
       holdAte = until;
       shakeAte = Math.max(now + 150, until - throwMs);
-      var list = dice.filter(function (d) {
-        return d.pend || d.hold > now || now - d.born < 1500;
-      });
-      if (list.length > 1) list = [list[list.length - 1]];
-      list.forEach(function (d) {
-        d.hold = until;
-        d.calm = false;
-        d.done = false;
-        d.doneAt = 0;
-        d.grace = 0;
-        d.alpha = 1;
-        d.delay = 0;
-        d.pend = true;
-        d.phase = "shake";
-        d.shakeEnd = shakeAte;
-        if (d.ax === undefined) ancoraBaixo(d);
-      });
-      if (!list.length && dice.length < MAX_DICE) {
-        var p = spawn(20, 20, 0);
-        p.pend = true;
-        p.hold = until;
-        p.phase = "shake";
-        p.shakeEnd = shakeAte;
+
+      var visiveis = dice.filter(function (d) { return d.alpha > 0; });
+      if (visiveis.length > 0) {
+        var pends = visiveis.filter(function (d) { return d.pend; });
+        pends.forEach(function (d) {
+          d.hold = until;
+          d.calm = false;
+          d.done = false;
+          d.doneAt = 0;
+          d.grace = 0;
+          d.alpha = 1;
+          d.delay = 0;
+          d.phase = "shake";
+          d.shakeEnd = shakeAte;
+          if (d.ax === undefined) ancoraBaixo(d);
+        });
+        if (pends.length > 0) start();
+        return;
       }
+
+      if (dice.length >= MAX_DICE) return;
+      var p = spawn(20, 20, 0);
+      p.pend = true;
+      p.hold = until;
+      p.phase = "shake";
+      p.shakeEnd = shakeAte;
       start();
     } catch (e) {
     }
