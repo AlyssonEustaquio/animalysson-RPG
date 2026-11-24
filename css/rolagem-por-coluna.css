@@ -119,10 +119,9 @@ html body #app.view-monsters .catalog-detail {
 
 /* Monstros: aplica a rolagem às duas colunas caso a marcação use IDs próprios. */
 html body #app.view-monsters :is(#monsters-grid, #monster-grid, #monsters-list, #monster-list) {
-  min-height: 0 !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  overscroll-behavior: contain;
+  min-height: min-content !important;
+  overflow: visible !important;
+  overscroll-behavior: auto;
 }
 
 html body #app.view-monsters :is(#monster-detail, #monsters-detail) {

@@ -37,6 +37,36 @@ var s=document.getElementById('rail-slot');
 if(s&&!s.classList.contains('collapsed')&&!s.contains(e.target)&&typeof setRail==='function')setRail(false);
 },true);
 
+var celular=matchMedia('(max-width:700px)');
+document.addEventListener('click',function(e){
+if(!celular.matches)return;
+var alvo=e.target.closest&&e.target.closest('.catalog-card');
+if(!alvo)return;
+var lay=alvo.closest('.catalog-layout');
+if(lay)lay.classList.add('detalhe-aberto');
+},true);
+function botoesFechar(){
+document.querySelectorAll('.catalog-layout').forEach(function(lay){
+if(lay.querySelector('.fechar-detalhe'))return;
+var b=document.createElement('button');
+b.type='button';
+b.className='fechar-detalhe';
+b.textContent='✕ Fechar';
+b.addEventListener('click',function(){lay.classList.remove('detalhe-aberto')});
+lay.insertBefore(b,lay.firstChild);
+});
+}
+var appEl=document.getElementById('app');
+if(appEl){
+var agendado=false;
+new MutationObserver(function(){
+if(agendado)return;
+agendado=true;
+requestAnimationFrame(function(){agendado=false;botoesFechar()});
+}).observe(appEl,{childList:true,subtree:true});
+botoesFechar();
+}
+
 window.addEventListener('orientationchange',function(){
 setTimeout(function(){window.dispatchEvent(new Event('resize'))},250);
 });
