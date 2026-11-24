@@ -4,7 +4,7 @@
   var G = 1900;
   var MAX_DICE = 26;
   var cv = null, cx = null, dice = [], raf = null, last = 0, W = 0, H = 0, dpr = 1;
-  var burstAt = 0, burstN = 0, holdAte = 0;
+  var burstAt = 0, burstN = 0, holdAte = 0, shakeAte = 0;
   var shapes = {};
   var LIGHT = [-0.35, -0.5, 0.8];
   var COLORS = { 4: [67, 160, 71], 6: [211, 47, 47], 8: [30, 136, 229], 10: [142, 68, 173], 12: [239, 140, 20], 20: [0, 137, 123], tens: [94, 53, 177] };
@@ -180,16 +180,73 @@
       c.doneAt = 0;
       c.grace = 0;
       c.alpha = 1;
-      if (!(c.hold > Date.now())) calmar(c);
+      if (!(c.hold > Date.now())) {
+        calmar(c);
+        if (c.h <= 0 && Math.hypot(c.vx, c.vy) < 80) c.vz = 260;
+      }
       return c;
     }
     var nd = {
       kind: kind, shape: shape, R: R, delay: delay, x: sx, y: sy, h: 90, vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed, vz: rnd(480, 700),
       q: qrandom(), w: [rnd(-1, 1) * 22, rnd(-1, 1) * 22, rnd(-1, 1) * 22], qt: qt, age: 0, done: false, doneAt: 0, alpha: 1,
-      color: color, hold: holdAte > Date.now() ? holdAte : 0, calm: false, pend: false, grace: 0, born: Date.now()
+      color: color, hold: holdAte > Date.now() ? holdAte : 0, calm: false, pend: false, grace: 0, born: Date.now(),
+      phase: holdAte > Date.now() ? "shake" : "", shakeEnd: shakeAte, st: 0, swt: 0
     };
     dice.push(nd);
     return nd;
+  }
+
+  function aleatorio3() {
+    return norm([rnd(-1, 1), rnd(-1, 1), rnd(-1, 1)]);
+  }
+
+  function girar(d, dt) {
+    var wl = Math.hypot(d.w[0], d.w[1], d.w[2]);
+    if (wl > 1e-6) {
+      var half = 0.5 * dt;
+      var dq = qmul([d.w[0] * half, d.w[1] * half, d.w[2] * half, 0], d.q);
+      d.q = qnorm([d.q[0] + dq[0], d.q[1] + dq[1], d.q[2] + dq[2], d.q[3] + dq[3]]);
+    }
+  }
+
+  function faceMaisBaixa(d) {
+    var best = null, bz = -2;
+    d.shape.faces.forEach(function (f) {
+      var z = rot(d.q, f.n)[2];
+      if (z > bz) { bz = z; best = f; }
+    });
+    return qmul(qFromTo(rot(d.q, best.n), [0, 0, 1]), d.q);
+  }
+
+  function agitar(d, dt) {
+    d.st += dt;
+    if (d.ax === undefined) {
+      d.ax = W * 0.5 + rnd(-1, 1) * d.R * 3;
+      d.ay = H * 0.7 + rnd(-1, 1) * d.R;
+    }
+    var t = d.st;
+    d.x = d.ax + Math.sin(t * 37) * d.R * 0.35 + Math.sin(t * 23 + 1.3) * d.R * 0.2;
+    d.y = d.ay + Math.sin(t * 31 + 0.7) * d.R * 0.25 + Math.sin(t * 19) * d.R * 0.15;
+    d.h = 40 + Math.abs(Math.sin(t * 27)) * d.R * 1.4;
+    d.vx = d.vy = d.vz = 0;
+    d.swt -= dt;
+    if (d.swt <= 0) {
+      d.swt = rnd(0.04, 0.09);
+      d.w = mul(aleatorio3(), rnd(18, 30));
+    }
+    girar(d, dt);
+  }
+
+  function lancarDoCopo(d) {
+    d.phase = "throw";
+    d.age = 0;
+    if (d.ax === undefined) return;
+    var tx = rnd(W * 0.15, W * 0.85), ty = rnd(H * 0.22, H * 0.7);
+    var dx = tx - d.x, dy = ty - d.y, dist = Math.hypot(dx, dy) || 1, sp = dist * 2.2 * rnd(0.85, 1.15);
+    d.vx = dx / dist * sp;
+    d.vy = dy / dist * sp;
+    d.vz = rnd(380, 600);
+    d.w = mul(aleatorio3(), rnd(18, 28));
   }
 
   function calmar(d) {
@@ -205,12 +262,20 @@
       d.hold = 0;
       holding = false;
       d.age = 0;
+      if (d.phase === "shake") lancarDoCopo(d);
       if (d.pend) d.grace = 0.3;
       else calmar(d);
     }
     if (d.grace > 0) {
       d.grace -= dt;
       if (d.grace <= 0 && d.pend) { d.done = true; d.doneAt = 2.6; }
+    }
+    if (holding && d.phase === "shake") {
+      if (Date.now() < d.shakeEnd) {
+        agitar(d, dt);
+        return;
+      }
+      lancarDoCopo(d);
     }
     d.vz -= G * dt;
     d.h += d.vz * dt;
@@ -224,7 +289,7 @@
         var bk = holding ? 0.92 : 0.78;
         d.vx *= bk;
         d.vy *= bk;
-        d.w = [d.w[0] + rnd(-6, 6), d.w[1] + rnd(-6, 6), d.w[2] + rnd(-6, 6)];
+        d.w = mul(aleatorio3(), Math.min(30, 8 + Math.hypot(d.vx, d.vy) / 70));
       } else {
         d.vz = 0;
         onGround = true;
@@ -242,31 +307,28 @@
       d.vx *= k;
       d.vy *= k;
       speed = ns;
-      var wr = [d.vy / (d.R * 0.012 * 60), -d.vx / (d.R * 0.012 * 60), 0];
-      var bl = Math.min(1, dt * 5);
-      d.w = [d.w[0] + (wr[0] - d.w[0]) * bl, d.w[1] + (wr[1] - d.w[1]) * bl, d.w[2] * Math.exp(-3 * dt)];
+      d.w = mul(d.w, Math.exp(-3.5 * dt));
     }
     var S = d.R, wr2 = holding ? 0.85 : 0.6;
     if (d.x < S) { d.x = S; d.vx = Math.abs(d.vx) * wr2; }
     if (d.x > W - S) { d.x = W - S; d.vx = -Math.abs(d.vx) * wr2; }
     if (d.y < S) { d.y = S; d.vy = Math.abs(d.vy) * wr2; }
     if (d.y > H - S && d.age > 0.6) { d.y = H - S; d.vy = -Math.abs(d.vy) * wr2; }
-    var wl = Math.hypot(d.w[0], d.w[1], d.w[2]);
-    if (wl > 1e-6) {
-      var half = 0.5 * dt;
-      var dq = qmul([d.w[0] * half, d.w[1] * half, d.w[2] * half, 0], d.q);
-      d.q = qnorm([d.q[0] + dq[0], d.q[1] + dq[1], d.q[2] + dq[2], d.q[3] + dq[3]]);
-    }
+    girar(d, dt);
     if (d.calm) {
       var kc = Math.exp(-8 * dt);
       d.vx *= kc;
       d.vy *= kc;
       d.w = mul(d.w, Math.exp(-7 * dt));
       d.q = qnlerp(d.q, d.qt, 1 - Math.exp(-dt * 6));
-    } else if (holding && !d.pend && (d.hold - Date.now()) < 1000) {
-      var ease = 1 - Math.max(0, (d.hold - Date.now()) / 1000);
-      d.q = qnlerp(d.q, d.qt, 1 - Math.exp(-dt * ease * 6));
-      d.w = mul(d.w, Math.exp(-3 * dt * ease));
+    } else if (holding) {
+      var remS = (d.hold - Date.now()) / 1000;
+      var rate = d.h === 0 ? (1 - Math.min(1, speed / 350)) * 5 : 0;
+      if (!d.pend && remS < 1) rate = Math.max(rate, (1 - Math.max(0, remS)) * 6);
+      if (rate > 0) {
+        d.q = qnlerp(d.q, d.pend ? faceMaisBaixa(d) : d.qt, 1 - Math.exp(-dt * rate));
+        d.w = mul(d.w, Math.exp(-dt * rate * 0.5));
+      }
     } else if (!holding && !d.pend && d.h === 0 && speed < 150) {
       d.q = qnlerp(d.q, d.qt, 1 - Math.exp(-dt * 8));
       d.w = mul(d.w, Math.exp(-6 * dt));
@@ -406,22 +468,33 @@
       ms = Number(ms);
       if (!isFinite(ms) || ms <= 0) return;
       ensure();
-      var now = Date.now(), until = now + ms, hit = false;
-      holdAte = Math.max(holdAte, until);
-      dice.forEach(function (d) {
-        if (!d.pend && !(d.hold > now) && now - d.born >= 1500) return;
-        d.hold = Math.max(d.hold, until);
+      var now = Date.now(), until = now + ms;
+      var throwMs = Math.min(2200, Math.max(800, ms * 0.6));
+      holdAte = until;
+      shakeAte = Math.max(now + 150, until - throwMs);
+      var list = dice.filter(function (d) {
+        return d.pend || d.hold > now || now - d.born < 1500;
+      });
+      list.forEach(function (d, i) {
+        d.hold = until;
         d.calm = false;
         d.done = false;
         d.doneAt = 0;
         d.grace = 0;
         d.alpha = 1;
-        hit = true;
+        d.delay = 0;
+        if (d.phase === "throw") return;
+        d.phase = "shake";
+        d.shakeEnd = shakeAte;
+        d.ax = W * 0.5 + (i - (list.length - 1) / 2) * d.R * 2.4;
+        d.ay = H * 0.7;
       });
-      if (!hit && dice.length < MAX_DICE) {
+      if (!list.length && dice.length < MAX_DICE) {
         var p = spawn(20, 20, 0);
         p.pend = true;
         p.hold = until;
+        p.phase = "shake";
+        p.shakeEnd = shakeAte;
       }
       start();
     } catch (e) {
