@@ -406,30 +406,19 @@ function visibleEdgesForPlayer(player, range) {
     });
   }
 
+var chatFree = 0;
+
+function postRollChat(title, lines, buttons, done) {
+    var now = Date.now();
+    var at = Math.max(now, chatFree, actionBusy && now < actionBusy.until ? actionBusy.until + 300 : 0);
+    chatFree = at + 1;
+    function run() {
+      window.ChatRolagens.postar(title, lines, buttons, done);
+    }
+    if (at <= now) run();
+    else window.setTimeout(run, at - now);
+  }
+
 function playerActionResult(title, lines) {
-    var dlg = createPortalDialog(title, "Resultado automático — a rolagem foi aplicada aos alvos dentro da visão do personagem.");
-    if (!dlg) return;
-    dlg.panel.style.width = "min(620px,100%)";
-    dlg.panel.style.maxHeight = "86%";
-    dlg.panel.style.overflow = "auto";
-    var list = document.createElement("div");
-    list.style.cssText = "display:flex;flex-direction:column;gap:7px;margin:10px 0 14px;max-height:55vh;overflow:auto;";
-    (lines || []).forEach(function(line) {
-      var item = document.createElement("div");
-      item.style.cssText = "padding:8px 10px;border:1px solid rgba(255,255,255,.12);border-radius:7px;background:rgba(255,255,255,.045);font-size:13px;line-height:1.45;white-space:pre-wrap;";
-      item.textContent = String(line);
-      list.appendChild(item);
-    });
-    dlg.panel.appendChild(list);
-    var actions = document.createElement("div");
-    actions.className = "mp-portal-dialog-actions";
-    var close = document.createElement("button");
-    close.type = "button";
-    close.className = "primary";
-    close.textContent = "Fechar";
-    close.onclick = function() {
-      closePortalDialog(dlg.overlay);
-    };
-    actions.appendChild(close);
-    dlg.panel.appendChild(actions);
+    postRollChat(title, lines);
   }

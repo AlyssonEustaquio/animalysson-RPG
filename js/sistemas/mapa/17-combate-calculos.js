@@ -357,7 +357,7 @@ function getCombat() {
       var r = gastarBase.apply(this, arguments);
       if (r && r.ok && !combatSkipWait && combatActive() && t && t.tipo === "player" && COMBAT_COST_MS[tipo]) {
         var ms = COMBAT_COST_MS[tipo];
-        beginActionWait(tipo === "acao" ? "Ação" : tipo === "bonus" ? "Ação bônus" : "Reação", ms);
+        beginActionWait(ms);
       }
       return r;
     };

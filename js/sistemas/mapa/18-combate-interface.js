@@ -1,4 +1,8 @@
 function combatShowLog(title, lines, onClose, extraButtons) {
+    if (title !== "Registro do combate") {
+      postRollChat(title, lines, extraButtons, onClose);
+      return;
+    }
     var dlg = combatDialog(title, "", 620);
     if (!dlg) {
       if (onClose) onClose();
@@ -223,7 +227,7 @@ function combatPerformAttackBase(actor, atq, bonusMode) {
         }
       }
       var res = C.atacar(actor, target, atq, {});
-      if (res.ok && actor.tipo === "player") beginActionWait("Ataque", atq.tempoMs || 1500);
+      if (res.ok && actor.tipo === "player") beginActionWait(atq.tempoMs || 1500);
       if (res.ok && !bonusMode) {
         actor.eco.atacou = true;
         if (C.ativo()) {
@@ -425,7 +429,7 @@ function combatSpellDialog(actor) {
       } finally {
         combatSkipWait = false;
       }
-      if (res && res.ok !== false && actor.tipo === "player") beginActionWait("Magia", spellCastMs(nome.value.trim(), acao.value));
+      if (res && res.ok !== false && actor.tipo === "player") beginActionWait(spellCastMs(nome.value.trim(), acao.value));
       combatClose(dlg);
       if (autoLines) res.linhas = autoLines.concat(res.linhas || []);
       combatFinishAction(res);

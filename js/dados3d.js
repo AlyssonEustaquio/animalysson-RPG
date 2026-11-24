@@ -4,7 +4,7 @@
   var G = 1900;
   var MAX_DICE = 26;
   var cv = null, cx = null, dice = [], raf = null, last = 0, W = 0, H = 0, dpr = 1;
-  var burstAt = 0, burstN = 0;
+  var burstAt = 0, burstN = 0, holdAte = 0;
   var shapes = {};
   var LIGHT = [-0.35, -0.5, 0.8];
   var COLORS = { 4: [67, 160, 71], 6: [211, 47, 47], 8: [30, 136, 229], 10: [142, 68, 173], 12: [239, 140, 20], 20: [0, 137, 123], tens: [94, 53, 177] };
@@ -166,16 +166,52 @@
     var qAlign = qFromTo(shape.faces[fi].n, [0, 0, 1]);
     var za = rnd(0, Math.PI * 2);
     var qt = qmul([0, 0, Math.sin(za / 2), Math.cos(za / 2)], qAlign);
-    dice.push({
+    var color = COLORS[kind === "units" ? 10 : kind];
+    for (var pi = 0; pi < dice.length; pi++) {
+      if (!dice[pi].pend) continue;
+      var c = dice[pi];
+      c.pend = false;
+      c.kind = kind;
+      c.shape = shape;
+      c.color = color;
+      c.R = R;
+      c.qt = qt;
+      c.done = false;
+      c.doneAt = 0;
+      c.grace = 0;
+      c.alpha = 1;
+      if (!(c.hold > Date.now())) calmar(c);
+      return c;
+    }
+    var nd = {
       kind: kind, shape: shape, R: R, delay: delay, x: sx, y: sy, h: 90, vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed, vz: rnd(480, 700),
       q: qrandom(), w: [rnd(-1, 1) * 22, rnd(-1, 1) * 22, rnd(-1, 1) * 22], qt: qt, age: 0, done: false, doneAt: 0, alpha: 1,
-      color: COLORS[kind === "units" ? 10 : kind]
-    });
+      color: color, hold: holdAte > Date.now() ? holdAte : 0, calm: false, pend: false, grace: 0, born: Date.now()
+    };
+    dice.push(nd);
+    return nd;
+  }
+
+  function calmar(d) {
+    d.calm = true;
+    d.vz = Math.min(d.vz, 0);
   }
 
   function step(d, dt) {
     if (d.delay > 0) { d.delay -= dt; return; }
     d.age += dt;
+    var holding = d.hold > 0;
+    if (holding && Date.now() >= d.hold) {
+      d.hold = 0;
+      holding = false;
+      d.age = 0;
+      if (d.pend) d.grace = 0.3;
+      else calmar(d);
+    }
+    if (d.grace > 0) {
+      d.grace -= dt;
+      if (d.grace <= 0 && d.pend) { d.done = true; d.doneAt = 2.6; }
+    }
     d.vz -= G * dt;
     d.h += d.vz * dt;
     d.x += d.vx * dt;
@@ -183,7 +219,7 @@
     var onGround = false;
     if (d.h <= 0) {
       d.h = 0;
-      if (Math.abs(d.vz) > 130) {
+      if (Math.abs(d.vz) > 130 && !d.calm) {
         d.vz = -d.vz * 0.42;
         d.vx *= 0.78;
         d.vy *= 0.78;
@@ -205,6 +241,13 @@
       var bl = Math.min(1, dt * 5);
       d.w = [d.w[0] + (wr[0] - d.w[0]) * bl, d.w[1] + (wr[1] - d.w[1]) * bl, d.w[2] * Math.exp(-3 * dt)];
     }
+    if (holding && d.h === 0 && Math.hypot(d.vx, d.vy) < 260) {
+      var ka = rnd(0, Math.PI * 2), ks = rnd(380, 700);
+      d.vx = Math.cos(ka) * ks;
+      d.vy = Math.sin(ka) * ks;
+      d.vz = rnd(420, 680);
+      d.w = [rnd(-1, 1) * 22, rnd(-1, 1) * 22, rnd(-1, 1) * 22];
+    }
     var m = 36, S = d.R;
     if (d.x < S) { d.x = S; d.vx = Math.abs(d.vx) * 0.6; }
     if (d.x > W - S) { d.x = W - S; d.vx = -Math.abs(d.vx) * 0.6; }
@@ -216,16 +259,22 @@
       var dq = qmul([d.w[0] * half, d.w[1] * half, d.w[2] * half, 0], d.q);
       d.q = qnorm([d.q[0] + dq[0], d.q[1] + dq[1], d.q[2] + dq[2], d.q[3] + dq[3]]);
     }
-    if (d.h === 0 && speed < 150) {
+    if (d.calm) {
+      var kc = Math.exp(-8 * dt);
+      d.vx *= kc;
+      d.vy *= kc;
+      d.w = mul(d.w, Math.exp(-7 * dt));
+      d.q = qnlerp(d.q, d.qt, 1 - Math.exp(-dt * 9));
+    } else if (!holding && !d.pend && d.h === 0 && speed < 150) {
       d.q = qnlerp(d.q, d.qt, 1 - Math.exp(-dt * 8));
       d.w = mul(d.w, Math.exp(-6 * dt));
     }
-    if (!d.done && d.h === 0 && speed < 8 && Math.abs(dot4(d.q, d.qt)) > 0.9995) {
+    if (!d.done && !holding && !d.pend && d.h === 0 && speed < 8 && Math.abs(dot4(d.q, d.qt)) > 0.9995) {
       d.done = true;
       d.doneAt = 0;
       d.q = d.qt;
     }
-    if (!d.done && d.age > 6) { d.done = true; d.q = d.qt; d.vx = d.vy = 0; d.h = 0; }
+    if (!d.done && !holding && !d.pend && d.age > 6) { d.done = true; d.q = d.qt; d.vx = d.vy = 0; d.h = 0; }
     if (d.done) {
       d.doneAt += dt;
       if (d.doneAt > 2.6) d.alpha = Math.max(0, 1 - (d.doneAt - 2.6) / 0.6);
@@ -328,7 +377,8 @@
       if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       sides = Number(sides);
       value = Number(value);
-      if (!isFinite(sides) || !isFinite(value) || dice.length >= MAX_DICE) return;
+      if (!isFinite(sides) || !isFinite(value)) return;
+      if (dice.length >= MAX_DICE && !dice.some(function (x) { return x.pend; })) return;
       ensure();
       var now = performance.now();
       if (now - burstAt > 60) burstN = 0;
@@ -348,5 +398,33 @@
     }
   }
 
-  window.Dados3D = { lancar: lancar };
+  function segurar(ms) {
+    try {
+      if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      ms = Number(ms);
+      if (!isFinite(ms) || ms <= 0) return;
+      ensure();
+      var now = Date.now(), until = now + ms, hit = false;
+      holdAte = Math.max(holdAte, until);
+      dice.forEach(function (d) {
+        if (!d.pend && !(d.hold > now) && now - d.born >= 1500) return;
+        d.hold = Math.max(d.hold, until);
+        d.calm = false;
+        d.done = false;
+        d.doneAt = 0;
+        d.grace = 0;
+        d.alpha = 1;
+        hit = true;
+      });
+      if (!hit && dice.length < MAX_DICE) {
+        var p = spawn(20, 20, 0);
+        p.pend = true;
+        p.hold = until;
+      }
+      start();
+    } catch (e) {
+    }
+  }
+
+  window.Dados3D = { lancar: lancar, segurar: segurar };
 })();

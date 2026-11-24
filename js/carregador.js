@@ -2,7 +2,7 @@
   var versao = Date.now();
 
   var modulos = [
-    { nome: "dados3d", arquivos: ["js/dados3d.js"] },
+    { nome: "dados3d", arquivos: ["js/dados3d.js", "js/chat-rolagens.js"] },
     { nome: "dados", arquivos: [
       "js/dados/especies.js",
       "js/dados/classes.js",

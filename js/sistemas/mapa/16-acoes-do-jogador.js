@@ -319,8 +319,6 @@ var COMBAT_COST_MS = { acao: 6000, bonus: 3000, reacao: 0 };
 
 var actionBusy = null;
 
-var actionTickRunning = false;
-
 var combatSkipWait = false;
 
 function actionLocked() {
@@ -364,36 +362,11 @@ function spellCastMs(name, castType) {
     return ms;
   }
 
-function showActionWait() {
-    var el = document.getElementById("mp-action-wait");
-    if (!el) {
-      el = document.createElement("div");
-      el.id = "mp-action-wait";
-      el.style.cssText = "position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:9999;background:rgba(10,10,11,.92);color:#fff;border:1px solid #888;border-radius:10px;padding:8px 14px;font:600 14px Roboto,sans-serif;min-width:180px;text-align:center;pointer-events:none";
-      el.innerHTML = '<div class="t"></div><div style="height:6px;background:#333;border-radius:3px;margin-top:6px;overflow:hidden"><div class="b" style="height:100%;width:0;background:#4fc3f7"></div></div>';
-      document.body.appendChild(el);
-    }
-    el.style.display = "block";
-    if (actionTickRunning) return;
-    actionTickRunning = true;
-    var bar = el.querySelector(".b"), label = el.querySelector(".t");
-    (function tick() {
-      if (!actionBusy || Date.now() >= actionBusy.until) {
-        el.style.display = "none";
-        actionTickRunning = false;
-        return;
-      }
-      label.textContent = actionBusy.label;
-      bar.style.width = Math.min(100, (Date.now() - actionBusy.t0) / actionBusy.ms * 100) + "%";
-      window.requestAnimationFrame(tick);
-    })();
-  }
-
-function beginActionWait(label, ms) {
+function beginActionWait(ms) {
     if (!(ms > 0)) return;
     stopKeyMove();
-    actionBusy = { t0: Date.now(), ms: ms, until: Date.now() + ms, label: label + "… " + Math.round(ms / 100) / 10 + " s" };
-    showActionWait();
+    actionBusy = { until: Date.now() + ms };
+    if (window.Dados3D) window.Dados3D.segurar(ms);
   }
 
 function runPlayerAction(action) {
@@ -403,7 +376,7 @@ function runPlayerAction(action) {
         return;
       }
       var ms = ACTION_MS[action];
-      beginActionWait("Executando ação", ms);
+      beginActionWait(ms);
       window.setTimeout(function() {
         actionBusy = null;
         runPlayerActionNow(action);
