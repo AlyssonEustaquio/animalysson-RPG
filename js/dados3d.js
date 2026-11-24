@@ -352,38 +352,19 @@
       var rate = d.h === 0 ? (1 - Math.min(1, speed / 350)) * 5 : 0;
       if (!d.pend && remS < 1) rate = Math.max(rate, (1 - Math.max(0, remS)) * 6);
       if (rate > 0) {
-        // Durante o hold: se ainda não capturou face física, usa a face de baixo
-        if (!d.lockedFace) {
-          d.qt = faceMaisBaixa(d);
-        }
         d.q = qnlerp(d.q, d.pend ? faceMaisBaixa(d) : d.qt, 1 - Math.exp(-dt * rate));
         d.w = mul(d.w, Math.exp(-dt * rate * 0.5));
       }
-    } else if (!holding && !d.pend && d.h === 0 && speed < 140) {
-      // Quando o dado fica lento no chão, captura a face física uma única vez
-      // (em vez de forçar a face pré-escolhida e "virar" no final)
-      if (!d.lockedFace) {
-        d.qt = faceMaisBaixa(d);
-        d.lockedFace = true;
-      }
-      d.q = qnlerp(d.q, d.qt, 1 - Math.exp(-dt * 4.2));
-      d.w = mul(d.w, Math.exp(-3.8 * dt));
+    } else if (!holding && !d.pend && d.h === 0 && speed < 110) {
+      d.q = qnlerp(d.q, d.qt, 1 - Math.exp(-dt * 5));
+      d.w = mul(d.w, Math.exp(-4 * dt));
     }
-    if (!d.done && !holding && !d.pend && d.h === 0 && speed < 8 && d.lockedFace && Math.abs(dot4(d.q, d.qt)) > 0.999) {
+    if (!d.done && !holding && !d.pend && d.h === 0 && speed < 8 && Math.abs(dot4(d.q, d.qt)) > 0.9995) {
       d.done = true;
       d.doneAt = 0;
       d.q = d.qt;
     }
-    if (!d.done && !holding && !d.pend && d.age > 9) {
-      if (!d.lockedFace) {
-        d.qt = faceMaisBaixa(d);
-        d.lockedFace = true;
-      }
-      d.done = true;
-      d.q = d.qt;
-      d.vx = d.vy = 0;
-      d.h = 0;
-    }
+    if (!d.done && !holding && !d.pend && d.age > 9) { d.done = true; d.q = d.qt; d.vx = d.vy = 0; d.h = 0; }
     if (d.done) {
       d.doneAt += dt;
       if (d.doneAt > 2.6) d.alpha = Math.max(0, 1 - (d.doneAt - 2.6) / 0.6);

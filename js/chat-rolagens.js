@@ -54,4 +54,5 @@
   }
 
   window.ChatRolagens = { postar: postar };
+  garantir();
 })();
