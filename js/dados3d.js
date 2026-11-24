@@ -43,7 +43,16 @@
     return qnorm([a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k, a[3] + (b[3] - a[3]) * k]);
   }
   function dot4(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3]; }
-  function qrandom() { return qnorm([rnd(-1, 1), rnd(-1, 1), rnd(-1, 1), rnd(-1, 1)]); }
+  function qrandom() {
+    // Amostragem uniforme de orientações (Shoemake), sem escolher uma face-alvo.
+    var u1 = Math.random(), u2 = Math.random(), u3 = Math.random();
+    return [
+      Math.sqrt(1 - u1) * Math.sin(2 * Math.PI * u2),
+      Math.sqrt(1 - u1) * Math.cos(2 * Math.PI * u2),
+      Math.sqrt(u1) * Math.sin(2 * Math.PI * u3),
+      Math.sqrt(u1) * Math.cos(2 * Math.PI * u3)
+    ];
+  }
 
   function buildShape(verts, strings, pairs, fontSize) {
     var maxLen = 0;
@@ -152,21 +161,36 @@
     cv.height = Math.round(H * dpr);
   }
 
-  function spawn(kind, value, delay) {
+  function origemDoLancamento(origin, R) {
+    var x = W / 2, y = H - R * 1.5;
+    if (origin && typeof origin.getBoundingClientRect === "function") {
+      var rect = origin.getBoundingClientRect();
+      x = rect.left + rect.width / 2;
+      y = rect.top + rect.height / 2;
+    } else if (origin && isFinite(Number(origin.x)) && isFinite(Number(origin.y))) {
+      x = Number(origin.x);
+      y = Number(origin.y);
+    }
+    return {
+      x: Math.max(R, Math.min(W - R, x)),
+      y: Math.max(R, Math.min(H - R, y))
+    };
+  }
+
+  function spawn(kind, delay, options, resolve) {
+    options = options || {};
     var shape = getShape(kind);
-    var label = String(value);
-    var fi = 0;
-    for (var i = 0; i < shape.faces.length; i++) if (shape.faces[i].label.replace(".", "") === label) { fi = i; break; }
     var R = Math.max(20, Math.min(40, Math.min(W, H) * 0.055));
-    var sx = rnd(W * 0.12, W * 0.88), sy = H + R * 0.3;
-    var tx = rnd(W * 0.15, W * 0.85), ty = rnd(H * 0.22, H * 0.7);
-    var dx = tx - sx, dy = ty - sy, dist = Math.hypot(dx, dy);
+    var origin = origemDoLancamento(options.origem || options.origin || options.element || options.source, R);
+    var sx = origin.x, sy = origin.y;
+    var tx = rnd(W * 0.15, W * 0.85), ty = rnd(H * 0.22, H * 0.68);
+    var dx = tx - sx, dy = ty - sy, dist = Math.hypot(dx, dy) || 1;
     var speed = dist * 3.1 * rnd(0.85, 1.15);
     var ang = Math.atan2(dy, dx) + rnd(-0.12, 0.12);
-    var qAlign = qFromTo(shape.faces[fi].n, [0, 0, 1]);
-    var za = rnd(0, Math.PI * 2);
-    var qt = qmul([0, 0, Math.sin(za / 2), Math.cos(za / 2)], qAlign);
     var color = COLORS[kind === "units" ? 10 : kind];
+
+    // Um dado reservado pelo modo de agitação pode ser reaproveitado, mas
+    // nunca recebe uma face ou resultado pré-definido.
     for (var pi = 0; pi < dice.length; pi++) {
       if (!dice[pi].pend) continue;
       var c = dice[pi];
@@ -175,22 +199,37 @@
       c.shape = shape;
       c.color = color;
       c.R = R;
-      c.qt = qt;
+      c.x = sx;
+      c.y = sy;
+      c.h = 90;
+      c.vx = Math.cos(ang) * speed;
+      c.vy = Math.sin(ang) * speed;
+      c.vz = rnd(600, 850);
+      c.q = qrandom();
+      c.w = [rnd(-1, 1) * 22, rnd(-1, 1) * 22, rnd(-1, 1) * 22];
+      c.age = 0;
       c.done = false;
       c.doneAt = 0;
-      c.grace = 0;
       c.alpha = 1;
-      if (!(c.hold > Date.now()) && c.h <= 0 && Math.hypot(c.vx, c.vy) < 80) {
-        calmar(c);
-        c.vz = 260;
-      }
+      c.calm = false;
+      c.delay = delay;
+      c.resolve = resolve;
+      c.resolved = false;
+      c.grace = 0;
+      c.born = Date.now();
+      c.phase = "throw";
       return c;
     }
+
     var nd = {
-      kind: kind, shape: shape, R: R, delay: delay, x: sx, y: sy, h: 90, vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed, vz: rnd(600, 850),
-      q: qrandom(), w: [rnd(-1, 1) * 22, rnd(-1, 1) * 22, rnd(-1, 1) * 22], qt: qt, age: 0, done: false, doneAt: 0, alpha: 1,
-      color: color, hold: holdAte > Date.now() ? holdAte : 0, calm: false, pend: false, grace: 0, born: Date.now(),
-      phase: holdAte > Date.now() ? "shake" : "", shakeEnd: shakeAte, shakeStart: Date.now(), st: 0, swt: 0, ph: rnd(0, Math.PI * 2), dir: 1
+      kind: kind, shape: shape, R: R, delay: delay, x: sx, y: sy, h: 90,
+      vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed, vz: rnd(600, 850),
+      q: qrandom(), w: [rnd(-1, 1) * 22, rnd(-1, 1) * 22, rnd(-1, 1) * 22],
+      age: 0, done: false, doneAt: 0, alpha: 1, color: color,
+      hold: holdAte > Date.now() ? holdAte : 0, calm: false, pend: false,
+      grace: 0, born: Date.now(), phase: holdAte > Date.now() ? "shake" : "throw",
+      shakeEnd: shakeAte, shakeStart: Date.now(), st: 0, swt: 0,
+      ph: rnd(0, Math.PI * 2), dir: 1, resolve: resolve, resolved: false
     };
     dice.push(nd);
     if (nd.phase === "shake" && shakeAte > Date.now()) {
@@ -200,6 +239,36 @@
       nd.h = 40;
     }
     return nd;
+  }
+
+  function valorDaFaceSuperior(d) {
+    var melhor = null, maiorZ = -Infinity;
+    d.shape.faces.forEach(function (face) {
+      var z = rot(d.q, face.n)[2];
+      if (z > maiorZ) { maiorZ = z; melhor = face; }
+    });
+    if (!melhor) return NaN;
+    var label = String(melhor.label).replace(/\./g, "");
+    var value = Number(label);
+    if (d.kind === 10 && label === "0") return 10;
+    if (d.kind === "tens" && label === "00") return 0;
+    return value;
+  }
+
+  function concluirRolagem(d) {
+    if (d.resolved) return;
+    // Congela o resultado no instante em que o dado realmente para.
+    d.resolved = true;
+    d.result = valorDaFaceSuperior(d);
+  }
+
+  function entregarResultadoQuandoSumir(d) {
+    // Mantém a rolagem atual visível até terminar a animação de saída.
+    // Assim, lancarVarios/rolarFormula não iniciam o próximo dado por cima dele.
+    if (!d.notified && d.resolved && d.alpha <= 0) {
+      d.notified = true;
+      if (typeof d.resolve === "function") d.resolve(d.result);
+    }
   }
 
   function aleatorio3() {
@@ -339,33 +408,32 @@
     if (d.y < S) { d.y = S; d.vy = Math.abs(d.vy) * wr2; }
     if (d.y > H - S && d.age > 0.6) { d.y = H - S; d.vy = -Math.abs(d.vy) * wr2; }
     girar(d, dt);
-    if (d.calm) {
-      var kc = Math.exp(-8 * dt);
-      d.vx *= kc;
-      d.vy *= kc;
-      d.w = mul(d.w, Math.exp(-7 * dt));
-      d.q = qnlerp(d.q, d.qt, 1 - Math.exp(-dt * 6));
-    } else if (holding) {
+    if (holding) {
+      // Durante a agitação, conserva o movimento e reduz a rotação aos poucos.
       var remS = (d.hold - Date.now()) / 1000;
-      var rate = d.h === 0 ? (1 - Math.min(1, speed / 350)) * 5 : 0;
-      if (!d.pend && remS < 1) rate = Math.max(rate, (1 - Math.max(0, remS)) * 6);
-      if (rate > 0) {
-        d.q = qnlerp(d.q, d.pend ? faceMaisBaixa(d) : d.qt, 1 - Math.exp(-dt * rate));
-        d.w = mul(d.w, Math.exp(-dt * rate * 0.5));
-      }
-    } else if (!holding && !d.pend && d.h === 0 && speed < 110) {
-      d.q = qnlerp(d.q, d.qt, 1 - Math.exp(-dt * 5));
-      d.w = mul(d.w, Math.exp(-4 * dt));
+      if (d.h === 0 && remS < 0.7) d.w = mul(d.w, Math.exp(-dt * 1.5));
+    } else if (!d.pend && d.h === 0 && speed < 130) {
+      // Atrito físico: o dado desacelera sem ser alinhado para uma face escolhida.
+      d.w = mul(d.w, Math.exp(-3.8 * dt));
     }
-    if (!d.done && !holding && !d.pend && d.h === 0 && speed < 8 && Math.abs(dot4(d.q, d.qt)) > 0.9995) {
+    var angularSpeed = Math.hypot(d.w[0], d.w[1], d.w[2]);
+    if (!d.done && !holding && !d.pend && d.h === 0 && speed < 5 && angularSpeed < 0.12) {
       d.done = true;
       d.doneAt = 0;
-      d.q = d.qt;
+      concluirRolagem(d);
     }
-    if (!d.done && !holding && !d.pend && d.age > 9) { d.done = true; d.q = d.qt; d.vx = d.vy = 0; d.h = 0; }
+    if (!d.done && !holding && !d.pend && d.age > 9) {
+      d.done = true;
+      d.vx = d.vy = d.vz = 0;
+      d.w = [0, 0, 0];
+      d.h = 0;
+      d.doneAt = 0;
+      concluirRolagem(d);
+    }
     if (d.done) {
       d.doneAt += dt;
       if (d.doneAt > 2.6) d.alpha = Math.max(0, 1 - (d.doneAt - 2.6) / 0.6);
+      entregarResultadoQuandoSumir(d);
     }
   }
 
@@ -460,30 +528,131 @@
     }
   }
 
-  function lancar(sides, value) {
-    try {
-      if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-      sides = Number(sides);
-      value = Number(value);
-      if (!isFinite(sides) || !isFinite(value)) return;
-      if (dice.length >= MAX_DICE && !dice.some(function (x) { return x.pend; })) return;
-      ensure();
-      var now = performance.now();
-      if (now - burstAt > 60) burstN = 0;
-      burstAt = now;
-      var delay = burstN * 0.06;
-      burstN++;
-      if (sides === 100) {
-        var tens = value >= 100 ? "00" : String(Math.floor(value / 10) * 10 || "00");
-        if (value < 10) tens = "00";
-        spawn("tens", tens, delay);
-        spawn("units", String(value % 10), delay + 0.03);
-      } else if ([4, 6, 8, 10, 12, 20].indexOf(sides) >= 0) {
-        spawn(sides, sides === 10 && value === 10 ? "0" : String(value), delay);
-      } else return;
-      start();
-    } catch (e) {
+  function lancar(sides, options) {
+    sides = Number(sides);
+    // Compatibilidade com chamadas antigas lancar(lados, valor): o valor é
+    // deliberadamente ignorado; quem define o resultado é a face que parar em cima.
+    if (!options || typeof options !== "object") options = {};
+    if ([4, 6, 8, 10, 12, 20, 100].indexOf(sides) < 0) {
+      return Promise.reject(new Error("Tipo de dado não suportado: d" + sides));
     }
+    return new Promise(function (resolve, reject) {
+      try {
+        ensure();
+        if (dice.length >= MAX_DICE && !dice.some(function (x) { return x.pend; })) {
+          reject(new Error("Limite de dados simultâneos atingido."));
+          return;
+        }
+        if (sides === 100) {
+          var values = [];
+          var remaining = 2;
+          function gotPart(index, value) {
+            values[index] = value;
+            remaining--;
+            if (!remaining) {
+              var result = values[0] + values[1];
+              resolve(result === 0 ? 100 : result);
+            }
+          }
+          spawn("tens", 0, options, function (v) { gotPart(0, v); });
+          spawn("units", 0.04, options, function (v) { gotPart(1, v); });
+        } else {
+          spawn(sides, 0, options, resolve);
+        }
+        start();
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
+  async function lancarVarios(quantidade, lados, options) {
+    quantidade = Math.floor(Number(quantidade));
+    if (!isFinite(quantidade) || quantidade < 1 || quantidade > 100) {
+      throw new Error("Quantidade de dados inválida (use de 1 a 100)." );
+    }
+    var resultados = [];
+    for (var i = 0; i < quantidade; i++) {
+      // Espera a rolagem atual terminar antes de lançar a próxima.
+      resultados.push(await lancar(lados, options || {}));
+    }
+    return { quantidade: quantidade, lados: Number(lados), resultados: resultados, total: resultados.reduce(function (a, b) { return a + b; }, 0) };
+  }
+
+  async function rolarFormula(formula, options) {
+    var texto = String(formula || "").replace(/\s+/g, "");
+    var partes = texto.match(/[+-]?[^+-]+/g);
+    if (!partes || partes.join("") !== texto) throw new Error("Fórmula de dano inválida: " + formula);
+    var termos = [], total = 0;
+    for (var i = 0; i < partes.length; i++) {
+      var parte = partes[i], sinal = 1;
+      if (parte.charAt(0) === "-") { sinal = -1; parte = parte.slice(1); }
+      else if (parte.charAt(0) === "+") parte = parte.slice(1);
+      var match = parte.match(/^(\d*)d(4|6|8|10|12|20|100)$/i);
+      if (match) {
+        var qtd = match[1] ? Number(match[1]) : 1;
+        var lados = Number(match[2]);
+        var bloco = await lancarVarios(qtd, lados, options || {});
+        termos.push({ formula: (sinal < 0 ? "-" : "") + parte, resultados: bloco.resultados, total: bloco.total * sinal });
+        total += bloco.total * sinal;
+      } else if (/^\d+$/.test(parte)) {
+        var fixo = Number(parte) * sinal;
+        termos.push({ formula: (sinal < 0 ? "-" : "") + parte, resultados: [], total: fixo });
+        total += fixo;
+      } else {
+        throw new Error("Termo de dado inválido: " + parte);
+      }
+    }
+    return { formula: texto, termos: termos, total: total };
+  }
+
+  async function rolarIniciativa(participantes, options) {
+    if (!Array.isArray(participantes) || !participantes.length) return [];
+    var resultados = [];
+    for (var i = 0; i < participantes.length; i++) {
+      var participante = participantes[i] || {};
+      var opts = Object.assign({}, options || {});
+      opts.origem = participante.origem || participante.elemento || opts.origem;
+      var dado = await lancar(20, opts);
+      var bonus = Number(participante.bonus || participante.modificador || 0);
+      resultados.push({ participante: participante.nome || participante.id || ("Participante " + (i + 1)), dado: dado, bonus: bonus, total: dado + bonus });
+    }
+    resultados.sort(function (a, b) { return b.total - a.total; });
+    return resultados;
+  }
+
+  async function rolarAtaque(options) {
+    options = options || {};
+    var quantidade = Number(options.quantidadeD20 || options.d20 || 1);
+    if (quantidade !== 1 && quantidade !== 2) throw new Error("Ataque deve rolar 1 ou 2d20.");
+    var dados = await lancarVarios(quantidade, 20, options);
+    var escolhido = options.modo === "desvantagem" ? Math.min.apply(Math, dados.resultados) : Math.max.apply(Math, dados.resultados);
+    var bonus = Number(options.bonus || options.modificador || 0);
+    var total = escolhido + bonus;
+    var ca = Number(options.ca);
+    var temCA = isFinite(ca);
+    var acerto = temCA ? (escolhido === 20 ? true : escolhido === 1 ? false : total >= ca) : null;
+    return {
+      resultados: dados.resultados,
+      escolhido: escolhido,
+      bonus: bonus,
+      total: total,
+      ca: temCA ? ca : null,
+      acerto: acerto,
+      critico: escolhido === 20,
+      falhaCritica: escolhido === 1
+    };
+  }
+
+  async function executarAtaque(options) {
+    options = options || {};
+    if (options.ca == null || !isFinite(Number(options.ca))) {
+      throw new Error("Informe a Classe de Armadura (CA) do alvo para resolver o acerto.");
+    }
+    var ataque = await rolarAtaque(options);
+    if (!ataque.acerto) return { ataque: ataque, dano: null, acertou: false };
+    var dano = options.dano ? await rolarFormula(options.dano, options) : null;
+    return { ataque: ataque, dano: dano, acertou: true };
   }
 
   function segurar(ms) {
@@ -513,7 +682,7 @@
         if (d.ax === undefined) ancoraBaixo(d);
       });
       if (!list.length && dice.length < MAX_DICE) {
-        var p = spawn(20, 20, 0);
+        var p = spawn(20, 0, {}, null);
         p.pend = true;
         p.hold = until;
         p.phase = "shake";
@@ -524,5 +693,13 @@
     }
   }
 
-  window.Dados3D = { lancar: lancar, segurar: segurar };
+  window.Dados3D = {
+    lancar: lancar,
+    lancarVarios: lancarVarios,
+    rolarFormula: rolarFormula,
+    rolarIniciativa: rolarIniciativa,
+    rolarAtaque: rolarAtaque,
+    executarAtaque: executarAtaque,
+    segurar: segurar
+  };
 })();
