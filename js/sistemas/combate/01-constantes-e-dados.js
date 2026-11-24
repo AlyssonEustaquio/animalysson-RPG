@@ -120,7 +120,9 @@ function norm(s) {
   }
 
 function d(n) {
-    return 1 + Math.floor(Math.random() * n);
+    var v = 1 + Math.floor(Math.random() * n);
+    if (window.Dados3D) window.Dados3D.lancar(n, v);
+    return v;
   }
 
 function mod(score) {

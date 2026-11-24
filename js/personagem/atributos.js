@@ -51,7 +51,11 @@ function bgSk() {
 }
 function roll6() {
   const r = () => {
-    const d = [1, 2, 3, 4].map(() => 1 + Math.floor(Math.random() * 6)).sort((x, y) => x - y);
+    const d = [1, 2, 3, 4].map(() => {
+    const v = 1 + Math.floor(Math.random() * 6);
+    if (window.Dados3D) window.Dados3D.lancar(6, v);
+    return v;
+  }).sort((x, y) => x - y);
     return d[1] + d[2] + d[3];
   };
   S.rolled = [0, 0, 0, 0, 0, 0].map(r).sort((x, y) => y - x);

@@ -3,7 +3,7 @@ function vFicha() {
   const sp = S.sp !== null ? SP[S.sp] : null;
   const b = S.bg !== null ? BG[S.bg] : null;
   const pb = c ? 2 : 0;
-  const prof = /* @__PURE__ */ new Set([...S.skills, ...b ? b.s : []]);
+  const prof =  new Set([...S.skills, ...b ? b.s : []]);
   const hp = c ? Math.max(1, c.d + mod(score("CON"))) : 0;
   const ac = c ? window.Inventario ? Inventario.calcularCA(Inventario.carregar(S, INV_OPTS).itens, invCtx()) : 10 + mod(score("DES")) : 0;
   const per = 10 + mod(score("SAB")) + (prof.has("Percepção") ? pb : 0);

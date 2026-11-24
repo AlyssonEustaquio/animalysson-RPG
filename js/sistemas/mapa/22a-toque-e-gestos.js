@@ -81,8 +81,14 @@ function attachTouchGestures() {
       centerCameraOnPlayer();
       draw();
     }
+    var pan1 = null;
+    function startPan1(e) {
+      pan1 = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox0: ox, oy0: oy, px0: camPan.x, py0: camPan.y };
+    }
     cv.addEventListener("pointerdown", function(e) {
       if (e.pointerType !== "touch") return;
+      if (Object.keys(pts).length === 0 && (appMode !== "editor" || tool === "select" || tool === "pan")) startPan1(e);
+      else pan1 = null;
       if (Object.keys(pts).length >= 2) {
         ignored[e.pointerId] = true;
         block(e);
@@ -111,6 +117,27 @@ function attachTouchGestures() {
         if (Math.hypot(e.clientX - hold.x0, e.clientY - hold.y0) > 10) clearHold();
       }
       if (pendingTouchMove && pendingTouchMove.id === e.pointerId && Math.hypot(e.clientX - pendingTouchMove.x0, e.clientY - pendingTouchMove.y0) > 10) pendingTouchMove = null;
+      if (pan1 && pan1.id === e.pointerId && !g) {
+        var ddx = e.clientX - pan1.sx, ddy = e.clientY - pan1.sy;
+        if (pan1.on || Math.hypot(ddx, ddy) > 10 && !(drag && (drag.moveToken || drag.wall || drag.brush || drag.edgePaint))) {
+          if (!pan1.on) {
+            pan1.on = true;
+            clearHold();
+            pendingTouchMove = null;
+            drag = null;
+          }
+          if (appMode === "editor") {
+            ox = pan1.ox0 + ddx;
+            oy = pan1.oy0 + ddy;
+          } else {
+            camPan.x = pan1.px0 + ddx;
+            camPan.y = pan1.py0 + ddy;
+          }
+          draw();
+          block(e);
+          return;
+        }
+      }
       if (!ignored[e.pointerId]) return;
       if (g) applyGesture();
       block(e);
@@ -118,6 +145,8 @@ function attachTouchGestures() {
     function end(e) {
       if (e.pointerType !== "touch") return;
       var wasIgnored = ignored[e.pointerId];
+      var panned = pan1 && pan1.id === e.pointerId && pan1.on;
+      if (pan1 && pan1.id === e.pointerId) pan1 = null;
       if (hold && hold.id === e.pointerId) clearHold();
       if (pendingTouchMove && pendingTouchMove.id === e.pointerId) {
         var move = pendingTouchMove;
@@ -127,7 +156,7 @@ function attachTouchGestures() {
       delete pts[e.pointerId];
       delete ignored[e.pointerId];
       if (Object.keys(pts).length < 2) g = null;
-      if (wasIgnored) block(e);
+      if (wasIgnored || panned) block(e);
     }
     cv.addEventListener("pointerup", end, true);
     cv.addEventListener("pointercancel", end, true);

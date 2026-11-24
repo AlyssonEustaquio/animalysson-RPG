@@ -1,7 +1,3 @@
-/*
- * Ajustes visuais da ficha sem alterar a lógica do personagem.
- * Remove o texto de ajuda e integra o dado ao fluxo normal do título/conteúdo.
- */
 (function () {
   "use strict";
 
@@ -48,7 +44,6 @@
       var texto = normalizar(botao.textContent);
       if (!botao.classList.contains("sortear-personagem-icone") && !/sortear\s+personagem/i.test(texto)) return;
 
-      // Mantém o próprio botão, onclick e listeners existentes.
       botao.textContent = "🎲";
       botao.classList.add("sortear-personagem-icone");
       botao.setAttribute("aria-label", "Sortear personagem");
@@ -79,8 +74,6 @@
     var titulo = encontrarTituloNome(root);
     if (!app || !botao || !titulo) return;
 
-    // Localiza o bloco completo do campo (rótulo + editor), não apenas o texto.
-    // O dado será um irmão FORA desse bloco, alinhado ao extremo direito.
     var campo = titulo;
     var atual = titulo.parentElement;
     while (atual && atual !== app) {
@@ -89,7 +82,6 @@
       var pareceCampo = /(field|form-group|input-group|char-name|nome-personagem|ficha-field|stat-row)/i.test(classe);
       if (temEditor || pareceCampo) {
         campo = atual;
-        // Continua subindo enquanto o pai também é claramente o agrupador do campo.
         var pai = atual.parentElement;
         if (!pai || pai === app) break;
         var paiTemEditor = !!pai.querySelector('input,textarea,[contenteditable="true"],select');
@@ -105,8 +97,6 @@
       atual = atual.parentElement;
     }
 
-    // Cria uma linha de ação separada depois do campo inteiro. O dado nunca
-    // será filho do label, do input ou do wrapper que contém o texto editável.
     var linha = botao.closest('.ficha-nome-dado-externo');
     if (!linha) {
       linha = document.createElement('div');
@@ -117,8 +107,6 @@
     }
     if (botao.parentNode !== linha) linha.appendChild(botao);
 
-    // Se o código original colocou o botão dentro do campo, removê-lo dali
-    // ocorre ao movê-lo para a linha externa acima.
     titulo.classList.add('ficha-nome-personagem-texto');
   }
 
@@ -139,7 +127,6 @@
       atual = atual.parentElement;
     }
 
-    // Retira somente a moldura externa mais abrangente, preservando os campos internos.
     if (candidatos.length) candidatos[candidatos.length - 1].classList.add("ficha-sem-caixa-externa");
   }
 

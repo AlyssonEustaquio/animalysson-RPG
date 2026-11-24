@@ -177,7 +177,7 @@ C.entrarNoCombate = function(t) {
 C.gastar = function(t, tipo) {
       if (!est().ativo) return { ok: true };
       var atual = C.atual();
-      if (tipo !== "reacao" && atual && atual !== t) return { ok: false, motivo: "Não é o turno de " + nomeDe(t) + "." };
+            if (tipo !== "reacao" && atual && atual !== t) return { ok: false, motivo: "Não é o turno de " + nomeDe(t) + "." };
       if (incapacitado(t)) return { ok: false, motivo: nomeDe(t) + " está incapacitado." };
       if (!t.eco) t.eco = novaEco();
       if (!t.eco[tipo]) return { ok: false, motivo: tipo === "acao" ? "A ação deste turno já foi usada." : tipo === "bonus" ? "A ação bônus deste turno já foi usada." : "A reação já foi usada." };

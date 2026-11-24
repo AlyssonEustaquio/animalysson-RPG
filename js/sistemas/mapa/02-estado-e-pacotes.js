@@ -133,7 +133,7 @@ function zipEntryMime(name) {
 
 async function readStoredZipEntries(zipBlob) {
     if (!zipBlob || typeof zipBlob.slice !== "function" || !isFinite(zipBlob.size)) throw new Error("Arquivo ZIP inválido.");
-    var entries = /* @__PURE__ */ new Map(), offset = 0, totalSize = zipBlob.size;
+    var entries =  new Map(), offset = 0, totalSize = zipBlob.size;
     var decoder = new TextDecoder("utf-8");
     while (offset + 30 <= totalSize) {
       var header = new DataView(await zipBlob.slice(offset, offset + 30).arrayBuffer());

@@ -313,7 +313,111 @@ function runPlayerInteract(player, range) {
     playerActionResult("✋ Interagir", lines);
   }
 
+var ACTION_MS = { perception: 6000, investigation: 6000, athletics: 6000, tools: 6000, interact: 1000, skill: 6000 };
+
+var COMBAT_COST_MS = { acao: 6000, bonus: 3000, reacao: 0 };
+
+var actionBusy = null;
+
+var actionTickRunning = false;
+
+var combatSkipWait = false;
+
+function actionLocked() {
+    return !!(actionBusy && Date.now() < actionBusy.until);
+  }
+
+function weaponSwingMs(weapon, twoHands, thrown) {
+    if (!weapon) return 700;
+    var props = normalizeRpgText(weapon.propriedades || "");
+    var lb = parseFloat(String(weapon.peso || "").replace(",", ".")) || 3;
+    var ms = lb <= 2 ? 1000 : lb <= 4 ? 1500 : lb <= 8 ? 2000 : 3000;
+    var ranged = /distancia/.test(normalizeRpgText(weapon.tipo || ""));
+    if (/\bleve\b/.test(props)) ms -= 300;
+    if (props.indexOf("acuidade") >= 0) ms -= 100;
+    if (props.indexOf("pesada") >= 0) ms += 1000;
+    if (props.indexOf("alcance") >= 0) ms += 500;
+    if (props.indexOf("duas maos") >= 0 || twoHands) ms += 500;
+    if (props.indexOf("municao") >= 0) ms += 500;
+    if (props.indexOf("recarga") >= 0 || props.indexOf("carregamento") >= 0) ms += 1000;
+    if (thrown) ms = Math.min(ms, 1200);
+    if (ranged && ms < 1500) ms = 1500;
+    return Math.max(700, Math.min(5000, ms));
+  }
+
+function spellCastMs(name, castType) {
+    var spell = null;
+    if (name && typeof window.findSpell === "function") {
+      var key = normalizeRpgText(name).trim();
+      spell = (window.SPELLS || []).find(function(sp) {
+        return normalizeRpgText(sp.n) === key || normalizeRpgText(sp.en) === key;
+      }) || null;
+    }
+    var time = spell ? normalizeRpgText(spell.tempo) : castType === "bonus" ? "1 acao bonus" : "1 acao";
+    var level = spell ? Number(spell.lvl) || 0 : 1;
+    if (/reacao/.test(time)) return 0;
+    var minutes = time.match(/(\d+)\s*minuto/), hours = time.match(/(\d+)\s*hora/);
+    if (minutes) return Math.min(60000, Number(minutes[1]) * 60000);
+    if (hours) return 60000;
+    var ms = level === 0 ? 2000 : 2600 + 400 * level;
+    if (/bonus/.test(time)) ms = Math.round(ms * 0.6);
+    return ms;
+  }
+
+function showActionWait() {
+    var el = document.getElementById("mp-action-wait");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "mp-action-wait";
+      el.style.cssText = "position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:9999;background:rgba(10,10,11,.92);color:#fff;border:1px solid #888;border-radius:10px;padding:8px 14px;font:600 14px Roboto,sans-serif;min-width:180px;text-align:center;pointer-events:none";
+      el.innerHTML = '<div class="t"></div><div style="height:6px;background:#333;border-radius:3px;margin-top:6px;overflow:hidden"><div class="b" style="height:100%;width:0;background:#4fc3f7"></div></div>';
+      document.body.appendChild(el);
+    }
+    el.style.display = "block";
+    if (actionTickRunning) return;
+    actionTickRunning = true;
+    var bar = el.querySelector(".b"), label = el.querySelector(".t");
+    (function tick() {
+      if (!actionBusy || Date.now() >= actionBusy.until) {
+        el.style.display = "none";
+        actionTickRunning = false;
+        return;
+      }
+      label.textContent = actionBusy.label;
+      bar.style.width = Math.min(100, (Date.now() - actionBusy.t0) / actionBusy.ms * 100) + "%";
+      window.requestAnimationFrame(tick);
+    })();
+  }
+
+function beginActionWait(label, ms) {
+    if (!(ms > 0)) return;
+    stopKeyMove();
+    actionBusy = { t0: Date.now(), ms: ms, until: Date.now() + ms, label: label + "… " + Math.round(ms / 100) / 10 + " s" };
+    showActionWait();
+  }
+
 function runPlayerAction(action) {
+    if (action !== "menu" && action !== "combat" && ACTION_MS[action]) {
+      if (actionLocked()) {
+        combatToast("Aguarde: o personagem ainda está concluindo a ação.");
+        return;
+      }
+      var ms = ACTION_MS[action];
+      beginActionWait("Executando ação", ms);
+      window.setTimeout(function() {
+        actionBusy = null;
+        runPlayerActionNow(action);
+      }, ms);
+      return;
+    }
+    if (action !== "menu" && actionLocked()) {
+      combatToast("Aguarde: o personagem ainda está concluindo a ação.");
+      return;
+    }
+    runPlayerActionNow(action);
+  }
+
+function runPlayerActionNow(action) {
     if (appMode !== "player") return;
     var player = currentPlayer();
     if (!player || player.tipo !== "player") {

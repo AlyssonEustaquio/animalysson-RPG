@@ -53,7 +53,7 @@ function renderInventoryPage() {
     return;
   }
   if (!INV_OPTS.catalogo) {
-    const vistos = /* @__PURE__ */ new Set(), todos = [];
+    const vistos =  new Set(), todos = [];
     ITEMS.concat(Array.isArray(MAGIC_ITEMS) ? MAGIC_ITEMS.map(function(m) {
       return Object.assign({ magico: true }, m);
     }) : []).forEach(function(x) {

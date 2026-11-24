@@ -77,6 +77,7 @@ function worldTravelFrame(now) {
 function startWorldTravel(destination) {
     var player = currentPlayer();
     if (!isHexMap() || !player || !destination) return;
+    camPan.x = camPan.y = 0;
     stopKeyMove();
     var origin = worldTravelStep ? worldTravelStep.to : { x: player.x, y: player.y };
     if (destination.x === origin.x && destination.y === origin.y) {

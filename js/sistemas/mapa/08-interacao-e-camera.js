@@ -298,8 +298,8 @@ function focusCameraOnPlayer(viewW, viewH, force) {
     var center = worldTravelPos || cellCenter(player.x, player.y);
     var width = viewW == null ? cv.clientWidth : viewW;
     var height = viewH == null ? cv.clientHeight : viewH;
-    ox = width / 2 - center.x * zoom;
-    oy = height / 2 - center.y * zoom;
+    ox = width / 2 - center.x * zoom + (force ? 0 : camPan.x);
+    oy = height / 2 - center.y * zoom + (force ? 0 : camPan.y);
   }
 
 function visionZoom(viewW, viewH) {
@@ -319,8 +319,8 @@ function centerCameraOnPlayer(viewW, viewH, force) {
     var minZoom = visionZoom(width, height);
     zoom = Math.max(minZoom, zoom);
     var c = keyMoveVis || tokenAnchor(p, p.x, p.y);
-    ox = width / 2 - c.x * zoom;
-    oy = height / 2 - c.y * zoom;
+    ox = width / 2 - c.x * zoom + (force ? 0 : camPan.x);
+    oy = height / 2 - c.y * zoom + (force ? 0 : camPan.y);
   }
 
 function changeCameraZoom(factor, anchorX, anchorY) {

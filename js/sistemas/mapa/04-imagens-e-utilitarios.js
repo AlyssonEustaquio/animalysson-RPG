@@ -273,7 +273,7 @@ function createCustomMapFromFile(file) {
           format: MAP_PACKAGE_FORMAT,
           version: 1,
           id,
-          createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+          createdAt: ( new Date()).toISOString(),
           config: serializableMapConfig(config)
         };
         var zipEntries = [{

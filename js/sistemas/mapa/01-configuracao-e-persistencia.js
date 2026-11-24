@@ -103,7 +103,7 @@ function customMapEntries() {
 
 function persistCustomMaps() {
     try {
-      if (MAPS[mapId] && MAPS[mapId].custom) MAPS[mapId].settingsUpdatedAt = (/* @__PURE__ */ new Date()).toISOString();
+      if (MAPS[mapId] && MAPS[mapId].custom) MAPS[mapId].settingsUpdatedAt = ( new Date()).toISOString();
       localStorage.setItem(CUSTOM_MAPS_KEY, JSON.stringify(customMapEntries()));
     } catch (e) {
     }
@@ -255,7 +255,7 @@ function readSavedHexGridProfile() {
 
 function saveHexGridProfile(width, miles) {
     try {
-      localStorage.setItem(HEX_SIZE_KEY, JSON.stringify({ width: Number(width), miles: Number(miles), updatedAt: (/* @__PURE__ */ new Date()).toISOString() }));
+      localStorage.setItem(HEX_SIZE_KEY, JSON.stringify({ width: Number(width), miles: Number(miles), updatedAt: ( new Date()).toISOString() }));
       return true;
     } catch (e) {
       return false;
@@ -400,7 +400,15 @@ var worldTravelPath = [];
 
 var worldTravelTarget = null;
 
-var KEY_STEP_MS = 140;
+var KEY_STEP_MS = 1000;
+
+var camPan = { x: 0, y: 0 };
+
+function localStepMs() {
+    var sp = typeof invSpeedMeters === "function" ? invSpeedMeters() : null;
+    var m = sp && Number(sp.atual) > 0 ? Number(sp.atual) : 9;
+    return 9000 / m;
+  }
 
 var MOVE_KEYS = { ArrowLeft: 1, ArrowRight: 1, ArrowUp: 1, ArrowDown: 1 };
 

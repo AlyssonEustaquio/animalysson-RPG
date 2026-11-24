@@ -47,7 +47,7 @@ function exportMapCatalog(allowEmpty) {
     var payload = {
       format: "animalysson-rpg-map-catalog",
       version: 1,
-      updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+      updatedAt: ( new Date()).toISOString(),
       maps: entries
     };
     downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" }), "mapas.json");
@@ -72,7 +72,7 @@ function exportMapFile() {
       version: 1,
       mapId,
       mapName: MAPINFO.nome,
-      exportedAt: (/* @__PURE__ */ new Date()).toISOString(),
+      exportedAt: ( new Date()).toISOString(),
       dimensions: { width: MAP_W, height: MAP_H, columns: COLS, rows: ROWS },
       imageFolder: mapFolder,
       images: assets,
@@ -116,8 +116,8 @@ async function exportMapPackage() {
         format: MAP_PACKAGE_FORMAT,
         version: 1,
         id: mapId,
-        createdAt: MAPINFO.packageStateExportedAt || (/* @__PURE__ */ new Date()).toISOString(),
-        exportedAt: (/* @__PURE__ */ new Date()).toISOString(),
+        createdAt: MAPINFO.packageStateExportedAt || ( new Date()).toISOString(),
+        exportedAt: ( new Date()).toISOString(),
         config,
         state: exportedState
       };
@@ -244,7 +244,7 @@ function zipSetUint64(view, offset, value) {
 
 async function createImagesZip(entries) {
     var localParts = [], centralParts = [], offset = 0, centralSize = 0;
-    var now = /* @__PURE__ */ new Date();
+    var now =  new Date();
     var dosTime = now.getHours() << 11 | now.getMinutes() << 5 | Math.floor(now.getSeconds() / 2);
     var dosDate = Math.max(1980, now.getFullYear()) - 1980 << 9 | now.getMonth() + 1 << 5 | now.getDate();
     for (var i = 0; i < entries.length; i++) {

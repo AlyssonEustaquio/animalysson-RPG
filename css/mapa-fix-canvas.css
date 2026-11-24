@@ -1,4 +1,3 @@
-/* Animalysson RPG — mapa sem corte: mantém a coluna lateral e o canvas lado a lado. */
 html body #app.view-maps,
 html body #app.view-maps #mp-root {
   display: flex !important;
@@ -23,13 +22,11 @@ html body #app.view-maps #mp-root .mp {
   overflow: hidden !important;
 }
 
-/* Barra de ferramentas ocupa apenas a altura do seu conteúdo. */
 html body #app.view-maps #mp-root .mp-bar {
   flex: 0 0 auto !important;
   min-width: 0 !important;
 }
 
-/* Área do mapa usa o espaço restante, sem ultrapassar a área disponível. */
 html body #app.view-maps #mp-root .mp-wrap,
 html body #app.view-maps #mp-root .vtt-wrap {
   display: flex !important;
@@ -44,7 +41,6 @@ html body #app.view-maps #mp-root .vtt-wrap {
   overflow: hidden !important;
 }
 
-/* A barra lateral dos mapas tem rolagem própria. */
 html body #app.view-maps #mp-root .mp-side {
   flex: 0 0 250px !important;
   width: 250px !important;
@@ -62,7 +58,6 @@ html body #app.view-maps #mp-root .vtt-wrap .mp-side {
   width: 260px !important;
 }
 
-/* Canvas permanece visível e não cria rolagem global. */
 html body #app.view-maps #mp-root .mp-main {
   position: relative !important;
   flex: 1 1 0 !important;

@@ -78,6 +78,7 @@ function combatWeaponAttack(token, weapon, mode, opts) {
       acuidade: finesse,
       pesada: props.indexOf("pesada") >= 0,
       maestria: weapon.maestria || "",
+      tempoMs: weaponSwingMs(weapon, !!opts.duasMaos, !!thrown),
       atributoMod: ability,
       modAtributo: abilityMod,
       magico: false,
@@ -92,7 +93,7 @@ function combatUnarmedAttack(token) {
     var mod = sheet ? sheet.abilityMods[ability] : 0;
     var bonus = sheet ? mod + sheet.proficiencyBonus : 0;
     var damage = monk ? "1d6" + (mod > 0 ? "+" + mod : mod < 0 ? String(mod) : "") : String(Math.max(1, 1 + mod));
-    return { nome: "Golpe desarmado", bonus, distancia: false, alcanceNormal: 1, alcanceMax: 1, dano: [{ dados: damage, tipo: "contundente" }], arma: true, leve: false, acuidade: monk, pesada: false, maestria: "", atributoMod: ability, modAtributo: mod, magico: false, melee: true, desarmado: true };
+    return { nome: "Golpe desarmado", tempoMs: 700, bonus, distancia: false, alcanceNormal: 1, alcanceMax: 1, dano: [{ dados: damage, tipo: "contundente" }], arma: true, leve: false, acuidade: monk, pesada: false, maestria: "", atributoMod: ability, modAtributo: mod, magico: false, melee: true, desarmado: true };
   }
 
 function combatDefaultAttack(token) {
@@ -351,6 +352,15 @@ function getCombat() {
         return !!(armor && armor.furtividade === "Desvantagem");
       }
     });
+    var gastarBase = combatEngine.gastar;
+    combatEngine.gastar = function(t, tipo) {
+      var r = gastarBase.apply(this, arguments);
+      if (r && r.ok && !combatSkipWait && combatActive() && t && t.tipo === "player" && COMBAT_COST_MS[tipo]) {
+        var ms = COMBAT_COST_MS[tipo];
+        beginActionWait(tipo === "acao" ? "Ação" : tipo === "bonus" ? "Ação bônus" : "Reação", ms);
+      }
+      return r;
+    };
     return combatEngine;
   }
 

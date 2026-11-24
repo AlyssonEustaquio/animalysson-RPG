@@ -178,6 +178,15 @@ function combatPayAttack(actor, st) {
   }
 
 function combatPerformAttack(actor, atq, bonusMode) {
+    combatSkipWait = true;
+    try {
+      combatPerformAttackBase(actor, atq, bonusMode);
+    } finally {
+      combatSkipWait = false;
+    }
+  }
+
+function combatPerformAttackBase(actor, atq, bonusMode) {
     var C = getCombat(), st = C.stats(actor), pay = { ok: true, novo: false };
     if (!bonusMode) {
       pay = combatPayAttack(actor, st);
@@ -214,6 +223,7 @@ function combatPerformAttack(actor, atq, bonusMode) {
         }
       }
       var res = C.atacar(actor, target, atq, {});
+      if (res.ok && actor.tipo === "player") beginActionWait("Ataque", atq.tempoMs || 1500);
       if (res.ok && !bonusMode) {
         actor.eco.atacou = true;
         if (C.ativo()) {
@@ -312,6 +322,10 @@ function combatPickMode(actor, melee, ranged) {
 function combatAttackFlow(actor) {
     var C = getCombat();
     if (!C) return;
+    if (actor && actor.tipo === "player" && actionLocked()) {
+      combatToast("Aguarde: o personagem ainda está concluindo a ação.");
+      return;
+    }
     var st = C.stats(actor);
     if (st.tipo === "monstro") {
       combatMonsterAttackFlow(actor);
@@ -327,6 +341,10 @@ function combatAttackFlow(actor) {
   }
 
 function combatSpellDialog(actor) {
+    if (actor && actor.tipo === "player" && actionLocked()) {
+      combatToast("Aguarde: o personagem ainda está concluindo a ação.");
+      return;
+    }
     var C = getCombat(), st = C.stats(actor);
     var abil = COMBAT_SPELL_ABILITY[st.classe] || "INT";
     var mod = st.mods[abil], dc = 8 + st.prof + mod, atk = st.prof + mod;
@@ -387,7 +405,10 @@ function combatSpellDialog(actor) {
           return t !== actor;
         }), first: actor, reason: "⚔ O personagem atacou com " + (nome.value.trim() || "uma magia") + "! O combate começou." });
       }
-      var res = C.magia(actor, {
+      combatSkipWait = true;
+      var res;
+      try {
+        res = C.magia(actor, {
         nome: nome.value.trim() || "Magia",
         efeito: ef,
         dados: dados.value.trim(),
@@ -400,7 +421,11 @@ function combatSpellDialog(actor) {
         alvos,
         concentracao: conc.value === "1",
         tipoAcao: acao.value
-      });
+        });
+      } finally {
+        combatSkipWait = false;
+      }
+      if (res && res.ok !== false && actor.tipo === "player") beginActionWait("Magia", spellCastMs(nome.value.trim(), acao.value));
       combatClose(dlg);
       if (autoLines) res.linhas = autoLines.concat(res.linhas || []);
       combatFinishAction(res);

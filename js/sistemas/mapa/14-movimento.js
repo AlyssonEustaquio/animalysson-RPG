@@ -63,8 +63,10 @@ function findVisiblePath(start, goal, token, allowUnseenForExit) {
 function startClickMove(destination, exitAfterArrival) {
     var player = currentPlayer();
     if (!player || isHexMap() || !destination) return false;
+    if (typeof actionLocked === "function" && actionLocked()) return false;
     var path = findVisiblePath({ x: player.x, y: player.y }, destination, player, !!exitAfterArrival);
     if (!path) return false;
+    camPan.x = camPan.y = 0;
     stopKeyMove();
     if (path.length < 2) {
       if (exitAfterArrival) return returnToWorldMapFromExit();
@@ -246,7 +248,7 @@ function keyMoveFrame(now) {
         }
         var from = tokenAnchor(pl, pl.x, pl.y), to = tokenAnchor(pl, next.x, next.y);
         var cells = Math.sqrt(Math.pow(next.x - pl.x, 2) + Math.pow(next.y - pl.y, 2));
-        keyMoveStep = { from, to, dur: (hexMode ? worldTravelStepDurationMs() : KEY_STEP_MS) * cells, t0: keyMoveCarry != null ? keyMoveCarry : now };
+        keyMoveStep = { from, to, dur: (hexMode ? worldTravelStepDurationMs() : localStepMs()) * cells, t0: keyMoveCarry != null ? keyMoveCarry : now };
         keyMoveCarry = null;
         var combatFrom = { x: pl.x, y: pl.y };
         pl.x = next.x;
@@ -328,7 +330,9 @@ function onKey(e) {
         clickMovePath = [];
         clickMoveExitPending = false;
       }
+      if (typeof actionLocked === "function" && actionLocked()) return;
       keysHeld[e.code] = true;
+      camPan.x = camPan.y = 0;
       portalClickTarget = null;
       if (keyMoveRaf == null) keyMoveRaf = window.requestAnimationFrame(keyMoveFrame);
       return;

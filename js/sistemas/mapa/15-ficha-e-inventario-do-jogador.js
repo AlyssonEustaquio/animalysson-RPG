@@ -346,7 +346,10 @@ function playerSkillOptionsHtml() {
   }
 
 function rollDie(sides) {
-    return 1 + Math.floor(Math.random() * Math.max(2, Number(sides) || 20));
+    var n = Math.max(2, Number(sides) || 20);
+    var v = 1 + Math.floor(Math.random() * n);
+    if (window.Dados3D) window.Dados3D.lancar(n, v);
+    return v;
   }
 
 function rollCheck(bonus) {
