@@ -235,7 +235,6 @@ function mountNow(el) {
       });
     }
     attachTouchGestures();
-    attachDpad();
     cv.addEventListener("pointerdown", onPointerDown);
     cv.addEventListener("pointermove", onPointerMove);
     cv.addEventListener("pointerleave", onPointerLeave);

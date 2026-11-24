@@ -1,5 +1,34 @@
 function attachTouchGestures() {
-    var pts = {}, ignored = {}, g = null;
+    var pts = {}, ignored = {}, g = null, hold = null;
+    cv.style.webkitTouchCallout = "none";
+    cv.style.userSelect = "none";
+    cv.style.webkitUserSelect = "none";
+    function clearHold() {
+      if (hold && hold.timer) window.clearTimeout(hold.timer);
+      hold = null;
+    }
+    function startHold(e) {
+      clearHold();
+      if (appMode !== "editor") return;
+      hold = { id: e.pointerId, x0: e.clientX, y0: e.clientY, cx: e.clientX, cy: e.clientY, timer: null };
+      hold.timer = window.setTimeout(function() {
+        var h = hold;
+        hold = null;
+        if (!h || !pts[h.id] || Object.keys(pts).length !== 1 || g) return;
+        if (appMode !== "editor" || tool !== "select" && tool !== "pan") return;
+        if (drag && (drag.moveToken || drag.wall || drag.brush || drag.edgePaint || drag.pan)) return;
+        clickMovePath = [];
+        clickMoveExitPending = false;
+        if (isHexMap()) stopWorldTravel(false);
+        drag = { pan: true, startX: h.cx, startY: h.cy, originX: ox, originY: oy };
+        cv.style.cursor = "grabbing";
+        try {
+          cv.setPointerCapture(h.id);
+        } catch (err) {
+        }
+        if (navigator.vibrate) navigator.vibrate(15);
+      }, 420);
+    }
     function localPoint(e) {
       var r = cv.getBoundingClientRect();
       return { x: e.clientX - r.left, y: e.clientY - r.top };
@@ -47,7 +76,11 @@ function attachTouchGestures() {
         return;
       }
       pts[e.pointerId] = localPoint(e);
-      if (Object.keys(pts).length < 2) return;
+      if (Object.keys(pts).length < 2) {
+        startHold(e);
+        return;
+      }
+      clearHold();
       cancelFirstFinger();
       var p = pair();
       g = { zoom: zoom, ox: ox, oy: oy, dist: p.dist, mx: p.mx, my: p.my };
@@ -59,6 +92,11 @@ function attachTouchGestures() {
     cv.addEventListener("pointermove", function(e) {
       if (e.pointerType !== "touch") return;
       if (pts[e.pointerId]) pts[e.pointerId] = localPoint(e);
+      if (hold && hold.id === e.pointerId) {
+        hold.cx = e.clientX;
+        hold.cy = e.clientY;
+        if (Math.hypot(e.clientX - hold.x0, e.clientY - hold.y0) > 10) clearHold();
+      }
       if (!ignored[e.pointerId]) return;
       if (g) applyGesture();
       block(e);
@@ -66,6 +104,7 @@ function attachTouchGestures() {
     function end(e) {
       if (e.pointerType !== "touch") return;
       var wasIgnored = ignored[e.pointerId];
+      if (hold && hold.id === e.pointerId) clearHold();
       delete pts[e.pointerId];
       delete ignored[e.pointerId];
       if (Object.keys(pts).length < 2) g = null;
@@ -73,88 +112,4 @@ function attachTouchGestures() {
     }
     cv.addEventListener("pointerup", end, true);
     cv.addEventListener("pointercancel", end, true);
-  }
-
-function attachDpad() {
-    if (!window.matchMedia || !window.matchMedia("(pointer:coarse)").matches) return;
-    var host = R && R.querySelector(".mp-main");
-    if (!host || host.querySelector("#mp-dpad")) return;
-    if (!document.getElementById("mp-dpad-style")) {
-      var st = document.createElement("style");
-      st.id = "mp-dpad-style";
-      st.textContent = "#mp-root #mp-dpad{position:absolute;right:calc(12px + env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:20;display:grid;grid-template-columns:repeat(3,54px);grid-template-rows:repeat(3,54px);gap:6px;user-select:none;-webkit-user-select:none;touch-action:none;opacity:.88}#mp-root #mp-dpad[hidden]{display:none}#mp-root #mp-dpad button{width:54px;height:54px;padding:0;border-radius:12px;border:1px solid rgba(255,255,255,.28);background:rgba(15,15,18,.86);color:#fff;font-size:22px;line-height:1;touch-action:none;-webkit-touch-callout:none}#mp-root #mp-dpad button.on{background:rgba(55,145,190,.7);border-color:#66c8ed}#mp-root #mp-dpad-toggle{position:absolute;right:calc(12px + env(safe-area-inset-right,0px));bottom:calc(190px + env(safe-area-inset-bottom,0px));z-index:20;width:44px;height:44px;padding:0;border-radius:10px;border:1px solid rgba(255,255,255,.28);background:rgba(15,15,18,.86);color:#fff;font-size:20px}";
-      document.head.appendChild(st);
-    }
-    var KEYS = {
-      up: { code: "ArrowUp", kc: 38, label: "▲", cell: "1 / 2" },
-      left: { code: "ArrowLeft", kc: 37, label: "◀", cell: "2 / 1" },
-      down: { code: "ArrowDown", kc: 40, label: "▼", cell: "3 / 2" },
-      right: { code: "ArrowRight", kc: 39, label: "▶", cell: "2 / 3" }
-    };
-    function fire(type, k) {
-      var target = cv || document.body;
-      var ev = new KeyboardEvent(type, { key: k.code, code: k.code, bubbles: true, cancelable: true });
-      try {
-        Object.defineProperty(ev, "keyCode", { get: function() { return k.kc; } });
-        Object.defineProperty(ev, "which", { get: function() { return k.kc; } });
-      } catch (err) {
-      }
-      target.dispatchEvent(ev);
-    }
-    var pad = document.createElement("div");
-    pad.id = "mp-dpad";
-    Object.keys(KEYS).forEach(function(name) {
-      var k = KEYS[name], b = document.createElement("button"), down = false;
-      b.type = "button";
-      b.textContent = k.label;
-      b.setAttribute("aria-label", "Mover " + name);
-      var cell = k.cell.split(" / ");
-      b.style.gridRow = cell[0];
-      b.style.gridColumn = cell[1];
-      function release() {
-        if (!down) return;
-        down = false;
-        b.classList.remove("on");
-        fire("keyup", k);
-      }
-      b.addEventListener("pointerdown", function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (down) return;
-        down = true;
-        b.classList.add("on");
-        try {
-          b.setPointerCapture(e.pointerId);
-        } catch (err) {
-        }
-        fire("keydown", k);
-      });
-      b.addEventListener("pointerup", release);
-      b.addEventListener("pointercancel", release);
-      b.addEventListener("lostpointercapture", release);
-      b.addEventListener("contextmenu", function(e) {
-        e.preventDefault();
-      });
-      pad.appendChild(b);
-    });
-    var toggle = document.createElement("button");
-    toggle.id = "mp-dpad-toggle";
-    toggle.type = "button";
-    toggle.textContent = "🎮";
-    toggle.setAttribute("aria-label", "Mostrar ou esconder o direcional");
-    var hidden = false;
-    try {
-      hidden = localStorage.getItem("mp-dpad-oculto") === "1";
-    } catch (err) {
-    }
-    pad.hidden = hidden;
-    toggle.onclick = function() {
-      pad.hidden = !pad.hidden;
-      try {
-        localStorage.setItem("mp-dpad-oculto", pad.hidden ? "1" : "0");
-      } catch (err) {
-      }
-    };
-    host.appendChild(pad);
-    host.appendChild(toggle);
   }
