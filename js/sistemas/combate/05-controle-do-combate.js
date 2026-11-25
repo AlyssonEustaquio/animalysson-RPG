@@ -41,10 +41,12 @@ C.iniciar = function(opts) {
         t.eco = novaEco();
         t.efeitos = {};
         t.escondido = false;
+        if (window.Dados3D) window.Dados3D.lancador(t.id);
         var r = d20(t.surpreso ? -1 : 0);
         var bonus = st.iniciativa + (Number(t.bonusIniciativa) || 0) - 2 * (t.exaustao || 0);
         return { id: t.id, nome: nomeDe(t), valor: r.dado + bonus, des: st.mods.DES, desempate: Math.random() };
       });
+      if (window.Dados3D) window.Dados3D.lancador(null);
       rolagens.sort(function(a, b) {
         return b.valor - a.valor || b.des - a.des || b.desempate - a.desempate;
       });

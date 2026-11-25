@@ -347,6 +347,8 @@ function playerSkillOptionsHtml() {
 
 function rollDie(sides) {
     var n = Math.max(2, Number(sides) || 20);
+    var previsto = window.Dados3D ? window.Dados3D.consumir(n) : null;
+    if (previsto != null) return previsto;
     var v = 1 + Math.floor(Math.random() * n);
     if (window.Dados3D) window.Dados3D.lancar(n, v);
     return v;
@@ -406,17 +408,12 @@ function visibleEdgesForPlayer(player, range) {
     });
   }
 
-var chatFree = 0;
-
 function postRollChat(title, lines, buttons, done) {
-    var now = Date.now();
-    var at = Math.max(now, chatFree, actionBusy && now < actionBusy.until ? actionBusy.until + 300 : 0);
-    chatFree = at + 1;
     function run() {
       window.ChatRolagens.postar(title, lines, buttons, done);
     }
-    if (at <= now) run();
-    else window.setTimeout(run, at - now);
+    if (window.Dados3D) window.Dados3D.aoTerminar(run);
+    else run();
   }
 
 function playerActionResult(title, lines) {

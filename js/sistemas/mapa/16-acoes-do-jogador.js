@@ -322,7 +322,7 @@ var actionBusy = null;
 var combatSkipWait = false;
 
 function actionLocked() {
-    return !!(actionBusy && Date.now() < actionBusy.until);
+    return !!(actionBusy && Date.now() < actionBusy.until) || !!(window.Dados3D && window.Dados3D.ocupado());
   }
 
 function weaponSwingMs(weapon, twoHands, thrown) {
@@ -366,7 +366,6 @@ function beginActionWait(ms) {
     if (!(ms > 0)) return;
     stopKeyMove();
     actionBusy = { until: Date.now() + ms };
-    if (window.Dados3D) window.Dados3D.segurar(ms);
   }
 
 function runPlayerAction(action) {
@@ -376,6 +375,7 @@ function runPlayerAction(action) {
         return;
       }
       var ms = ACTION_MS[action];
+      if (action !== "interact" && window.Dados3D) window.Dados3D.prever(20, ms);
       beginActionWait(ms);
       window.setTimeout(function() {
         actionBusy = null;

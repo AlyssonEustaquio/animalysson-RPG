@@ -352,6 +352,32 @@ function getCombat() {
         return !!(armor && armor.furtividade === "Desvantagem");
       }
     });
+    if (window.Dados3D) {
+      window.Dados3D.provedorOrigem(function(id) {
+        var tk = state.tokens.find(function(x) {
+          return x.id === id;
+        });
+        if (!tk || !cv) return null;
+        var c = cellCenter(tk.x, tk.y), rc = cv.getBoundingClientRect();
+        return {
+          x: Math.min(window.innerWidth - 30, Math.max(30, rc.left + c.x * zoom + ox)),
+          y: Math.min(window.innerHeight - 30, Math.max(30, rc.top + c.y * zoom + oy))
+        };
+      });
+      Object.keys(combatEngine).forEach(function(nome) {
+        var original = combatEngine[nome];
+        if (typeof original !== "function") return;
+        combatEngine[nome] = function(alvo) {
+          var anterior = window.Dados3D.lancadorAtual();
+          if (alvo && typeof alvo === "object" && alvo.id !== undefined && alvo.tipo !== undefined) window.Dados3D.lancador(alvo.id);
+          try {
+            return original.apply(this, arguments);
+          } finally {
+            window.Dados3D.lancador(anterior);
+          }
+        };
+      });
+    }
     var gastarBase = combatEngine.gastar;
     combatEngine.gastar = function(t, tipo) {
       var r = gastarBase.apply(this, arguments);

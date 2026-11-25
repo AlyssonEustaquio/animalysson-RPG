@@ -4,12 +4,10 @@
   var G = 1900;
   var MAX_DICE = 26;
   var cv = null, cx = null, dice = [], raf = null, last = 0, W = 0, H = 0, dpr = 1;
-  var burstAt = 0, burstN = 0, holdAte = 0, shakeAte = 0;
+  var fila = [], atual = null, lote = [], loteAgendado = false, previstos = [], aguardando = [], origemFn = null, lancadorId = null, flushTimer = null;
   var shapes = {};
   var LIGHT = [-0.35, -0.5, 0.8];
   var COLORS = { 4: [67, 160, 71], 6: [211, 47, 47], 8: [30, 136, 229], 10: [142, 68, 173], 12: [239, 140, 20], 20: [0, 137, 123], tens: [94, 53, 177] };
-  var STRICT = window.DADOS3D_STRICT_DEDUP === true;
-  var STRICT_MS = 60;
 
   function sub(a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
   function add(a, b) { return [a[0] + b[0], a[1] + b[1], a[2] + b[2]]; }
@@ -36,13 +34,9 @@
   function qFromTo(a, b) {
     var d = dot(a, b);
     if (d > 0.999999) return [0, 0, 0, 1];
-    if (d < -0.999999) {
-      var perp = Math.abs(a[0]) < 0.9 ? [1, 0, 0] : [0, 1, 0];
-      var ax = norm(cross(a, perp));
-      return [ax[0], ax[1], ax[2], 0];
-    }
-    var ax2 = cross(a, b);
-    return qnorm([ax2[0], ax2[1], ax2[2], 1 + d]);
+    if (d < -0.999999) return [1, 0, 0, 0];
+    var ax = cross(a, b);
+    return qnorm([ax[0], ax[1], ax[2], 1 + d]);
   }
   function qnlerp(a, b, k) {
     if (dot4(a, b) < 0) b = [-b[0], -b[1], -b[2], -b[3]];
@@ -156,68 +150,10 @@
     H = window.innerHeight;
     cv.width = Math.round(W * dpr);
     cv.height = Math.round(H * dpr);
-    for (var i = 0; i < dice.length; i++) {
-      var d = dice[i];
-      if (d.R) {
-        d.x = Math.min(Math.max(d.x, d.R), W - d.R);
-        d.y = Math.min(Math.max(d.y, d.R), H - d.R);
-      }
-    }
   }
 
-  function spawn(kind, value, delay) {
-    var shape = getShape(kind);
-    var label = String(value);
-    var fi = 0;
-    for (var i = 0; i < shape.faces.length; i++) if (shape.faces[i].label.replace(".", "") === label) { fi = i; break; }
-    var R = Math.max(20, Math.min(40, Math.min(W, H) * 0.055));
-    var sx = rnd(W * 0.12, W * 0.88), sy = H + R * 0.3;
-    var tx = rnd(W * 0.15, W * 0.85), ty = rnd(H * 0.22, H * 0.7);
-    var dx = tx - sx, dy = ty - sy, dist = Math.hypot(dx, dy);
-    var speed = dist * 3.1 * rnd(0.85, 1.15);
-    var ang = Math.atan2(dy, dx) + rnd(-0.12, 0.12);
-    var qAlign = qFromTo(shape.faces[fi].n, [0, 0, 1]);
-    var za = rnd(0, Math.PI * 2);
-    var qt = qmul([0, 0, Math.sin(za / 2), Math.cos(za / 2)], qAlign);
-    var color = COLORS[kind === "units" ? 10 : kind];
-    for (var pi = 0; pi < dice.length; pi++) {
-      if (!dice[pi].pend) continue;
-      var c = dice[pi];
-      c.pend = false;
-      c.kind = kind;
-      c.shape = shape;
-      c.color = color;
-      c.R = R;
-      c.qt = qt;
-      c.done = false;
-      c.doneAt = 0;
-      c.grace = 0;
-      c.alpha = 1;
-      c.age = 0;
-      c.lockedFace = false;
-      c.lancarSides = undefined;
-      c.lancarValue = undefined;
-      if (!(c.hold > Date.now()) && c.h <= 0 && Math.hypot(c.vx, c.vy) < 80) {
-        calmar(c);
-        c.vz = 260;
-      }
-      return c;
-    }
-    var nd = {
-      kind: kind, shape: shape, R: R, delay: delay, x: sx, y: sy, h: 90, vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed, vz: rnd(600, 850),
-      q: qrandom(), w: [rnd(-1, 1) * 22, rnd(-1, 1) * 22, rnd(-1, 1) * 22], qt: qt, age: 0, done: false, doneAt: 0, alpha: 1,
-      color: color, hold: holdAte > Date.now() ? holdAte : 0, calm: false, pend: false, grace: 0, born: Date.now(),
-      phase: holdAte > Date.now() ? "shake" : "", shakeEnd: shakeAte, shakeStart: Date.now(), st: 0, swt: 0, ph: rnd(0, Math.PI * 2), dir: 1,
-      lockedFace: false
-    };
-    dice.push(nd);
-    if (nd.phase === "shake" && shakeAte > Date.now()) {
-      ancoraBaixo(nd);
-      nd.x = nd.ax;
-      nd.y = nd.ay;
-      nd.h = 40;
-    }
-    return nd;
+  function reduzido() {
+    return !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
   }
 
   function aleatorio3() {
@@ -233,18 +169,49 @@
     }
   }
 
-  function faceMaisBaixa(d) {
-    var best = null, bz = -2;
-    d.shape.faces.forEach(function (f) {
-      var z = rot(d.q, f.n)[2];
-      if (z > bz) { bz = z; best = f; }
-    });
-    return qmul(qFromTo(rot(d.q, best.n), [0, 0, 1]), d.q);
+  function eixoAngulo(axis, ang) {
+    var s = Math.sin(ang / 2);
+    return [axis[0] * s, axis[1] * s, axis[2] * s, Math.cos(ang / 2)];
+  }
+
+  function planejar(d) {
+    var q0 = qmul(d.q, [-d.qt[0], -d.qt[1], -d.qt[2], d.qt[3]]);
+    if (q0[3] < 0) q0 = [-q0[0], -q0[1], -q0[2], -q0[3]];
+    var psi0 = 2 * Math.acos(Math.min(1, q0[3])), s = Math.sqrt(Math.max(0, 1 - q0[3] * q0[3]));
+    d.plano = {
+      axis: s > 1e-4 ? [q0[0] / s, q0[1] / s, q0[2] / s] : aleatorio3(),
+      psi: psi0 + 2 * Math.PI * (Math.random() < 0.5 ? 1 : 2),
+      ax2: aleatorio3(),
+      th2: rnd(1.5, 3) * (Math.random() < 0.5 ? -1 : 1)
+    };
+  }
+
+  function orientar(d, u) {
+    var p = d.plano, f = Math.pow(1 - u, 3), g = Math.sin(Math.PI * u) * Math.pow(1 - u, 2);
+    d.q = qmul(eixoAngulo(p.ax2, p.th2 * g), qmul(eixoAngulo(p.axis, p.psi * f), d.qt));
+  }
+
+  function spawn(kind, value, atraso) {
+    var shape = getShape(kind);
+    var label = String(value);
+    var fi = 0;
+    for (var i = 0; i < shape.faces.length; i++) if (shape.faces[i].label.replace(".", "") === label) { fi = i; break; }
+    var R = Math.max(20, Math.min(40, Math.min(W, H) * 0.055));
+    var qAlign = qFromTo(shape.faces[fi].n, [0, 0, 1]);
+    var za = rnd(0, Math.PI * 2);
+    var nd = {
+      kind: kind, shape: shape, R: R, x: W / 2, y: H / 2, h: 0, vx: 0, vy: 0, vz: 0,
+      q: qrandom(), w: [0, 0, 0], qt: qmul([0, 0, Math.sin(za / 2), Math.cos(za / 2)], qAlign),
+      alpha: 1, color: COLORS[kind === "units" ? 10 : kind], fase: "voo", t0: Date.now() + atraso * 1000,
+      fimEm: 0, tl: 0, plano: null, fimT: 0, linger: 1, st: 0, swt: 0, ph: rnd(0, Math.PI * 2), dir: 1, age: 0
+    };
+    dice.push(nd);
+    return nd;
   }
 
   function ancoraBaixo(d) {
     var par = null;
-    for (var i = 0; i < dice.length; i++) if (dice[i] !== d && dice[i].phase === "shake" && dice[i].ax !== undefined) { par = dice[i]; break; }
+    for (var i = 0; i < dice.length; i++) if (dice[i] !== d && dice[i].fase === "agitar" && dice[i].ax !== undefined) { par = dice[i]; break; }
     if (par) {
       d.ax = Math.min(W - d.R * 2, Math.max(d.R * 2, par.ax + (Math.random() < 0.5 ? -1 : 1) * d.R * 2.6));
       d.ay = par.ay;
@@ -258,7 +225,6 @@
 
   function agitar(d, dt) {
     d.st += dt;
-    if (d.ax === undefined) ancoraBaixo(d);
     var span = Math.max(300, d.shakeEnd - d.shakeStart);
     var ramp = Math.min(1, Math.max(0, (Date.now() - d.shakeStart) / span));
     ramp = ramp * ramp;
@@ -267,137 +233,115 @@
     d.x = d.ax + Math.sin(d.ph) * a;
     d.y = d.ay + Math.sin(d.ph * 0.8 + 0.7) * d.R * 0.12;
     d.h = 26 + (0.5 + 0.5 * Math.sin(d.ph * 1.25)) * d.R * (0.9 + 0.8 * ramp);
-    d.vx = d.vy = d.vz = 0;
     d.swt -= dt;
     if (d.swt <= 0) {
       d.swt = rnd(0.3, 0.6);
       d.wt = mul(aleatorio3(), 5 + 10 * ramp);
     }
-    if (!d.wt) d.wt = [0, 0, 0];
     var k = Math.min(1, dt * 4);
     d.w = [d.w[0] + (d.wt[0] - d.w[0]) * k, d.w[1] + (d.wt[1] - d.w[1]) * k, d.w[2] + (d.wt[2] - d.w[2]) * k];
     girar(d, dt);
   }
 
-  function lancarDoCopo(d) {
-    d.phase = "throw";
-    d.age = 0;
-    if (d.ax === undefined) return;
-    var tx = Math.min(W * 0.92, Math.max(W * 0.08, d.x + d.dir * rnd(0.3, 0.65) * W)), ty = rnd(H * 0.12, H * 0.5);
-    var dx = tx - d.x, dy = ty - d.y, dist = Math.hypot(dx, dy) || 1, sp = dist * 3 * rnd(0.9, 1.15);
+  function impulso(d, alvoX, alvoY, vzMax) {
+    var now = Date.now(), restante = Math.max(0.6, (d.fimEm - now) / 1000);
+    var dx = alvoX - d.x, dy = alvoY - d.y, dist = Math.hypot(dx, dy) || 1, sp = dist * 3 * rnd(0.9, 1.15);
     d.vx = dx / dist * sp;
     d.vy = dy / dist * sp;
-    d.vz = rnd(750, 1000);
-    d.w = mul(aleatorio3(), rnd(22, 34));
+    d.vz = Math.min(vzMax || 1050, Math.max(450, restante * 299));
+    d.fase = "voo";
+    d.tl = now;
+    planejar(d);
   }
 
-  function calmar(d) {
-    d.calm = true;
-    d.vz = Math.min(d.vz, 0);
+  function lancarDoCopo(d) {
+    var tx = Math.min(W * 0.92, Math.max(W * 0.08, d.x + d.dir * rnd(0.3, 0.65) * W)), ty = rnd(H * 0.12, H * 0.5);
+    impulso(d, tx, ty);
+  }
+
+  function lancarLivre(d, orig) {
+    var S = d.R;
+    if (orig) {
+      d.x = orig.x + rnd(-6, 6);
+      d.y = orig.y + rnd(-6, 6);
+      d.h = 55;
+    } else {
+      d.x = rnd(W * 0.12, W * 0.88);
+      d.y = H + S * 0.3;
+      d.h = 90;
+    }
+    var tx, ty;
+    if (orig) {
+      tx = orig.x + (W / 2 - orig.x) * rnd(0.35, 0.7) + rnd(-1, 1) * W * 0.1;
+      ty = orig.y + (H / 2 - orig.y) * rnd(0.35, 0.7) + rnd(-1, 1) * H * 0.1;
+    } else {
+      tx = rnd(W * 0.15, W * 0.85);
+      ty = rnd(H * 0.22, H * 0.7);
+    }
+    impulso(d, Math.min(W - S, Math.max(S, tx)), Math.min(H - S, Math.max(S, ty)));
+  }
+
+  function finalizar(d) {
+    d.q = d.qt;
+    d.h = 0;
+    d.vx = d.vy = d.vz = 0;
+    d.fase = "fim";
+    d.fimT = 0;
+    d.linger = fila.length ? 0.5 : 1.8;
   }
 
   function step(d, dt) {
-    if (d.delay > 0) { d.delay -= dt; return; }
+    var now = Date.now();
+    if (now < d.t0) return;
     d.age += dt;
-    var holding = d.hold > 0;
-    if (holding && Date.now() >= d.hold) {
-      d.hold = 0;
-      holding = false;
-      d.age = 0;
-      if (d.pend) {
-        d.pend = false;
-        d.done = true;
-        d.doneAt = 2.6;
-        d.alpha = 0;
-        return;
-      }
-      if (d.phase === "shake") lancarDoCopo(d);
-      if (d.pend) d.grace = 0.3;
+    if (d.fase === "fim") {
+      d.fimT += dt;
+      if (d.fimT > d.linger) d.alpha = Math.max(0, 1 - (d.fimT - d.linger) / 0.4);
+      return;
     }
-    if (d.grace > 0) {
-      d.grace -= dt;
-      if (d.grace <= 0 && d.pend) { d.done = true; d.doneAt = 2.6; }
-    }
-    if (holding && d.phase === "shake") {
-      var agora = Date.now();
-      if (agora < d.shakeEnd || (d.ax !== undefined && -d.dir * Math.cos(d.ph) < 0.8 && agora < d.shakeEnd + 700)) {
+    if (d.fase === "agitar") {
+      if (now < d.shakeEnd || (-d.dir * Math.cos(d.ph) < 0.8 && now < d.shakeEnd + 450)) {
         agitar(d, dt);
         return;
       }
       lancarDoCopo(d);
     }
+    var rem = (d.fimEm - now) / 1000;
+    if (rem <= 0) {
+      finalizar(d);
+      return;
+    }
     d.vz -= G * dt;
     d.h += d.vz * dt;
     d.x += d.vx * dt;
     d.y += d.vy * dt;
-    var onGround = false;
+    var speed = Math.hypot(d.vx, d.vy);
     if (d.h <= 0) {
       d.h = 0;
-      if (Math.abs(d.vz) > 130 && !d.calm) {
-        d.vz = -d.vz * (holding ? 0.55 : 0.5);
-        var bk = holding ? 0.95 : 0.88;
-        d.vx *= bk;
-        d.vy *= bk;
-        d.w = mul(aleatorio3(), Math.min(30, 8 + Math.hypot(d.vx, d.vy) / 70));
+      if (Math.abs(d.vz) > 130) {
+        d.vz = -d.vz * 0.58;
+        d.vx *= 0.95;
+        d.vy *= 0.95;
       } else {
         d.vz = 0;
-        onGround = true;
+        var kk = Math.min(6, Math.max(0.25, Math.log(Math.max(speed, 31) / 30) / Math.max(rem, 0.2)));
+        var ns = speed * Math.exp(-kk * dt), k = speed > 0 ? ns / speed : 0;
+        d.vx *= k;
+        d.vy *= k;
       }
     }
-    var speed = Math.hypot(d.vx, d.vy);
-    if (onGround) {
-      var ns;
-      if (holding) {
-        var rem = Math.max(0.2, (d.hold - Date.now()) / 1000);
-        var kk = Math.min(6, Math.max(0.25, Math.log(Math.max(speed, 31) / 30) / rem));
-        ns = speed * Math.exp(-kk * dt);
-      } else ns = Math.max(0, speed * Math.exp(-1.1 * dt) - 45 * dt);
-      var k = speed > 0 ? ns / speed : 0;
-      d.vx *= k;
-      d.vy *= k;
-      speed = ns;
-      d.w = mul(d.w, Math.exp(-3.5 * dt));
-    }
-    var S = d.R, wr2 = holding ? 0.9 : 0.72;
-    if (d.x < S) { d.x = S; d.vx = Math.abs(d.vx) * wr2; }
-    if (d.x > W - S) { d.x = W - S; d.vx = -Math.abs(d.vx) * wr2; }
-    if (d.y < S) { d.y = S; d.vy = Math.abs(d.vy) * wr2; }
-    if (d.y > H - S && d.age > 0.6) { d.y = H - S; d.vy = -Math.abs(d.vy) * wr2; }
-    girar(d, dt);
-    if (d.calm) {
-      var kc = Math.exp(-8 * dt);
-      d.vx *= kc;
-      d.vy *= kc;
-      d.w = mul(d.w, Math.exp(-7 * dt));
-      d.q = qnlerp(d.q, d.qt, 1 - Math.exp(-dt * 6));
-    } else if (holding) {
-      var remS = (d.hold - Date.now()) / 1000;
-      var rate = d.h === 0 ? (1 - Math.min(1, speed / 350)) * 5 : 0;
-      if (!d.pend && remS < 1) rate = Math.max(rate, (1 - Math.max(0, remS)) * 6);
-      if (rate > 0) {
-        d.q = qnlerp(d.q, d.pend ? faceMaisBaixa(d) : d.qt, 1 - Math.exp(-dt * rate));
-        d.w = mul(d.w, Math.exp(-dt * rate * 0.5));
-      }
-    } else if (!holding && !d.pend && d.h === 0 && speed < 110) {
-      d.q = qnlerp(d.q, d.qt, 1 - Math.exp(-dt * 5));
-      d.w = mul(d.w, Math.exp(-4 * dt));
-    }
-    if (!d.done && !holding && !d.pend && d.h === 0 && speed < 8 && Math.abs(dot4(d.q, d.qt)) > 0.9995) {
-      d.done = true;
-      d.doneAt = 0;
-      d.q = d.qt;
-    }
-    if (!d.done && !holding && !d.pend && d.age > 9) { d.done = true; d.q = d.qt; d.vx = d.vy = 0; d.h = 0; }
-    if (d.done) {
-      d.doneAt += dt;
-      if (d.doneAt > 2.6) d.alpha = Math.max(0, 1 - (d.doneAt - 2.6) / 0.6);
-    }
+    var S = d.R;
+    if (d.x < S) { d.x = S; d.vx = Math.abs(d.vx) * 0.9; }
+    if (d.x > W - S) { d.x = W - S; d.vx = -Math.abs(d.vx) * 0.9; }
+    if (d.y < S) { d.y = S; d.vy = Math.abs(d.vy) * 0.9; }
+    if (d.y > H - S && d.age > 0.6) { d.y = H - S; d.vy = -Math.abs(d.vy) * 0.9; }
+    orientar(d, Math.min(1, Math.max(0, (now - d.tl) / Math.max(1, d.fimEm - d.tl))));
   }
 
   function collide() {
     for (var i = 0; i < dice.length; i++) for (var j = i + 1; j < dice.length; j++) {
       var a = dice[i], b = dice[j];
-      if (a.delay > 0 || b.delay > 0 || a.h > a.R || b.h > b.R) continue;
+      if (a.fase !== "voo" || b.fase !== "voo" || a.h > a.R || b.h > b.R) continue;
       var dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy), min = (a.R + b.R) * 0.95;
       if (dist >= min || dist === 0) continue;
       var nx = dx / dist, ny = dy / dist, push = (min - dist) / 2;
@@ -409,13 +353,11 @@
         a.vx -= nx * imp; a.vy -= ny * imp;
         b.vx += nx * imp; b.vy += ny * imp;
       }
-      if (a.done) { a.done = false; a.doneAt = 0; a.alpha = 1; }
-      if (b.done) { b.done = false; b.doneAt = 0; b.alpha = 1; }
     }
   }
 
   function render(d) {
-    if (d.delay > 0 || d.alpha <= 0) return;
+    if (Date.now() < d.t0) return;
     var S = d.R * (1 + d.h / 500), px = d.x, py = d.y - d.h * 0.4;
     cx.save();
     cx.globalAlpha = d.alpha;
@@ -464,124 +406,163 @@
     cx.restore();
   }
 
+  function iniciarEtapa() {
+    atual = fila.shift() || null;
+    if (!atual) return;
+    ensure();
+    var now = Date.now(), n = atual.dados.length;
+    while (dice.length + n > MAX_DICE) {
+      var velho = -1;
+      for (var i = 0; i < dice.length; i++) if (dice[i].fase === "fim") { velho = i; break; }
+      if (velho < 0) break;
+      dice.splice(velho, 1);
+    }
+    var dur = atual.agitar || 1500 + 90 * Math.min(n, 10);
+    atual.fim = now + dur + (n - 1) * 70;
+    atual.dados.forEach(function (dd, i) {
+      var d = spawn(dd.kind, dd.value, i * 0.07);
+      d.fimEm = d.t0 + dur;
+      if (atual.agitar) {
+        var throwMs = Math.min(3600, Math.max(1400, dur * 0.65));
+        d.fase = "agitar";
+        d.shakeStart = now;
+        d.shakeEnd = Math.max(now + 150, d.fimEm - throwMs - 400);
+        d.wt = [0, 0, 0];
+        ancoraBaixo(d);
+        d.x = d.ax;
+        d.y = d.ay;
+        d.h = 40;
+      } else {
+        lancarLivre(d, atual.orig);
+        d.tl = d.t0;
+      }
+    });
+    start();
+  }
+
+  function agendarFlush() {
+    if (flushTimer) return;
+    flushTimer = window.setTimeout(function () {
+      flushTimer = null;
+      if (ocupado()) return;
+      var lista = aguardando;
+      aguardando = [];
+      lista.forEach(function (fn) {
+        try { fn(); } catch (e) { }
+      });
+    }, 250);
+  }
+
+  function ocupado() {
+    return !!(atual || fila.length || lote.length);
+  }
+
+  function fecharLote() {
+    loteAgendado = false;
+    var rolls = lote;
+    lote = [];
+    var etapa = null;
+    rolls.forEach(function (r) {
+      var chave = (r.lanc == null ? "x" : r.lanc) + "|" + (r.agitar ? "a" : "");
+      var novo = !etapa || etapa.sides !== r.sides || etapa.chave !== chave || etapa.dados.length >= 12;
+      if (novo) {
+        etapa = { sides: r.sides, chave: chave, orig: r.orig, agitar: r.agitar || 0, dados: [] };
+        fila.push(etapa);
+      }
+      if (r.sides === 100) {
+        var tens = r.value >= 100 || r.value < 10 ? "00" : String(Math.floor(r.value / 10) * 10);
+        etapa.dados.push({ kind: "tens", value: tens });
+        etapa.dados.push({ kind: "units", value: String(r.value % 10) });
+      } else etapa.dados.push({ kind: r.sides, value: r.sides === 10 && r.value === 10 ? "0" : String(r.value) });
+    });
+    if (!atual) iniciarEtapa();
+    if (!ocupado()) agendarFlush();
+    start();
+  }
+
   function frame(now) {
     raf = null;
     var dt = Math.min(0.033, (now - last) / 1000 || 0.016);
     last = now;
+    var agora = Date.now();
+    if (atual && agora >= atual.fim) {
+      if (!fila.length) {
+        atual = null;
+        agendarFlush();
+      } else if (agora >= atual.fim + 350) iniciarEtapa();
+    } else if (!atual && fila.length) iniciarEtapa();
     cx.setTransform(dpr, 0, 0, dpr, 0, 0);
     cx.clearRect(0, 0, W, H);
     dice.forEach(function (d) { step(d, dt); });
     collide();
     dice = dice.filter(function (d) { return d.alpha > 0; });
     dice.forEach(render);
-    if (dice.length) raf = window.requestAnimationFrame(frame);
+    if (dice.length || atual || fila.length) raf = window.requestAnimationFrame(frame);
     else cx.clearRect(0, 0, W, H);
   }
 
   function start() {
-    if (raf == null) {
+    if (cv && raf == null) {
       last = performance.now();
       raf = window.requestAnimationFrame(frame);
     }
   }
 
-  function duplicado(sides, value) {
-    var now = Date.now();
-    for (var i = 0; i < dice.length; i++) {
-      var d = dice[i];
-      if (d.lancarSides !== sides || d.lancarValue !== value) continue;
-      if (d.pend) return true;
-      if (d.hold && d.hold > now && d.phase === "shake") return true;
-      if (STRICT && d.born && now - d.born < STRICT_MS) return true;
+  function enfileirar(sides, value, agitar) {
+    ensure();
+    var orig = null;
+    if (!agitar && origemFn && lancadorId != null) {
+      try { orig = origemFn(lancadorId) || null; } catch (e) { orig = null; }
     }
-    return false;
+    lote.push({ sides: sides, value: value, orig: orig, lanc: agitar ? null : lancadorId, agitar: agitar || 0 });
+    if (!loteAgendado) {
+      loteAgendado = true;
+      Promise.resolve().then(fecharLote);
+    }
   }
 
   function lancar(sides, value) {
     try {
-      if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      if (reduzido()) return;
       sides = Number(sides);
       value = Number(value);
-      if (!isFinite(sides) || !isFinite(value)) return;
-
-      if (duplicado(sides, value)) {
-        if (window.DADOS3D_DEBUG) console.warn("[Dados3D] lancar duplicado ignorado:", sides, value);
-        return;
-      }
-
-      if (dice.length >= MAX_DICE && !dice.some(function (x) { return x.pend; })) return;
-      ensure();
-      var perfNow = performance.now();
-      var gap = perfNow - burstAt;
-      if (gap > 900 || burstN >= 4) burstN = 0;
-      burstAt = perfNow;
-      var delay = Math.min(burstN * 0.55, 1.65);
-      burstN++;
-
-      if (sides === 100) {
-        var tens = value >= 100 ? "00" : String(Math.floor(value / 10) * 10 || "00");
-        if (value < 10) tens = "00";
-        var dt1 = spawn("tens", tens, delay);
-        dt1.lancarSides = 100; dt1.lancarValue = value;
-        var du1 = spawn("units", String(value % 10), delay + 0.03);
-        du1.lancarSides = 100; du1.lancarValue = value;
-      } else if ([4, 6, 8, 10, 12, 20].indexOf(sides) >= 0) {
-        var dd = spawn(sides, sides === 10 && value === 10 ? "0" : String(value), delay);
-        dd.lancarSides = sides; dd.lancarValue = value;
-      } else return;
-
-      for (var i = 0; i < dice.length; i++) {
-        if (dice[i].pend && !(dice[i].hold > Date.now())) {
-          dice[i].pend = false;
-          dice[i].alpha = 0;
-        }
-      }
-      dice = dice.filter(function (d) { return d.alpha > 0; });
-      start();
+      if (!isFinite(sides) || !isFinite(value) || [4, 6, 8, 10, 12, 20, 100].indexOf(sides) < 0) return;
+      enfileirar(sides, value, 0);
     } catch (e) {
     }
   }
 
-  function segurar(ms) {
+  function prever(sides, ms) {
+    var value = 1 + Math.floor(Math.random() * sides);
+    previstos = previstos.filter(function (p) { return p.sides !== sides && Date.now() - p.t < 20000; });
+    previstos.push({ sides: sides, value: value, t: Date.now() });
     try {
-      if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-      ms = Number(ms);
-      if (!isFinite(ms) || ms <= 0) return;
-      ensure();
-      var now = Date.now(), until = now + ms;
-      var throwMs = Math.min(3600, Math.max(1400, ms * 0.65));
-      holdAte = until;
-      shakeAte = Math.max(now + 150, until - throwMs);
-
-      var visiveis = dice.filter(function (d) { return d.alpha > 0; });
-      if (visiveis.length > 0) {
-        var pends = visiveis.filter(function (d) { return d.pend; });
-        pends.forEach(function (d) {
-          d.hold = until;
-          d.calm = false;
-          d.done = false;
-          d.doneAt = 0;
-          d.grace = 0;
-          d.alpha = 1;
-          d.delay = 0;
-          d.phase = "shake";
-          d.shakeEnd = shakeAte;
-          if (d.ax === undefined) ancoraBaixo(d);
-        });
-        if (pends.length > 0) start();
-        return;
-      }
-
-      if (dice.length >= MAX_DICE) return;
-      var p = spawn(20, 20, 0);
-      p.pend = true;
-      p.hold = until;
-      p.phase = "shake";
-      p.shakeEnd = shakeAte;
-      start();
+      if (!reduzido() && Number(ms) > 0 && [4, 6, 8, 10, 12, 20, 100].indexOf(sides) >= 0) enfileirar(sides, value, Number(ms));
     } catch (e) {
     }
+    return value;
   }
 
-  window.Dados3D = { lancar: lancar, segurar: segurar };
+  function consumir(sides) {
+    for (var i = 0; i < previstos.length; i++) {
+      if (previstos[i].sides === sides) return previstos.splice(i, 1)[0].value;
+    }
+    return null;
+  }
+
+  function aoTerminar(fn) {
+    if (!ocupado()) fn();
+    else aguardando.push(fn);
+  }
+
+  window.Dados3D = {
+    lancar: lancar,
+    prever: prever,
+    consumir: consumir,
+    ocupado: ocupado,
+    aoTerminar: aoTerminar,
+    lancador: function (id) { lancadorId = id == null ? null : id; },
+    lancadorAtual: function () { return lancadorId; },
+    provedorOrigem: function (fn) { origemFn = typeof fn === "function" ? fn : null; }
+  };
 })();
