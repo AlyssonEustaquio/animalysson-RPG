@@ -358,7 +358,7 @@
     aplicarFrame(d, d.traj.n - 1, 0);
     d.fase = "fim";
     d.fimT = 0;
-    d.linger = fila.length ? 0.5 : 1.8;
+    d.linger = fila.length ? 1.5 : 2.8;
   }
 
   function step(d, dt) {

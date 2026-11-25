@@ -1,6 +1,6 @@
 (function () {
   if (window.ChatRolagens) return;
-  var MAX = 200;
+  var MAX = 50, VIDA = 10000, SUMIR = 1000;
   var box = null, lista = null;
 
   function garantir() {
@@ -13,8 +13,23 @@
     document.body.appendChild(box);
   }
 
+  function agendarSumir(msg) {
+    window.setTimeout(function () {
+      msg.classList.add("chat-rolagens-sumindo");
+      window.setTimeout(function () {
+        if (msg.parentNode) msg.parentNode.removeChild(msg);
+      }, SUMIR);
+    }, VIDA);
+  }
+
   function desativarBotoes() {
     lista.querySelectorAll(".chat-rolagens-botoes button").forEach(function (b) { b.disabled = true; });
+    lista.querySelectorAll(".chat-rolagens-msg").forEach(function (m) {
+      if (m.querySelector(".chat-rolagens-botoes") && !m.dataset.sumindo) {
+        m.dataset.sumindo = "1";
+        agendarSumir(m);
+      }
+    });
   }
 
   function postar(titulo, linhas, botoes, aoPostar) {
@@ -49,10 +64,9 @@
     }
     lista.appendChild(msg);
     while (lista.children.length > MAX) lista.removeChild(lista.firstChild);
-    lista.scrollTop = lista.scrollHeight;
+    if (!botoes || !botoes.length) agendarSumir(msg);
     if (aoPostar) aoPostar();
   }
 
   window.ChatRolagens = { postar: postar };
-  garantir();
 })();
