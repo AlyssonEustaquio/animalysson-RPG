@@ -1,7 +1,7 @@
 (function () {
   if (window.Dados3D) return;
   var PHI = (1 + Math.sqrt(5)) / 2;
-  var G = 1900;
+  var GRAV = 2600, REST = 0.5, MU = 0.38, DT = 1 / 240;
   var MAX_DICE = 26;
   var cv = null, cx = null, dice = [], raf = null, last = 0, W = 0, H = 0, dpr = 1;
   var fila = [], atual = null, lote = [], loteAgendado = false, previstos = [], aguardando = [], origemFn = null, lancadorId = null, flushTimer = null;
@@ -105,7 +105,10 @@
   function getShape(kind) {
     if (shapes[kind]) return shapes[kind];
     var s;
-    if (kind === 4) s = buildShape([[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]], numbers(1, 4), false, 0.5);
+    if (kind === 4) {
+      s = buildShape([[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]], numbers(1, 4), false, 0.5);
+      s.vlabels = numbers(1, 4);
+    }
     else if (kind === 6) {
       var cube = [];
       [-1, 1].forEach(function (x) { [-1, 1].forEach(function (y) { [-1, 1].forEach(function (z) { cube.push([x, y, z]); }); }); });
@@ -129,6 +132,8 @@
       [-1, 1].forEach(function (x) { [-1, 1].forEach(function (y) { iv.push([0, x, y * PHI]); iv.push([x, y * PHI, 0]); iv.push([x * PHI, 0, y]); }); });
       s = buildShape(iv, numbers(1, 20).map(function (t) { return t === "6" || t === "9" ? t + "." : t; }), true, 0.36);
     }
+    s.inR = 9;
+    s.faces.forEach(function (f) { s.inR = Math.min(s.inR, dot(f.n, f.c)); });
     shapes[kind] = s;
     return s;
   }
@@ -169,44 +174,132 @@
     }
   }
 
-  function eixoAngulo(axis, ang) {
-    var s = Math.sin(ang / 2);
-    return [axis[0] * s, axis[1] * s, axis[2] * s, Math.cos(ang / 2)];
+  function simular(shape, R, s0) {
+    var verts = shape.verts.map(function (v) { return mul(v, R); }), nv = verts.length;
+    var I = 0.4 * Math.pow(R * 0.62, 2);
+    var p = [s0.x, s0.y, s0.z], v = [s0.vx, s0.vy, s0.vz], q = s0.q.slice(), w = s0.w.slice();
+    var M = R * 0.9, out = [], quieto = 0, rs = new Array(nv), calmo = false;
+    for (var n = 0; n < 1440; n++) {
+      v[2] -= GRAV * DT;
+      p[0] += v[0] * DT; p[1] += v[1] * DT; p[2] += v[2] * DT;
+      var hw = 0.5 * DT, dq = qmul([w[0] * hw, w[1] * hw, w[2] * hw, 0], q);
+      q = qnorm([q[0] + dq[0], q[1] + dq[1], q[2] + dq[2], q[3] + dq[3]]);
+      for (var i = 0; i < nv; i++) rs[i] = rot(q, verts[i]);
+      for (var it = 0; it < 4; it++) {
+        for (i = 0; i < nv; i++) {
+          var r = rs[i];
+          if (p[2] + r[2] > 0) continue;
+          var vz = v[2] + w[0] * r[1] - w[1] * r[0];
+          if (vz >= 0) continue;
+          var e = vz < -240 ? REST : 0;
+          var j = -(1 + e) * vz / (1 + (r[0] * r[0] + r[1] * r[1]) / I);
+          v[2] += j;
+          w[0] += r[1] * j / I;
+          w[1] -= r[0] * j / I;
+          var cx0 = v[0] + w[1] * r[2] - w[2] * r[1], cy0 = v[1] + w[2] * r[0] - w[0] * r[2];
+          var sp = Math.hypot(cx0, cy0);
+          if (sp > 1e-3) {
+            var tx = cx0 / sp, ty = cy0 / sp, rt = cross(r, [tx, ty, 0]);
+            var jt = Math.min(sp / (1 + dot(rt, rt) / I), MU * j);
+            v[0] -= tx * jt; v[1] -= ty * jt;
+            var tq = cross(r, [-tx * jt, -ty * jt, 0]);
+            w[0] += tq[0] / I; w[1] += tq[1] / I; w[2] += tq[2] / I;
+          }
+        }
+      }
+      var minZ = 0;
+      for (i = 0; i < nv; i++) minZ = Math.min(minZ, p[2] + rs[i][2]);
+      if (minZ < 0) p[2] -= minZ;
+      var dm = Math.exp(-0.3 * DT);
+      w[0] *= dm; w[1] *= dm; w[2] *= dm;
+      if (p[0] < M) { p[0] = M; if (v[0] < 0) v[0] *= -0.5; }
+      if (p[0] > W - M) { p[0] = W - M; if (v[0] > 0) v[0] *= -0.5; }
+      if (p[1] < M) { p[1] = M; if (v[1] < 0) v[1] *= -0.5; }
+      if (p[1] > H - M) { p[1] = H - M; if (v[1] > 0) v[1] *= -0.5; }
+      if (n % 2 === 1) out.push(p[0], p[1], p[2], q[0], q[1], q[2], q[3]);
+      if (Math.hypot(v[0], v[1], v[2]) < 30 && Math.hypot(w[0], w[1], w[2]) < 1.5) {
+        quieto += DT;
+        if (quieto > 0.25) { calmo = true; break; }
+      } else quieto = 0;
+    }
+    return { data: Float32Array.from(out), n: out.length / 7, dt: 2 * DT, rest: calmo, q: q };
   }
 
-  function planejar(d) {
-    var q0 = qmul(d.q, [-d.qt[0], -d.qt[1], -d.qt[2], d.qt[3]]);
-    if (q0[3] < 0) q0 = [-q0[0], -q0[1], -q0[2], -q0[3]];
-    var psi0 = 2 * Math.acos(Math.min(1, q0[3])), s = Math.sqrt(Math.max(0, 1 - q0[3] * q0[3]));
-    d.plano = {
-      axis: s > 1e-4 ? [q0[0] / s, q0[1] / s, q0[2] / s] : aleatorio3(),
-      psi: psi0 + 2 * Math.PI * (Math.random() < 0.5 ? 1 : 2),
-      ax2: aleatorio3(),
-      th2: rnd(1.5, 3) * (Math.random() < 0.5 ? -1 : 1)
-    };
+  function topo(shape, q) {
+    var best = 0, bz = -2, lista = shape.vlabels ? shape.verts : shape.faces.map(function (f) { return f.n; });
+    for (var i = 0; i < lista.length; i++) {
+      var z = rot(q, lista[i])[2];
+      if (z > bz) { bz = z; best = i; }
+    }
+    return { idx: best, plano: bz > 0.985 };
   }
 
-  function orientar(d, u) {
-    var p = d.plano, f = Math.pow(1 - u, 3), g = Math.sin(Math.PI * u) * Math.pow(1 - u, 2);
-    d.q = qmul(eixoAngulo(p.ax2, p.th2 * g), qmul(eixoAngulo(p.axis, p.psi * f), d.qt));
+  function lancarFisico(d, geraInicio, evitar) {
+    var alt = null, ult = null, achou = null;
+    for (var k = 0; k < 120 && !achou; k++) {
+      var r = simular(d.shape, d.R, geraInicio());
+      ult = r;
+      if (!r.rest) continue;
+      var tp = topo(d.shape, r.q);
+      if (!tp.plano) continue;
+      var o = (r.n - 1) * 7, fx = r.data[o], fy = r.data[o + 1];
+      if (evitar.some(function (e) { return Math.hypot(e.x - fx, e.y - fy) < d.R * 2.1; })) continue;
+      if (tp.idx === d.alvo) achou = r;
+      else if (!alt) alt = { r: r, idx: tp.idx };
+    }
+    if (!achou) {
+      var base = alt ? alt.r : ult, idx = alt ? alt.idx : topo(d.shape, ult.q).idx;
+      if (d.shape.vlabels) {
+        d.vl = d.shape.vlabels.slice();
+        var vt = d.vl[idx]; d.vl[idx] = d.vl[d.alvo]; d.vl[d.alvo] = vt;
+      } else {
+        d.fl = d.shape.faces.map(function (f) { return f.label; });
+        var ft = d.fl[idx]; d.fl[idx] = d.fl[d.alvo]; d.fl[d.alvo] = ft;
+      }
+      achou = base;
+    }
+    var f = (achou.n - 1) * 7;
+    evitar.push({ x: achou.data[f], y: achou.data[f + 1] });
+    d.traj = achou;
   }
 
   function spawn(kind, value, atraso) {
     var shape = getShape(kind);
     var label = String(value);
     var fi = 0;
-    for (var i = 0; i < shape.faces.length; i++) if (shape.faces[i].label.replace(".", "") === label) { fi = i; break; }
+    if (shape.vlabels) fi = Math.max(0, Math.min(3, Number(value) - 1));
+    else for (var i = 0; i < shape.faces.length; i++) if (shape.faces[i].label.replace(".", "") === label) { fi = i; break; }
     var R = Math.max(20, Math.min(40, Math.min(W, H) * 0.055));
-    var qAlign = qFromTo(shape.faces[fi].n, [0, 0, 1]);
-    var za = rnd(0, Math.PI * 2);
     var nd = {
-      kind: kind, shape: shape, R: R, x: W / 2, y: H / 2, h: 0, vx: 0, vy: 0, vz: 0,
-      q: qrandom(), w: [0, 0, 0], qt: qmul([0, 0, Math.sin(za / 2), Math.cos(za / 2)], qAlign),
-      alpha: 1, color: COLORS[kind === "units" ? 10 : kind], fase: "voo", t0: Date.now() + atraso * 1000,
-      fimEm: 0, tl: 0, plano: null, fimT: 0, linger: 1, st: 0, swt: 0, ph: rnd(0, Math.PI * 2), dir: 1, age: 0
+      kind: kind, shape: shape, R: R, x: W / 2, y: H / 2, h: 0, alvo: fi, fl: null, vl: null, traj: null,
+      q: qrandom(), w: [0, 0, 0], alpha: 1, color: COLORS[kind === "units" ? 10 : kind], fase: "voo",
+      t0: Date.now() + atraso * 1000, tl: 0, fimEm: 0, fimT: 0, rate: 1, linger: 1, st: 0, swt: 0, ph: rnd(0, Math.PI * 2), dir: 1, etapa: null
     };
     dice.push(nd);
     return nd;
+  }
+
+  function inicioLivre(d, orig, evitarOrig) {
+    var R = d.R, x, y, tx, ty;
+    if (orig) {
+      x = orig.x + rnd(-8, 8);
+      y = orig.y + rnd(-8, 8);
+      tx = orig.x + (W / 2 - orig.x) * rnd(0.35, 0.8) + rnd(-1, 1) * W * 0.12;
+      ty = orig.y + (H / 2 - orig.y) * rnd(0.35, 0.8) + rnd(-1, 1) * H * 0.12;
+    } else {
+      x = rnd(W * 0.15, W * 0.85);
+      y = H - R * 1.2;
+      tx = rnd(W * 0.15, W * 0.85);
+      ty = rnd(H * 0.2, H * 0.6);
+    }
+    var dx = tx - x, dy = ty - y, dist = Math.hypot(dx, dy) || 1, sp = rnd(1100, 2000);
+    return { x: x, y: y, z: R * 1.3 + 90, vx: dx / dist * sp, vy: dy / dist * sp, vz: rnd(450, 950), q: qrandom(), w: mul(aleatorio3(), rnd(12, 30)) };
+  }
+
+  function inicioCopo(d) {
+    var tx = Math.min(W * 0.92, Math.max(W * 0.08, d.x + d.dir * rnd(0.3, 0.65) * W)), ty = rnd(H * 0.12, H * 0.5);
+    var dx = tx - d.x, dy = ty - d.y, dist = Math.hypot(dx, dy) || 1, sp = rnd(1100, 1900);
+    return { x: d.x, y: d.y, z: d.h + d.shape.inR * d.R, vx: dx / dist * sp, vy: dy / dist * sp, vz: rnd(250, 600), q: d.q.slice(), w: mul(aleatorio3(), rnd(15, 32)) };
   }
 
   function ancoraBaixo(d) {
@@ -243,48 +336,26 @@
     girar(d, dt);
   }
 
-  function impulso(d, alvoX, alvoY, vzMax) {
-    var now = Date.now(), restante = Math.max(0.6, (d.fimEm - now) / 1000);
-    var dx = alvoX - d.x, dy = alvoY - d.y, dist = Math.hypot(dx, dy) || 1, sp = dist * 3 * rnd(0.9, 1.15);
-    d.vx = dx / dist * sp;
-    d.vy = dy / dist * sp;
-    d.vz = Math.min(vzMax || 1050, Math.max(450, restante * 299));
-    d.fase = "voo";
-    d.tl = now;
-    planejar(d);
-  }
-
   function lancarDoCopo(d) {
-    var tx = Math.min(W * 0.92, Math.max(W * 0.08, d.x + d.dir * rnd(0.3, 0.65) * W)), ty = rnd(H * 0.12, H * 0.5);
-    impulso(d, tx, ty);
+    lancarFisico(d, function () { return inicioCopo(d); }, []);
+    var agora = Date.now(), dur = (d.traj.n - 1) * d.traj.dt, resta = Math.max(0.4, (d.fimEm - agora) / 1000);
+    d.rate = Math.min(1.3, Math.max(0.75, dur / resta));
+    d.fase = "voo";
+    d.tl = agora;
+    d.fimEm = agora + dur * 1000 / d.rate;
+    if (d.etapa) d.etapa.fim = d.etapa.objs.reduce(function (m, o) { return Math.max(m, o.fimEm); }, 0);
   }
 
-  function lancarLivre(d, orig) {
-    var S = d.R;
-    if (orig) {
-      d.x = orig.x + rnd(-6, 6);
-      d.y = orig.y + rnd(-6, 6);
-      d.h = 55;
-    } else {
-      d.x = rnd(W * 0.12, W * 0.88);
-      d.y = H + S * 0.3;
-      d.h = 90;
-    }
-    var tx, ty;
-    if (orig) {
-      tx = orig.x + (W / 2 - orig.x) * rnd(0.35, 0.7) + rnd(-1, 1) * W * 0.1;
-      ty = orig.y + (H / 2 - orig.y) * rnd(0.35, 0.7) + rnd(-1, 1) * H * 0.1;
-    } else {
-      tx = rnd(W * 0.15, W * 0.85);
-      ty = rnd(H * 0.22, H * 0.7);
-    }
-    impulso(d, Math.min(W - S, Math.max(S, tx)), Math.min(H - S, Math.max(S, ty)));
+  function aplicarFrame(d, i, f) {
+    var a = i * 7, b = Math.min(d.traj.n - 1, i + 1) * 7, D = d.traj.data;
+    d.x = D[a] + (D[b] - D[a]) * f;
+    d.y = D[a + 1] + (D[b + 1] - D[a + 1]) * f;
+    d.h = Math.max(0, D[a + 2] + (D[b + 2] - D[a + 2]) * f - d.shape.inR * d.R);
+    d.q = qnlerp([D[a + 3], D[a + 4], D[a + 5], D[a + 6]], [D[b + 3], D[b + 4], D[b + 5], D[b + 6]], f);
   }
 
   function finalizar(d) {
-    d.q = d.qt;
-    d.h = 0;
-    d.vx = d.vy = d.vz = 0;
+    aplicarFrame(d, d.traj.n - 1, 0);
     d.fase = "fim";
     d.fimT = 0;
     d.linger = fila.length ? 0.5 : 1.8;
@@ -293,7 +364,6 @@
   function step(d, dt) {
     var now = Date.now();
     if (now < d.t0) return;
-    d.age += dt;
     if (d.fase === "fim") {
       d.fimT += dt;
       if (d.fimT > d.linger) d.alpha = Math.max(0, 1 - (d.fimT - d.linger) / 0.4);
@@ -306,54 +376,12 @@
       }
       lancarDoCopo(d);
     }
-    var rem = (d.fimEm - now) / 1000;
-    if (rem <= 0) {
+    var pos = (now - d.tl) / 1000 * d.rate / d.traj.dt, i = Math.floor(pos);
+    if (i >= d.traj.n - 1) {
       finalizar(d);
       return;
     }
-    d.vz -= G * dt;
-    d.h += d.vz * dt;
-    d.x += d.vx * dt;
-    d.y += d.vy * dt;
-    var speed = Math.hypot(d.vx, d.vy);
-    if (d.h <= 0) {
-      d.h = 0;
-      if (Math.abs(d.vz) > 130) {
-        d.vz = -d.vz * 0.58;
-        d.vx *= 0.95;
-        d.vy *= 0.95;
-      } else {
-        d.vz = 0;
-        var kk = Math.min(6, Math.max(0.25, Math.log(Math.max(speed, 31) / 30) / Math.max(rem, 0.2)));
-        var ns = speed * Math.exp(-kk * dt), k = speed > 0 ? ns / speed : 0;
-        d.vx *= k;
-        d.vy *= k;
-      }
-    }
-    var S = d.R;
-    if (d.x < S) { d.x = S; d.vx = Math.abs(d.vx) * 0.9; }
-    if (d.x > W - S) { d.x = W - S; d.vx = -Math.abs(d.vx) * 0.9; }
-    if (d.y < S) { d.y = S; d.vy = Math.abs(d.vy) * 0.9; }
-    if (d.y > H - S && d.age > 0.6) { d.y = H - S; d.vy = -Math.abs(d.vy) * 0.9; }
-    orientar(d, Math.min(1, Math.max(0, (now - d.tl) / Math.max(1, d.fimEm - d.tl))));
-  }
-
-  function collide() {
-    for (var i = 0; i < dice.length; i++) for (var j = i + 1; j < dice.length; j++) {
-      var a = dice[i], b = dice[j];
-      if (a.fase !== "voo" || b.fase !== "voo" || a.h > a.R || b.h > b.R) continue;
-      var dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy), min = (a.R + b.R) * 0.95;
-      if (dist >= min || dist === 0) continue;
-      var nx = dx / dist, ny = dy / dist, push = (min - dist) / 2;
-      a.x -= nx * push; a.y -= ny * push;
-      b.x += nx * push; b.y += ny * push;
-      var rel = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
-      if (rel < 0) {
-        var imp = -rel * 0.6;
-        a.vx -= nx * imp; a.vy -= ny * imp;
-        b.vx += nx * imp; b.vy += ny * imp;
-      }
-    }
+    aplicarFrame(d, i, pos - i);
   }
 
   function render(d) {
@@ -367,9 +395,9 @@
     cx.fill();
     var vs = d.shape.verts.map(function (v) { return rot(d.q, v); });
     var list = [];
-    d.shape.faces.forEach(function (f) {
+    d.shape.faces.forEach(function (f, fi) {
       var n = rot(d.q, f.n);
-      if (n[2] > 0) list.push({ f: f, n: n });
+      if (n[2] > 0) list.push({ f: f, n: n, fi: fi });
     });
     list.sort(function (a, b) { return a.n[2] - b.n[2]; });
     list.forEach(function (it) {
@@ -389,7 +417,26 @@
       cx.lineWidth = 1.3;
       cx.lineJoin = "round";
       cx.stroke();
-      if (n[2] > 0.3) {
+      if (d.shape.vlabels) {
+        if (n[2] > 0.12) {
+          var vl = d.vl || d.shape.vlabels;
+          f.idx.forEach(function (vi) {
+            var vv = d.shape.verts[vi], dirv = norm(sub(vv, f.c));
+            var P = rot(d.q, add(f.c, mul(sub(vv, f.c), 0.5)));
+            var V2 = mul(dirv, -1), U = rot(d.q, cross(V2, f.n)), V = rot(d.q, V2);
+            cx.save();
+            cx.transform(U[0] * S, U[1] * S, V[0] * S, V[1] * S, px + P[0] * S, py + P[1] * S);
+            cx.font = "700 " + d.shape.fs + "px Roboto, Arial, sans-serif";
+            cx.textAlign = "center";
+            cx.textBaseline = "middle";
+            cx.fillStyle = "rgba(255,255,255," + Math.min(1, n[2] * 3) + ")";
+            cx.shadowColor = "rgba(0,0,0,0.6)";
+            cx.shadowBlur = 2;
+            cx.fillText(vl[vi], 0, 0);
+            cx.restore();
+          });
+        }
+      } else if (n[2] > 0.3) {
         var u = rot(d.q, f.u), v = rot(d.q, f.v), c = rot(d.q, f.c);
         cx.save();
         cx.transform(u[0] * S, u[1] * S, v[0] * S, v[1] * S, px + c[0] * S, py + c[1] * S);
@@ -399,7 +446,7 @@
         cx.fillStyle = "rgba(255,255,255," + Math.min(1, n[2] * 1.4) + ")";
         cx.shadowColor = "rgba(0,0,0,0.6)";
         cx.shadowBlur = 2;
-        cx.fillText(f.label, 0, 0);
+        cx.fillText(d.fl ? d.fl[it.fi] : f.label, 0, 0);
         cx.restore();
       }
     });
@@ -417,26 +464,31 @@
       if (velho < 0) break;
       dice.splice(velho, 1);
     }
-    var dur = atual.agitar || 1500 + 90 * Math.min(n, 10);
-    atual.fim = now + dur + (n - 1) * 70;
+    atual.objs = [];
+    var evitar = [];
     atual.dados.forEach(function (dd, i) {
       var d = spawn(dd.kind, dd.value, i * 0.07);
-      d.fimEm = d.t0 + dur;
+      d.etapa = atual;
+      atual.objs.push(d);
       if (atual.agitar) {
-        var throwMs = Math.min(3600, Math.max(1400, dur * 0.65));
         d.fase = "agitar";
+        d.fimEm = d.t0 + atual.agitar;
         d.shakeStart = now;
-        d.shakeEnd = Math.max(now + 150, d.fimEm - throwMs - 400);
         d.wt = [0, 0, 0];
         ancoraBaixo(d);
         d.x = d.ax;
         d.y = d.ay;
         d.h = 40;
+        var sondas = [0, 1, 2].map(function () { var r = simular(d.shape, d.R, inicioCopo(d)); return (r.n - 1) * r.dt; }).sort();
+        d.shakeEnd = Math.max(now + 150, d.fimEm - sondas[1] * 1000 - 300);
       } else {
-        lancarLivre(d, atual.orig);
+        lancarFisico(d, function () { return inicioLivre(d, atual.orig); }, evitar);
         d.tl = d.t0;
+        d.fimEm = d.t0 + (d.traj.n - 1) * d.traj.dt * 1000;
+        aplicarFrame(d, 0, 0);
       }
     });
+    atual.fim = atual.objs.reduce(function (m, o) { return Math.max(m, o.fimEm); }, 0);
     start();
   }
 
@@ -494,7 +546,6 @@
     cx.setTransform(dpr, 0, 0, dpr, 0, 0);
     cx.clearRect(0, 0, W, H);
     dice.forEach(function (d) { step(d, dt); });
-    collide();
     dice = dice.filter(function (d) { return d.alpha > 0; });
     dice.forEach(render);
     if (dice.length || atual || fila.length) raf = window.requestAnimationFrame(frame);
