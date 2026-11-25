@@ -8,6 +8,8 @@
   var shapes = {};
   var LIGHT = [-0.35, -0.5, 0.8];
   var COLORS = { 4: [67, 160, 71], 6: [211, 47, 47], 8: [30, 136, 229], 10: [142, 68, 173], 12: [239, 140, 20], 20: [0, 137, 123], tens: [94, 53, 177] };
+  var STRICT = window.DADOS3D_STRICT_DEDUP === true;
+  var STRICT_MS = 60;
 
   function sub(a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
   function add(a, b) { return [a[0] + b[0], a[1] + b[1], a[2] + b[2]]; }
@@ -193,6 +195,8 @@
       c.alpha = 1;
       c.age = 0;
       c.lockedFace = false;
+      c.lancarSides = undefined;
+      c.lancarValue = undefined;
       if (!(c.hold > Date.now()) && c.h <= 0 && Math.hypot(c.vx, c.vy) < 80) {
         calmar(c);
         c.vz = 260;
@@ -481,28 +485,51 @@
     }
   }
 
+  function duplicado(sides, value) {
+    var now = Date.now();
+    for (var i = 0; i < dice.length; i++) {
+      var d = dice[i];
+      if (d.lancarSides !== sides || d.lancarValue !== value) continue;
+      if (d.pend) return true;
+      if (d.hold && d.hold > now && d.phase === "shake") return true;
+      if (STRICT && d.born && now - d.born < STRICT_MS) return true;
+    }
+    return false;
+  }
+
   function lancar(sides, value) {
     try {
       if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       sides = Number(sides);
       value = Number(value);
       if (!isFinite(sides) || !isFinite(value)) return;
+
+      if (duplicado(sides, value)) {
+        if (window.DADOS3D_DEBUG) console.warn("[Dados3D] lancar duplicado ignorado:", sides, value);
+        return;
+      }
+
       if (dice.length >= MAX_DICE && !dice.some(function (x) { return x.pend; })) return;
       ensure();
-      var now = performance.now();
-      var gap = now - burstAt;
+      var perfNow = performance.now();
+      var gap = perfNow - burstAt;
       if (gap > 900 || burstN >= 4) burstN = 0;
-      burstAt = now;
+      burstAt = perfNow;
       var delay = Math.min(burstN * 0.55, 1.65);
       burstN++;
+
       if (sides === 100) {
         var tens = value >= 100 ? "00" : String(Math.floor(value / 10) * 10 || "00");
         if (value < 10) tens = "00";
-        spawn("tens", tens, delay);
-        spawn("units", String(value % 10), delay + 0.03);
+        var dt1 = spawn("tens", tens, delay);
+        dt1.lancarSides = 100; dt1.lancarValue = value;
+        var du1 = spawn("units", String(value % 10), delay + 0.03);
+        du1.lancarSides = 100; du1.lancarValue = value;
       } else if ([4, 6, 8, 10, 12, 20].indexOf(sides) >= 0) {
-        spawn(sides, sides === 10 && value === 10 ? "0" : String(value), delay);
+        var dd = spawn(sides, sides === 10 && value === 10 ? "0" : String(value), delay);
+        dd.lancarSides = sides; dd.lancarValue = value;
       } else return;
+
       for (var i = 0; i < dice.length; i++) {
         if (dice[i].pend && !(dice[i].hold > Date.now())) {
           dice[i].pend = false;
