@@ -788,16 +788,20 @@ function creativeTorchIntensityAtDistance(distance) {
   if (distance <= 1) return 1;
   return Math.max(.1, 1 - .9 * ((distance - 1) / 5));
 }
+function creativeIsInsideBaseLightSquare(dx, dy) {
+  // Um tile em cada direção forma um quadrado 3x3, incluindo as diagonais.
+  return Math.abs(dx) <= 1.000001 && Math.abs(dy) <= 1.000001;
+}
 function creativeGetCellLightIntensity(x, y, viewer) {
   if (!creativeIsDarkCell(x, y)) return 1;
   var best = 0, player = viewer || (typeof currentPlayer === "function" ? currentPlayer() : null);
   if (player && player.tipo === "player") {
     var baseDx = x - Number(player.x), baseDy = y - Number(player.y);
     var baseDistance = Math.sqrt(baseDx * baseDx + baseDy * baseDy);
-    // O próprio tile do personagem permanece claro; os tiles adjacentes
-    // recebem apenas 10% de luz, respeitando paredes e portas fechadas.
-    if (baseDistance < 0.001) best = 1;
-    else if (baseDistance <= 1.000001 && hasLOS(player.x, player.y, x, y)) best = 0.1;
+    // Luz ambiente base em quadrado 3x3: centro a 20% e entorno a 10%.
+    // Paredes e portas fechadas continuam bloqueando a iluminação.
+    if (Math.abs(baseDx) < 0.001 && Math.abs(baseDy) < 0.001) best = 0.2;
+    else if (creativeIsInsideBaseLightSquare(baseDx, baseDy) && hasLOS(player.x, player.y, x, y)) best = 0.1;
     if (creativeGetActiveTorchItem(player) && hasLOS(player.x, player.y, x, y)) {
       best = Math.max(best, creativeTorchIntensityAtDistance(baseDistance));
     }
@@ -1064,6 +1068,21 @@ isCurrentlyVisible = function(x, y, px, py, radius) {
   if (x < 0 || y < 0 || x >= COLS || y >= ROWS) return false;
   if (isHexMap() || appMode === "editor") return true;
   return creativeCellVisibleToPlayer(x, y, px, py);
+};
+var creativeBaseRevealAround = revealAround;
+revealAround = function(cx2, cy, radius) {
+  var player = typeof currentPlayer === "function" ? currentPlayer() : null;
+  var baseSquare = !isHexMap() && player && player.tipo === "player" &&
+    Math.abs(Number(player.x) - Number(cx2)) < 0.001 &&
+    Math.abs(Number(player.y) - Number(cy)) < 0.001 &&
+    creativeIsDarkCell(Number(cx2), Number(cy)) && !creativeGetActiveTorchItem(player);
+  if (!baseSquare) return creativeBaseRevealAround(cx2, cy, radius);
+  // Revela também os quatro cantos do quadrado 3x3 da visão base.
+  for (var dy = -1; dy <= 1; dy++) for (var dx = -1; dx <= 1; dx++) {
+    var x = cx2 + dx, y = cy + dy;
+    if (x < 0 || y < 0 || x >= COLS || y >= ROWS) continue;
+    if (hasLOS(cx2, cy, x, y)) state.fog[idx(x, y)] = 0;
+  }
 };
 var creativeBaseCanStep = canStep;
 canStep = function(fromX, fromY, toX, toY, token, detectTouch) {
