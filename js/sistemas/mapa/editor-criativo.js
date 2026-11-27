@@ -1064,8 +1064,8 @@ function creativeInstallUi() {
   var modeSwitch = R.querySelector(".mp-mode-switch");
   if (modeSwitch) shell.querySelector(".mp-creator-topbar").appendChild(modeSwitch);
   // Exportação avançada e importação continuam disponíveis no menu original.
-  var burger = R.querySelector("#mp-burger");
-  if (burger) { burger.style.left = "auto"; burger.style.right = "14px"; burger.style.top = "66px"; }
+  // O botão Menu fica no canto superior esquerdo no modo Jogador; no Editor,
+  // o acesso às ferramentas avançadas é feito pelo botão próprio do painel.
   shell.querySelector("#mp-creator-save").onclick = function() {
     save();
     if (MAPINFO && MAPINFO.custom) exportMapPackage(); else exportMapFile();
