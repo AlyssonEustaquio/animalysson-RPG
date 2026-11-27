@@ -12,18 +12,13 @@
 <link rel="stylesheet" href="css/ficha.css">
 <link rel="stylesheet" href="css/catalogo.css">
 <link rel="stylesheet" href="css/mapa.css">
-<link rel="stylesheet" href="css/mapa-fix-canvas.css?v=20261123-95">
-<link rel="stylesheet" href="css/seletor-topo.css?v=20261123-top5">
-<link rel="stylesheet" href="css/rolagem-por-coluna.css?v=20261123-cols">
-<link rel="stylesheet" href="css/personagem-sem-aro.css?v=20261123-dice-outside-name-field">
 <link rel="stylesheet" href="css/chat-rolagens.css">
 </head>
 <body>
 <div class="shell">
-<div class="rail-slot collapsed" id="rail-slot">
+<div class="rail-slot">
 <nav class="section-tabs" aria-label="Seções principais">
-<button type="button" class="rail-toggle" id="rail-toggle" onclick="toggleRail()" aria-expanded="false" aria-controls="rail-items" aria-label="Mostrar seções" title="Mostrar seções">&lt;</button>
-<div class="rail-items" id="rail-items">
+<div class="rail-items">
 <button id="tab-character" class="section-tab on" onclick="switchView('character')"><span>♙</span> Personagem</button>
 <button id="tab-items" class="section-tab" onclick="switchView('items')"><span>⚒</span> Itens</button>
 <button id="tab-inventory" class="section-tab" onclick="switchView('inventory')"><span>🎒</span> Inventário</button>
@@ -37,8 +32,6 @@
 </main>
 </div>
 <div id="modal-root"></div>
-<script src="js/dados3d.js"></script>
-<script src="js/chat-rolagens.js"></script>
 <script src="js/carregador.js"></script>
 </body>
 </html>

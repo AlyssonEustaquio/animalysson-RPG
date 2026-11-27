@@ -99,26 +99,6 @@
   opacity:.6;
 }
 
-.stat {
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(100px,1fr));
-  gap:8px;
-}
-
-.stat div {
-  border:1px solid var(--line);
-  border-radius:8px;
-  padding:8px;
-  text-align:center;
-  background:var(--bg);
-}
-
-.stat b {
-  display:block;
-  font-family:"Roboto Condensed",system-ui,sans-serif;
-  font-size:1.4rem;
-}
-
 .dot {
   display:inline-block;
   width:10px;
@@ -134,10 +114,6 @@
 }
 
 .ficha {
-  background:var(--paper);
-  border:1px solid var(--line);
-  border-radius:6px;
-  padding:10px;
   display:grid;
   gap:8px;
 }
@@ -423,4 +399,28 @@
     border-color:#999;
     background:#fff;
   }
+}
+
+.ficha-acoes {
+  display:flex;
+  justify-content:flex-end;
+  margin-bottom:6px;
+}
+
+.sortear-dado {
+  padding:0 4px;
+  border:0;
+  background:none;
+  font-size:2rem;
+  line-height:1;
+  cursor:pointer;
+  transition:transform .15s;
+}
+
+.sortear-dado:hover {
+  transform:rotate(20deg) scale(1.1);
+}
+
+.sortear-dado:active {
+  transform:rotate(-20deg) scale(.95);
 }
