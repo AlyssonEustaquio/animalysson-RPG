@@ -623,3 +623,198 @@ main { background: transparent; }
   #mp-root .mp-player-action-dialog .mp-cb-grid { grid-template-columns: minmax(0, 1fr); }
   #mp-root .mp-player-action-dialog .mp-action-group { padding: 9px; }
 }
+
+
+/* Mapa: ocupar toda a área útil do aplicativo, sem as margens padrão das outras telas. */
+html body main:has(> #app.view-maps) {
+  padding: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+html body #app.view-maps {
+  flex: 1 1 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+
+/* Seletor de perícia das rolagens: área de toque clara, contraste e valor selecionado legível. */
+#mp-root.mp.vtt .mp-player-skill-row {
+  display: flex !important;
+  align-items: flex-end !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+#mp-root.mp.vtt .mp-player-skill-field {
+  display: flex !important;
+  flex: 1 1 180px !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  color: #cdbb98 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+#mp-root.mp.vtt .mp-player-skill-field > span {
+  display: block !important;
+  color: #d7bd8e !important;
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+  letter-spacing: .04em !important;
+}
+#mp-root.mp.vtt .mp-player-skill-field select,
+#mp-root.mp.vtt #mp-player-skill {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 42px !important;
+  box-sizing: border-box !important;
+  padding: 9px 34px 9px 11px !important;
+  border: 1px solid #806844 !important;
+  border-radius: 8px !important;
+  background-color: #211f19 !important;
+  color: #fff0d2 !important;
+  color-scheme: dark;
+  font: 600 13px/1.3 Roboto, system-ui, sans-serif !important;
+  cursor: pointer !important;
+}
+#mp-root.mp.vtt #mp-player-skill option {
+  background: #242119 !important;
+  color: #f6eddd !important;
+}
+#mp-root.mp.vtt #mp-player-skill:focus-visible {
+  outline: 2px solid #d2a85d !important;
+  outline-offset: 2px !important;
+  border-color: #d2a85d !important;
+}
+#mp-root.mp.vtt .mp-player-skill-row > button[data-player-action="skill"] {
+  flex: 0 0 auto !important;
+  min-height: 42px !important;
+  white-space: nowrap !important;
+}
+#mp-root.mp.vtt .mp-player-skill-feedback {
+  display: block !important;
+  flex: 1 0 100% !important;
+  width: 100% !important;
+  margin: 1px 0 0 !important;
+  color: #d9bb81 !important;
+  font-size: 10px !important;
+  line-height: 1.4 !important;
+}
+@media (max-width: 420px) {
+  #mp-root.mp.vtt .mp-player-skill-row { align-items: stretch !important; }
+  #mp-root.mp.vtt .mp-player-skill-field { flex-basis: 100% !important; }
+  #mp-root.mp.vtt .mp-player-skill-row > button[data-player-action="skill"] { width: 100% !important; }
+}
+
+
+/* Seletor de perícias por clique: abre uma lista explícita de opções sem depender do select nativo. */
+#mp-root.mp.vtt .mp-player-skill-select {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+#mp-root.mp.vtt #mp-player-skill {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 42px !important;
+  box-sizing: border-box !important;
+  padding: 9px 11px !important;
+  border: 1px solid #806844 !important;
+  border-radius: 8px !important;
+  background: linear-gradient(180deg, #302b21, #211f19) !important;
+  color: #fff0d2 !important;
+  font: 600 13px/1.3 Roboto, system-ui, sans-serif !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  touch-action: manipulation !important;
+  user-select: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+#mp-root.mp.vtt #mp-player-skill:hover,
+#mp-root.mp.vtt #mp-player-skill.open {
+  border-color: #d2a85d !important;
+  background: linear-gradient(180deg, #403522, #2b251a) !important;
+}
+#mp-root.mp.vtt #mp-player-skill:focus-visible {
+  outline: 2px solid #d2a85d !important;
+  outline-offset: 2px !important;
+}
+#mp-root.mp.vtt .mp-player-skill-chevron {
+  flex: 0 0 auto;
+  color: #d6b77d;
+  transition: transform .15s ease;
+}
+#mp-root.mp.vtt #mp-player-skill.open .mp-player-skill-chevron {
+  transform: rotate(180deg);
+}
+#mp-root.mp.vtt .mp-player-skill-options {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 3px !important;
+  width: 100% !important;
+  max-height: min(42vh, 260px) !important;
+  box-sizing: border-box !important;
+  margin-top: 5px !important;
+  padding: 5px !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  border: 1px solid #685438 !important;
+  border-radius: 8px !important;
+  background: #171610 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 230, 190, .05), 0 8px 20px rgba(0,0,0,.3) !important;
+}
+#mp-root.mp.vtt .mp-player-skill-options[hidden] {
+  display: none !important;
+}
+#mp-root.mp.vtt .mp-player-skill-option {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  width: 100% !important;
+  min-height: 38px !important;
+  box-sizing: border-box !important;
+  padding: 8px 10px !important;
+  border: 1px solid transparent !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  color: #eee2c9 !important;
+  font: 500 12px/1.3 Roboto, system-ui, sans-serif !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent;
+}
+#mp-root.mp.vtt .mp-player-skill-option small {
+  margin: 0 !important;
+  color: #bda477 !important;
+  font-size: 10px !important;
+}
+#mp-root.mp.vtt .mp-player-skill-option:hover,
+#mp-root.mp.vtt .mp-player-skill-option:focus-visible {
+  border-color: #806844 !important;
+  background: #302819 !important;
+  outline: none !important;
+}
+#mp-root.mp.vtt .mp-player-skill-option.selected {
+  border-color: #a98750 !important;
+  background: linear-gradient(90deg, rgba(143,108,57,.35), rgba(143,108,57,.12)) !important;
+  color: #ffe5b2 !important;
+}

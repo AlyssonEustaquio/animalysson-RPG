@@ -269,21 +269,43 @@ function runPlayerDoorCheck(player, profile, range, useTools) {
     draw();
     playerActionResult(useTools ? "🗝 Ferramentas de Ladrão" : "💪 Atletismo", lines);
   }
-function runPlayerSkill(player, profile) {
-    var selector = R && R.querySelector("#mp-player-skill");
-    var skill = selector ? selector.value : "Percepção";
+function playerSkillCheckInfo(player, profile, skill) {
+    var selected = setPlayerSkillSelection(skill || playerSelectedSkill);
     var sheet = getCharacterSheetActionData();
-    var ability = RPG_SKILL_ABILITIES[skill] || "SAB";
-    var bonus = sheet && sheet.skillBonuses[skill] != null ? sheet.skillBonuses[skill] : 0;
-    if (!sheet) {
-      if (profile.skillBonuses && profile.skillBonuses[skill] != null) bonus = Number(profile.skillBonuses[skill]) || 0;
-      else if (skill === "Percepção") bonus = Number(profile.perception) || 0;
-      else if (skill === "Investigação") bonus = Number(profile.investigation) || 0;
-      else if (skill === "Atletismo") bonus = Number(profile.athletics) || 0;
+    var ability = RPG_SKILL_ABILITIES[selected] || "SAB";
+    var bonus = 0;
+    if (sheet && sheet.skillBonuses && sheet.skillBonuses[selected] != null) {
+      bonus = Number(sheet.skillBonuses[selected]) || 0;
+    } else if (profile && profile.skillBonuses && profile.skillBonuses[selected] != null) {
+      bonus = Number(profile.skillBonuses[selected]) || 0;
+    } else if (profile && selected === "Percepção") {
+      bonus = Number(profile.perception) || 0;
+    } else if (profile && selected === "Investigação") {
+      bonus = Number(profile.investigation) || 0;
+    } else if (profile && selected === "Atletismo") {
+      bonus = Number(profile.athletics) || 0;
     }
-    var check = rollCheck(bonus);
-    playerActionResult("🎲 " + skill, [skill + " (" + ability + "): 1d20 (" + check.die + ") " + signed(check.bonus) + " = " + check.total + "."]);
+    return { skill: selected, ability: ability, bonus: bonus, sheet: sheet };
   }
+function updatePlayerSkillFeedback() {
+    var feedback = R && R.querySelector ? R.querySelector("#mp-player-skill-feedback") : null;
+    var selected = setPlayerSkillSelection(playerSelectedSkill);
+    if (!feedback) return;
+    var player = typeof currentPlayer === "function" ? currentPlayer() : null;
+    if (!player || player.tipo !== "player") {
+      feedback.textContent = selected + " (" + (RPG_SKILL_ABILITIES[selected] || "SAB") + ") · teste 1d20 + bônus da ficha.";
+      return;
+    }
+    var info = playerSkillCheckInfo(player, playerActionProfile(player), selected);
+    feedback.textContent = info.skill + " (" + info.ability + ") · Bônus " + signed(info.bonus) + " · rolagem 1d20.";
+  }
+function runPlayerSkill(player, profile, selectedSkill) {
+    var selected = selectedSkill || playerSelectedSkill;
+    var info = playerSkillCheckInfo(player, profile, selected);
+    var check = rollCheck(info.bonus);
+    playerActionResult("🎲 " + info.skill, [info.skill + " (" + info.ability + "): 1d20 (" + check.die + ") " + signed(check.bonus) + " = " + check.total + "."]);
+  }
+
 function runPlayerInteract(player, range) {
     var edges = visibleEdgesForPlayer(player, Math.min(1.5, range)), changed = [], lines = [];
     edges.forEach(function(item) {

@@ -77,10 +77,53 @@ function resolvePlayerAttackData(player, profile) {
       abilityMod
     };
   }
+var PLAYER_SKILL_STORAGE_KEY = "animalysson-rpg-player-skill";
+var playerSelectedSkill = (function() {
+    try {
+      var saved = localStorage.getItem(PLAYER_SKILL_STORAGE_KEY);
+      if (saved && Object.prototype.hasOwnProperty.call(RPG_SKILL_ABILITIES, saved)) return saved;
+    } catch (e) {
+    }
+    return "Percepção";
+  })();
+function setPlayerSkillSelection(skill) {
+    var selected = Object.prototype.hasOwnProperty.call(RPG_SKILL_ABILITIES, String(skill || "")) ? String(skill) : "Percepção";
+    playerSelectedSkill = selected;
+    try {
+      localStorage.setItem(PLAYER_SKILL_STORAGE_KEY, selected);
+    } catch (e) {
+    }
+    return selected;
+  }
 function playerSkillOptionsHtml() {
     return Object.keys(RPG_SKILL_ABILITIES).map(function(skill) {
-      return '<option value="' + esc(skill) + '">' + esc(skill) + " (" + RPG_SKILL_ABILITIES[skill] + ")</option>";
+      var selected = skill === playerSelectedSkill;
+      return '<button type="button" class="mp-player-skill-option' + (selected ? ' selected' : '') + '" role="option" data-player-skill-option="' + esc(skill) + '" aria-selected="' + (selected ? 'true' : 'false') + '"><span>' + esc(skill) + '</span><small>' + esc(RPG_SKILL_ABILITIES[skill]) + '</small></button>';
     }).join("");
+  }
+function updatePlayerSkillDropdown() {
+    var trigger = R && R.querySelector ? R.querySelector("#mp-player-skill") : null;
+    var value = R && R.querySelector ? R.querySelector("#mp-player-skill-value") : null;
+    var options = R && R.querySelector ? R.querySelector("#mp-player-skill-options") : null;
+    var selected = setPlayerSkillSelection(playerSelectedSkill);
+    if (value) value.textContent = selected;
+    if (trigger) trigger.setAttribute("aria-label", "Escolher perícia. Selecionada: " + selected);
+    if (options) {
+      options.querySelectorAll("[data-player-skill-option]").forEach(function(option) {
+        var isSelected = option.getAttribute("data-player-skill-option") === selected;
+        option.classList.toggle("selected", isSelected);
+        option.setAttribute("aria-selected", isSelected ? "true" : "false");
+      });
+    }
+  }
+function setPlayerSkillDropdownOpen(open) {
+    var trigger = R && R.querySelector ? R.querySelector("#mp-player-skill") : null;
+    var options = R && R.querySelector ? R.querySelector("#mp-player-skill-options") : null;
+    if (!trigger || !options) return;
+    var isOpen = !!open;
+    trigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    trigger.classList.toggle("open", isOpen);
+    options.hidden = !isOpen;
   }
 function rollDie(sides) {
     var n = Math.max(2, Number(sides) || 20);
