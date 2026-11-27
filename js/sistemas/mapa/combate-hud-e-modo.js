@@ -14,7 +14,7 @@ function renderCombatHud() {
     var cur = C.atual();
     var parts = [combatState().rodada, cur ? cur.id : "", cur && cur.eco ? [cur.eco.acao, cur.eco.bonus, cur.eco.reacao, C.movimentoRestante(cur)].join(",") : "", C.resumoOrdem().map(function(o) {
       return o.id + o.morto + o.caido;
-    }).join("|"), appMode];
+    }).join("|"), appMode, combatNinguemAtaca() ? 1 : 0];
     var sig = parts.join("#");
     if (sig === combatHudSig) return;
     combatHudSig = sig;
@@ -27,7 +27,7 @@ function renderCombatHud() {
     if (cur && cur.eco) {
       eco = '<span class="mp-cb-eco' + (cur.eco.acao ? " ok" : "") + '">Ação</span><span class="mp-cb-eco' + (cur.eco.bonus ? " ok" : "") + '">Bônus</span><span class="mp-cb-eco' + (cur.eco.reacao ? " ok" : "") + '">Reação</span><span class="mp-cb-eco ok">Mov ' + (Math.round(C.movimentoRestante(cur) * 15) / 10).toString().replace(".", ",") + " m</span>";
     }
-    hud.innerHTML = '<div class="mp-cb-order">' + order + '</div><div class="mp-cb-row"><strong>Rodada ' + combatState().rodada + " · " + esc(cur ? cur.nome : "—") + "</strong>" + eco + '</div><div class="mp-cb-row"><button type="button" data-cb="menu">⚔ Ações</button><button type="button" data-cb="end">⏭ Fim do turno</button><button type="button" data-cb="log">📜 Registro</button></div>';
+    hud.innerHTML = '<div class="mp-cb-order">' + order + '</div><div class="mp-cb-row"><strong>Rodada ' + combatState().rodada + " · " + esc(cur ? cur.nome : "—") + "</strong>" + eco + '</div><div class="mp-cb-row"><button type="button" data-cb="menu">⚔ Ações</button><button type="button" data-cb="end">⏭ Fim do turno</button><button type="button" data-cb="log">📜 Registro</button>' + (combatNinguemAtaca() ? '<button type="button" data-cb="stop" title="Nenhum inimigo consegue te atacar agora">🏁 Encerrar combate</button>' : "") + "</div>";
     updateCombatPanelUi();
   }
 function combatDrawOverlay(t, c, r) {

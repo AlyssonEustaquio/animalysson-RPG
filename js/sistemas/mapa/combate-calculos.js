@@ -408,3 +408,37 @@ function combatActor() {
     if (appMode === "editor") return C.ativo() ? C.atual() : selected && selected.tipo !== void 0 ? selected : null;
     return currentPlayer();
   }
+var combatSemAmeacaCache = { chave: "", valor: false };
+function combatInimigoAlcanca(inimigo, alvo) {
+    var C = getCombat(), s = C.stats(inimigo);
+    if (C.incapacitado(inimigo)) return false;
+    var alcance = 1;
+    (s.ataques || []).forEach(function(a) {
+      if (a.tipo === "salva") alcance = Math.max(alcance, a.area || 1);
+      else if (a.modo === "distancia" || a.modo === "ambos") alcance = Math.max(alcance, a.alcanceMax || a.alcanceNormal || 1);
+      else alcance = Math.max(alcance, a.alcanceCorpo || 1);
+    });
+    if (C.dist(inimigo, alvo) <= alcance && combatLineOfSight(inimigo, alvo)) return true;
+    var passos = C.veloc(inimigo) * 2;
+    if (passos <= 0) return false;
+    var rota = combatPath(inimigo, alvo, alcance, passos);
+    if (!rota.length || rota.length > passos) return false;
+    var fim = rota[rota.length - 1], fantasma = { x: fim.x, y: fim.y, raio: Math.max(1, inimigo.raio || 1) };
+    return C.dist(fantasma, alvo) <= alcance && combatLineOfSight(fantasma, alvo);
+  }
+function combatNinguemAtaca() {
+    var C = getCombat(), jogador = currentPlayer();
+    if (!C || isHexMap() || !combatState().ativo || !jogador || jogador.morto) return false;
+    var chave = state.tokens.map(function(t) {
+      return [t.id || t.nome, t.x, t.y, t.hp, t.morto ? 1 : 0, (t.condicoes || []).length].join(":");
+    }).join("|");
+    if (chave === combatSemAmeacaCache.chave) return combatSemAmeacaCache.valor;
+    var inimigos = state.tokens.filter(function(t) {
+      return t !== jogador && !t.morto && t.hp > 0 && C.hostis(jogador, t);
+    });
+    var valor = inimigos.length > 0 && !inimigos.some(function(i) {
+      return combatInimigoAlcanca(i, jogador);
+    });
+    combatSemAmeacaCache = { chave: chave, valor: valor };
+    return valor;
+  }

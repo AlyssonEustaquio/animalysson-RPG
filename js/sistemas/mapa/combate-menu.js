@@ -62,6 +62,7 @@ function openCombatMenu() {
     var info = C.pontosDeVidaTexto(actor) + " · CA " + (actor.ca || st.ca) + (live ? " · Movimento " + (Math.round(C.movimentoRestante(actor) * 15) / 10).toString().replace(".", ",") + " m" : "");
     var dlg = combatDialog("⚔ " + actor.nome, info, 560);
     if (!dlg) return;
+    var bloqueadas = [], secoes = [];
     function section(title, openByDefault) {
       var details = document.createElement("details");
       details.className = "mp-cb-accordion";
@@ -74,6 +75,7 @@ function openCombatMenu() {
       g.className = "mp-cb-grid";
       details.appendChild(g);
       dlg.panel.appendChild(details);
+      secoes.push({ details: details, grid: g });
       return g;
     }
     function add(grid, label, kind, run, extraOff, hint) {
@@ -89,10 +91,19 @@ function openCombatMenu() {
           why = "";
         }
       }
-      grid.appendChild(combatButton(label, function() {
+      var botao = combatButton(label, function() {
         combatClose(dlg);
         run();
-      }, { disabled: off, title: off ? why : hint }));
+      }, { disabled: off, title: off ? why : hint });
+      if (off) {
+        if (why) {
+          var motivo = document.createElement("small");
+          motivo.textContent = why;
+          motivo.style.cssText = "display:block;font-weight:400;opacity:.75;font-size:.75em";
+          botao.appendChild(motivo);
+        }
+        bloqueadas.push(botao);
+      } else grid.appendChild(botao);
     }
     var acao = section("Ação principal", true);
     add(acao, "Atacar", "acao", function() {
@@ -294,6 +305,19 @@ function openCombatMenu() {
         combatFinishAction({ linhas: l });
       });
     }
+    secoes.forEach(function(s) {
+      if (!s.grid.children.length) s.details.remove();
+    });
+    if (bloqueadas.length) {
+      var gradeBloqueadas = section("Indisponíveis agora", false);
+      bloqueadas.forEach(function(b) {
+        gradeBloqueadas.appendChild(b);
+      });
+    }
+    var primeira = secoes.find(function(s) {
+      return s.details.parentNode;
+    });
+    if (primeira) primeira.details.open = true;
     var actions = document.createElement("div");
     actions.className = "mp-portal-dialog-actions";
     actions.appendChild(combatButton("Fechar", function() {
