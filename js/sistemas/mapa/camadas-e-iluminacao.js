@@ -484,15 +484,7 @@ function creativeUpdateLevelUi() {
   var targetSelect = panel.querySelector("#mp-creator-transition-target");
   var envSelect = panel.querySelector("#mp-creator-level-environment");
   var newEnv = panel.querySelector("#mp-creator-new-environment");
-  var torchStatus = panel.querySelector("#mp-creator-torch-status");
   var sorted = creativeSortedLevels(state.levels || []);
-  var playerTorch = creativeGetActiveTorchItem(typeof currentPlayer === "function" ? currentPlayer() : null);
-  if (torchStatus) {
-    var torchItems = typeof S !== "undefined" && S && S.inventario && Array.isArray(S.inventario.itens) ? S.inventario.itens.filter(creativeIsTorchItem) : [];
-    var litItem = torchItems.find(function(item) { return creativeTorchStatus(item).lit; });
-    var statusText = litItem ? "Tocha acesa · " + creativeFormatTorchTime(creativeTorchRemainingMs(litItem)) + " restantes · luz plena 6 m + penumbra 6 m" : (torchItems.some(function(item) { return creativeTorchStatus(item).burned; }) && !playerTorch ? "Nenhuma tocha acesa · há tochas queimadas no inventário." : "Nenhuma tocha acesa. Equipe uma Tocha no inventário e clique em Acender.");
-    torchStatus.textContent = statusText;
-  }
   var legacyTorchSlider = R.querySelector("#mp-lr");
   if (legacyTorchSlider) { var oldTorchLabel = legacyTorchSlider.closest("label"); if (oldTorchLabel) oldTorchLabel.hidden = true; }
   if (activeSelect) activeSelect.innerHTML = sorted.map(function(item) {
@@ -532,7 +524,6 @@ function creativeInstallLevelUi() {
     '<button type="button" id="mp-creator-level-delete" class="mp-creator-level-delete danger">Excluir camada selecionada</button>' +
     '<label class="mp-creator-level-label">Ambiente desta camada<select id="mp-creator-level-environment"><option value="outdoor">Exterior / luz do sol</option><option value="interior">Interior</option><option value="cavern">Caverna</option><option value="basement">Porão</option></select></label>' +
     '<label class="mp-creator-level-label">Conectar a outra camada<select id="mp-creator-transition-target"></select></label>' +
-    '<div class="mp-creator-torch-control"><strong>Iluminação do personagem</strong><small id="mp-creator-torch-status">A luz vem do item Tocha equipado e aceso no inventário.</small><small>Tocha: 6 m de luz plena + 6 m de penumbra. Duração: 1 hora acesa.</small></div>' +
     '<small id="mp-creator-level-status" class="mp-creator-muted"></small>';
   panel.insertBefore(section, toolGrid);
   var tools = document.createElement("div");
