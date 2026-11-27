@@ -54,14 +54,9 @@ var keyMoveCarry = null;
 var clickMoveExitPending = false;
 var keyMoveLastSave = 0;
 var clickMovePath = [];
-var WORLD_TRAVEL_STEP_MS = 2e3;
+var WORLD_TRAVEL_STEP_MS = 1e3;
 function worldTravelStepDurationMs() {
-    var speed = typeof invSpeedMeters === "function" ? invSpeedMeters() : null;
-    var base = speed && Number(speed.base) > 0 ? Number(speed.base) : 9;
-    var current = speed && Number(speed.atual) > 0 ? Number(speed.atual) : base;
-    var ratio = current / base;
-    if (!isFinite(ratio) || ratio <= 0) ratio = 1;
-    return Math.max(150, Math.round(WORLD_TRAVEL_STEP_MS / ratio));
+    return Math.max(150, Math.round(localStepMs()));
   }
 var state = loadCurrentMapState();
 function savedHexMetricsForState(s) {

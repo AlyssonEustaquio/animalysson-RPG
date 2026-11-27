@@ -66,7 +66,13 @@ function startClickMove(destination, exitAfterArrival) {
     var path = findVisiblePath({ x: player.x, y: player.y }, destination, player, !!exitAfterArrival);
     if (!path) return false;
     camPan.x = camPan.y = 0;
-    stopKeyMove();
+    var andando = !!keyMoveStep && path.length >= 2;
+    if (andando) {
+      keysHeld = {};
+      clickMovePath = [];
+      portalClickTarget = null;
+      clickMoveExitPending = false;
+    } else stopKeyMove();
     if (path.length < 2) {
       if (exitAfterArrival) return returnToWorldMapFromExit();
       var standingLocalPortal = findLocalPortalAt(player.x, player.y);
