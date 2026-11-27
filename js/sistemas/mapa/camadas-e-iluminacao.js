@@ -798,10 +798,11 @@ function creativeGetCellLightIntensity(x, y, viewer) {
   if (player && player.tipo === "player") {
     var baseDx = x - Number(player.x), baseDy = y - Number(player.y);
     var baseDistance = Math.sqrt(baseDx * baseDx + baseDy * baseDy);
-    // Luz ambiente base em quadrado 3x3: centro a 20% e entorno a 10%.
+    // Luz ambiente base em quadrado 3x3: centro a 20% e entorno a 15%.
+    // Os tiles descobertos fora do quadrado recebem 10% (overlay de 90%).
     // Paredes e portas fechadas continuam bloqueando a iluminação.
     if (Math.abs(baseDx) < 0.001 && Math.abs(baseDy) < 0.001) best = 0.2;
-    else if (creativeIsInsideBaseLightSquare(baseDx, baseDy) && hasLOS(player.x, player.y, x, y)) best = 0.1;
+    else if (creativeIsInsideBaseLightSquare(baseDx, baseDy) && hasLOS(player.x, player.y, x, y)) best = 0.15;
     if (creativeGetActiveTorchItem(player) && hasLOS(player.x, player.y, x, y)) {
       best = Math.max(best, creativeTorchIntensityAtDistance(baseDistance));
     }
@@ -1032,7 +1033,7 @@ drawFogAndLight = function(viewW, viewH) {
     var visible = player && isCurrentlyVisible(x, y, px, py, creativeGetVisibilityRadius(player, x, y));
     if (!visible) {
       var fogged = showFog && state.fog && state.fog[idx(x, y)];
-      cx.fillStyle = fogged ? "rgba(0,0,0,1)" : "rgba(0,0,0,.88)";
+      cx.fillStyle = fogged ? "rgba(0,0,0,1)" : "rgba(0,0,0,.90)";
       cx.fillRect(x * CELL, y * CELL, CELL + .5, CELL + .5);
       continue;
     }
