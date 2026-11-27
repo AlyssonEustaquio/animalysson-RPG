@@ -138,14 +138,15 @@ function draw() {
         cx.lineWidth = 1 / zoom;
         cx.stroke();
       } else {
+        var squareGridBounds = visibleCellBounds(W, H);
         cx.beginPath();
-        for (var gx = 0; gx <= COLS; gx++) {
-          cx.moveTo(gx * CELL, 0);
-          cx.lineTo(gx * CELL, ROWS * CELL);
+        for (var gx = squareGridBounds.x0; gx <= squareGridBounds.x1 + 1; gx++) {
+          cx.moveTo(gx * CELL, squareGridBounds.y0 * CELL);
+          cx.lineTo(gx * CELL, (squareGridBounds.y1 + 1) * CELL);
         }
-        for (var gy = 0; gy <= ROWS; gy++) {
-          cx.moveTo(0, gy * CELL);
-          cx.lineTo(COLS * CELL, gy * CELL);
+        for (var gy = squareGridBounds.y0; gy <= squareGridBounds.y1 + 1; gy++) {
+          cx.moveTo(squareGridBounds.x0 * CELL, gy * CELL);
+          cx.lineTo((squareGridBounds.x1 + 1) * CELL, gy * CELL);
         }
         cx.stroke();
       }
@@ -288,9 +289,17 @@ function drawEdges() {
       }
       cx.restore();
     }
-    for (var ye = 0; ye <= ROWS; ye++) for (var x = 0; x < COLS; x++) drawOne({ dir: "h", x, yEdge: ye }, getH(x, ye));
-    for (var y = 0; y < ROWS; y++) for (var xe = 0; xe <= COLS; xe++) drawOne({ dir: "v", xEdge: xe, y }, getV(xe, y));
+    var viewport = visibleCellBounds(cv ? cv.clientWidth : 0, cv ? cv.clientHeight : 0);
+    for (var ye = viewport.y0; ye <= Math.min(ROWS, viewport.y1 + 1); ye++)
+      for (var x = viewport.x0; x <= viewport.x1; x++) drawOne({ dir: "h", x, yEdge: ye }, getH(x, ye));
+    for (var y = viewport.y0; y <= viewport.y1; y++)
+      for (var xe = viewport.x0; xe <= Math.min(COLS, viewport.x1 + 1); xe++) drawOne({ dir: "v", xEdge: xe, y }, getV(xe, y));
+    var visibleLeft = viewport.x0 * CELL, visibleTop = viewport.y0 * CELL;
+    var visibleRight = (viewport.x1 + 1) * CELL, visibleBottom = (viewport.y1 + 1) * CELL;
     (state.customEdges || []).forEach(function(item) {
+      var minX = Math.min(Number(item.x1), Number(item.x2)), maxX = Math.max(Number(item.x1), Number(item.x2));
+      var minY = Math.min(Number(item.y1), Number(item.y2)), maxY = Math.max(Number(item.y1), Number(item.y2));
+      if (maxX < visibleLeft || minX > visibleRight || maxY < visibleTop || minY > visibleBottom) return;
       var val = item.val, meta = item.meta || {};
       if (!val || edgeIsHidden({ custom: item }, val)) return;
       if (val === EDGE_SECRET_WALL && meta.open) return;

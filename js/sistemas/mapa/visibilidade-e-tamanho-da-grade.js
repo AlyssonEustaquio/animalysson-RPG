@@ -20,7 +20,9 @@ function isCellExplored(x, y) {
     return !!(state && state.fog && state.fog[idx(x, y)] === 0);
   }
 function canClickMoveToCell(x, y, px, py, radius) {
-    return isCurrentlyVisible(x, y, px, py, radius) || isCellExplored(x, y);
+    // A maioria das células do trajeto já foi explorada. Verifique isso primeiro
+    // para evitar recalcular linha de visão em cada nó do pathfinding.
+    return isCellExplored(x, y) || isCurrentlyVisible(x, y, px, py, radius);
   }
 function isTokenVisible(t) {
     if (!t) return false;

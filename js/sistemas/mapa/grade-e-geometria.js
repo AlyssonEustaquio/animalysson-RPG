@@ -305,10 +305,19 @@ function hexPath(ctx, center, fill, stroke, lineWidth) {
     }
   }
 function visibleCellBounds(viewW, viewH) {
-    if (!isHexMap()) return { x0: 0, x1: COLS - 1, y0: 0, y1: ROWS - 1 };
-    var hm = hexMetrics();
     var left = -ox / zoom, right = (viewW - ox) / zoom;
     var top = -oy / zoom, bottom = (viewH - oy) / zoom;
+    if (!isHexMap()) {
+      // Grade quadrada: limita o processamento às células que aparecem na tela,
+      // com uma célula de margem para não deixar bordas surgirem ao rolar.
+      return {
+        x0: Math.max(0, Math.floor(left / CELL) - 1),
+        x1: Math.min(COLS - 1, Math.ceil(right / CELL) + 1),
+        y0: Math.max(0, Math.floor(top / CELL) - 1),
+        y1: Math.min(ROWS - 1, Math.ceil(bottom / CELL) + 1)
+      };
+    }
+    var hm = hexMetrics();
     var y0 = Math.max(0, Math.floor((top - hm.height / 2) / hm.rowStep) - 2);
     var y1 = Math.min(ROWS - 1, Math.ceil((bottom - hm.height / 2) / hm.rowStep) + 2);
     var minX = COLS - 1, maxX = 0;
