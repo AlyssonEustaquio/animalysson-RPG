@@ -339,15 +339,23 @@ function creativeDrawLayer(viewW, viewH) {
     }
   }
   (state.decorations || []).forEach(function(item) {
-    if (!creativeCellVisible(item.x, item.y, bounds)) return;
     var def = CREATIVE_OBJECTS[item.kind] || { glyph: item.glyph || "◆", label: "Objeto" };
-    var center = cellCenter(item.x, item.y), size = CELL * Math.max(.28, Math.min(1.8, Number(item.size) || .82));
+    var isImage = item.kind === "image";
+    var geometry = isImage ? creativeImageGeometry(item) : null;
+    if (isImage) {
+      var absCos = Math.abs(Math.cos(geometry.rotation)), absSin = Math.abs(Math.sin(geometry.rotation));
+      var padX = (geometry.width * absCos + geometry.height * absSin) / 2;
+      var padY = (geometry.width * absSin + geometry.height * absCos) / 2;
+      if (geometry.center.x + padX < bounds.x0 * CELL || geometry.center.x - padX > (bounds.x1 + 1) * CELL || geometry.center.y + padY < bounds.y0 * CELL || geometry.center.y - padY > (bounds.y1 + 1) * CELL) return;
+    } else if (!creativeCellVisible(item.x, item.y, bounds)) return;
+    var center = geometry ? geometry.center : cellCenter(item.x, item.y);
+    var size = isImage ? geometry.height : CELL * Math.max(.28, Math.min(1.8, Number(item.size) || .82));
     cx.save(); cx.translate(center.x, center.y); cx.rotate((Number(item.rotation) || 0) * Math.PI / 180);
-    var asset = item.kind === "image" ? creativeFindRecord("assets", item.assetId) : null;
+    var asset = isImage ? creativeFindRecord("assets", item.assetId) : null;
     var image = asset ? creativeGetImage(asset) : null;
-    if (image) {
+    if (image && geometry) {
       cx.shadowColor = "rgba(0,0,0,.55)"; cx.shadowBlur = size * .12;
-      cx.drawImage(image, -size / 2, -size / 2, size, size);
+      cx.drawImage(image, -geometry.width / 2, -geometry.height / 2, geometry.width, geometry.height);
     } else {
       cx.font = Math.round(size) + "px Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif";
       cx.textAlign = "center"; cx.textBaseline = "middle";
@@ -464,6 +472,56 @@ function creativeGetImage(asset) {
   }
   return cached.ready && cached.image.complete && cached.image.naturalWidth ? cached.image : null;
 }
+function creativeImageAspect(item) {
+  var asset = item && item.kind === "image" ? creativeFindRecord("assets", item.assetId) : null;
+  if (!asset) return 1;
+  var exactRatio = Number(asset.aspectRatio);
+  if (Number.isFinite(exactRatio) && exactRatio > 0) return exactRatio;
+  var width = Number(asset.width) || 0, height = Number(asset.height) || 0;
+  if (!(width > 0 && height > 0)) {
+    var image = creativeGetImage(asset);
+    if (image) { width = image.naturalWidth; height = image.naturalHeight; }
+  }
+  var ratio = width > 0 && height > 0 ? width / height : Number(asset.aspectRatio) || 1;
+  return Number.isFinite(ratio) && ratio > 0 ? ratio : 1;
+}
+function creativeImageGeometry(item) {
+  var center = cellCenter(Number(item.x) || 0, Number(item.y) || 0);
+  var itemScale = Number(item.size);
+  if (!Number.isFinite(itemScale) || itemScale <= 0) itemScale = 1.35;
+  var height = CELL * itemScale;
+  var aspect = creativeImageAspect(item);
+  return { center: center, width: height * aspect, height: height, aspect: aspect, rotation: (Number(item.rotation) || 0) * Math.PI / 180 };
+}
+function creativeImageLocalPoint(worldX, worldY, geometry) {
+  var dx = worldX - geometry.center.x, dy = worldY - geometry.center.y;
+  var c = Math.cos(geometry.rotation), sn = Math.sin(geometry.rotation);
+  return { x: dx * c + dy * sn, y: -dx * sn + dy * c };
+}
+function creativeRotateLocalPoint(x, y, center, angle) {
+  var c = Math.cos(angle), sn = Math.sin(angle);
+  return { x: center.x + x * c - y * sn, y: center.y + x * sn + y * c };
+}
+function creativeImageHandlePoint(geometry, name) {
+  var sx = name.indexOf("w") >= 0 ? -1 : 1;
+  var sy = name.indexOf("n") >= 0 ? -1 : 1;
+  if (name === "rotate") return creativeRotateLocalPoint(0, -geometry.height / 2 - 24 / Math.max(.2, zoom || 1), geometry.center, geometry.rotation);
+  return creativeRotateLocalPoint(sx * geometry.width / 2, sy * geometry.height / 2, geometry.center, geometry.rotation);
+}
+function creativeSelectedImageControl(worldX, worldY) {
+  if (!creativeSelected || creativeSelected.type !== "decoration" || tool !== "select") return null;
+  var item = creativeFindRecord("decorations", creativeSelected.id);
+  if (!item || item.kind !== "image") return null;
+  var geometry = creativeImageGeometry(item), tolerance = 11 / Math.max(.2, zoom || 1);
+  var rotate = creativeImageHandlePoint(geometry, "rotate");
+  if (Math.hypot(worldX - rotate.x, worldY - rotate.y) <= tolerance) return { mode: "rotate", item: item, geometry: geometry };
+  var handles = ["nw", "ne", "sw", "se"];
+  for (var i = 0; i < handles.length; i++) {
+    var point = creativeImageHandlePoint(geometry, handles[i]);
+    if (Math.hypot(worldX - point.x, worldY - point.y) <= tolerance) return { mode: "resize", handle: handles[i], item: item, geometry: geometry };
+  }
+  return null;
+}
 function creativeImportImageFile(file) {
   if (!file) return;
   if (!/^image\//i.test(file.type || "")) { appAlertMessage("msg008", "Selecione um arquivo de imagem válido."); return; }
@@ -472,24 +530,27 @@ function creativeImportImageFile(file) {
   var objectUrl = URL.createObjectURL(file), image = new Image();
   image.onload = function() {
     try {
-      var side = 256, scale = Math.min(1, side / Math.max(image.naturalWidth, image.naturalHeight));
+      var originalWidth = image.naturalWidth, originalHeight = image.naturalHeight;
+      var scale = Math.min(1, 512 / Math.max(originalWidth, originalHeight));
       var canvas = document.createElement("canvas");
-      canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
-      canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+      canvas.width = Math.max(1, Math.round(originalWidth * scale));
+      canvas.height = Math.max(1, Math.round(originalHeight * scale));
       var context = canvas.getContext("2d", { alpha: true });
       context.drawImage(image, 0, 0, canvas.width, canvas.height);
-      var data = canvas.toDataURL("image/webp", .72);
+      var data = canvas.toDataURL("image/webp", .70);
       if (data.indexOf("data:image/webp") !== 0) data = canvas.toDataURL("image/png");
       if (data.length > 64000) {
-        var smaller = document.createElement("canvas"), shrink = 192 / Math.max(canvas.width, canvas.height);
+        var smaller = document.createElement("canvas"), shrink = 256 / Math.max(canvas.width, canvas.height);
         smaller.width = Math.max(1, Math.round(canvas.width * shrink));
         smaller.height = Math.max(1, Math.round(canvas.height * shrink));
-        smaller.getContext("2d").drawImage(canvas, 0, 0, smaller.width, smaller.height);
-        data = smaller.toDataURL("image/webp", .52);
+        smaller.getContext("2d", { alpha: true }).drawImage(canvas, 0, 0, smaller.width, smaller.height);
+        data = smaller.toDataURL("image/webp", .55);
+        if (data.indexOf("data:image/webp") !== 0) data = smaller.toDataURL("image/png");
+        canvas = smaller;
       }
       if (data.length > 64000) throw new Error("A imagem continua muito pesada após a otimização. Use uma imagem menor ou mais simples.");
       var id = "asset-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6);
-      var asset = { id: id, name: String(file.name || "Imagem").replace(/\.[^.]+$/, "").slice(0, 80), src: data, width: canvas.width, height: canvas.height };
+      var asset = { id: id, name: String(file.name || "Imagem").replace(/\.[^.]+$/, "").slice(0, 80), src: data, width: canvas.width, height: canvas.height, aspectRatio: originalWidth / originalHeight };
       creativeBeginTransaction(); creativeAddRecord("assets", asset); creativeCommitTransaction();
       creativeSelectedAssetId = id; creativeObjectKind = "image"; setTool("object");
       creativeRenderAssetPalette(); creativeUpdateUi(); save();
@@ -508,15 +569,47 @@ function creativeRenderAssetPalette() {
   if (!host) return;
   host.innerHTML = "";
   (state.assets || []).forEach(function(asset) {
+    var wrapper = document.createElement("div");
+    wrapper.className = "mp-creator-custom-asset-wrap";
     var button = document.createElement("button");
     button.type = "button"; button.className = "mp-creator-custom-asset";
-    button.setAttribute("data-asset-id", asset.id); button.title = asset.name || "Imagem";
+    button.setAttribute("data-asset-id", asset.id); button.title = "Selecionar " + (asset.name || "imagem");
     var img = document.createElement("img"); img.src = asset.src; img.alt = "";
     var label = document.createElement("small"); label.textContent = asset.name || "Imagem";
     button.appendChild(img); button.appendChild(label);
     button.classList.toggle("active", creativeSelectedAssetId === asset.id);
-    host.appendChild(button);
+    var remove = document.createElement("button");
+    remove.type = "button"; remove.className = "mp-creator-delete-asset";
+    remove.setAttribute("data-delete-asset", asset.id); remove.title = "Excluir imagem importada"; remove.setAttribute("aria-label", "Excluir " + (asset.name || "imagem"));
+    remove.textContent = "×";
+    wrapper.appendChild(button); wrapper.appendChild(remove); host.appendChild(wrapper);
   });
+}
+function creativeDeleteAsset(assetId) {
+  var asset = creativeFindRecord("assets", assetId);
+  if (!asset) return false;
+  var placed = (state.decorations || []).filter(function(item) { return item && item.kind === "image" && item.assetId === assetId; });
+  var message = "Excluir a imagem importada '" + (asset.name || "Imagem") + "'?";
+  if (placed.length) message += " " + placed.length + " imagem(ns) colocada(s) no mapa também será(ão) removida(s).";
+  if (!appConfirmMessage("msg008", message)) return false;
+  creativeBeginTransaction();
+  placed.forEach(function(item) {
+    creativeRecordArrayChange("decorations", item, item, null);
+    state.decorations = state.decorations.filter(function(entry) { return entry !== item && entry.id !== item.id; });
+  });
+  creativeRecordArrayChange("assets", asset, asset, null);
+  state.assets = (state.assets || []).filter(function(entry) { return entry !== asset && entry.id !== asset.id; });
+  creativeCommitTransaction();
+  delete creativeImageCache[assetId];
+  if (creativeSelectedAssetId === assetId) creativeSelectedAssetId = null;
+  if (creativeSelected && creativeSelected.type === "decoration") {
+    var selectedItem = creativeFindRecord("decorations", creativeSelected.id);
+    if (!selectedItem) creativeSelected = null;
+  }
+  if (creativeObjectKind === "image" && !creativeSelectedAssetId) setTool("select");
+  creativeRenderAssetPalette(); creativeRenderInspector(); creativeUpdateUi();
+  save(); draw(); creativeUpdateHistoryButtons();
+  return true;
 }
 function creativeDrawPreview() {
   if (!R || appMode !== "editor" || isHexMap()) return;
@@ -633,16 +726,23 @@ function creativeHitTest(worldX, worldY) {
       return { type: "label", id: label.id, item: label };
     }
   }
-  // Decoration hit area follows its scaled and rotated visible bounds.
+  // Decoration hit area follows the actual rotated image bounds and aspect ratio.
   var decorations = state.decorations || [];
   for (var di = decorations.length - 1; di >= 0; di--) {
-    var decoration = decorations[di], center = cellCenter(decoration.x, decoration.y);
-    var dx = worldX - center.x, dy = worldY - center.y;
-    var angle = -(Number(decoration.rotation) || 0) * Math.PI / 180;
-    var localX = dx * Math.cos(angle) - dy * Math.sin(angle);
-    var localY = dx * Math.sin(angle) + dy * Math.cos(angle);
-    var half = CELL * Math.max(.28, Math.min(1.8, Number(decoration.size) || .84)) * .56;
-    if (Math.abs(localX) <= half && Math.abs(localY) <= half) return { type: "decoration", id: decoration.id, item: decoration };
+    var decoration = decorations[di];
+    if (decoration.kind === "image") {
+      var imageGeometry = creativeImageGeometry(decoration);
+      var imageLocal = creativeImageLocalPoint(worldX, worldY, imageGeometry);
+      if (Math.abs(imageLocal.x) <= imageGeometry.width / 2 && Math.abs(imageLocal.y) <= imageGeometry.height / 2) return { type: "decoration", id: decoration.id, item: decoration };
+    } else {
+      var center = cellCenter(decoration.x, decoration.y);
+      var dx = worldX - center.x, dy = worldY - center.y;
+      var angle = -(Number(decoration.rotation) || 0) * Math.PI / 180;
+      var localX = dx * Math.cos(angle) - dy * Math.sin(angle);
+      var localY = dx * Math.sin(angle) + dy * Math.cos(angle);
+      var half = CELL * Math.max(.28, Math.min(1.8, Number(decoration.size) || .84)) * .56;
+      if (Math.abs(localX) <= half && Math.abs(localY) <= half) return { type: "decoration", id: decoration.id, item: decoration };
+    }
   }
   if (cellX >= 0 && cellX < COLS && cellY >= 0 && cellY < ROWS) {
     var material = creativeGetTerrain(idx(cellX, cellY));
@@ -662,12 +762,29 @@ function creativeDrawSelectionOverlay() {
     item = creativeFindRecord("decorations", creativeSelected.id);
     if (item) {
       center = cellCenter(item.x, item.y);
-      size = CELL * Math.max(.28, Math.min(1.8, Number(item.size) || .84)) * 1.18;
       cx.translate(center.x, center.y);
       cx.rotate((Number(item.rotation) || 0) * Math.PI / 180);
-      cx.strokeRect(-size / 2, -size / 2, size, size);
-      cx.setLineDash([]);
-      cx.fillRect(-3 / zoom, -3 / zoom, 6 / zoom, 6 / zoom);
+      if (item.kind === "image") {
+        var imageGeometry = creativeImageGeometry(item), handleSize = 7 / Math.max(.2, zoom || 1), rotateGap = 24 / Math.max(.2, zoom || 1);
+        cx.strokeRect(-imageGeometry.width / 2, -imageGeometry.height / 2, imageGeometry.width, imageGeometry.height);
+        if (tool === "select") {
+          cx.setLineDash([]);
+          cx.lineWidth = 1.5 / Math.max(.2, zoom || 1);
+          cx.beginPath(); cx.moveTo(0, -imageGeometry.height / 2); cx.lineTo(0, -imageGeometry.height / 2 - rotateGap); cx.stroke();
+          cx.beginPath(); cx.arc(0, -imageGeometry.height / 2 - rotateGap, handleSize * .82, 0, Math.PI * 2);
+          cx.fillStyle = "#e5b85e"; cx.fill(); cx.stroke();
+          [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(function(point) {
+            cx.fillStyle = "#211e18"; cx.strokeStyle = "#ffe08a"; cx.lineWidth = 1.5 / Math.max(.2, zoom || 1);
+            cx.fillRect(point[0] * imageGeometry.width / 2 - handleSize, point[1] * imageGeometry.height / 2 - handleSize, handleSize * 2, handleSize * 2);
+            cx.strokeRect(point[0] * imageGeometry.width / 2 - handleSize, point[1] * imageGeometry.height / 2 - handleSize, handleSize * 2, handleSize * 2);
+          });
+        }
+      } else {
+        size = CELL * Math.max(.28, Math.min(1.8, Number(item.size) || .84)) * 1.18;
+        cx.strokeRect(-size / 2, -size / 2, size, size);
+        cx.setLineDash([]);
+        cx.fillRect(-3 / zoom, -3 / zoom, 6 / zoom, 6 / zoom);
+      }
     }
   } else if (type === "label") {
     item = creativeFindRecord("labels", creativeSelected.id);
@@ -826,9 +943,14 @@ function creativeRenderInspector() {
     }
     html += creativeInspectorField("Coluna", "x", item.x + 1, "number", { min: 1, max: COLS, step: 1 });
     html += creativeInspectorField("Linha", "y", item.y + 1, "number", { min: 1, max: ROWS, step: 1 });
-    html += creativeInspectorField("Tamanho", "size", item.size, "range", { min: .28, max: 1.8, step: .04 });
-    html += creativeInspectorField("Rotação", "rotation", item.rotation || 0, "range", { min: 0, max: 359, step: 1 });
-    actions = '<button type="button" data-creator-action="rotate">↻ Girar 45°</button><button type="button" class="danger" data-creator-action="delete">Excluir objeto</button>';
+    if (item.kind === "image") {
+      html += '<div class="mp-creator-muted mp-creator-field-full">Arraste os cantos da imagem para redimensionar mantendo a proporção. Use o controle acima para girar.</div>';
+      actions = '<button type="button" class="danger" data-creator-action="delete">Excluir imagem do mapa</button>';
+    } else {
+      html += creativeInspectorField("Tamanho", "size", item.size, "range", { min: .28, max: 1.8, step: .04 });
+      html += creativeInspectorField("Rotação", "rotation", item.rotation || 0, "range", { min: 0, max: 359, step: 1 });
+      actions = '<button type="button" data-creator-action="rotate">↻ Girar 45°</button><button type="button" class="danger" data-creator-action="delete">Excluir objeto</button>';
+    }
   } else if (creativeSelected.type === "label") {
     title = "Texto / identificação";
     html += '<label class="mp-creator-field mp-creator-field-full"><span>Texto</span><textarea data-creator-field="text" maxlength="160" rows="3">' + esc(item.text || "") + '</textarea></label>';
@@ -914,7 +1036,7 @@ function creativeInstallUi() {
   if (!main) return;
   var shell = document.createElement("div");
   shell.className = "mp-creator-ui";
-  shell.innerHTML = '<header class="mp-creator-topbar"><div class="mp-creator-brand"><span class="mp-creator-mark">✣</span><div><strong>Animalysson Studio</strong><small>EDITOR DE MAPAS</small></div></div><div class="mp-creator-map-host"></div><div class="mp-creator-top-actions"><button type="button" id="mp-new-map" title="Criar um mapa vazio com grade">＋ Novo mapa</button><button type="button" id="mp-creator-undo" title="Desfazer (Ctrl+Z)" disabled>↶</button><button type="button" id="mp-creator-redo" title="Refazer (Ctrl+Y)" disabled>↷</button><button type="button" id="mp-creator-save">⬇ Exportar</button></div></header><aside class="mp-creator-panel mp-editor-only"><div class="mp-creator-panel-head"><div><small>CONSTRUÇÃO</small><strong>Ferramentas</strong></div><span class="mp-creator-hotkey">V · B · E</span></div><div class="mp-creator-toolgrid">' +
+  shell.innerHTML = '<header class="mp-creator-topbar"><div class="mp-creator-brand"><span class="mp-creator-mark">✣</span><div><strong>Animalysson Studio</strong><small>EDITOR DE MAPAS</small></div></div><div class="mp-creator-map-host"></div><div class="mp-creator-top-actions"><button type="button" id="mp-new-map" title="Criar um mapa vazio com grade">＋ Novo mapa</button><button type="button" id="mp-creator-undo" title="Desfazer (Ctrl+Z)" disabled>↶</button><button type="button" id="mp-creator-redo" title="Refazer (Ctrl+Y)" disabled>↷</button><button type="button" id="mp-creator-save">⬇ Exportar</button></div></header><aside class="mp-creator-panel mp-editor-only"><div class="mp-creator-toolgrid">' +
     creativeToolButton("select", "Selecionar", "↖", "Selecionar e mover elementos") +
     creativeToolButton("pan", "Mover visão", "✥", "Arrastar o mapa") +
     creativeToolButton("ground", "Pincel", "🖌", "Pintar o terreno selecionado") +
@@ -960,6 +1082,8 @@ function creativeInstallUi() {
     }
     var materialButton = event.target.closest("[data-material]");
     if (materialButton) { creativeMaterial = materialButton.getAttribute("data-material"); creativeUpdateUi(); return; }
+    var deleteAssetButton = event.target.closest("[data-delete-asset]");
+    if (deleteAssetButton) { event.preventDefault(); event.stopPropagation(); creativeDeleteAsset(deleteAssetButton.getAttribute("data-delete-asset")); return; }
     var objectButton = event.target.closest("[data-object-kind]");
     if (objectButton) { creativeObjectKind = objectButton.getAttribute("data-object-kind"); creativeSelectedAssetId = null; setTool("object"); creativeUpdateUi(); creativeRenderAssetPalette(); return; }
     var assetButton = event.target.closest("[data-asset-id]");
@@ -1086,7 +1210,9 @@ function creativeHandlePointerDown(event, world, cell) {
     creativeBeginTransaction();
     var def = CREATIVE_OBJECTS[creativeObjectKind] || CREATIVE_OBJECTS.tree;
     if (creativeObjectKind === "image" && !creativeFindRecord("assets", creativeSelectedAssetId)) { appAlertMessage("msg008", "Importe ou selecione uma imagem antes de posicioná-la."); return true; }
+    var selectedAsset = creativeObjectKind === "image" ? creativeFindRecord("assets", creativeSelectedAssetId) : null;
     var item = { id: "dec-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6), kind: creativeObjectKind, assetId: creativeObjectKind === "image" ? creativeSelectedAssetId : null, glyph: def.glyph, x: cell.x, y: cell.y, size: creativeObjectKind === "image" ? 1.35 : .84, rotation: 0 };
+    if (selectedAsset) item.aspectRatio = creativeImageAspect({ kind: "image", assetId: selectedAsset.id });
     creativeAddRecord("decorations", item); creativeCommitTransaction(); creativeSelected = { type: "decoration", id: item.id }; save(); draw(); creativeRenderInspector(); return true;
   }
   if (tool === "text") {
@@ -1102,8 +1228,25 @@ function creativeHandlePointerDown(event, world, cell) {
     creativeAddRecord("lights", light); creativeCommitTransaction(); creativeSelected = { type: "light", id: light.id }; save(); draw(); creativeRenderInspector(); return true;
   }
   if (tool === "select") {
-    // Tokens ficam acima da decoração no desenho e continuam sendo tratados pelo VTT original.
+    // A colocação de monstros mantém prioridade sobre a seleção de cenário.
     if (pendingMonster) return false;
+    // Os manipuladores da imagem selecionada são desenhados por cima do cenário e recebem o clique primeiro.
+    var imageControl = creativeSelectedImageControl(world.x, world.y);
+    if (imageControl) {
+      var controlledImage = imageControl.item, geometry = imageControl.geometry;
+      creativeBeginTransaction();
+      if (imageControl.mode === "rotate") {
+        drag = { creativeImageTransform: true, transformMode: "rotate", selected: creativeSelected, before: creativeClone(controlledImage), centerX: geometry.center.x, centerY: geometry.center.y, startAngle: Math.atan2(world.y - geometry.center.y, world.x - geometry.center.x), startRotation: Number(controlledImage.rotation) || 0 };
+      } else {
+        var signs = { nw: [-1,-1], ne: [1,-1], sw: [-1,1], se: [1,1] }[imageControl.handle];
+        var sx = signs[0], sy = signs[1];
+        var anchor = creativeRotateLocalPoint(-sx * geometry.width / 2, -sy * geometry.height / 2, geometry.center, geometry.rotation);
+        drag = { creativeImageTransform: true, transformMode: "resize", handle: imageControl.handle, sx: sx, sy: sy, aspect: geometry.aspect, angle: geometry.rotation, anchorX: anchor.x, anchorY: anchor.y, selected: creativeSelected, before: creativeClone(controlledImage) };
+      }
+      if (cv) cv.style.cursor = imageControl.mode === "rotate" ? "crosshair" : (imageControl.handle === "nw" || imageControl.handle === "se" ? "nwse-resize" : "nesw-resize");
+      return true;
+    }
+    // Tokens ficam acima da decoração no desenho e continuam sendo tratados pelo VTT original.
     var tokenAtCell = cell.x >= 0 && cell.y >= 0 && cell.x < COLS && cell.y < ROWS && (state.tokens || []).some(function(token) {
       var size = token.raio || 1;
       return isTokenVisible(token) && cell.x >= token.x && cell.x < token.x + size && cell.y >= token.y && cell.y < token.y + size;
@@ -1125,7 +1268,12 @@ function creativeHandlePointerDown(event, world, cell) {
       creativeBeginTransaction();
       var moveX = hit.type === "portal" && hit.endpoint === "destination" ? hit.item.destX : hit.item.x;
       var moveY = hit.type === "portal" && hit.endpoint === "destination" ? hit.item.destY : hit.item.y;
-      drag = { creativeMove: true, selected: creativeSelected, before: creativeClone(hit.item), offsetX: cell.x - moveX, offsetY: cell.y - moveY };
+      if (hit.type === "decoration" && hit.item.kind === "image") {
+        var imageCenter = creativeImageGeometry(hit.item).center;
+        drag = { creativeMove: true, imageFreeMove: true, selected: creativeSelected, before: creativeClone(hit.item), offsetWorldX: world.x - imageCenter.x, offsetWorldY: world.y - imageCenter.y };
+      } else {
+        drag = { creativeMove: true, selected: creativeSelected, before: creativeClone(hit.item), offsetX: cell.x - moveX, offsetY: cell.y - moveY };
+      }
     }
     return true;
   }
@@ -1133,6 +1281,28 @@ function creativeHandlePointerDown(event, world, cell) {
 }
 function creativeHandlePointerMove(event, world, cell) {
   if (!drag || appMode !== "editor" || isHexMap()) return false;
+  if (drag.creativeImageTransform) {
+    var transformed = creativeFindRecord("decorations", drag.selected.id);
+    if (!transformed) return true;
+    if (drag.transformMode === "rotate") {
+      var currentAngle = Math.atan2(world.y - drag.centerY, world.x - drag.centerX);
+      transformed.rotation = ((drag.startRotation + (currentAngle - drag.startAngle) * 180 / Math.PI) % 360 + 360) % 360;
+    } else {
+      var dx = world.x - drag.anchorX, dy = world.y - drag.anchorY;
+      var c = Math.cos(drag.angle), sn = Math.sin(drag.angle);
+      var localX = dx * c + dy * sn, localY = -dx * sn + dy * c;
+      var aspect = Number(drag.aspect);
+      if (!Number.isFinite(aspect) || aspect <= 0) aspect = 1;
+      var newHeight = (aspect * Math.abs(localX) + Math.abs(localY)) / (aspect * aspect + 1);
+      if (!Number.isFinite(newHeight) || newHeight <= 0) return true;
+      var newWidth = newHeight * aspect;
+      var newCenter = creativeRotateLocalPoint(drag.sx * newWidth / 2, drag.sy * newHeight / 2, { x: drag.anchorX, y: drag.anchorY }, drag.angle);
+      transformed.size = newHeight / CELL;
+      transformed.x = newCenter.x / CELL - 0.5;
+      transformed.y = newCenter.y / CELL - 0.5;
+    }
+    return true;
+  }
   if (drag.creativeTerrain) {
     if (cell.x !== drag.lastX || cell.y !== drag.lastY) {
       creativePaintBrush(cell, drag.material); drag.lastX = cell.x; drag.lastY = cell.y;
@@ -1142,10 +1312,15 @@ function creativeHandlePointerMove(event, world, cell) {
   if (drag.creativeMove) {
     var collection = drag.selected.type === "decoration" ? "decorations" : drag.selected.type === "label" ? "labels" : drag.selected.type === "light" ? "lights" : "portals";
     var item = creativeFindRecord(collection, drag.selected.id);
-    var targetX = cell.x - (drag.offsetX || 0), targetY = cell.y - (drag.offsetY || 0);
-    if (item && targetX >= 0 && targetY >= 0 && targetX < COLS && targetY < ROWS) {
-      if (drag.selected.type === "portal" && drag.selected.endpoint === "destination") { item.destX = targetX; item.destY = targetY; }
-      else { item.x = targetX; item.y = targetY; }
+    if (item && drag.imageFreeMove) {
+      var centerX = world.x - drag.offsetWorldX, centerY = world.y - drag.offsetWorldY;
+      item.x = centerX / CELL - 0.5; item.y = centerY / CELL - 0.5;
+    } else {
+      var targetX = cell.x - (drag.offsetX || 0), targetY = cell.y - (drag.offsetY || 0);
+      if (item && targetX >= 0 && targetY >= 0 && targetX < COLS && targetY < ROWS) {
+        if (drag.selected.type === "portal" && drag.selected.endpoint === "destination") { item.destX = targetX; item.destY = targetY; }
+        else { item.x = targetX; item.y = targetY; }
+      }
     }
     return true;
   }
@@ -1153,6 +1328,13 @@ function creativeHandlePointerMove(event, world, cell) {
 }
 function creativeFinishPointerAction() {
   if (!drag) return false;
+  if (drag.creativeImageTransform) {
+    var transformed = creativeFindRecord("decorations", drag.selected.id);
+    if (transformed) creativeRecordArrayChange("decorations", transformed, drag.before, transformed);
+    creativeCommitTransaction(); save(); drag = null; draw(); creativeRenderInspector(); creativeUpdateHistoryButtons();
+    if (cv) cv.style.cursor = tool === "select" ? "pointer" : "crosshair";
+    return true;
+  }
   if (drag.creativeTerrain) {
     creativeCommitTransaction(); save(); drag = null; draw(); creativeUpdateHistoryButtons(); return true;
   }

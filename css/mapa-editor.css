@@ -244,3 +244,9 @@
 @media (max-width:640px) {
   #mp-root .mp-creator-fields { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
+
+/* Miniaturas importadas: selecionar e excluir cada imagem diretamente na paleta. */
+#mp-root .mp-creator-custom-asset-wrap { position:relative;min-width:0; }
+#mp-root .mp-creator-custom-asset-wrap .mp-creator-custom-asset { width:100%;height:100%; }
+#mp-root .mp-creator-delete-asset { position:absolute;top:2px;right:2px;z-index:2;width:19px;height:19px;padding:0;border:1px solid #b86b62;border-radius:50%;background:#512b29;color:#fff2ed;font-size:15px;line-height:16px;font-weight:700;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.55); }
+#mp-root .mp-creator-delete-asset:hover { background:#8a3933;border-color:#ffd0c9; }
