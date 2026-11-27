@@ -562,6 +562,24 @@ function creativeInstallLevelUi() {
         var zone = (state.lightZones || []).find(function(item) { return item.id === field.getAttribute("data-id"); });
         if (zone) { var beforeZone = creativeClone(zone); creativeBeginTransaction(); zone.name = String(field.value || "Interior").slice(0, 40); creativeRecordArrayChange("lightZones", zone, beforeZone, zone); creativeCommitTransaction(); save(); draw(); }
       }
+      if (field.matches("[data-level-zone-field]")) {
+        var editedZone = (state.lightZones || []).find(function(item) { return item.id === field.getAttribute("data-id"); });
+        if (editedZone) {
+          var beforeEditedZone = creativeClone(editedZone);
+          var zoneProperty = field.getAttribute("data-level-zone-field");
+          var zoneValue = Math.round(Number(field.value));
+          if (!Number.isFinite(zoneValue)) zoneValue = 1;
+          creativeBeginTransaction();
+          if (zoneProperty === "x") editedZone.x = Math.max(0, Math.min(COLS - 1, zoneValue - 1));
+          else if (zoneProperty === "y") editedZone.y = Math.max(0, Math.min(ROWS - 1, zoneValue - 1));
+          else if (zoneProperty === "w") editedZone.w = Math.max(0, Math.min(COLS - editedZone.x, zoneValue) - 1);
+          else if (zoneProperty === "h") editedZone.h = Math.max(0, Math.min(ROWS - editedZone.y, zoneValue) - 1);
+          editedZone.w = Math.max(0, Math.min(COLS - editedZone.x - 1, Number(editedZone.w) || 0));
+          editedZone.h = Math.max(0, Math.min(ROWS - editedZone.y - 1, Number(editedZone.h) || 0));
+          creativeRecordArrayChange("lightZones", editedZone, beforeEditedZone, editedZone);
+          creativeCommitTransaction(); save(); draw(); creativeRenderInspector(); creativeUpdateHistoryButtons();
+        }
+      }
       if (field.matches("[data-level-cell-height]")) {
         var index = Number(field.getAttribute("data-index"));
         creativeBeginTransaction(); creativeSetHeight(index, field.value); creativeCommitTransaction();
@@ -699,6 +717,13 @@ function creativeDrawLightingZones() {
     cx.setLineDash([7 / zoom, 4 / zoom]); cx.strokeRect(x, y, w, h); cx.setLineDash([]);
     cx.fillStyle = "#ffe0a4"; cx.font = "bold " + (11 / zoom) + "px sans-serif"; cx.textAlign = "left"; cx.textBaseline = "top";
     cx.fillText((zone.name || "INTERIOR") + " · SEM LUZ SOLAR", x + 5 / zoom, y + 5 / zoom);
+    if (creativeSelected && creativeSelected.type === "lightZone" && creativeSelected.id === zone.id) {
+      var hs = 5 / zoom;
+      [[x,y],[x+w,y],[x,y+h],[x+w,y+h],[x+w/2,y],[x+w/2,y+h],[x,y+h/2],[x+w,y+h/2]].forEach(function(pt) {
+        cx.fillStyle = "#fff0bd"; cx.strokeStyle = "#7c5427"; cx.lineWidth = 1 / zoom;
+        cx.fillRect(pt[0]-hs, pt[1]-hs, hs*2, hs*2); cx.strokeRect(pt[0]-hs, pt[1]-hs, hs*2, hs*2);
+      });
+    }
     cx.restore();
   });
   if (drag && drag.creativeLightZone && drag.zonePreview) {
@@ -739,12 +764,28 @@ function creativeFindTransitionHit(worldX, worldY) {
   return null;
 }
 function creativeFindLightZoneBorderHit(worldX, worldY) {
-  var zones = state.lightZones || [], tolerance = Math.max(7 / zoom, CELL * .12);
+  // A zona inteira pode ser selecionada. Próximo às bordas, o gesto redimensiona;
+  // no interior, move a zona inteira.
+  var zones = state.lightZones || [], tolerance = Math.max(5, 10 / Math.max(.25, zoom));
   for (var i = zones.length - 1; i >= 0; i--) {
-    var zone = zones[i], x1 = zone.x * CELL, y1 = zone.y * CELL, x2 = (zone.x + zone.w + 1) * CELL, y2 = (zone.y + zone.h + 1) * CELL;
-    var nearHorizontal = (Math.abs(worldY - y1) <= tolerance || Math.abs(worldY - y2) <= tolerance) && worldX >= x1 - tolerance && worldX <= x2 + tolerance;
-    var nearVertical = (Math.abs(worldX - x1) <= tolerance || Math.abs(worldX - x2) <= tolerance) && worldY >= y1 - tolerance && worldY <= y2 + tolerance;
-    if (nearHorizontal || nearVertical) return { type: "lightZone", id: zone.id, item: zone };
+    var zone = zones[i];
+    var x1 = zone.x * CELL, y1 = zone.y * CELL;
+    var x2 = (zone.x + zone.w + 1) * CELL, y2 = (zone.y + zone.h + 1) * CELL;
+    if (worldX < x1 - tolerance || worldX > x2 + tolerance || worldY < y1 - tolerance || worldY > y2 + tolerance) continue;
+    var inside = worldX >= x1 && worldX <= x2 && worldY >= y1 && worldY <= y2;
+    if (!inside) continue;
+    var nearLeft = Math.abs(worldX - x1) <= tolerance, nearRight = Math.abs(worldX - x2) <= tolerance;
+    var nearTop = Math.abs(worldY - y1) <= tolerance, nearBottom = Math.abs(worldY - y2) <= tolerance;
+    var edge = null;
+    if (nearLeft && nearTop) edge = "nw";
+    else if (nearRight && nearTop) edge = "ne";
+    else if (nearLeft && nearBottom) edge = "sw";
+    else if (nearRight && nearBottom) edge = "se";
+    else if (nearLeft) edge = "w";
+    else if (nearRight) edge = "e";
+    else if (nearTop) edge = "n";
+    else if (nearBottom) edge = "s";
+    return { type: "lightZone", id: zone.id, item: zone, edge: edge };
   }
   return null;
 }
@@ -850,7 +891,15 @@ function creativeRenderLevelInspector() {
   if (creativeSelected.type === "lightZone") {
     var zone = (state.lightZones || []).find(function(item) { return item.id === creativeSelected.id; });
     if (!zone) { box.innerHTML = '<span class="mp-creator-muted">Zona não encontrada.</span>'; return true; }
-    box.innerHTML = '<div class="mp-creator-selection"><strong>Zona interna / sem luz solar</strong><span>O personagem precisa de uma fonte de luz para enxergar dentro desta área.</span></div><div class="mp-creator-fields"><label class="mp-creator-field mp-creator-field-full"><span>Nome da área</span><input data-level-zone-name data-id="' + esc(zone.id) + '" value="' + esc(zone.name || "Interior") + '"></label><div class="mp-creator-muted mp-creator-field-full">Área: ' + (zone.w + 1) + ' × ' + (zone.h + 1) + ' células.</div></div><div class="mp-creator-selection-actions"><button type="button" class="danger" data-level-zone-delete data-id="' + esc(zone.id) + '">Remover zona interna</button></div>';
+    box.innerHTML = '<div class="mp-creator-selection"><strong>Zona interna / sem luz solar</strong><span>Clique dentro da zona para selecioná-la. Arraste para mover ou ajuste as medidas abaixo.</span></div>' +
+      '<div class="mp-creator-fields">' +
+      '<label class="mp-creator-field mp-creator-field-full"><span>Nome da área</span><input data-level-zone-name data-id="' + esc(zone.id) + '" value="' + esc(zone.name || "Interior") + '"></label>' +
+      '<label class="mp-creator-field"><span>Coluna inicial</span><input type="number" min="1" max="' + COLS + '" step="1" data-level-zone-field="x" data-id="' + esc(zone.id) + '" value="' + (zone.x + 1) + '"></label>' +
+      '<label class="mp-creator-field"><span>Linha inicial</span><input type="number" min="1" max="' + ROWS + '" step="1" data-level-zone-field="y" data-id="' + esc(zone.id) + '" value="' + (zone.y + 1) + '"></label>' +
+      '<label class="mp-creator-field"><span>Largura (tiles)</span><input type="number" min="1" max="' + (COLS - zone.x) + '" step="1" data-level-zone-field="w" data-id="' + esc(zone.id) + '" value="' + (zone.w + 1) + '"></label>' +
+      '<label class="mp-creator-field"><span>Altura (tiles)</span><input type="number" min="1" max="' + (ROWS - zone.y) + '" step="1" data-level-zone-field="h" data-id="' + esc(zone.id) + '" value="' + (zone.h + 1) + '"></label>' +
+      '<div class="mp-creator-muted mp-creator-field-full">Tamanho atual: ' + (zone.w + 1) + ' × ' + (zone.h + 1) + ' células.</div></div>' +
+      '<div class="mp-creator-selection-actions"><button type="button" class="danger" data-level-zone-delete data-id="' + esc(zone.id) + '">Remover zona interna</button></div>';
     return true;
   }
   if (creativeSelected.type === "height") {
@@ -893,7 +942,30 @@ creativeHandlePointerDown = function(event, world, cell) {
         creativeRenderInspector(); draw(); return true;
       }
       var zoneHit = creativeFindLightZoneBorderHit(world.x, world.y);
-      if (zoneHit) { creativeSelected = { type: "lightZone", id: zoneHit.id }; creativeRenderInspector(); draw(); return true; }
+      if (zoneHit) {
+        var editableZone = zoneHit.item || (state.lightZones || []).find(function(item) { return item.id === zoneHit.id; });
+        creativeSelected = { type: "lightZone", id: zoneHit.id };
+        if (editableZone) {
+          var zoneRight = editableZone.x + editableZone.w;
+          var zoneBottom = editableZone.y + editableZone.h;
+          drag = {
+            creativeLightZoneEdit: true,
+            id: editableZone.id,
+            mode: zoneHit.edge ? "resize" : "move",
+            edge: zoneHit.edge || null,
+            offsetX: cell.x - editableZone.x,
+            offsetY: cell.y - editableZone.y,
+            fixedLeft: editableZone.x,
+            fixedTop: editableZone.y,
+            fixedRight: zoneRight,
+            fixedBottom: zoneBottom,
+            before: creativeClone(editableZone),
+            moved: false,
+            transactionStarted: false
+          };
+        }
+        creativeRenderInspector(); draw(); return true;
+      }
       var baseHit = creativeHitTest(world.x, world.y);
       if (!baseHit && cell.x >= 0 && cell.y >= 0 && cell.x < COLS && cell.y < ROWS && creativeHeightAt(cell.x, cell.y)) {
         creativeSelected = { type: "height", id: String(idx(cell.x, cell.y)), index: idx(cell.x, cell.y), x: cell.x, y: cell.y };
@@ -905,6 +977,27 @@ creativeHandlePointerDown = function(event, world, cell) {
 };
 var creativeBaseHandlePointerMove = creativeHandlePointerMove;
 creativeHandlePointerMove = function(event, world, cell) {
+  if (drag && drag.creativeLightZoneEdit) {
+    var movingZone = (state.lightZones || []).find(function(item) { return item.id === drag.id; });
+    if (movingZone && cell && Number.isFinite(Number(cell.x)) && Number.isFinite(Number(cell.y))) {
+      var nextX = movingZone.x, nextY = movingZone.y, nextW = movingZone.w, nextH = movingZone.h;
+      if (drag.mode === "resize") {
+        var edge = drag.edge || "se", cx = Math.max(0, Math.min(COLS - 1, cell.x)), cy = Math.max(0, Math.min(ROWS - 1, cell.y));
+        if (edge.indexOf("w") >= 0) { nextX = Math.min(cx, drag.fixedRight); nextW = Math.max(0, drag.fixedRight - nextX); }
+        if (edge.indexOf("e") >= 0) nextW = Math.max(0, Math.min(COLS - drag.fixedLeft - 1, cx - drag.fixedLeft));
+        if (edge.indexOf("n") >= 0) { nextY = Math.min(cy, drag.fixedBottom); nextH = Math.max(0, drag.fixedBottom - nextY); }
+        if (edge.indexOf("s") >= 0) nextH = Math.max(0, Math.min(ROWS - drag.fixedTop - 1, cy - drag.fixedTop));
+      } else {
+        nextX = Math.max(0, Math.min(COLS - movingZone.w - 1, Math.round(cell.x - drag.offsetX)));
+        nextY = Math.max(0, Math.min(ROWS - movingZone.h - 1, Math.round(cell.y - drag.offsetY)));
+      }
+      if (nextX !== movingZone.x || nextY !== movingZone.y || nextW !== movingZone.w || nextH !== movingZone.h) {
+        if (!drag.transactionStarted) { creativeBeginTransaction(); drag.transactionStarted = true; }
+        movingZone.x = nextX; movingZone.y = nextY; movingZone.w = nextW; movingZone.h = nextH; drag.moved = true; draw();
+      }
+    }
+    return true;
+  }
   if (drag && drag.creativeHeight) {
     if (cell.x !== drag.lastX || cell.y !== drag.lastY) { creativeApplyHeightBrush(cell, drag.delta); drag.lastX = cell.x; drag.lastY = cell.y; }
     return true;
@@ -926,6 +1019,14 @@ creativeHandlePointerMove = function(event, world, cell) {
 };
 var creativeBaseFinishPointerAction = creativeFinishPointerAction;
 creativeFinishPointerAction = function() {
+  if (drag && drag.creativeLightZoneEdit) {
+    var editedZone = (state.lightZones || []).find(function(item) { return item.id === drag.id; });
+    if (editedZone && drag.moved && drag.transactionStarted) {
+      creativeRecordArrayChange("lightZones", editedZone, drag.before, editedZone);
+      creativeCommitTransaction(); save();
+    }
+    drag = null; draw(); creativeRenderInspector(); creativeUpdateHistoryButtons(); return true;
+  }
   if (drag && drag.creativeHeight) {
     creativeCommitTransaction(); drag = null; save(); draw(); creativeUpdateHistoryButtons(); return true;
   }
