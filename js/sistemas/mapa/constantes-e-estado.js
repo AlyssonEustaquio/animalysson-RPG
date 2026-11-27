@@ -55,8 +55,13 @@ var clickMoveExitPending = false;
 var keyMoveLastSave = 0;
 var clickMovePath = [];
 var WORLD_TRAVEL_STEP_MS = 1e3;
+var WORLD_TRAVEL_DAY_SECONDS = 8 * 3600;
+var WORLD_TRAVEL_TIME_SCALE = 600;
 function worldTravelStepDurationMs() {
-    return Math.max(150, Math.round(localStepMs()));
+    var perDay = travelSpeedEffective();
+    if (!(perDay > 0)) perDay = 24;
+    var miles = hexMetrics().miles;
+    return Math.max(150, Math.round(miles / perDay * WORLD_TRAVEL_DAY_SECONDS * 1e3 / WORLD_TRAVEL_TIME_SCALE));
   }
 var state = loadCurrentMapState();
 function savedHexMetricsForState(s) {
