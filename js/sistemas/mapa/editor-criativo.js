@@ -1063,11 +1063,22 @@ function creativeInstallUi() {
   // O seletor de modo integra a barra para não sobrepor os botões do editor.
   var modeSwitch = R.querySelector(".mp-mode-switch");
   if (modeSwitch) shell.querySelector(".mp-creator-topbar").appendChild(modeSwitch);
-  // No modo Jogador, o botão Menu ocupa um espaço próprio na barra superior,
-  // antes da marca, evitando ficar flutuando sobre o título do Studio.
+  // O Menu e a marca formam um único grupo de layout. Assim o Menu reserva
+  // espaço real na barra e nunca se sobrepõe ao título, mesmo com as regras
+  // antigas de posicionamento absoluto do VTT ainda carregadas.
   var playerMenuButton = R.querySelector("#mp-burger");
   var creatorBrand = shell.querySelector(".mp-creator-brand");
-  if (playerMenuButton && creatorBrand) creatorBrand.parentNode.insertBefore(playerMenuButton, creatorBrand);
+  var creatorTopbar = shell.querySelector(".mp-creator-topbar");
+  if (playerMenuButton && creatorBrand && creatorTopbar) {
+    var brandGroup = document.createElement("div");
+    brandGroup.className = "mp-creator-brand-group";
+    creatorTopbar.insertBefore(brandGroup, creatorBrand);
+    brandGroup.appendChild(playerMenuButton);
+    brandGroup.appendChild(creatorBrand);
+    ["position", "top", "right", "bottom", "left", "inset", "transform"].forEach(function(prop) {
+      playerMenuButton.style.removeProperty(prop);
+    });
+  }
   // Exportação avançada e importação continuam disponíveis no menu original.
   // O botão Menu fica no canto superior esquerdo no modo Jogador; no Editor,
   // o acesso às ferramentas avançadas é feito pelo botão próprio do painel.
