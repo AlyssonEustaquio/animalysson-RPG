@@ -93,6 +93,8 @@ function openPlayerActionMenu() {
     var profile = playerActionProfile(player), range = playerVisionRadius(player);
     var dlg = combatDialog("Ações do personagem", "Escolha uma ação. As opções estão agrupadas por finalidade.", 500);
     if (!dlg) return;
+    dlg.overlay.classList.add("mp-player-action-dialog");
+    dlg.panel.classList.add("mp-player-action-panel");
     function group(title) {
       var box = document.createElement("section");
       box.className = "mp-action-group";

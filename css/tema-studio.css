@@ -373,3 +373,253 @@ main { background: transparent; }
   #mp-root .mp-creator-brand-group > .mp-creator-brand > div { display: none !important; }
   #mp-root .mp-creator-map-host .mp-map-selector { width: min(145px, 31vw); }
 }
+
+
+/* Ações do personagem: painel e janela no acabamento de pedra e bronze do Studio. */
+#mp-root.mp.vtt .mp-player-actions {
+  margin: 0 0 14px;
+  padding: 13px;
+  border: 1px solid rgba(181, 138, 74, .48);
+  border-radius: 11px;
+  background: linear-gradient(150deg, #302c23 0%, #25231d 58%, #211f19 100%);
+  color: #f2eee6;
+  box-shadow: inset 0 1px 0 rgba(255, 232, 190, .045), 0 8px 20px rgba(0, 0, 0, .2);
+}
+#mp-root.mp.vtt .mp-player-actions-head {
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 10px;
+  padding: 0 0 9px;
+  border-bottom: 1px solid rgba(181, 138, 74, .25);
+  color: #f4e4c5;
+  font-size: 14px;
+  letter-spacing: .01em;
+}
+#mp-root.mp.vtt .mp-player-actions-head strong {
+  color: #f0d29b;
+  font-family: "Roboto Condensed", Roboto, system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+}
+#mp-root.mp.vtt .mp-player-actions-head button {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #77603d;
+  border-radius: 7px;
+  background: linear-gradient(180deg, #40392c, #2d2921);
+  color: #f0d29b;
+  box-shadow: inset 0 1px 0 rgba(255, 235, 198, .06);
+}
+#mp-root.mp.vtt .mp-player-actions-head button:hover {
+  border-color: #c99a50;
+  background: #4a3b25;
+  color: #fff3d8;
+}
+#mp-root.mp.vtt .mp-player-actions-buttons {
+  gap: 8px;
+}
+#mp-root.mp.vtt .mp-player-actions-buttons button {
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid #987341;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #80613a, #624827);
+  color: #fff4df;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .01em;
+  box-shadow: inset 0 1px 0 rgba(255, 235, 198, .12), 0 3px 8px rgba(0, 0, 0, .16);
+  transition: border-color .14s ease, filter .14s ease, transform .14s ease;
+}
+#mp-root.mp.vtt .mp-player-actions-buttons button:hover {
+  border-color: #d5ae70;
+  background: linear-gradient(180deg, #927044, #76562f);
+  color: #fff9ed;
+  filter: brightness(1.04);
+}
+#mp-root.mp.vtt .mp-player-actions-buttons button:active {
+  transform: translateY(1px);
+}
+#mp-root.mp.vtt .mp-player-skill-row {
+  align-items: stretch;
+  gap: 7px;
+  margin-top: 9px;
+}
+#mp-root.mp.vtt .mp-player-skill-row select {
+  min-height: 39px;
+  padding: 8px 10px;
+  border: 1px solid #62543e;
+  border-radius: 7px;
+  background: #211f19;
+  color: #f2eadb;
+  accent-color: #c99a50;
+}
+#mp-root.mp.vtt .mp-player-skill-row select:focus {
+  border-color: #c99a50;
+  outline: 2px solid rgba(201, 154, 80, .2);
+  outline-offset: 1px;
+}
+#mp-root.mp.vtt .mp-player-skill-row button {
+  min-height: 39px;
+  padding: 8px 11px;
+  border: 1px solid #77603d;
+  border-radius: 7px;
+  background: linear-gradient(180deg, #494130, #332e23);
+  color: #f0d29b;
+  font-size: 12px;
+  font-weight: 700;
+}
+#mp-root.mp.vtt .mp-player-skill-row button:hover {
+  border-color: #c99a50;
+  background: #4a3b25;
+  color: #fff3d8;
+}
+#mp-root.mp.vtt .mp-player-actions > small {
+  margin-top: 9px;
+  color: #b9ad96;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+/* Janela aberta por "Abrir ações e interações". */
+#mp-root .mp-portal-dialog-overlay.mp-player-action-dialog {
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  padding: clamp(10px, 3vw, 24px);
+  background: rgba(8, 7, 5, .82);
+  backdrop-filter: blur(5px);
+}
+#mp-root .mp-player-action-dialog .mp-player-action-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: min(540px, 100%);
+  max-height: min(88%, 760px);
+  overflow-y: auto;
+  padding: 20px;
+  border: 1px solid rgba(193, 151, 87, .62);
+  border-radius: 14px;
+  background: linear-gradient(155deg, #302c23 0%, #26231d 48%, #1e1c17 100%);
+  color: #f2eee6;
+  box-shadow: 0 20px 64px rgba(0, 0, 0, .62), inset 0 1px 0 rgba(255, 232, 190, .08);
+  scrollbar-color: #806744 #242119;
+}
+#mp-root .mp-player-action-dialog .mp-player-action-panel h3 {
+  margin: 0 0 8px;
+  padding: 0 0 12px;
+  border-bottom: 1px solid rgba(193, 151, 87, .34);
+  color: #f2d6a5;
+  font-family: "Roboto Condensed", Roboto, system-ui, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: .015em;
+}
+#mp-root .mp-player-action-dialog .mp-player-action-panel > p {
+  margin: 0 0 14px;
+  color: #c8bda9;
+  font-size: 13px;
+  line-height: 1.5;
+}
+#mp-root .mp-player-action-dialog .mp-action-group {
+  margin: 0 0 11px;
+  padding: 11px;
+  border: 1px solid rgba(126, 103, 68, .55);
+  border-radius: 9px;
+  background: linear-gradient(145deg, rgba(57, 51, 39, .78), rgba(35, 32, 25, .9));
+  box-shadow: inset 0 1px 0 rgba(255, 235, 198, .025);
+}
+#mp-root .mp-player-action-dialog .mp-action-group h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 9px;
+  color: #e4bd7b;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .11em;
+}
+#mp-root .mp-player-action-dialog .mp-action-group h4::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(193, 151, 87, .35), transparent);
+}
+#mp-root .mp-player-action-dialog .mp-cb-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+#mp-root .mp-player-action-dialog .mp-cb-btn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+  min-height: 46px;
+  padding: 9px 11px;
+  border: 1px solid #62543e;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #39352b, #2b2821);
+  color: #eee5d5;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: left;
+  box-shadow: inset 0 1px 0 rgba(255, 235, 198, .035), 0 2px 6px rgba(0, 0, 0, .12);
+  transition: border-color .14s ease, background .14s ease, transform .14s ease, box-shadow .14s ease;
+}
+#mp-root .mp-player-action-dialog .mp-cb-btn:hover:not(:disabled) {
+  border-color: #bd9252;
+  background: linear-gradient(180deg, #4a4030, #383023);
+  color: #fff3d8;
+  box-shadow: inset 0 0 0 1px rgba(210, 168, 93, .12), 0 4px 12px rgba(0, 0, 0, .22);
+  transform: translateY(-1px);
+}
+#mp-root .mp-player-action-dialog .mp-cb-btn:focus-visible {
+  outline: 2px solid #d2a85d;
+  outline-offset: 2px;
+}
+#mp-root .mp-player-action-dialog .mp-portal-dialog-actions {
+  justify-content: flex-end;
+  margin-top: 3px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(193, 151, 87, .25);
+}
+#mp-root .mp-player-action-dialog .mp-portal-dialog-actions button {
+  min-width: 104px;
+  min-height: 38px;
+  padding: 8px 15px;
+  border: 1px solid #78603d;
+  border-radius: 7px;
+  background: linear-gradient(180deg, #40392c, #2d2921);
+  color: #f0d29b;
+  font-size: 12px;
+  font-weight: 700;
+}
+#mp-root .mp-player-action-dialog .mp-portal-dialog-actions button.primary {
+  border-color: #a27b43;
+  background: linear-gradient(180deg, #80613a, #624827);
+  color: #fff4df;
+}
+#mp-root .mp-player-action-dialog .mp-portal-dialog-actions button:hover {
+  border-color: #d2a85d;
+  filter: brightness(1.08);
+}
+@media (max-width: 520px) {
+  #mp-root .mp-player-action-dialog.mp-player-action-dialog {
+    align-items: flex-start;
+  }
+  #mp-root .mp-player-action-dialog .mp-player-action-panel {
+    width: 100%;
+    max-height: calc(100% - 4px);
+    padding: 14px;
+    border-radius: 11px;
+  }
+  #mp-root .mp-player-action-dialog .mp-player-action-panel h3 { font-size: 19px; }
+  #mp-root .mp-player-action-dialog .mp-cb-grid { grid-template-columns: minmax(0, 1fr); }
+  #mp-root .mp-player-action-dialog .mp-action-group { padding: 9px; }
+}
