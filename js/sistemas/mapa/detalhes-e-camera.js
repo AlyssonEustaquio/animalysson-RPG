@@ -51,10 +51,20 @@ function focusCameraOnPlayer(viewW, viewH, force) {
     oy = height / 2 - center.y * zoom + (force ? 0 : camPan.y);
   }
 function visionZoom(viewW, viewH) {
-    // A distância de visão e a iluminação nunca devem controlar a escala da câmera.
-    // Mantém apenas o limite técnico mínimo usado pelo zoom manual e pelos gestos.
-    // Assim, entrar em uma área escura ou apagar a tocha não provoca zoom automático.
-    return 0.04;
+    // O campo "Raio" do Editor define o limite de afastamento da câmera no modo Jogador.
+    // Ele é global e independente da tocha: apagar a tocha ou entrar na escuridão
+    // não altera o limite nem provoca um novo zoom.
+    var width = Number(viewW) || cv && cv.clientWidth || 1;
+    var height = Number(viewH) || cv && cv.clientHeight || 1;
+    var radius = Number(lightRadius);
+    if (!isFinite(radius)) radius = 6;
+    radius = Math.max(0, Math.min(20, radius));
+    var cellSize = Math.max(1, Number(CELL) || 36);
+    // Mantém o diâmetro de 2*raio+1 células dentro do menor lado da tela,
+    // para que a área de visão não seja cortada pelo enquadramento.
+    var diameter = radius * 2 + 1;
+    var limit = Math.min(width, height) / (diameter * cellSize);
+    return Math.max(0.04, Math.min(16, limit));
   }
 function centerCameraOnPlayer(viewW, viewH, force) {
     if (isHexMap() || !cv || appMode === "editor" && !force) return;
@@ -62,8 +72,10 @@ function centerCameraOnPlayer(viewW, viewH, force) {
     var width = viewW == null ? cv.clientWidth : viewW;
     var height = viewH == null ? cv.clientHeight : viewH;
     if (!p || !width || !height) return;
-    // A câmera acompanha o personagem, mas preserva exatamente o zoom escolhido.
-    // O alcance de visão/luz é calculado no sistema de iluminação, não na câmera.
+    // Aplica somente o limite de zoom-out definido pelo Raio do Editor.
+    // Como esse valor não depende da luz carregada, a escuridão não muda a câmera.
+    zoom = Math.max(visionZoom(width, height), zoom);
+    // A câmera acompanha o personagem sem alterar o zoom enquanto ele se movimenta.
     var c = keyMoveVis || tokenAnchor(p, p.x, p.y);
     ox = width / 2 - c.x * zoom + (force ? 0 : camPan.x);
     oy = height / 2 - c.y * zoom + (force ? 0 : camPan.y);
