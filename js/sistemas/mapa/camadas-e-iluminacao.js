@@ -7,7 +7,20 @@ var CREATIVE_LEVEL_DATA_KEYS = [
 var creativePendingTransition = null;
 var creativeLevelUiInstalled = false;
 var creativeLastTransitionNotice = 0;
-
+function creativeLevelZ(level) {
+  var value = Number(level && level.z);
+  return Number.isFinite(value) ? Math.round(value) : 0;
+}
+function creativeLevelZLabel(level) {
+  var z = creativeLevelZ(level);
+  if (z === 0) return 'Z 0 · base';
+  return z < 0 ? 'Z ' + z + ' · acima' : 'Z +' + z + ' · subsolo';
+}
+function creativeSortedLevels(levels) {
+  return (Array.isArray(levels) ? levels.slice() : []).sort(function(a, b) {
+    return creativeLevelZ(a) - creativeLevelZ(b) || String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR');
+  });
+}
 function creativeLevelId() {
   return state && state.activeLevelId || "surface";
 }
@@ -126,26 +139,31 @@ function creativeRestoreLevelData(level) {
 function creativeEnsureLevelState(source) {
   if (!source || isHexMap()) return source;
   if (!Array.isArray(source.levels) || !source.levels.length) {
-    source.levels = [{ id: "surface", name: "Superfície", elevation: 0, environment: "outdoor", data: null }];
+    source.levels = [{ id: "surface", name: "Superfície", z: 0, elevation: 0, environment: "outdoor", data: null }];
     source.activeLevelId = "surface";
   }
-  var clean = [];
+  var clean = [], usedZ = {};
   source.levels.forEach(function(level, index) {
     if (!level || typeof level !== "object") return;
     var id = String(level.id || "level-" + index).replace(/[^a-z0-9_-]/gi, "-").slice(0, 80);
     if (clean.some(function(existing) { return existing.id === id; })) id += "-" + index;
     var environment = ["outdoor", "interior", "cavern", "basement"].indexOf(level.environment) >= 0 ? level.environment : "outdoor";
+    var rawZ = Number(level.z);
+    var z = Number.isFinite(rawZ) ? Math.round(rawZ) : (index === 0 ? 0 : index);
+    while (usedZ[String(z)]) z += 1;
+    usedZ[String(z)] = true;
     clean.push({
       id: id,
-      name: String(level.name || (index === 0 ? "Superfície" : "Nível " + (index + 1))).slice(0, 48),
-      elevation: Math.max(-500, Math.min(500, Number(level.elevation) || 0)),
+      name: String(level.name || (index === 0 ? "Superfície" : "Camada " + (index + 1))).slice(0, 48),
+      z: z,
+      elevation: Number.isFinite(Number(level.elevation)) ? Number(level.elevation) : 0,
       environment: environment,
       data: level.data && typeof level.data === "object" ? level.data : null
     });
   });
-  if (!clean.length) clean.push({ id: "surface", name: "Superfície", elevation: 0, environment: "outdoor", data: null });
+  if (!clean.length) clean.push({ id: "surface", name: "Superfície", z: 0, elevation: 0, environment: "outdoor", data: null });
   source.levels = clean;
-  if (!clean.some(function(level) { return level.id === source.activeLevelId; })) source.activeLevelId = clean[0].id;
+  if (!clean.some(function(level) { return level.id === source.activeLevelId; })) source.activeLevelId = creativeSortedLevels(clean)[0].id;
   if (!Array.isArray(source.transitions)) source.transitions = [];
   var validIds = clean.map(function(level) { return level.id; });
   source.transitions = source.transitions.filter(function(link) {
@@ -162,6 +180,8 @@ function creativeEnsureLevelState(source) {
   source.tokens = Array.isArray(source.tokens) ? source.tokens : [];
   source.tokens.forEach(function(token) {
     if (!token.layerId || validIds.indexOf(token.layerId) < 0) token.layerId = source.activeLevelId;
+    var tokenLevel = clean.find(function(level) { return level.id === token.layerId; });
+    if (tokenLevel) token.z = tokenLevel.z;
     if (token.visao == null || !Number.isFinite(Number(token.visao))) token.visao = 6;
     else token.visao = Math.max(0, Math.min(60, Number(token.visao)));
     if (token.luz == null || !Number.isFinite(Number(token.luz))) token.luz = Math.max(0, Number(lightRadius) || 0);
@@ -197,10 +217,13 @@ function creativeSwitchLevel(levelId, options) {
   creativeRestoreLevelData(target);
   creativeSelected = null;
   selected = null;
-  if (options.playerTransition && options.player) { options.player.layerId = target.id; if (typeof revealAround === "function") revealAround(options.player.x, options.player.y, creativeGetVisibilityRadius(options.player, options.player.x, options.player.y)); }
-  if (!options.keepTool) {
-    setTool("select");
-  } else if (cv) cv.style.cursor = "crosshair";
+  if (options.playerTransition && options.player) {
+    options.player.layerId = target.id;
+    options.player.z = creativeLevelZ(target);
+    if (typeof revealAround === "function") revealAround(options.player.x, options.player.y, creativeGetVisibilityRadius(options.player, options.player.x, options.player.y));
+  }
+  if (!options.keepTool) setTool("select");
+  else if (cv) cv.style.cursor = "crosshair";
   creativeHistoryUndo = [];
   creativeHistoryRedo = [];
   creativeUpdateHistoryButtons();
@@ -210,38 +233,61 @@ function creativeSwitchLevel(levelId, options) {
   draw();
   return true;
 }
-function creativeAddLevel() {
-  if (!state || isHexMap()) return;
+function creativeAddLevel(direction) {
+  if (!state || isHexMap()) return false;
+  var active = creativeCurrentLevel();
+  if (!active) return false;
+  direction = Number(direction) < 0 ? -1 : 1; // -1 = acima; +1 = abaixo.
   var kindInput = R && R.querySelector("#mp-creator-new-environment");
+  var nameInput = R && R.querySelector("#mp-creator-new-name");
   var environment = kindInput ? kindInput.value : "cavern";
-  var defaultName = ({ outdoor: "Área externa", interior: "Interior", cavern: "Caverna", basement: "Porão" })[environment] || "Novo nível";
-  var name = appPromptMessage("msg006", "Nome do novo nível:", defaultName);
-  if (!name || !name.trim()) return;
-  creativeStoreActiveLevelData(state);
+  if (["outdoor", "interior", "cavern", "basement"].indexOf(environment) < 0) environment = "cavern";
+  var currentZ = creativeLevelZ(active);
+  var newZ = currentZ + direction;
+  // Abre espaço imediatamente acima/abaixo sem limitar quantos andares o mapa pode ter.
+  (state.levels || []).forEach(function(level) {
+    if (level.id === active.id) return;
+    var z = creativeLevelZ(level);
+    if (direction < 0 && z < currentZ) level.z = z - 1;
+    else if (direction > 0 && z > currentZ) level.z = z + 1;
+  });
+  var defaultName = ({ outdoor: "Exterior", interior: "Interior", cavern: "Caverna", basement: "Porão" })[environment] || "Camada";
+  var customName = nameInput ? String(nameInput.value || "").trim() : "";
+  if (!customName) {
+    var sameTypeCount = (state.levels || []).filter(function(item) { return item.environment === environment; }).length;
+    if (sameTypeCount) defaultName += " " + (sameTypeCount + 1);
+  }
   var level = {
-    id: "level-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6),
-    name: name.trim().slice(0, 48),
-    elevation: environment === "basement" || environment === "cavern" ? -3 : environment === "interior" ? 0 : 3,
+    id: "level-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 7),
+    name: (customName || defaultName).slice(0, 48),
+    z: newZ,
+    elevation: Number(active.elevation) || 0,
     environment: environment,
     data: creativeMakeEmptyLevelData(environment)
   };
+  creativeStoreActiveLevelData(state);
   state.levels.push(level);
-  var currentPlayerToken = currentPlayer();
-  if (currentPlayerToken && appMode === "editor") {
-    // A troca de nível no Editor não move o personagem; ele continua vinculado ao andar anterior.
-  }
+  state.levels = creativeSortedLevels(state.levels);
+  (state.tokens || []).forEach(function(token) {
+    var tokenLevel = state.levels.find(function(item) { return item.id === token.layerId; });
+    if (tokenLevel) token.z = creativeLevelZ(tokenLevel);
+  });
+  if (nameInput) nameInput.value = "";
   creativeSwitchLevel(level.id, { keepTool: false });
   save();
+  return true;
 }
 function creativeDeleteActiveLevel() {
   if (!state || !state.levels || state.levels.length <= 1) {
-    appAlertMessage("msg008", "O mapa precisa manter pelo menos um nível.");
+    appAlertMessage("msg008", "O mapa precisa manter pelo menos uma camada.");
     return;
   }
   var active = creativeCurrentLevel();
-  if (!active || !appConfirmMessage("msg008", "Excluir o nível '" + active.name + "'? As passagens ligadas a ele também serão removidas.")) return;
-  var fallback = state.levels.find(function(level) { return level.id !== active.id; });
-  state.tokens.forEach(function(token) { if (token.layerId === active.id) token.layerId = fallback.id; });
+  if (!active || !appConfirmMessage("msg008", "Excluir a camada '" + active.name + "'? As passagens ligadas a ela também serão removidas.")) return;
+  var fallback = creativeSortedLevels(state.levels.filter(function(level) { return level.id !== active.id; }))[0];
+  state.tokens.forEach(function(token) {
+    if (token.layerId === active.id) { token.layerId = fallback.id; token.z = creativeLevelZ(fallback); }
+  });
   state.transitions = (state.transitions || []).filter(function(link) { return link.fromLevelId !== active.id && link.toLevelId !== active.id; });
   state.levels = state.levels.filter(function(level) { return level.id !== active.id; });
   state.activeLevelId = fallback.id;
@@ -266,29 +312,34 @@ function creativeUpdateLevelUi() {
   var activeSelect = panel.querySelector("#mp-creator-level-select");
   var targetSelect = panel.querySelector("#mp-creator-transition-target");
   var envSelect = panel.querySelector("#mp-creator-level-environment");
-  var elevationInput = panel.querySelector("#mp-creator-level-elevation");
   var newEnv = panel.querySelector("#mp-creator-new-environment");
   var torchSlider = panel.querySelector("#mp-creator-torch-radius");
   var torchOutput = panel.querySelector("#mp-creator-torch-value");
+  var sorted = creativeSortedLevels(state.levels || []);
   if (torchSlider && document.activeElement !== torchSlider) torchSlider.value = String(creativeTorchRadius());
   if (torchOutput) torchOutput.textContent = String(creativeTorchRadius()) + " células";
   var legacyTorchSlider = R.querySelector("#mp-lr");
   if (legacyTorchSlider && document.activeElement !== legacyTorchSlider) legacyTorchSlider.value = String(creativeTorchRadius());
-  if (activeSelect) activeSelect.innerHTML = (state.levels || []).map(function(item) { return '<option value="' + esc(item.id) + '">' + esc(item.name) + ' · ' + (Number(item.elevation) > 0 ? "+" : "") + Number(item.elevation) + ' m</option>'; }).join("");
+  if (activeSelect) activeSelect.innerHTML = sorted.map(function(item) {
+    return '<option value="' + esc(item.id) + '">' + esc(item.name) + ' · ' + esc(creativeLevelZLabel(item)) + '</option>';
+  }).join("");
   if (activeSelect && level) activeSelect.value = level.id;
   if (targetSelect) {
-    targetSelect.innerHTML = (state.levels || []).filter(function(item) { return !level || item.id !== level.id; }).map(function(item) { return '<option value="' + esc(item.id) + '">' + esc(item.name) + '</option>'; }).join("");
-    if (!targetSelect.options.length) targetSelect.innerHTML = '<option value="">Crie outro nível primeiro</option>';
+    targetSelect.innerHTML = sorted.filter(function(item) { return !level || item.id !== level.id; }).map(function(item) {
+      return '<option value="' + esc(item.id) + '">' + esc(item.name) + ' · ' + esc(creativeLevelZLabel(item)) + '</option>';
+    }).join("");
+    if (!targetSelect.options.length) targetSelect.innerHTML = '<option value="">Adicione outra camada primeiro</option>';
   }
   if (envSelect && level) envSelect.value = level.environment;
-  if (elevationInput && level && document.activeElement !== elevationInput) elevationInput.value = String(level.elevation);
   if (newEnv && !newEnv.value) newEnv.value = "cavern";
+  var zOutput = panel.querySelector("#mp-creator-level-z");
+  if (zOutput && level) zOutput.textContent = creativeLevelZLabel(level);
   var deleteButton = panel.querySelector("#mp-creator-level-delete");
   if (deleteButton) deleteButton.disabled = !state.levels || state.levels.length <= 1;
   var status = panel.querySelector("#mp-creator-level-status");
   if (status) {
-    if (creativePendingTransition) status.textContent = "Clique no nível de destino para posicionar a outra ponta da passagem.";
-    else status.textContent = "" + creativeEnvironmentName(level && level.environment) + " · use ↑/↓ para criar desníveis e 'Passagem' para ligar andares.";
+    if (creativePendingTransition) status.textContent = "Clique no destino da camada selecionada para concluir a passagem.";
+    else status.textContent = creativeEnvironmentName(level && level.environment) + " · Z " + creativeLevelZ(level) + ". Adicione camadas acima ou abaixo conforme precisar; não há quantidade fixa.";
   }
 }
 function creativeInstallLevelUi() {
@@ -297,18 +348,21 @@ function creativeInstallLevelUi() {
   if (!panel || !toolGrid || panel.querySelector(".mp-creator-level-manager")) return;
   var section = document.createElement("section");
   section.className = "mp-creator-section mp-creator-level-manager";
-  section.innerHTML = '<div class="mp-creator-section-title">Camadas e níveis <span>andares, cavernas e relevo</span></div>' +
-    '<label class="mp-creator-level-label">Nível ativo<select id="mp-creator-level-select"></select></label>' +
-    '<div class="mp-creator-level-actions"><button type="button" id="mp-creator-level-add">＋ Criar nível</button><button type="button" id="mp-creator-level-delete" class="danger">Excluir</button></div>' +
-    '<label class="mp-creator-level-label">Tipo de novo nível<select id="mp-creator-new-environment"><option value="outdoor">Exterior · luz do sol</option><option value="interior">Interior · luz limitada</option><option value="cavern" selected>Caverna · escuro</option><option value="basement">Porão · escuro</option></select></label>' +
-    '<div class="mp-creator-level-properties"><label>Ambiente atual<select id="mp-creator-level-environment"><option value="outdoor">Exterior / sol</option><option value="interior">Interior</option><option value="cavern">Caverna</option><option value="basement">Porão</option></select></label><label>Altitude (m)<input id="mp-creator-level-elevation" type="number" min="-500" max="500" step="0.5" value="0"></label></div>' +
-    '<label class="mp-creator-level-label">Conectar com<select id="mp-creator-transition-target"></select></label>' +
-    '<label class="mp-creator-torch-control"><span>Tocha / lanterna do personagem <output id="mp-creator-torch-value">' + creativeTorchRadius() + ' células</output></span><input id="mp-creator-torch-radius" type="range" min="0" max="30" step="1" value="' + creativeTorchRadius() + '"><small>0 = sem luz carregada. O Mestre ajusta o alcance conforme a tocha/lanterna do personagem.</small></label>' +
+  section.innerHTML = '<div class="mp-creator-section-title">Camadas e andares <span>modelo Z · criação dinâmica</span></div>' +
+    '<label class="mp-creator-level-label">Camada em edição<select id="mp-creator-level-select"></select></label>' +
+    '<div class="mp-creator-level-zreadout"><small>COORDENADA DO ANDAR</small><strong id="mp-creator-level-z">Z 0 · térreo</strong></div>' +
+    '<div class="mp-creator-level-new-fields"><label class="mp-creator-level-label">Nome da nova camada<input id="mp-creator-new-name" type="text" maxlength="48" placeholder="Ex.: 1º andar, Caverna, Porão"></label>' +
+    '<label class="mp-creator-level-label">Ambiente da nova camada<select id="mp-creator-new-environment"><option value="outdoor">Exterior · luz do sol</option><option value="interior">Interior · sem sol direto</option><option value="cavern" selected>Caverna · escuro</option><option value="basement">Porão · escuro</option></select></label></div>' +
+    '<div class="mp-creator-level-actions mp-creator-level-add-actions"><button type="button" id="mp-creator-level-add-above">＋ Adicionar acima</button><button type="button" id="mp-creator-level-add-below">＋ Adicionar abaixo</button></div>' +
+    '<button type="button" id="mp-creator-level-delete" class="mp-creator-level-delete danger">Excluir camada selecionada</button>' +
+    '<label class="mp-creator-level-label">Ambiente desta camada<select id="mp-creator-level-environment"><option value="outdoor">Exterior / luz do sol</option><option value="interior">Interior</option><option value="cavern">Caverna</option><option value="basement">Porão</option></select></label>' +
+    '<label class="mp-creator-level-label">Conectar a outra camada<select id="mp-creator-transition-target"></select></label>' +
+    '<label class="mp-creator-torch-control"><span>Tocha / lanterna do personagem <output id="mp-creator-torch-value">' + creativeTorchRadius() + ' células</output></span><input id="mp-creator-torch-radius" type="range" min="0" max="30" step="1" value="' + creativeTorchRadius() + '"><small>0 = sem luz carregada. O alcance é independente da quantidade de camadas.</small></label>' +
     '<small id="mp-creator-level-status" class="mp-creator-muted"></small>';
   panel.insertBefore(section, toolGrid);
   var tools = document.createElement("div");
   tools.className = "mp-creator-level-tools";
-  tools.innerHTML = '<button type="button" class="mp-creator-tool" data-creator-tool="raiseTerrain" title="Elevar terreno em um nível"><span class="mp-creator-tool-icon">⛰</span><span>Elevar</span></button><button type="button" class="mp-creator-tool" data-creator-tool="lowerTerrain" title="Abaixar terreno em um nível"><span class="mp-creator-tool-icon">▽</span><span>Abaixar</span></button><button type="button" class="mp-creator-tool" data-creator-tool="interiorZone" title="Desenhar uma área interna sem luz solar; a tocha ilumina o interior"><span class="mp-creator-tool-icon">⌂</span><span>Zona interna</span></button><button type="button" class="mp-creator-tool" data-creator-tool="transition" title="Conectar este nível ao nível escolhido acima"><span class="mp-creator-tool-icon">↕</span><span>Passagem</span></button>';
+  tools.innerHTML = '<button type="button" class="mp-creator-tool" data-creator-tool="raiseTerrain" title="Elevar terreno em um nível"><span class="mp-creator-tool-icon">⛰</span><span>Elevar</span></button><button type="button" class="mp-creator-tool" data-creator-tool="lowerTerrain" title="Abaixar terreno em um nível"><span class="mp-creator-tool-icon">▽</span><span>Abaixar</span></button><button type="button" class="mp-creator-tool" data-creator-tool="interiorZone" title="Desenhar uma área interna sem luz solar"><span class="mp-creator-tool-icon">⌂</span><span>Zona interna</span></button><button type="button" class="mp-creator-tool" data-creator-tool="transition" title="Conectar camadas por escada, rampa ou buraco"><span class="mp-creator-tool-icon">↕</span><span>Passagem</span></button>';
   panel.insertBefore(tools, toolGrid.nextSibling);
   section.addEventListener("change", function(event) {
     var target = event.target;
@@ -317,8 +371,6 @@ function creativeInstallLevelUi() {
       creativeSwitchLevel(target.value);
     } else if (target.id === "mp-creator-level-environment") {
       creativeSetActiveLevelEnvironment(target.value);
-    } else if (target.id === "mp-creator-level-elevation") {
-      var level = creativeCurrentLevel(); if (level) { level.elevation = Math.max(-500, Math.min(500, Number(target.value) || 0)); save(); creativeUpdateLevelUi(); }
     }
   });
   var torchSlider = section.querySelector("#mp-creator-torch-radius");
@@ -328,7 +380,8 @@ function creativeInstallLevelUi() {
     creativeSetTorchRadius(this.value);
   });
   section.addEventListener("click", function(event) {
-    if (event.target.closest("#mp-creator-level-add")) creativeAddLevel();
+    if (event.target.closest("#mp-creator-level-add-above")) creativeAddLevel(-1);
+    else if (event.target.closest("#mp-creator-level-add-below")) creativeAddLevel(1);
     else if (event.target.closest("#mp-creator-level-delete")) creativeDeleteActiveLevel();
   });
   tools.addEventListener("click", function(event) {
@@ -546,6 +599,8 @@ function creativeTryTraverseLayerTransition(player) {
   if (!link || !target) return false;
   creativeLastTransitionNotice = Date.now();
   player.x = target.x; player.y = target.y; player.layerId = target.id;
+  var targetFloor = (state.levels || []).find(function(level) { return level.id === target.id; });
+  if (targetFloor) player.z = creativeLevelZ(targetFloor);
   if (typeof stopKeyMove === "function") stopKeyMove();
   creativeSwitchLevel(target.id, { playerTransition: true, player: player });
   if (R) {
