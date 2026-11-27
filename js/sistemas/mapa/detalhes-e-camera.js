@@ -51,11 +51,10 @@ function focusCameraOnPlayer(viewW, viewH, force) {
     oy = height / 2 - center.y * zoom + (force ? 0 : camPan.y);
   }
 function visionZoom(viewW, viewH) {
-    var p = currentPlayer();
-    var r = Math.max(1, typeof creativeGetVisibilityRadius === "function" ? creativeGetVisibilityRadius(p, p && p.x, p && p.y) : p && p.luz || lightRadius);
-    var w = viewW == null ? cv.clientWidth : viewW;
-    var h = viewH == null ? cv.clientHeight : viewH;
-    return Math.max(0.04, Math.min(w, h) / ((r * 2 + 1) * CELL));
+    // A distância de visão e a iluminação nunca devem controlar a escala da câmera.
+    // Mantém apenas o limite técnico mínimo usado pelo zoom manual e pelos gestos.
+    // Assim, entrar em uma área escura ou apagar a tocha não provoca zoom automático.
+    return 0.04;
   }
 function centerCameraOnPlayer(viewW, viewH, force) {
     if (isHexMap() || !cv || appMode === "editor" && !force) return;
@@ -63,8 +62,8 @@ function centerCameraOnPlayer(viewW, viewH, force) {
     var width = viewW == null ? cv.clientWidth : viewW;
     var height = viewH == null ? cv.clientHeight : viewH;
     if (!p || !width || !height) return;
-    var minZoom = visionZoom(width, height);
-    zoom = Math.max(minZoom, zoom);
+    // A câmera acompanha o personagem, mas preserva exatamente o zoom escolhido.
+    // O alcance de visão/luz é calculado no sistema de iluminação, não na câmera.
     var c = keyMoveVis || tokenAnchor(p, p.x, p.y);
     ox = width / 2 - c.x * zoom + (force ? 0 : camPan.x);
     oy = height / 2 - c.y * zoom + (force ? 0 : camPan.y);
