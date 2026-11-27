@@ -58,6 +58,7 @@
       "(function() {\n\"use strict\";",
       "js/sistemas/mapa/mapas-e-configuracao.js",
       "js/sistemas/mapa/editor-criativo.js",
+      "js/sistemas/mapa/camadas-e-iluminacao.js",
       "js/sistemas/mapa/constantes-e-estado.js",
       "js/sistemas/mapa/estado-do-mapa.js",
       "js/sistemas/mapa/pacotes-e-catalogo-de-mapas.js",

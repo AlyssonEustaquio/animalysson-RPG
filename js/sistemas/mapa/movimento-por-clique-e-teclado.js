@@ -1,7 +1,7 @@
 function findVisiblePath(start, goal, token, allowUnseenForExit) {
     if (!start || !goal || isHexMap()) return null;
     if (goal.x < 0 || goal.y < 0 || goal.x >= COLS || goal.y >= ROWS) return null;
-    var radius = token && token.luz || lightRadius;
+    var radius = typeof creativeGetVisibilityRadius === "function" ? creativeGetVisibilityRadius(token, goal.x, goal.y) : token && token.luz || lightRadius;
     if (!allowUnseenForExit && !isCurrentlyVisible(goal.x, goal.y, start.x, start.y, radius)) return null;
     if (start.x === goal.x && start.y === goal.y) return [start];
     var dirs = [
@@ -77,6 +77,7 @@ function startClickMove(destination, exitAfterArrival) {
       if (exitAfterArrival) return returnToWorldMapFromExit();
       var standingLocalPortal = findLocalPortalAt(player.x, player.y);
       if (standingLocalPortal) return teleportPlayerWithinMap(standingLocalPortal, player);
+      if (typeof creativeTryTraverseLayerTransition === "function" && creativeTryTraverseLayerTransition(player)) return true;
       return false;
     }
     clickMovePath = path.slice(1);
@@ -248,9 +249,10 @@ function keyMoveFrame(now) {
         pl.x = next.x;
         pl.y = next.y;
         selected = pl;
+        if (!hexMode && typeof creativeTryTraverseLayerTransition === "function" && creativeTryTraverseLayerTransition(pl)) return;
         if (!hexMode) combatAfterStep(pl, combatFrom, { x: next.x, y: next.y });
         if (!hexMode) checkPassiveSecretDetection(pl);
-        if (dynLight && !hexMode) revealAround(pl.x, pl.y, pl.luz || lightRadius);
+        if (dynLight && !hexMode) revealAround(pl.x, pl.y, typeof creativeGetVisibilityRadius === "function" ? creativeGetVisibilityRadius(pl, pl.x, pl.y) : pl.luz || lightRadius);
       }
       var st = keyMoveStep;
       var p = (now - st.t0) / st.dur;
@@ -270,7 +272,7 @@ function keyMoveFrame(now) {
             clickMoveExitPending = false;
             if (hexMode) worldTravelPos = null;
             else {
-              if (dynLight) revealAround(pl.x, pl.y, pl.luz || lightRadius);
+              if (dynLight) revealAround(pl.x, pl.y, typeof creativeGetVisibilityRadius === "function" ? creativeGetVisibilityRadius(pl, pl.x, pl.y) : pl.luz || lightRadius);
               checkPassiveSecretDetection(pl);
             }
             save();

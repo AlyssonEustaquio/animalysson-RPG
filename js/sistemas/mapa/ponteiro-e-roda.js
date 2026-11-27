@@ -123,7 +123,7 @@ function onPointerDown(e) {
         return t2.tipo === "player";
       });
       if (!player) {
-        player = { id: "p1", nome: "Aventureiro", tipo: "player", x: cell.x, y: cell.y, cor: "#4fc3f7", raio: 1, luz: lightRadius, percepcaoPassiva: 10, hp: null, hpMax: null };
+        player = { id: "p1", nome: "Aventureiro", tipo: "player", x: cell.x, y: cell.y, cor: "#4fc3f7", raio: 1, luz: 0, visao: 6, percepcaoPassiva: 10, hp: null, hpMax: null };
         state.tokens.unshift(player);
       } else {
         if (blockMove && isCellWall(cell.x, cell.y)) {
@@ -135,7 +135,7 @@ function onPointerDown(e) {
       }
       selected = player;
       setMapSpawn(cell, player);
-      if (dynLight) revealAround(player.x, player.y, player.luz || lightRadius);
+      if (dynLight) revealAround(player.x, player.y, typeof creativeGetVisibilityRadius === "function" ? creativeGetVisibilityRadius(player, player.x, player.y) : player.luz || lightRadius);
       save();
       draw();
       return;
@@ -191,7 +191,7 @@ function onPointerDown(e) {
         }
       } else {
         var movingPlayer = currentPlayer();
-        if (movingPlayer && isCurrentlyVisible(cell.x, cell.y, movingPlayer.x, movingPlayer.y, movingPlayer.luz || lightRadius)) {
+        if (movingPlayer && isCurrentlyVisible(cell.x, cell.y, movingPlayer.x, movingPlayer.y, typeof creativeGetVisibilityRadius === "function" ? creativeGetVisibilityRadius(movingPlayer, cell.x, cell.y) : movingPlayer.luz || lightRadius)) {
           runOrDeferMove(e, function() {
             startClickMove(cell);
           });
@@ -294,7 +294,7 @@ function onPointerMove(e) {
         t.y = cell2.y;
         if (t.tipo === "player") checkPassiveSecretDetection(t);
         if (t.tipo === "player" && dynLight) {
-          revealAround(cell2.x, cell2.y, t.luz || lightRadius);
+          revealAround(cell2.x, cell2.y, typeof creativeGetVisibilityRadius === "function" ? creativeGetVisibilityRadius(t, cell2.x, cell2.y) : t.luz || lightRadius);
         }
       }
       draw();
@@ -317,6 +317,7 @@ function onPointerUp() {
     if (drag && drag.moveToken && drag.moveToken.tipo === "player") {
       var localPortal = findLocalPortalAt(drag.moveToken.x, drag.moveToken.y);
       if (localPortal) teleported = teleportPlayerWithinMap(localPortal, drag.moveToken);
+      else if (typeof creativeTryTraverseLayerTransition === "function") teleported = creativeTryTraverseLayerTransition(drag.moveToken);
     }
     if (drag && (drag.moveToken || drag.brush || drag.wall || drag.edgePaint)) save();
     drag = null;

@@ -52,7 +52,7 @@ function focusCameraOnPlayer(viewW, viewH, force) {
   }
 function visionZoom(viewW, viewH) {
     var p = currentPlayer();
-    var r = Math.max(1, p && p.luz || lightRadius);
+    var r = Math.max(1, typeof creativeGetVisibilityRadius === "function" ? creativeGetVisibilityRadius(p, p && p.x, p && p.y) : p && p.luz || lightRadius);
     var w = viewW == null ? cv.clientWidth : viewW;
     var h = viewH == null ? cv.clientHeight : viewH;
     return Math.max(0.04, Math.min(w, h) / ((r * 2 + 1) * CELL));

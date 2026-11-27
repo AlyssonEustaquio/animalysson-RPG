@@ -28,7 +28,7 @@ function teleportPlayerWithinMap(portal, player) {
     player.y = destination.y;
     selected = player;
     if (!isHexMap()) {
-      if (dynLight) revealAround(player.x, player.y, player.luz || lightRadius);
+      if (dynLight) revealAround(player.x, player.y, typeof creativeGetVisibilityRadius === "function" ? creativeGetVisibilityRadius(player, player.x, player.y) : player.luz || lightRadius);
       checkPassiveSecretDetection(player);
     }
     save();
@@ -310,7 +310,7 @@ function teleportThroughWorldPortal(portal) {
       MAPINFO.spawn = { x: spawn.x, y: spawn.y };
       var player = currentPlayer();
       if (!player) {
-        player = { id: "p1", nome: "Aventureiro", tipo: "player", x: spawn.x, y: spawn.y, cor: "#4fc3f7", raio: 1, luz: 6, hp: null, hpMax: null };
+        player = { id: "p1", nome: "Aventureiro", tipo: "player", x: spawn.x, y: spawn.y, cor: "#4fc3f7", raio: 1, luz: 0, visao: 6, hp: null, hpMax: null };
         state.tokens.unshift(player);
       } else {
         player.x = spawn.x;

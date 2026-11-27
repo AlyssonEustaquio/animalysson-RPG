@@ -157,7 +157,7 @@ function rollDamageExpression(expression, critical) {
     return { rolls, modifier, total: diceTotal * (critical ? 2 : 1) + modifier, formula: count + "d" + sides + (modifier ? (modifier > 0 ? "+" : "") + modifier : ""), critical: !!critical };
   }
 function playerVisionRadius(player) {
-    return Math.max(1, Number(player && player.luz) || Number(lightRadius) || 6);
+    return Math.max(1, typeof creativeGetVisibilityRadius === "function" ? creativeGetVisibilityRadius(player, player && player.x, player && player.y) : Number(player && player.luz) || Number(lightRadius) || 6);
   }
 function edgeInPlayerVision(edge, player, range) {
     if (!edge || !player || isHexMap()) return false;

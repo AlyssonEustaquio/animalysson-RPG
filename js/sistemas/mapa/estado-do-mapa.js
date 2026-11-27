@@ -7,7 +7,7 @@ function defaultState() {
       spawn: { x: MAPINFO.spawn.x, y: MAPINFO.spawn.y },
       portals: [],
       tokens: [
-        { id: "p1", nome: "Aventureiro", tipo: "player", x: isHexMap() ? worldToCell(MAP_W / 2, MAP_H / 2).x : MAPINFO.spawn.x, y: isHexMap() ? worldToCell(MAP_W / 2, MAP_H / 2).y : MAPINFO.spawn.y, cor: "#4fc3f7", raio: 1, luz: 6, hp: null, hpMax: null }
+        { id: "p1", nome: "Aventureiro", tipo: "player", x: isHexMap() ? worldToCell(MAP_W / 2, MAP_H / 2).x : MAPINFO.spawn.x, y: isHexMap() ? worldToCell(MAP_W / 2, MAP_H / 2).y : MAPINFO.spawn.y, cor: "#4fc3f7", raio: 1, luz: 0, visao: 6, hp: null, hpMax: null }
       ],
       fog: isHexMap() ? [] : makeGrid(1),
       walls: isHexMap() ? [] : makeGrid(0),

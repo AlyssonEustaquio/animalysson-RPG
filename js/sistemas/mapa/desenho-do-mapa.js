@@ -150,13 +150,14 @@ function draw() {
         cx.stroke();
       }
     }
-    if (showFog && !isHexMap()) drawFogAndLight(W, H);
+    if (!isHexMap() && (showFog || typeof creativeHasDarkness === "function" && creativeHasDarkness())) drawFogAndLight(W, H);
     if (!isHexMap() && typeof creativeDrawLights === "function") creativeDrawLights(W, H);
     if (selected && !isTokenVisible(selected)) selected = null;
     state.tokens.forEach(function(t) {
       if (isTokenVisible(t)) drawToken(t, t === selected);
     });
     if (!isHexMap() && typeof creativeDrawLightMarkers === "function") creativeDrawLightMarkers(W, H);
+    if (!isHexMap() && typeof creativeDrawLevelTransitions === "function") creativeDrawLevelTransitions();
     drawLocalPortals();
     if (!isHexMap() && typeof creativeDrawSelectionOverlay === "function") creativeDrawSelectionOverlay();
     if (!isHexMap()) {

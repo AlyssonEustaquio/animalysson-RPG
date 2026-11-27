@@ -293,3 +293,164 @@
     gap:6px;
   }
 }
+
+
+/* Layout responsivo em tela cheia: o cabeçalho fica fixo e o canvas ocupa todo o espaço restante. */
+html body main:has(> #app.view-maps) {
+  padding: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+}
+html body #app.view-maps,
+html body #app.view-maps #mp-root,
+html body #app.view-maps #mp-root .mp,
+html body #app.view-maps #mp-root .mp-wrap,
+html body #app.view-maps #mp-root .vtt-wrap {
+  width: 100% !important;
+  max-width: none !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+#mp-root .mp-creator-topbar {
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 54px !important;
+  border-radius: 0 !important;
+}
+#mp-root .mp-creator-panel {
+  top: 54px !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  width: 260px !important;
+  border-top: 0 !important;
+  border-left: 0 !important;
+  border-bottom: 0 !important;
+  border-radius: 0 10px 0 0 !important;
+}
+#mp-root #mp-cv {
+  position: absolute !important;
+  left: 260px !important;
+  top: 54px !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  max-width: none !important;
+  max-height: none !important;
+  border-radius: 0 !important;
+}
+#mp-root.player-mode #mp-cv,
+#mp-root.mp-world-map #mp-cv,
+#mp-root:has(.mp-creator-ui.is-hex-disabled) #mp-cv {
+  left: 0 !important;
+  top: 54px !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: auto !important;
+  height: auto !important;
+}
+#mp-root .mp-drawer {
+  top: 54px !important;
+  bottom: 0 !important;
+  padding: 12px !important;
+  max-height: none !important;
+  box-sizing: border-box !important;
+}
+@media (max-width: 820px) {
+  #mp-root .mp-creator-topbar { height: 52px !important; }
+  #mp-root .mp-creator-panel {
+    top: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 154px !important;
+    max-height: 42% !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+    border-bottom: 0 !important;
+    border-top: 1px solid rgba(225,197,150,.22) !important;
+    border-radius: 10px 10px 0 0 !important;
+  }
+  #mp-root #mp-cv {
+    left: 0 !important;
+    top: 52px !important;
+    right: 0 !important;
+    bottom: 154px !important;
+    width: auto !important;
+    height: auto !important;
+  }
+  #mp-root.player-mode #mp-cv,
+  #mp-root.mp-world-map #mp-cv,
+  #mp-root:has(.mp-creator-ui.is-hex-disabled) #mp-cv {
+    left: 0 !important;
+    top: 52px !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: auto !important;
+    height: auto !important;
+  }
+  #mp-root .mp-drawer { top: 52px !important; }
+}
+@media (max-width: 520px) {
+  #mp-root .mp-creator-topbar { height: 52px !important; }
+  #mp-root .mp-creator-panel {
+    height: 164px !important;
+    max-height: 44% !important;
+  }
+  #mp-root #mp-cv { bottom: 164px !important; }
+  #mp-root.player-mode #mp-cv,
+  #mp-root.mp-world-map #mp-cv,
+  #mp-root:has(.mp-creator-ui.is-hex-disabled) #mp-cv { bottom: 0 !important; }
+  #mp-root .mp-drawer { top: 52px !important; }
+}
+
+
+/* Camadas, níveis, relevo e zonas internas do mapa. */
+#mp-root .mp-creator-level-manager { padding:10px 9px; border:1px solid rgba(210,169,104,.28); border-radius:9px; background:linear-gradient(145deg,rgba(68,54,37,.28),rgba(25,24,21,.62)); }
+#mp-root .mp-creator-level-manager .mp-creator-section-title { color:#e5c48d; }
+#mp-root .mp-creator-level-label { display:flex; flex-direction:column; gap:4px; margin:7px 0; color:#d8c7aa; font-size:11px; font-weight:650; }
+#mp-root .mp-creator-level-manager select,
+#mp-root .mp-creator-level-manager input { width:100%; min-width:0; min-height:30px; box-sizing:border-box; padding:5px 7px; border:1px solid #5d513e; border-radius:6px; background:#24231f; color:#f1e7d5; font:inherit; }
+#mp-root .mp-creator-level-actions { display:flex; gap:6px; margin:6px 0; }
+#mp-root .mp-creator-level-actions button { flex:1 1 0; min-height:30px; padding:5px 7px; border:1px solid #6b5a3e; border-radius:6px; background:#393126; color:#f5e8d0; font-size:11px; cursor:pointer; }
+#mp-root .mp-creator-level-actions button.danger { border-color:#854f46; background:#482c29; color:#ffe2d9; }
+#mp-root .mp-creator-level-actions button:disabled { opacity:.4; cursor:not-allowed; }
+#mp-root .mp-creator-level-properties { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,.8fr); gap:7px; }
+#mp-root .mp-creator-level-properties label { display:flex; flex-direction:column; gap:4px; color:#d8c7aa; font-size:10px; font-weight:650; }
+#mp-root #mp-creator-level-status { display:block; min-height:28px; margin-top:7px; color:#ad9c7e; font-size:10px; line-height:1.4; }
+#mp-root .mp-creator-level-tools { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:5px; margin:0 0 9px; }
+#mp-root .mp-creator-level-tools .mp-creator-tool { min-height:34px; }
+#mp-root .mp-creator-level-tools .mp-creator-tool.active { border-color:#d1a45c; background:rgba(177,127,58,.23); color:#ffe4b5; }
+#mp-root #mp-creator-inspector [data-level-transition-field],
+#mp-root #mp-creator-inspector [data-level-zone-name],
+#mp-root #mp-creator-inspector [data-level-cell-height] { width:100%; min-height:30px; box-sizing:border-box; padding:6px 7px; border:1px solid #5b513f; border-radius:6px; background:#25241f; color:#f3ead9; }
+@media(max-width:820px) {
+  #mp-root .mp-creator-level-manager { padding:7px; }
+  #mp-root .mp-creator-level-manager .mp-creator-section-title { font-size:10px; }
+  #mp-root .mp-creator-level-manager .mp-creator-level-label { margin:4px 0; }
+  #mp-root .mp-creator-level-manager select,
+  #mp-root .mp-creator-level-manager input { min-height:27px; }
+  #mp-root .mp-creator-level-actions { margin:4px 0; }
+  #mp-root .mp-creator-level-actions button { min-height:27px; }
+  #mp-root .mp-creator-level-tools { grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; }
+  #mp-root .mp-creator-level-tools .mp-creator-tool { min-height:30px; padding:4px 2px; font-size:9px; }
+  #mp-root .mp-creator-level-tools .mp-creator-tool-icon { font-size:14px; }
+}
+
+/* Camadas, níveis e fontes de luz. */
+#mp-root .mp-creator-level-manager { display:flex;flex-direction:column;gap:8px; }
+#mp-root .mp-creator-level-manager .mp-creator-torch-control { display:flex;flex-direction:column;gap:5px;padding:8px;border:1px solid rgba(210,169,104,.22);border-radius:7px;background:rgba(10,12,14,.28);color:#d8c9ad;font-size:10px; }
+#mp-root .mp-creator-level-manager .mp-creator-torch-control span { display:flex;justify-content:space-between;gap:8px;font-weight:600; }
+#mp-root .mp-creator-level-manager .mp-creator-torch-control output { color:#f2ce8c;white-space:nowrap; }
+#mp-root .mp-creator-level-manager .mp-creator-torch-control input[type=range] { width:100%;accent-color:#d2a85d; }
+#mp-root .mp-creator-level-manager .mp-creator-torch-control small { color:#aaa18f;font-size:9px;line-height:1.35; }
+#mp-root .mp-creator-level-tools { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin:7px 0; }
+#mp-root .mp-creator-level-height-field { margin-top:8px;padding-top:8px;border-top:1px solid rgba(210,169,104,.18); }

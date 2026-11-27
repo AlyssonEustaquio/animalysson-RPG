@@ -230,6 +230,10 @@ function creativeApplyHistoryChange(change, side) {
     var restoredBytes = value instanceof Uint8Array ? value.slice() : new Uint8Array(value || []);
     creativeStoreTerrainBytes(restoredBytes, restoredBytes.reduce(function(sum, v) { return sum + (v ? 1 : 0); }, 0));
     state.terrain = {};
+  } else if (change.kind === "height") {
+    if (!state.terrainHeights || typeof state.terrainHeights !== "object") state.terrainHeights = {};
+    if (Number(value)) state.terrainHeights[String(change.index)] = Math.max(-10, Math.min(10, Math.round(Number(value))));
+    else delete state.terrainHeights[String(change.index)];
   }
 }
 function creativeUndo() {

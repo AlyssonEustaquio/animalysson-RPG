@@ -18,7 +18,7 @@ function isTokenVisible(t) {
     var player = currentPlayer();
     if (!player) return false;
     var sq = t.raio || 1;
-    var radius = player.luz || lightRadius;
+    var radius = typeof creativeGetVisibilityRadius === "function" ? creativeGetVisibilityRadius(player, t.x, t.y) : player.luz || lightRadius;
     if (isHexMap()) return isCurrentlyVisible(t.x, t.y, player.x, player.y, radius);
     for (var dy = 0; dy < sq; dy++) {
       for (var dx = 0; dx < sq; dx++) {

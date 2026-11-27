@@ -1,10 +1,10 @@
 function drawFogAndLight(viewW, viewH) {
-    var player = state.tokens.find(function(t) {
+    var player = typeof currentPlayer === "function" ? currentPlayer() : state.tokens.find(function(t) {
       return t.tipo === "player";
     }) || state.tokens[0];
     var px = player ? player.x : -1;
     var py = player ? player.y : -1;
-    var r = player ? player.luz || lightRadius : 0;
+    var r = player ? (typeof creativeGetVisibilityRadius === "function" ? creativeGetVisibilityRadius(player, player.x, player.y) : player.luz || lightRadius) : 0;
     var fogBounds = visibleCellBounds(viewW, viewH);
     if (isHexMap()) {
       var hmFog = hexMetrics();
@@ -25,11 +25,11 @@ function drawFogAndLight(viewW, viewH) {
     } else {
       for (var y = fogBounds.y0; y <= fogBounds.y1; y++) for (var x = fogBounds.x0; x <= fogBounds.x1; x++) {
         if (isCurrentlyVisible(x, y, px, py, r)) continue;
-        if (state.fog[idx(x, y)]) {
+        if (showFog && state.fog[idx(x, y)]) {
           cx.fillStyle = "rgba(0,0,0,1)";
           cx.fillRect(x * CELL, y * CELL, CELL + 0.5, CELL + 0.5);
-        } else if (dynLight) {
-          cx.fillStyle = "rgba(0,0,0,0.5)";
+        } else if (appMode !== "editor" && typeof creativeIsDarkCell === "function" && creativeIsDarkCell(x, y)) {
+          cx.fillStyle = "rgba(0,0,0,0.84)";
           cx.fillRect(x * CELL, y * CELL, CELL + 0.5, CELL + 0.5);
         }
       }

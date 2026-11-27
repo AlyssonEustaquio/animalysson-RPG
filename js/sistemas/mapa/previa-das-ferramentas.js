@@ -155,7 +155,7 @@ function drawToolPreview() {
       cx.restore();
     } else if (tool === "spawn") {
       var player = currentPlayer();
-      var radius = player && player.luz || lightRadius;
+      var radius = typeof creativeGetVisibilityRadius === "function" ? creativeGetVisibilityRadius(player, player && player.x, player && player.y) : player && player.luz || lightRadius;
       cx.save();
       cx.fillStyle = "rgba(255,213,79,0.08)";
       cx.strokeStyle = "rgba(255,213,79,0.9)";
