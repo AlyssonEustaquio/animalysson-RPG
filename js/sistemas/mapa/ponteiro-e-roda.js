@@ -44,6 +44,7 @@ function onPointerDown(e) {
     var rect = cv.getBoundingClientRect();
     var world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
     var cell = worldToCell(world.x, world.y);
+    if (typeof creativeHandlePointerDown === "function" && creativeHandlePointerDown(e, world, cell)) return;
     if (tool === "localPortal") {
       placeLocalPortal(cell);
       return;
@@ -248,6 +249,10 @@ function onPointerMove(e) {
     if (isHexMap()) return;
     var previewRect = cv.getBoundingClientRect();
     previewPointer = screenToWorld(e.clientX - previewRect.left, e.clientY - previewRect.top);
+    if (drag && typeof creativeHandlePointerMove === "function") {
+      var creativeCell = worldToCell(previewPointer.x, previewPointer.y);
+      if (creativeHandlePointerMove(e, previewPointer, creativeCell)) { draw(); return; }
+    }
     if (!drag) {
       draw();
       return;
@@ -304,6 +309,10 @@ function onPointerMove(e) {
     }
   }
 function onPointerUp() {
+    if (typeof creativeFinishPointerAction === "function" && creativeFinishPointerAction()) {
+      if (cv) cv.style.cursor = tool === "pan" && appMode === "editor" ? "grab" : tool === "select" ? "pointer" : "crosshair";
+      return;
+    }
     var teleported = false;
     if (drag && drag.moveToken && drag.moveToken.tipo === "player") {
       var localPortal = findLocalPortalAt(drag.moveToken.x, drag.moveToken.y);

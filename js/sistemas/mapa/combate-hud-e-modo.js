@@ -227,6 +227,7 @@ function updateModeUi() {
     if (block) block.checked = blockMove;
     var radius = R.querySelector("#mp-lr");
     if (radius) radius.value = lightRadius;
+    if (typeof updateCreativeModeUi === "function") updateCreativeModeUi();
   }
 function setMode(nextMode) {
     appMode = nextMode === "editor" ? "editor" : "player";

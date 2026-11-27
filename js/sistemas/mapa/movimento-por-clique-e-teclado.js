@@ -307,6 +307,7 @@ function keyMoveFrame(now) {
     draw();
   }
 function onKey(e) {
+    if (typeof creativeHandleKeyboard === "function" && creativeHandleKeyboard(e)) return;
     if (e.key === "Escape" && menuIsOpen()) {
       setMenu(false);
       return;
@@ -416,5 +417,6 @@ function setTool(t) {
     if (worldLocalPortalButton) worldLocalPortalButton.classList.toggle("active", t === "localPortal");
     if (worldMoveButton) worldMoveButton.classList.toggle("active", t === "select");
     if (cv) cv.style.cursor = t === "pan" && appMode === "editor" ? "grab" : t === "select" ? "pointer" : "crosshair";
+    if (typeof updateCreativeToolUi === "function") updateCreativeToolUi();
     draw();
   }

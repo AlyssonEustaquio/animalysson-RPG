@@ -14,7 +14,7 @@ function save() {
           _savedAt: state._savedAt
         }));
       } else {
-        localStorage.setItem(KEY, JSON.stringify(state));
+        localStorage.setItem(KEY, JSON.stringify(serializeMapState(state)));
       }
     } catch (e) {
     }
@@ -196,6 +196,7 @@ function hasLOS(x0, y0, x1, y1) {
     return true;
   }
 function loadBackgrounds(cb) {
+    if (typeof creativePrepareBackgrounds === "function") creativePrepareBackgrounds();
     bgImages = [];
     bgReady = 0;
     PARTS.forEach(function(p, i) {

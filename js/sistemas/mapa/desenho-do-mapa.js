@@ -75,7 +75,7 @@ function drawWorldTravelPath() {
 function draw() {
     if (!cv || !cx) return;
     renderCombatHud();
-    var dpr = window.devicePixelRatio || 1;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
     var W = cv.clientWidth, H = cv.clientHeight;
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) {
       cv.width = Math.round(W * dpr);
@@ -104,6 +104,7 @@ function draw() {
       }
     });
     if (isHexMap()) drawDetail(W, H);
+    if (!isHexMap() && typeof creativeDrawLayer === "function") creativeDrawLayer(W, H);
     if (showWalls && !isHexMap()) {
       var wallBounds = visibleCellBounds(W, H);
       if (isHexMap()) {
@@ -150,13 +151,16 @@ function draw() {
       }
     }
     if (showFog && !isHexMap()) drawFogAndLight(W, H);
+    if (!isHexMap() && typeof creativeDrawLights === "function") creativeDrawLights(W, H);
     if (selected && !isTokenVisible(selected)) selected = null;
     state.tokens.forEach(function(t) {
       if (isTokenVisible(t)) drawToken(t, t === selected);
     });
     drawLocalPortals();
-    if (!isHexMap()) drawToolPreview();
-    else {
+    if (!isHexMap()) {
+      drawToolPreview();
+      if (typeof creativeDrawPreview === "function") creativeDrawPreview();
+    } else {
       drawWorldTravelPath();
       drawWorldPortals();
     }

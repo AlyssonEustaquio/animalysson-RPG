@@ -347,7 +347,7 @@ function exportMapFile() {
         }
       }
     }
-    var exportedState = isHexMap() ? { v: 4, nome: MAPINFO.nome, gridMode: FLANAESS_GRID_MODE, gridMetrics: hexGridSnapshot(), spawn: state.spawn || MAPINFO.spawn, portals: state.portals || [], tokens: state.tokens || [] } : JSON.parse(JSON.stringify(state));
+    var exportedState = isHexMap() ? { v: 4, nome: MAPINFO.nome, gridMode: FLANAESS_GRID_MODE, gridMetrics: hexGridSnapshot(), spawn: state.spawn || MAPINFO.spawn, portals: state.portals || [], tokens: state.tokens || [] } : serializeMapState(state);
     if (exportedState && Object.prototype.hasOwnProperty.call(exportedState, "_savedAt")) delete exportedState._savedAt;
     var payload = {
       format: "animalysson-rpg-map",
@@ -391,7 +391,7 @@ async function exportMapPackage() {
         var imageBlob = await imageResponse.blob();
         entries.push({ name: config.parts[i].src, blob: imageBlob });
       }
-      var exportedState = isHexMap() ? { v: 4, nome: MAPINFO.nome, gridMode: FLANAESS_GRID_MODE, gridMetrics: hexGridSnapshot(), spawn: state.spawn || MAPINFO.spawn, portals: state.portals || [], tokens: state.tokens || [] } : JSON.parse(JSON.stringify(state));
+      var exportedState = isHexMap() ? { v: 4, nome: MAPINFO.nome, gridMode: FLANAESS_GRID_MODE, gridMetrics: hexGridSnapshot(), spawn: state.spawn || MAPINFO.spawn, portals: state.portals || [], tokens: state.tokens || [] } : serializeMapState(state);
       if (exportedState && Object.prototype.hasOwnProperty.call(exportedState, "_savedAt")) delete exportedState._savedAt;
       var manifest = {
         format: MAP_PACKAGE_FORMAT,

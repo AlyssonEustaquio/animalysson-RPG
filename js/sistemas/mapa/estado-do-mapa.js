@@ -16,7 +16,12 @@ function defaultState() {
       vEdges: isHexMap() ? [] : makeArr((COLS + 1) * ROWS, 0),
       hEdgeMeta: isHexMap() ? [] : makeArr(COLS * (ROWS + 1), null),
       vEdgeMeta: isHexMap() ? [] : makeArr((COLS + 1) * ROWS, null),
-      customEdges: []
+      customEdges: [],
+      terrain: {},
+      decorations: [],
+      assets: [],
+      labels: [],
+      lights: []
     };
   }
 function makeGrid(val) {
@@ -41,6 +46,49 @@ function normalizeMapState(s) {
     };
     MAPINFO.spawn = { x: s.spawn.x, y: s.spawn.y };
     if (!Array.isArray(s.portals)) s.portals = [];
+    if (!Array.isArray(s.assets)) s.assets = [];
+    s.assets = s.assets.filter(function(asset) {
+      return asset && /^[a-z0-9_-]{1,80}$/i.test(String(asset.id || "")) && /^data:image\/(webp|png|jpeg);base64,/i.test(String(asset.src || "")) && String(asset.src).length <= 64000;
+    }).slice(0, 16).map(function(asset) {
+      return { id: String(asset.id), name: String(asset.name || "Imagem").slice(0, 80), src: String(asset.src), width: 256, height: 256 };
+    });
+    if (!Array.isArray(s.decorations)) s.decorations = [];
+    s.decorations = s.decorations.filter(function(item) {
+      return item && isFinite(Number(item.x)) && isFinite(Number(item.y)) && !!item.kind;
+    }).slice(0, 5000).map(function(item) {
+      var assetId = item.kind === "image" && s.assets.some(function(asset) { return asset.id === item.assetId; }) ? String(item.assetId) : null;
+      var kind = assetId ? "image" : CREATIVE_OBJECTS && CREATIVE_OBJECTS[item.kind] ? item.kind : "tree";
+      return { id: String(item.id || "dec-" + Math.random().toString(36).slice(2)), kind: kind, assetId: assetId, glyph: CREATIVE_OBJECTS && CREATIVE_OBJECTS[kind] ? CREATIVE_OBJECTS[kind].glyph : "🌳", x: Math.max(0, Math.min(COLS - 1, Math.round(Number(item.x)))), y: Math.max(0, Math.min(ROWS - 1, Math.round(Number(item.y)))), size: Math.max(.28, Math.min(1.8, Number(item.size) || .84)), rotation: ((Number(item.rotation) || 0) % 360 + 360) % 360 };
+    });
+    if (!Array.isArray(s.labels)) s.labels = [];
+    s.labels = s.labels.filter(function(item) {
+      return item && isFinite(Number(item.x)) && isFinite(Number(item.y)) && String(item.text || "").trim();
+    }).slice(0, 1000).map(function(item) {
+      return { id: String(item.id || "label-" + Math.random().toString(36).slice(2)), text: String(item.text).slice(0, 160), x: Math.max(0, Math.min(COLS - 1, Math.round(Number(item.x)))), y: Math.max(0, Math.min(ROWS - 1, Math.round(Number(item.y)))), color: /^#[0-9a-f]{6}$/i.test(item.color || "") ? item.color : "#ffffff", size: Math.max(10, Math.min(40, Number(item.size) || 17)), bubble: item.bubble !== false, bold: item.bold !== false, align: ["left", "center", "right"].indexOf(item.align) >= 0 ? item.align : "center" };
+    });
+    if (!Array.isArray(s.lights)) s.lights = [];
+    s.lights = s.lights.filter(function(item) {
+      return item && isFinite(Number(item.x)) && isFinite(Number(item.y));
+    }).slice(0, 200).map(function(item) {
+      return { id: String(item.id || "light-" + Math.random().toString(36).slice(2)), x: Math.max(0, Math.min(COLS - 1, Math.round(Number(item.x)))), y: Math.max(0, Math.min(ROWS - 1, Math.round(Number(item.y)))), color: /^#[0-9a-f]{6}$/i.test(item.color || "") ? item.color : "#ffd36a", radius: Math.max(1, Math.min(16, Number(item.radius) || 5)), intensity: Math.max(.08, Math.min(.85, Number(item.intensity) || .42)) };
+    });
+    if (s._terrainBytes instanceof Uint8Array) {
+      var liveBytes = s._terrainBytes;
+      var liveCount = Number(s._terrainCount) || liveBytes.reduce(function(sum, value) { return sum + (value ? 1 : 0); }, 0);
+      Object.defineProperty(s, "_terrainBytes", { value: liveBytes, writable: true, configurable: true, enumerable: false });
+      Object.defineProperty(s, "_terrainCount", { value: liveCount, writable: true, configurable: true, enumerable: false });
+    } else if (s.terrainPacked) {
+      var decodedTerrain = creativeDecodeTerrain(s.terrainPacked, isHexMap() ? 0 : COLS * ROWS);
+      Object.defineProperty(s, "_terrainBytes", { value: decodedTerrain.bytes, writable: true, configurable: true, enumerable: false });
+      Object.defineProperty(s, "_terrainCount", { value: decodedTerrain.count, writable: true, configurable: true, enumerable: false });
+      delete s.terrain;
+    } else {
+      if (!s.terrain || typeof s.terrain !== "object" || Array.isArray(s.terrain)) s.terrain = {};
+      Object.keys(s.terrain).forEach(function(key) {
+        var index = Number(key);
+        if (!Number.isInteger(index) || index < 0 || index >= COLS * ROWS || !(CREATIVE_MATERIALS && CREATIVE_MATERIALS[s.terrain[key]])) delete s.terrain[key];
+      });
+    }
     s.portals = s.portals.filter(function(portal) {
       if (!portal || !isFinite(Number(portal.x)) || !isFinite(Number(portal.y))) return false;
       return !!portal.destMapId || isFinite(Number(portal.destX)) && isFinite(Number(portal.destY));
