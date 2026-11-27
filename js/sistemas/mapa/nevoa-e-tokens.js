@@ -34,18 +34,8 @@ function drawFogAndLight(viewW, viewH) {
         }
       }
     }
-    if (dynLight && player) {
-      var c = !isHexMap() && keyMoveVis && player === currentPlayer() ? keyMoveVis : cellCenter(px, py);
-      var rPx = r * CELL;
-      var grd = cx.createRadialGradient(c.x, c.y, rPx * 0.12, c.x, c.y, rPx);
-      grd.addColorStop(0, "rgba(255,220,140,0.16)");
-      grd.addColorStop(0.65, "rgba(255,180,80,0.05)");
-      grd.addColorStop(1, "rgba(0,0,0,0)");
-      cx.fillStyle = grd;
-      cx.beginPath();
-      cx.arc(c.x, c.y, rPx, 0, Math.PI * 2);
-      cx.fill();
-    }
+    // A visão do personagem continua sendo calculada por isCurrentlyVisible().
+    // Removido somente o brilho radial desenhado sobre o token do jogador.
   }
 function drawToken(t, sel) {
     var sq = t.raio || 1;

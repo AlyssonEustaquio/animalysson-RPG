@@ -156,6 +156,7 @@ function draw() {
     state.tokens.forEach(function(t) {
       if (isTokenVisible(t)) drawToken(t, t === selected);
     });
+    if (!isHexMap() && typeof creativeDrawLightMarkers === "function") creativeDrawLightMarkers(W, H);
     drawLocalPortals();
     if (!isHexMap() && typeof creativeDrawSelectionOverlay === "function") creativeDrawSelectionOverlay();
     if (!isHexMap()) {

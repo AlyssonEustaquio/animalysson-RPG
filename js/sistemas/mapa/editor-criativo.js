@@ -378,6 +378,45 @@ function creativeHexRgb(hex) {
   var value = String(hex || "#ffffff").replace("#", "");
   return [parseInt(value.slice(0, 2), 16) || 255, parseInt(value.slice(2, 4), 16) || 255, parseInt(value.slice(4, 6), 16) || 255];
 }
+function creativeDrawLightMarker(light, center) {
+  // Ícone permanece com tamanho constante na tela, mesmo ao aproximar ou afastar o mapa.
+  var unit = 1 / Math.max(.2, zoom || 1);
+  var color = /^#[0-9a-f]{6}$/i.test(light.color || "") ? light.color : "#ffd36a";
+  cx.save();
+  cx.translate(center.x, center.y);
+  cx.lineWidth = 1.35 * unit;
+  cx.fillStyle = "rgba(13,18,25,.94)";
+  cx.strokeStyle = color;
+  cx.beginPath();
+  cx.arc(0, 0, 9 * unit, 0, Math.PI * 2);
+  cx.fill();
+  cx.stroke();
+
+  // Desenha uma lâmpada vetorial, sem depender de fontes ou emojis do dispositivo.
+  cx.beginPath();
+  cx.moveTo(-3.1 * unit, -2.2 * unit);
+  cx.quadraticCurveTo(-3.1 * unit, -6.2 * unit, 0, -6.2 * unit);
+  cx.quadraticCurveTo(3.1 * unit, -6.2 * unit, 3.1 * unit, -2.2 * unit);
+  cx.quadraticCurveTo(3.1 * unit, -.2 * unit, 1.55 * unit, 1.7 * unit);
+  cx.lineTo(1.25 * unit, 3.1 * unit);
+  cx.lineTo(-1.25 * unit, 3.1 * unit);
+  cx.lineTo(-1.55 * unit, 1.7 * unit);
+  cx.quadraticCurveTo(-3.1 * unit, -.2 * unit, -3.1 * unit, -2.2 * unit);
+  cx.closePath();
+  cx.fillStyle = color;
+  cx.strokeStyle = "#fff4cf";
+  cx.fill();
+  cx.stroke();
+  cx.beginPath();
+  cx.moveTo(-1.3 * unit, 4.5 * unit);
+  cx.lineTo(1.3 * unit, 4.5 * unit);
+  cx.moveTo(-.9 * unit, 5.7 * unit);
+  cx.lineTo(.9 * unit, 5.7 * unit);
+  cx.strokeStyle = "#fff4cf";
+  cx.lineWidth = 1.1 * unit;
+  cx.stroke();
+  cx.restore();
+}
 function creativeDrawLights(viewW, viewH) {
   if (!state || isHexMap() || !state.lights || !state.lights.length) return;
   var bounds = creativeSquareVisibleBounds(viewW, viewH);
@@ -402,6 +441,16 @@ function creativeDrawLights(viewW, viewH) {
     cx.fillStyle = gradient; cx.beginPath(); cx.arc(center.x, center.y, radius, 0, Math.PI * 2); cx.fill();
   });
   cx.restore();
+}
+function creativeDrawLightMarkers(viewW, viewH) {
+  if (appMode !== "editor" || !state || isHexMap() || !state.lights || !state.lights.length) return;
+  var bounds = creativeSquareVisibleBounds(viewW, viewH);
+  // Marcadores desenhados acima dos tokens e sem o recorte da névoa para
+  // que o Mestre localize as fontes de luz em qualquer ponto do mapa.
+  state.lights.forEach(function(light) {
+    if (!creativeCellVisible(light.x, light.y, bounds)) return;
+    creativeDrawLightMarker(light, cellCenter(light.x, light.y));
+  });
 }
 function creativeGetImage(asset) {
   if (!asset || !asset.id || !asset.src) return null;
