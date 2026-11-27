@@ -12,6 +12,16 @@ function isCurrentlyVisible(x, y, px, py, r) {
     if (dist > r + 0.01) return false;
     return hasLOS(px, py, x, y);
   }
+// Para movimento por clique, uma célula descoberta continua sendo conhecida
+// mesmo quando saiu do alcance de iluminação/visão atual do personagem.
+function isCellExplored(x, y) {
+    if (x < 0 || y < 0 || x >= COLS || y >= ROWS) return false;
+    if (isHexMap()) return true;
+    return !!(state && state.fog && state.fog[idx(x, y)] === 0);
+  }
+function canClickMoveToCell(x, y, px, py, radius) {
+    return isCurrentlyVisible(x, y, px, py, radius) || isCellExplored(x, y);
+  }
 function isTokenVisible(t) {
     if (!t) return false;
     if (isHexMap() || t.tipo === "player") return true;

@@ -191,7 +191,7 @@ function onPointerDown(e) {
         }
       } else {
         var movingPlayer = currentPlayer();
-        if (movingPlayer && isCurrentlyVisible(cell.x, cell.y, movingPlayer.x, movingPlayer.y, typeof creativeGetVisibilityRadius === "function" ? creativeGetVisibilityRadius(movingPlayer, cell.x, cell.y) : movingPlayer.luz || lightRadius)) {
+        if (movingPlayer && canClickMoveToCell(cell.x, cell.y, movingPlayer.x, movingPlayer.y, typeof creativeGetVisibilityRadius === "function" ? creativeGetVisibilityRadius(movingPlayer, cell.x, cell.y) : movingPlayer.luz || lightRadius)) {
           runOrDeferMove(e, function() {
             startClickMove(cell);
           });

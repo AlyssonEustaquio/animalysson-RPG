@@ -2,7 +2,7 @@ function findVisiblePath(start, goal, token, allowUnseenForExit) {
     if (!start || !goal || isHexMap()) return null;
     if (goal.x < 0 || goal.y < 0 || goal.x >= COLS || goal.y >= ROWS) return null;
     var radius = typeof creativeGetVisibilityRadius === "function" ? creativeGetVisibilityRadius(token, goal.x, goal.y) : token && token.luz || lightRadius;
-    if (!allowUnseenForExit && !isCurrentlyVisible(goal.x, goal.y, start.x, start.y, radius)) return null;
+    if (!allowUnseenForExit && !canClickMoveToCell(goal.x, goal.y, start.x, start.y, radius)) return null;
     if (start.x === goal.x && start.y === goal.y) return [start];
     var dirs = [
       [1, 0],
@@ -48,7 +48,7 @@ function findVisiblePath(start, goal, token, allowUnseenForExit) {
         var nx = current.x + dirs[i][0], ny = current.y + dirs[i][1];
         var nextKey = key(nx, ny);
         if (closed[nextKey]) continue;
-        if (!allowUnseenForExit && !isCurrentlyVisible(nx, ny, start.x, start.y, radius)) continue;
+        if (!allowUnseenForExit && !canClickMoveToCell(nx, ny, start.x, start.y, radius)) continue;
         if (!canStep(current.x, current.y, nx, ny, token)) continue;
         var tentative = current.g + (dirs[i][0] && dirs[i][1] ? Math.SQRT2 : 1);
         if (gScore[nextKey] != null && tentative >= gScore[nextKey]) continue;
