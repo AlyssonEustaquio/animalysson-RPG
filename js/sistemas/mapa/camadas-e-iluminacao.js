@@ -167,7 +167,9 @@ function creativeGetTokenVisionRadius(token) {
 }
 function creativeGetVisibilityRadius(token, x, y) {
   var px = x == null ? token && token.x : x, py = y == null ? token && token.y : y;
-  return creativeIsDarkCell(Number(px), Number(py)) ? creativeGetTokenLightRadius(token) : creativeGetTokenVisionRadius(token);
+  // Mesmo sem tocha, a visão base alcança um tile ao redor do personagem.
+  // A iluminação fraca desse alcance é aplicada em creativeGetCellLightIntensity().
+  return creativeIsDarkCell(Number(px), Number(py)) ? Math.max(1, creativeGetTokenLightRadius(token)) : creativeGetTokenVisionRadius(token);
 }
 function creativeTorchRadius() {
   return creativeGetTokenLightRadius(creativePlayerTokenAnyLevel());
@@ -789,9 +791,16 @@ function creativeTorchIntensityAtDistance(distance) {
 function creativeGetCellLightIntensity(x, y, viewer) {
   if (!creativeIsDarkCell(x, y)) return 1;
   var best = 0, player = viewer || (typeof currentPlayer === "function" ? currentPlayer() : null);
-  if (player && player.tipo === "player" && creativeGetActiveTorchItem(player) && hasLOS(player.x, player.y, x, y)) {
-    var dx = x - Number(player.x), dy = y - Number(player.y);
-    best = Math.max(best, creativeTorchIntensityAtDistance(Math.sqrt(dx * dx + dy * dy)));
+  if (player && player.tipo === "player") {
+    var baseDx = x - Number(player.x), baseDy = y - Number(player.y);
+    var baseDistance = Math.sqrt(baseDx * baseDx + baseDy * baseDy);
+    // O próprio tile do personagem permanece claro; os tiles adjacentes
+    // recebem apenas 10% de luz, respeitando paredes e portas fechadas.
+    if (baseDistance < 0.001) best = 1;
+    else if (baseDistance <= 1.000001 && hasLOS(player.x, player.y, x, y)) best = 0.1;
+    if (creativeGetActiveTorchItem(player) && hasLOS(player.x, player.y, x, y)) {
+      best = Math.max(best, creativeTorchIntensityAtDistance(baseDistance));
+    }
   }
   (state && Array.isArray(state.lights) ? state.lights : []).forEach(function(light) {
     if (!light || !hasLOS(Number(light.x), Number(light.y), x, y)) return;
