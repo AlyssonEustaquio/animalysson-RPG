@@ -23,7 +23,8 @@ function combatWeaponDialog(actor, title, filter, semMod, onChosen) {
       return true;
     });
     var options = weapons.map(function(w) {
-      return [w.id, w.n + " — " + w.dano + (w.maestria ? " · " + w.maestria : "")];
+      var damageLabel = w._armaTocha || w._inv && w._inv.armaTocha ? (typeof creativeTorchIsLit === "function" && w._inv && creativeTorchIsLit(w._inv) ? "1 dano de fogo (acesa)" : "1 dano contundente (apagada)") : w.dano;
+      return [w.id, w.n + " — " + damageLabel + (w.maestria ? " · " + w.maestria : "")];
     });
     if (!filter) options.unshift(["", "Golpe desarmado"]);
     if (!options.length) {

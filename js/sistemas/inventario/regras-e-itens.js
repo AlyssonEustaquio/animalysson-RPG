@@ -118,10 +118,42 @@ const garantir = (p) => {
     const inv = p.inventario;
     if (!Array.isArray(inv.itens)) inv.itens = [];
     inv.moedas = Object.assign({ pc: 0, pp: 0, pe: 0, po: 0, pl: 0 }, inv.moedas || {});
+    const normalizedItems = [];
     inv.itens.forEach((i) => {
       if (!i.id) i.id = uid();
       if (!i.qtd && i.qtd !== 0) i.qtd = 1;
+      const isTorch = i.armaTocha || i.itemId === "equip-140" || norm(i.nome) === "tocha";
+      if (isTorch) {
+        i.tipo = "arma";
+        i.slot = "mao";
+        i.dano = "1";
+        i.propriedades = "simples";
+        i.proficiencia = "simples";
+        i.distancia = false;
+        i.armaTocha = true;
+        if (!Number.isFinite(Number(i.tochaRestanteMs)) || Number(i.tochaRestanteMs) < 0) i.tochaRestanteMs = 60 * 60 * 1000;
+        if (i.tochaAcesa == null) i.tochaAcesa = false;
+        if (i.tochaIniciadaEm == null) i.tochaIniciadaEm = 0;
+        if (i.tochaQueimada == null) i.tochaQueimada = false;
+        const qtd = Math.max(1, Math.floor(num(i.qtd, 1)));
+        i.qtd = 1;
+        normalizedItems.push(i);
+        // Tochas não se empilham: cada uma acompanha seu próprio tempo de queima.
+        for (let n = 1; n < qtd; n++) {
+          const extra = JSON.parse(JSON.stringify(i));
+          extra.id = uid();
+          extra.qtd = 1;
+          extra.equipado = "";
+          extra.local = "";
+          extra.tochaAcesa = false;
+          extra.tochaIniciadaEm = 0;
+          extra.tochaRestanteMs = 60 * 60 * 1000;
+          extra.tochaQueimada = false;
+          normalizedItems.push(extra);
+        }
+      } else normalizedItems.push(i);
     });
+    inv.itens = normalizedItems;
     return inv;
   };
 const carregarLocal = (p, o) => {
@@ -143,7 +175,7 @@ const persistir = (p, o) => {
     }
     if (o && typeof o.aoMudar === "function") o.aoMudar(p.inventario, p);
   };
-const mesmoEmpilhavel = (a, b) => a !== b && !a.equipado && !b.equipado && (a.local || "") === (b.local || "") && a.nome === b.nome && a.tipo !== "montaria" && !a.requerSintonia && !b.requerSintonia && !a.sintonizado && !b.sintonizado && num(a.bonus) === num(b.bonus);
+const mesmoEmpilhavel = (a, b) => a !== b && !a.armaTocha && !b.armaTocha && !a.equipado && !b.equipado && (a.local || "") === (b.local || "") && a.nome === b.nome && a.tipo !== "montaria" && !a.requerSintonia && !b.requerSintonia && !a.sintonizado && !b.sintonizado && num(a.bonus) === num(b.bonus);
 const empilhar = (inv, base) => {
     const copia = JSON.parse(JSON.stringify(base));
     delete copia.busca;
@@ -213,6 +245,21 @@ const deCatalogo = (x) => {
     };
     if (x.id) item.itemId = x.id;
     if (x.raridade) item.raridade = x.raridade;
+    // A Tocha é equipamento de iluminação e também uma arma simples de uma mão.
+    if (String(x.id || "") === "equip-140" || norm(nome) === "tocha" || norm(x.en || "") === "torch") {
+      item.tipo = "arma";
+      item.slot = "mao";
+      item.dano = "1";
+      item.propriedades = "simples";
+      item.proficiencia = "simples";
+      item.distancia = false;
+      item.armaTocha = true;
+      item.tochaRestanteMs = 60 * 60 * 1000;
+      item.tochaAcesa = false;
+      item.tochaIniciadaEm = 0;
+      item.tochaQueimada = false;
+      return item;
+    }
     const bonus = bonusDe(nome, x.en);
     if (x.magico) {
       const consumivel = /pocao|oleo|pergaminho/.test(tp) || /municao|ammunition/.test(alvo);

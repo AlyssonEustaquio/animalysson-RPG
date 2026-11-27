@@ -2,10 +2,21 @@ function mapInventoryOptions() {
     var base = typeof INV_OPTS !== "undefined" ? INV_OPTS : { chaveLocal: "animalysson-inventario" };
     var options = Object.assign({}, base, { modo: appMode });
     options.aoMudar = function() {
+      if (typeof creativeInvalidateTorchCache === "function") creativeInvalidateTorchCache();
       if (R && cv) {
         draw();
         updateCombatPanelUi();
+        if (typeof creativeUpdateLevelUi === "function") creativeUpdateLevelUi();
       }
+    };
+    options.estadoTocha = function(item) {
+      return typeof creativeTorchStatus === "function" ? creativeTorchStatus(item) : { lit: !!item.tochaAcesa, burned: !!item.tochaQueimada, remainingMs: Number(item.tochaRestanteMs) || 0 };
+    };
+    options.formatarTempoTocha = function(ms) {
+      return typeof creativeFormatTorchTime === "function" ? creativeFormatTorchTime(ms) : "";
+    };
+    options.aoAlternarTocha = function(item, acender) {
+      return typeof creativeSetTorchItemState === "function" && creativeSetTorchItemState(item, acender) === true;
     };
     options.aoAlternarMontaria = function(montaria) {
       if (!combatActive()) return false;

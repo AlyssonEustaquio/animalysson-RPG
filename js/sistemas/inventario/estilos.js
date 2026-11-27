@@ -37,6 +37,8 @@ const CSS = `
 .inv-btn.mini{padding:3px 8px;font-size:12px}
 .inv-btn.perigo:hover{border-color:var(--r);color:var(--r)}
 .inv-btn.on{border-color:var(--d);color:var(--d)}
+.inv-btn:disabled{opacity:.48;cursor:not-allowed;filter:saturate(.55)}
+.inv-btn:disabled:hover{border-color:var(--b)}
 .inv-item{border:1px solid var(--b);border-radius:6px;padding:8px 10px;margin-bottom:6px;background:var(--p2)}
 .inv-item.eqp{border-left:3px solid var(--d)}
 .inv-linha1{display:flex;align-items:baseline;justify-content:space-between;gap:8px}

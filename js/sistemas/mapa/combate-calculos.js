@@ -77,10 +77,12 @@ function combatWeaponAttack(token, weapon, mode, opts) {
       var versatile = String(weapon.propriedades || "").match(/Vers[áa]til\s*\((\d*d\d+)\)/i);
       if (versatile) dice = versatile[1];
     }
+    var isTorchWeapon = !!(weapon && weapon._inv && (weapon._inv.armaTocha || weapon._inv.itemId === "equip-140"));
+    var torchLit = isTorchWeapon && typeof creativeTorchIsLit === "function" && creativeTorchIsLit(weapon._inv);
     var damageMod = (opts.semMod ? Math.min(0, abilityMod) : abilityMod) + invWeaponMagic(weapon);
-    var damage = dice + (damageMod > 0 ? "+" + damageMod : damageMod < 0 ? String(damageMod) : "");
-    if (profile.damageOverride && !opts.semMod && profile.weaponId === weapon.id) damage = profile.damageOverride;
-    var type = RPGCombate.util.canonicoDano(weapon.dano) || "contundente";
+    var damage = isTorchWeapon ? "1" : dice + (damageMod > 0 ? "+" + damageMod : damageMod < 0 ? String(damageMod) : "");
+    if (!isTorchWeapon && profile.damageOverride && !opts.semMod && profile.weaponId === weapon.id) damage = profile.damageOverride;
+    var type = isTorchWeapon ? (torchLit ? "fogo" : "contundente") : (RPGCombate.util.canonicoDano(weapon.dano) || "contundente");
     var thrown = mode === "thrown" && range.thrown;
     var normal = range.normal, max = range.max;
     if (profile.weaponId === weapon.id && Number(profile.attackRange) > 0) normal = max = Number(profile.attackRange);

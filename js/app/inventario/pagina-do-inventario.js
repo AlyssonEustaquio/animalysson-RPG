@@ -7,7 +7,15 @@ function invMov() {
 function invCtx() {
   return { FOR: score("FOR"), DES: score("DES"), CON: score("CON"), SAB: score("SAB"), pb: 2, classe: S.cls !== null ? CL[S.cls].n : "", tamanho: S.sp !== null ? SP[S.sp].sz : "Médio", deslocamento: invMov() };
 }
-const INV_OPTS = { chaveLocal: "animalysson-inventario", getCtx: invCtx, catalogo: null };
+const INV_OPTS = {
+  chaveLocal: "animalysson-inventario",
+  getCtx: invCtx,
+  catalogo: null,
+  estadoTocha: function(item) { return window.AnimalyssonTorch ? window.AnimalyssonTorch.estado(item) : { lit: !!item.tochaAcesa, burned: !!item.tochaQueimada, remainingMs: Number(item.tochaRestanteMs) || 0 }; },
+  formatarTempoTocha: function(ms) { return window.AnimalyssonTorch ? window.AnimalyssonTorch.formatarTempo(ms) : ""; },
+  aoAlternarTocha: function(item, acender) { return !!(window.AnimalyssonTorch && window.AnimalyssonTorch.alternar(item, acender)); },
+  aoMudar: function() { if (window.AnimalyssonTorch) window.AnimalyssonTorch.aoMudarInventario(); }
+};
 function invStats() {
   if (!window.Inventario) return null;
   Inventario.carregar(S, INV_OPTS);

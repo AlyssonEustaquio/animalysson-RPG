@@ -28,9 +28,139 @@ function creativePlayerTokenAnyLevel() {
   if (!state || !Array.isArray(state.tokens)) return null;
   return state.tokens.find(function(token) { return token && token.tipo === "player"; }) || state.tokens[0] || null;
 }
+var CREATIVE_TORCH_DURATION_MS = 60 * 60 * 1000;
+var CREATIVE_TORCH_BRIGHT_METERS = 6;
+var CREATIVE_TORCH_DIM_EXTRA_METERS = 6;
+var CREATIVE_METERS_PER_CELL = 1.5;
+var creativeTorchCache = { item: null, playerId: "", inventory: null, validUntil: 0 };
+var creativeTorchTimers = Object.create(null);
+function creativeIsTorchItem(item) {
+  if (!item) return false;
+  return !!item.armaTocha || String(item.itemId || "") === "equip-140" || String(item.nome || item.n || "").trim().toLowerCase() === "tocha";
+}
+function creativeTorchEquippedInHand(item) {
+  return !!item && !item.local && (item.equipado === "maoPrincipal" || item.equipado === "maoSecundaria");
+}
+function creativeTorchRemainingMs(item, now) {
+  if (!creativeIsTorchItem(item) || item.tochaQueimada) return 0;
+  now = Number(now) || Date.now();
+  var remaining = Number(item.tochaRestanteMs);
+  if (!Number.isFinite(remaining) || remaining < 0) remaining = CREATIVE_TORCH_DURATION_MS;
+  if (item.tochaAcesa) {
+    var started = Number(item.tochaIniciadaEm);
+    if (!Number.isFinite(started) || started <= 0) {
+      started = now;
+      item.tochaIniciadaEm = started;
+    }
+    remaining -= Math.max(0, now - started);
+  }
+  return Math.max(0, remaining);
+}
+function creativeTorchIsLit(item) {
+  return !!(creativeIsTorchItem(item) && item.tochaAcesa && creativeTorchRemainingMs(item) > 0);
+}
+function creativeTorchTimerKey(item) {
+  return String(item && item.id || item && item.itemId || "torch");
+}
+function creativeScheduleTorchBurnout(item) {
+  if (!item || !item.tochaAcesa || typeof window === "undefined" || typeof window.setTimeout !== "function") return;
+  var key = creativeTorchTimerKey(item);
+  if (creativeTorchTimers[key]) return;
+  var delay = creativeTorchRemainingMs(item);
+  if (delay <= 0) {
+    creativeTorchStatus(item);
+    creativeTorchBurnoutRefresh();
+    return;
+  }
+  creativeTorchTimers[key] = window.setTimeout(function() {
+    delete creativeTorchTimers[key];
+    if (!item.tochaAcesa) return;
+    if (creativeTorchRemainingMs(item) > 0) {
+      creativeScheduleTorchBurnout(item);
+      return;
+    }
+    creativeTorchStatus(item);
+    creativeTorchBurnoutRefresh();
+  }, Math.max(25, delay));
+}
+function creativeStopTorchBurnout(item) {
+  var key = creativeTorchTimerKey(item), timer = creativeTorchTimers[key];
+  if (timer && typeof window !== "undefined" && typeof window.clearTimeout === "function") window.clearTimeout(timer);
+  delete creativeTorchTimers[key];
+}
+function creativeTorchBurnoutRefresh() {
+  creativeInvalidateTorchCache();
+  creativePersistTorchInventory();
+  if (typeof mapInventoryInstance !== "undefined" && mapInventoryInstance && typeof mapInventoryInstance.atualizar === "function") mapInventoryInstance.atualizar();
+  if (typeof draw === "function") draw();
+  if (R) creativeUpdateLevelUi();
+}
+function creativeTorchStatus(item) {
+  if (!creativeIsTorchItem(item)) return { lit: false, burned: false, remainingMs: 0 };
+  var remaining = creativeTorchRemainingMs(item);
+  var lit = !!item.tochaAcesa && remaining > 0;
+  if (lit) creativeScheduleTorchBurnout(item);
+  if (item.tochaAcesa && remaining <= 0) {
+    item.tochaAcesa = false;
+    item.tochaRestanteMs = 0;
+    item.tochaIniciadaEm = 0;
+    item.tochaQueimada = true;
+    creativeStopTorchBurnout(item);
+    creativeInvalidateTorchCache();
+    creativePersistTorchInventory();
+  }
+  return { lit: lit, burned: !!item.tochaQueimada || remaining <= 0, remainingMs: remaining };
+}
+function creativeInvalidateTorchCache() {
+  creativeTorchCache = { item: null, playerId: "", inventory: null, validUntil: 0 };
+}
+function creativePersistTorchInventory() {
+  try {
+    if (typeof S === "undefined" || !S || !S.inventario) return;
+    var options = typeof INV_OPTS !== "undefined" ? INV_OPTS : null;
+    var key = options && options.chaveLocal || "animalysson-inventario";
+    localStorage.setItem(key, JSON.stringify(S.inventario));
+  } catch (e) {}
+}
+function creativeGetActiveTorchItem(player) {
+  player = player || (typeof currentPlayer === "function" ? currentPlayer() : creativePlayerTokenAnyLevel());
+  var inventory = typeof S !== "undefined" && S && S.inventario && Array.isArray(S.inventario.itens) ? S.inventario : null;
+  if (!player || player.tipo !== "player" || !inventory) return null;
+  var now = Date.now();
+  if (creativeTorchCache.inventory === inventory && creativeTorchCache.playerId === String(player.id || "") && now < creativeTorchCache.validUntil) return creativeTorchCache.item;
+  var active = null, changed = false;
+  inventory.itens.forEach(function(item) {
+    if (!creativeIsTorchItem(item) || !item.tochaAcesa || item.tochaQueimada) return;
+    var remaining = creativeTorchRemainingMs(item, now);
+    if (remaining <= 0) {
+      item.tochaAcesa = false;
+      item.tochaRestanteMs = 0;
+      item.tochaIniciadaEm = 0;
+      item.tochaQueimada = true;
+      creativeStopTorchBurnout(item);
+      changed = true;
+      return;
+    }
+    creativeScheduleTorchBurnout(item);
+    if (!active && creativeTorchEquippedInHand(item)) active = item;
+  });
+  creativeTorchCache = { item: active, playerId: String(player.id || ""), inventory: inventory, validUntil: now + 350 };
+  if (changed) creativePersistTorchInventory();
+  return active;
+}
+function creativeTorchLightRadii() {
+  return {
+    bright: CREATIVE_TORCH_BRIGHT_METERS / CREATIVE_METERS_PER_CELL,
+    dim: (CREATIVE_TORCH_BRIGHT_METERS + CREATIVE_TORCH_DIM_EXTRA_METERS) / CREATIVE_METERS_PER_CELL
+  };
+}
+function creativeFormatTorchTime(milliseconds) {
+  var seconds = Math.max(0, Math.ceil(Number(milliseconds) / 1000));
+  var minutes = Math.floor(seconds / 60), rest = seconds % 60;
+  return minutes + ":" + String(rest).padStart(2, "0");
+}
 function creativeGetTokenLightRadius(token) {
-  var value = token && token.luz != null ? Number(token.luz) : Number(lightRadius);
-  return Number.isFinite(value) ? Math.max(0, Math.min(30, value)) : 0;
+  return creativeGetActiveTorchItem(token) ? creativeTorchLightRadii().dim : 0;
 }
 function creativeGetTokenVisionRadius(token) {
   var value = token && token.visao != null ? Number(token.visao) : 6;
@@ -43,20 +173,60 @@ function creativeGetVisibilityRadius(token, x, y) {
 function creativeTorchRadius() {
   return creativeGetTokenLightRadius(creativePlayerTokenAnyLevel());
 }
-function creativeSetTorchRadius(value) {
-  var radius = Math.max(0, Math.min(30, Math.round(Number(value) || 0)));
-  lightRadius = radius;
+function creativeSetTorchRadius() {
+  // Compatibilidade com mapas antigos: o alcance agora vem do item Tocha equipado e aceso.
+  lightRadius = 0;
   var player = creativePlayerTokenAnyLevel();
-  if (player) player.luz = radius;
-  var input = R && R.querySelector("#mp-creator-torch-radius");
-  var output = R && R.querySelector("#mp-creator-torch-value");
-  if (input) input.value = String(radius);
-  if (output) output.textContent = String(radius) + " células";
-  var legacySlider = R && R.querySelector("#mp-lr");
-  if (legacySlider) legacySlider.value = String(radius);
-  save();
-  draw();
+  if (player) player.luz = 0;
+  creativeInvalidateTorchCache();
+  if (R) creativeUpdateLevelUi();
+  if (typeof save === "function") save();
+  if (typeof draw === "function") draw();
 }
+function creativeSetTorchItemState(item, ignite) {
+  if (!creativeIsTorchItem(item)) return false;
+  var now = Date.now(), remaining = creativeTorchRemainingMs(item, now);
+  if (ignite) {
+    if (!creativeTorchEquippedInHand(item)) {
+      if (typeof combatToast === "function") combatToast("Equipe a tocha em uma das mãos antes de acendê-la.");
+      else if (typeof appAlertMessage === "function") appAlertMessage("msg010", "Equipe a tocha em uma das mãos antes de acendê-la.");
+      return false;
+    }
+    if (remaining <= 0 || item.tochaQueimada) {
+      if (typeof combatToast === "function") combatToast("Esta tocha já queimou. Pegue outra para iluminar o caminho.");
+      return false;
+    }
+    if (!item.tochaAcesa) {
+      item.tochaRestanteMs = remaining;
+      item.tochaIniciadaEm = now;
+      item.tochaAcesa = true;
+    }
+    creativeScheduleTorchBurnout(item);
+  } else if (item.tochaAcesa) {
+    item.tochaRestanteMs = remaining;
+    item.tochaIniciadaEm = 0;
+    item.tochaAcesa = false;
+    item.tochaQueimada = remaining <= 0;
+    creativeStopTorchBurnout(item);
+  }
+  creativeInvalidateTorchCache();
+  creativePersistTorchInventory();
+  if (typeof draw === "function") draw();
+  if (R) creativeUpdateLevelUi();
+  return true;
+}
+window.AnimalyssonTorch = {
+  estado: creativeTorchStatus,
+  alternar: creativeSetTorchItemState,
+  formatarTempo: creativeFormatTorchTime,
+  aoMudarInventario: function() {
+    creativeInvalidateTorchCache();
+    if (R && cv) {
+      draw();
+      if (typeof creativeUpdateLevelUi === "function") creativeUpdateLevelUi();
+    }
+  }
+};
 function creativeCurrentLevel() {
   if (!state || !Array.isArray(state.levels)) return null;
   return state.levels.find(function(level) { return level && level.id === creativeLevelId(); }) || state.levels[0] || null;
@@ -313,13 +483,17 @@ function creativeUpdateLevelUi() {
   var targetSelect = panel.querySelector("#mp-creator-transition-target");
   var envSelect = panel.querySelector("#mp-creator-level-environment");
   var newEnv = panel.querySelector("#mp-creator-new-environment");
-  var torchSlider = panel.querySelector("#mp-creator-torch-radius");
-  var torchOutput = panel.querySelector("#mp-creator-torch-value");
+  var torchStatus = panel.querySelector("#mp-creator-torch-status");
   var sorted = creativeSortedLevels(state.levels || []);
-  if (torchSlider && document.activeElement !== torchSlider) torchSlider.value = String(creativeTorchRadius());
-  if (torchOutput) torchOutput.textContent = String(creativeTorchRadius()) + " células";
+  var playerTorch = creativeGetActiveTorchItem(typeof currentPlayer === "function" ? currentPlayer() : null);
+  if (torchStatus) {
+    var torchItems = typeof S !== "undefined" && S && S.inventario && Array.isArray(S.inventario.itens) ? S.inventario.itens.filter(creativeIsTorchItem) : [];
+    var litItem = torchItems.find(function(item) { return creativeTorchStatus(item).lit; });
+    var statusText = litItem ? "Tocha acesa · " + creativeFormatTorchTime(creativeTorchRemainingMs(litItem)) + " restantes · luz plena 6 m + penumbra 6 m" : (torchItems.some(function(item) { return creativeTorchStatus(item).burned; }) && !playerTorch ? "Nenhuma tocha acesa · há tochas queimadas no inventário." : "Nenhuma tocha acesa. Equipe uma Tocha no inventário e clique em Acender.");
+    torchStatus.textContent = statusText;
+  }
   var legacyTorchSlider = R.querySelector("#mp-lr");
-  if (legacyTorchSlider && document.activeElement !== legacyTorchSlider) legacyTorchSlider.value = String(creativeTorchRadius());
+  if (legacyTorchSlider) { var oldTorchLabel = legacyTorchSlider.closest("label"); if (oldTorchLabel) oldTorchLabel.hidden = true; }
   if (activeSelect) activeSelect.innerHTML = sorted.map(function(item) {
     return '<option value="' + esc(item.id) + '">' + esc(item.name) + ' · ' + esc(creativeLevelZLabel(item)) + '</option>';
   }).join("");
@@ -357,7 +531,7 @@ function creativeInstallLevelUi() {
     '<button type="button" id="mp-creator-level-delete" class="mp-creator-level-delete danger">Excluir camada selecionada</button>' +
     '<label class="mp-creator-level-label">Ambiente desta camada<select id="mp-creator-level-environment"><option value="outdoor">Exterior / luz do sol</option><option value="interior">Interior</option><option value="cavern">Caverna</option><option value="basement">Porão</option></select></label>' +
     '<label class="mp-creator-level-label">Conectar a outra camada<select id="mp-creator-transition-target"></select></label>' +
-    '<label class="mp-creator-torch-control"><span>Tocha / lanterna do personagem <output id="mp-creator-torch-value">' + creativeTorchRadius() + ' células</output></span><input id="mp-creator-torch-radius" type="range" min="0" max="30" step="1" value="' + creativeTorchRadius() + '"><small>0 = sem luz carregada. O alcance é independente da quantidade de camadas.</small></label>' +
+    '<div class="mp-creator-torch-control"><strong>Iluminação do personagem</strong><small id="mp-creator-torch-status">A luz vem do item Tocha equipado e aceso no inventário.</small><small>Tocha: 6 m de luz plena + 6 m de penumbra. Duração: 1 hora acesa.</small></div>' +
     '<small id="mp-creator-level-status" class="mp-creator-muted"></small>';
   panel.insertBefore(section, toolGrid);
   var tools = document.createElement("div");
@@ -372,12 +546,6 @@ function creativeInstallLevelUi() {
     } else if (target.id === "mp-creator-level-environment") {
       creativeSetActiveLevelEnvironment(target.value);
     }
-  });
-  var torchSlider = section.querySelector("#mp-creator-torch-radius");
-  if (torchSlider) torchSlider.addEventListener("input", function() {
-    var output = section.querySelector("#mp-creator-torch-value");
-    if (output) output.textContent = String(this.value) + " células";
-    creativeSetTorchRadius(this.value);
   });
   section.addEventListener("click", function(event) {
     if (event.target.closest("#mp-creator-level-add-above")) creativeAddLevel(-1);
@@ -613,6 +781,34 @@ function creativeCanSeeCellFromLight(x, y, px, py, radius) {
   var dx = x - px, dy = y - py;
   return dx * dx + dy * dy <= radius * radius + .5 && hasLOS(px, py, x, y);
 }
+function creativeGetCellIllumination(x, y, viewer) {
+  if (!creativeIsDarkCell(x, y)) return "daylight";
+  var best = "dark", player = viewer || (typeof currentPlayer === "function" ? currentPlayer() : null);
+  if (player && player.tipo === "player") {
+    var torch = creativeGetActiveTorchItem(player), radii = creativeTorchLightRadii();
+    if (torch && hasLOS(player.x, player.y, x, y)) {
+      var dx = x - player.x, dy = y - player.y, distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance <= radii.bright + .01) best = "bright";
+      else if (distance <= radii.dim + .01) best = "dim";
+    }
+  }
+  (state && Array.isArray(state.lights) ? state.lights : []).forEach(function(light) {
+    if (!light || !hasLOS(Number(light.x), Number(light.y), x, y)) return;
+    var dx = x - Number(light.x), dy = y - Number(light.y), distance = Math.sqrt(dx * dx + dy * dy);
+    var brightRadius = Math.max(0, Number(light.radius) || 0), dimRadius = brightRadius * 2;
+    if (distance <= brightRadius + .01) best = "bright";
+    else if (best === "dark" && distance <= dimRadius + .01) best = "dim";
+  });
+  return best;
+}
+function creativeCellVisibleToPlayer(x, y, px, py) {
+  if (x < 0 || y < 0 || x >= COLS || y >= ROWS || px < 0 || py < 0) return false;
+  if (x === px && y === py) return true;
+  if (!hasLOS(px, py, x, y)) return false;
+  // Ao ar livre, a visão não tem limite artificial de distância; paredes e portas continuam bloqueando.
+  // Em áreas escuras, só é possível enxergar onde uma fonte de luz alcança.
+  return creativeGetCellIllumination(x, y, currentPlayer()) !== "dark";
+}
 function creativeApplyLayerToolDown(event, world, cell) {
   if (tool === "transition") return creativePlaceTransitionPoint(cell);
   if (tool === "raiseTerrain" || tool === "lowerTerrain") {
@@ -800,29 +996,49 @@ currentPlayer = function() {
   }
   return creativeBaseCurrentPlayer();
 };
+var creativeBaseDrawFogAndLight = drawFogAndLight;
+drawFogAndLight = function(viewW, viewH) {
+  if (isHexMap() || appMode === "editor") return creativeBaseDrawFogAndLight(viewW, viewH);
+  var player = typeof currentPlayer === "function" ? currentPlayer() : null;
+  var px = player ? Number(player.x) : -1, py = player ? Number(player.y) : -1;
+  var bounds = visibleCellBounds(viewW, viewH);
+  for (var y = bounds.y0; y <= bounds.y1; y++) for (var x = bounds.x0; x <= bounds.x1; x++) {
+    var visible = player && isCurrentlyVisible(x, y, px, py, creativeGetVisibilityRadius(player, x, y));
+    if (!visible) {
+      var fogged = showFog && state.fog && state.fog[idx(x, y)];
+      cx.fillStyle = fogged ? "rgba(0,0,0,1)" : "rgba(0,0,0,.88)";
+      cx.fillRect(x * CELL, y * CELL, CELL + .5, CELL + .5);
+      continue;
+    }
+    if (creativeIsDarkCell(x, y)) {
+      var illumination = creativeGetCellIllumination(x, y, player);
+      if (illumination === "dim") {
+        cx.fillStyle = "rgba(0,0,0,.38)";
+        cx.fillRect(x * CELL, y * CELL, CELL + .5, CELL + .5);
+      }
+    }
+  }
+};
 var creativeBaseIsTokenVisible = isTokenVisible;
-isTokenVisible = function(token) { if (!token) return false; if (!isHexMap() && !token.layerId) token.layerId = creativeLevelId(); if (!isHexMap() && token.layerId !== creativeLevelId()) return false; return creativeBaseIsTokenVisible(token); };
+isTokenVisible = function(token) {
+  if (!token) return false;
+  if (isHexMap()) return true;
+  if (!token.layerId) token.layerId = creativeLevelId();
+  if (token.layerId !== creativeLevelId()) return false;
+  if (token.tipo === "player") return true;
+  var viewer = typeof currentPlayer === "function" ? currentPlayer() : null;
+  if (!viewer) return false;
+  var size = Math.max(1, Number(token.raio) || 1);
+  for (var dy = 0; dy < size; dy++) for (var dx = 0; dx < size; dx++) {
+    if (!creativeCellVisibleToPlayer(token.x + dx, token.y + dy, viewer.x, viewer.y)) return false;
+  }
+  return true;
+};
 var creativeBaseVisibility = isCurrentlyVisible;
 isCurrentlyVisible = function(x, y, px, py, radius) {
   if (x < 0 || y < 0 || x >= COLS || y >= ROWS) return false;
   if (isHexMap() || appMode === "editor") return true;
-  var darkCell = creativeIsDarkCell(x, y);
-  if (!darkCell) {
-    if (!dynLight) return !state.fog[idx(x, y)];
-    if (px < 0) return false;
-    var viewer = currentPlayer();
-    var dayRadius = viewer ? creativeGetTokenVisionRadius(viewer) : Math.max(1, Number(radius) || 6);
-    return creativeCanSeeCellFromLight(x, y, px, py, dayRadius);
-  }
-  if (px >= 0) {
-    var viewerToken = currentPlayer();
-    var radiusValue = viewerToken ? creativeGetTokenLightRadius(viewerToken) : (radius != null && Number.isFinite(Number(radius)) ? Math.max(0, Number(radius)) : 0);
-    if (creativeCanSeeCellFromLight(x, y, px, py, radiusValue)) return true;
-  }
-  return (state.lights || []).some(function(light) {
-    var lightRadiusCells = Math.max(1, Number(light.radius) || 0);
-    return creativeCanSeeCellFromLight(x, y, Number(light.x), Number(light.y), lightRadiusCells);
-  });
+  return creativeCellVisibleToPlayer(x, y, px, py);
 };
 var creativeBaseCanStep = canStep;
 canStep = function(fromX, fromY, toX, toY, token, detectTouch) {

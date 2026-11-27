@@ -154,6 +154,17 @@ function invWeaponAsCatalog(it) {
       propriedades: it.propriedades || "",
       maestria: it.maestria || ""
     };
+    if (it.armaTocha || it.itemId === "equip-140" || normalizeRpgText(it.nome) === "tocha") {
+      out.n = it.nome || "Tocha";
+      out.categoria = "Armas";
+      out.tipo = "Arma corpo a corpo simples";
+      out.uso = "Ataque corpo a corpo";
+      out.dano = "1";
+      out.propriedades = "simples";
+      out.maestria = "";
+      out.distancia = false;
+      out._armaTocha = true;
+    }
     out.id = "inv:" + it.id;
     out._inv = it;
     return out;

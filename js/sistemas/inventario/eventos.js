@@ -46,6 +46,12 @@ raiz.addEventListener("click", (e) => {
       if (a === "pagar") return abrirPagar();
       const it = acharItem(b);
       if (!it) return;
+      if (a === "tocha") {
+        const acender = b.dataset.acender === "1";
+        if (typeof opcoes.aoAlternarTocha !== "function" || opcoes.aoAlternarTocha(it, acender) !== true) return;
+        salvar();
+        return;
+      }
       if (a === "mais") it.qtd = num(it.qtd, 1) + 1;
       if (a === "menos") {
         it.qtd = Math.max(0, num(it.qtd, 1) - 1);

@@ -127,6 +127,10 @@ const renderMochila = () => {
       q("lista").innerHTML = itens.map((i) => {
         const podeEquipar = slotsDoItem(i).length > 0;
         const podeSintonizar = i.requerSintonia && i.tipo !== "consumivel";
+        const ehTocha = !!i.armaTocha || i.itemId === "equip-140" || norm(i.nome) === "tocha";
+        const estadoTocha = ehTocha && typeof opcoes.estadoTocha === "function" ? opcoes.estadoTocha(i) : { lit: !!i.tochaAcesa, burned: !!i.tochaQueimada, remainingMs: Number(i.tochaRestanteMs) || 3600000 };
+        const podeAlternarTocha = ehTocha && !estadoTocha.burned && (estadoTocha.lit || i.equipado === "maoPrincipal" || i.equipado === "maoSecundaria");
+        const textoTocha = estadoTocha.burned ? "Queimada" : estadoTocha.lit ? "Apagar · " + (typeof opcoes.formatarTempoTocha === "function" ? opcoes.formatarTempoTocha(estadoTocha.remainingMs) : "acesa") : "Acender";
         return `<div class="inv-item ${i.equipado ? "eqp" : ""}" data-id="${i.id}">
           <div class="inv-linha1">
             <span class="inv-nome" title="${esc(i.nome)}">${esc(i.nome)}${i.equipado ? `<span class="inv-tag">${nomeSlot(i.equipado)}</span>` : ""}${i.sintonizado ? '<span class="inv-tag sint">Sintonizado</span>' : ""}</span>
@@ -138,6 +142,7 @@ const renderMochila = () => {
             ${podeEquipar ? `<button class="inv-btn mini ${i.equipado ? "on" : ""}" data-a="equipar">${i.equipado ? "Desequipar" : "Equipar"}</button>` : ""}
             ${podeSintonizar ? `<button class="inv-btn mini ${i.sintonizado ? "on" : ""}" data-a="sintonizar">${i.sintonizado ? "Romper sintonia" : "Sintonizar"}</button>` : ""}
             ${i.tipo === "consumivel" ? '<button class="inv-btn mini" data-a="usar">Usar</button>' : ""}
+            ${ehTocha ? `<button class="inv-btn mini ${estadoTocha.lit ? "on" : ""}" data-a="tocha" data-acender="${estadoTocha.lit ? "0" : "1"}" ${podeAlternarTocha ? "" : "disabled"}>${textoTocha}</button>` : ""}
             ${editorMode ? '<button class="inv-btn mini" data-a="editar">Editar</button><button class="inv-btn mini perigo" data-a="remover">Descartar</button>' : ""}
           </div>
         </div>`;
