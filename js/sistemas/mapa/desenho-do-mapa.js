@@ -157,6 +157,7 @@ function draw() {
       if (isTokenVisible(t)) drawToken(t, t === selected);
     });
     drawLocalPortals();
+    if (!isHexMap() && typeof creativeDrawSelectionOverlay === "function") creativeDrawSelectionOverlay();
     if (!isHexMap()) {
       drawToolPreview();
       if (typeof creativeDrawPreview === "function") creativeDrawPreview();

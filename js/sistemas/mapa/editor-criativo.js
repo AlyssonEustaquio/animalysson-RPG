@@ -354,10 +354,6 @@ function creativeDrawLayer(viewW, viewH) {
       cx.shadowColor = "rgba(0,0,0,.7)"; cx.shadowBlur = size * .18; cx.fillText(def.glyph, 0, 1 / zoom);
     }
     cx.restore();
-    if (creativeSelected && creativeSelected.type === "decoration" && creativeSelected.id === item.id) {
-      cx.strokeStyle = "#ffe082"; cx.lineWidth = 2 / zoom;
-      cx.strokeRect(item.x * CELL + 2 / zoom, item.y * CELL + 2 / zoom, CELL - 4 / zoom, CELL - 4 / zoom);
-    }
   });
   (state.labels || []).forEach(function(label) {
     if (!creativeCellVisible(label.x, label.y, bounds)) return;
@@ -376,10 +372,6 @@ function creativeDrawLayer(viewW, viewH) {
     cx.fillStyle = /^#[0-9a-f]{6}$/i.test(label.color || "") ? label.color : "#ffffff";
     cx.fillText(label.text, center.x, center.y);
     cx.restore();
-    if (creativeSelected && creativeSelected.type === "label" && creativeSelected.id === label.id) {
-      cx.strokeStyle = "#ffe082"; cx.lineWidth = 2 / zoom;
-      cx.strokeRect(label.x * CELL + 2 / zoom, label.y * CELL + 2 / zoom, CELL - 4 / zoom, CELL - 4 / zoom);
-    }
   });
 }
 function creativeHexRgb(hex) {
@@ -479,12 +471,7 @@ function creativeRenderAssetPalette() {
 }
 function creativeDrawPreview() {
   if (!R || appMode !== "editor" || isHexMap()) return;
-  if (drag && drag.creativeRoom) {
-    var a = drag.startCell, b = drag.currentCell || a;
-    var x = Math.min(a.x, b.x), y = Math.min(a.y, b.y), w = Math.abs(a.x - b.x) + 1, h = Math.abs(a.y - b.y) + 1;
-    cx.fillStyle = "rgba(88,174,220,.18)"; cx.strokeStyle = "rgba(130,215,255,.95)"; cx.lineWidth = 2 / zoom;
-    cx.fillRect(x * CELL, y * CELL, w * CELL, h * CELL); cx.strokeRect(x * CELL, y * CELL, w * CELL, h * CELL);
-  } else if (previewPointer && ["ground", "corridor", "eraseGround"].indexOf(tool) >= 0) {
+  if (previewPointer && ["ground", "eraseGround"].indexOf(tool) >= 0) {
     var cell = worldToCell(previewPointer.x, previewPointer.y), size = creativeBrushSize, radius = Math.floor((size - 1) / 2);
     cx.fillStyle = tool === "eraseGround" ? "rgba(255,90,90,.16)" : "rgba(100,190,235,.18)";
     cx.strokeStyle = "rgba(210,235,255,.9)"; cx.lineWidth = 1.5 / zoom;
@@ -524,24 +511,6 @@ function creativeFloodFill(cell, material) {
   state.terrain = {};
   return true;
 }
-function creativeApplyRoom(start, end) {
-  if (!start || !end) return;
-  var x0 = Math.max(0, Math.min(start.x, end.x)), x1 = Math.min(COLS - 1, Math.max(start.x, end.x));
-  var y0 = Math.max(0, Math.min(start.y, end.y)), y1 = Math.min(ROWS - 1, Math.max(start.y, end.y));
-  if (x1 < x0 || y1 < y0 || (x1 - x0 + 1) * (y1 - y0 + 1) < 4) return;
-  for (var y = y0; y <= y1; y++) for (var x = x0; x <= x1; x++) creativeSetTerrain(idx(x, y), creativeMaterial);
-  function setRoomEdge(dir, x, yEdge) {
-    var array = dir === "h" ? state.hEdges : state.vEdges;
-    var index = dir === "h" ? hIdx(x, yEdge) : vIdx(x, yEdge);
-    if (!array) return;
-    var key = "edge:" + dir + ":" + index, before = array[index] || 0;
-    if (before !== EDGE_NONE) return;
-    creativeRecordCreativeChange(key, { kind: "edge", dir: dir, index: index, before: before, after: EDGE_MURO });
-    array[index] = EDGE_MURO;
-  }
-  for (var xx = x0; xx <= x1; xx++) { setRoomEdge("h", xx, y0); setRoomEdge("h", xx, y1 + 1); }
-  for (var yy = y0; yy <= y1; yy++) { setRoomEdge("v", x0, yy); setRoomEdge("v", x1 + 1, yy); }
-}
 function creativeAddRecord(collection, item) {
   if (!Array.isArray(state[collection])) state[collection] = [];
   state[collection].push(item);
@@ -550,26 +519,183 @@ function creativeAddRecord(collection, item) {
 function creativeFindRecord(collection, id) {
   return (state[collection] || []).find(function(item) { return item && item.id === id; }) || null;
 }
-function creativeHitTest(worldX, worldY) {
-  var best = null, bestDist = CELL * .55;
-  ["decorations", "labels", "lights"].forEach(function(collection) {
-    (state[collection] || []).forEach(function(item) {
-      var p = cellCenter(item.x, item.y), d = Math.sqrt(Math.pow(worldX - p.x, 2) + Math.pow(worldY - p.y, 2));
-      var limit = collection === "lights" ? CELL * .35 : bestDist;
-      if (d <= limit && d < bestDist) { best = { collection: collection, item: item }; bestDist = d; }
-    });
+function creativePointSegmentDistance(px, py, ax, ay, bx, by) {
+  var dx = bx - ax, dy = by - ay, length2 = dx * dx + dy * dy;
+  var t = length2 ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / length2)) : 0;
+  var x = ax + t * dx, y = ay + t * dy;
+  return Math.sqrt((px - x) * (px - x) + (py - y) * (py - y));
+}
+function creativeHitStructure(worldX, worldY) {
+  var tolerance = Math.max(7 / Math.max(.2, zoom || 1), CELL * .16);
+  var custom = typeof customEdgeAt === "function" ? customEdgeAt(worldX, worldY, tolerance) : null;
+  if (custom && getEdgeVal(custom) !== EDGE_NONE) return { type: "edge", edge: custom, item: custom.custom };
+  var gx = worldX / CELL, gy = worldY / CELL, x = Math.floor(gx), y = Math.floor(gy), best = null, bestDistance = tolerance;
+  var candidates = [
+    { dir: "v", xEdge: x, y: y }, { dir: "v", xEdge: x + 1, y: y },
+    { dir: "h", x: x, yEdge: y }, { dir: "h", x: x, yEdge: y + 1 }
+  ];
+  candidates.forEach(function(edge) {
+    if (edge.dir === "v" && (edge.xEdge < 0 || edge.xEdge > COLS || edge.y < 0 || edge.y >= ROWS)) return;
+    if (edge.dir === "h" && (edge.x < 0 || edge.x >= COLS || edge.yEdge < 0 || edge.yEdge > ROWS)) return;
+    var value = getEdgeVal(edge);
+    if (value === EDGE_NONE) return;
+    var distance = edge.dir === "v"
+      ? creativePointSegmentDistance(worldX, worldY, edge.xEdge * CELL, edge.y * CELL, edge.xEdge * CELL, (edge.y + 1) * CELL)
+      : creativePointSegmentDistance(worldX, worldY, edge.x * CELL, edge.yEdge * CELL, (edge.x + 1) * CELL, edge.yEdge * CELL);
+    if (distance < bestDistance) { bestDistance = distance; best = { type: "edge", edge: edge, item: null }; }
   });
-  if (!best) return null;
-  return { type: best.collection === "decorations" ? "decoration" : best.collection === "labels" ? "label" : "light", id: best.item.id, item: best.item };
+  return best;
+}
+function creativeHitTest(worldX, worldY) {
+  if (!state) return null;
+  // Portals are painted above tokens and scenery, so they receive the first hit.
+  var portals = state.portals || [];
+  for (var pi = portals.length - 1; pi >= 0; pi--) {
+    var portal = portals[pi], portalCenter = cellCenter(portal.x, portal.y);
+    var portalHitRadius = Math.max(CELL * .38, 10 / Math.max(.2, zoom || 1));
+    if (Math.hypot(worldX - portalCenter.x, worldY - portalCenter.y) <= portalHitRadius) return { type: "portal", id: portal.id, item: portal, endpoint: "origin" };
+    if (!portal.destMapId && isFinite(Number(portal.destX)) && isFinite(Number(portal.destY))) {
+      var destinationCenter = cellCenter(portal.destX, portal.destY);
+      if (Math.hypot(worldX - destinationCenter.x, worldY - destinationCenter.y) <= portalHitRadius) return { type: "portal", id: portal.id, item: portal, endpoint: "destination" };
+    }
+  }
+  // Decorative lights are painted above the fog and walls.
+  var lights = state.lights || [];
+  for (var xi = lights.length - 1; xi >= 0; xi--) {
+    var light = lights[xi], lightCenter = cellCenter(light.x, light.y);
+    if (Math.hypot(worldX - lightCenter.x, worldY - lightCenter.y) <= Math.max(CELL * .32, 9 / Math.max(.2, zoom || 1))) return { type: "light", id: light.id, item: light };
+  }
+  // Original VTT walls and doors sit above the painted floor/decorations.
+  var structure = creativeHitStructure(worldX, worldY);
+  if (structure) return structure;
+  var cellX = Math.floor(worldX / CELL), cellY = Math.floor(worldY / CELL);
+  if (cellX >= 0 && cellX < COLS && cellY >= 0 && cellY < ROWS) {
+    var cellIndex = idx(cellX, cellY);
+    if (state.walls && state.walls[cellIndex]) return { type: "wallCell", id: cellIndex, x: cellX, y: cellY, item: state.wallMeta && state.wallMeta[cellIndex] || null };
+  }
+  // Labels are drawn above decorations, and can be selected over their full text bounds.
+  var labels = state.labels || [];
+  for (var li = labels.length - 1; li >= 0; li--) {
+    var label = labels[li], labelCenter = cellCenter(label.x, label.y);
+    var fontSize = Math.max(10, Math.min(40, Number(label.size) || 17)) / Math.max(.2, zoom || 1);
+    var textWidth = Math.max(CELL * .6, Math.min(CELL * 7, String(label.text || "").length * fontSize * .62 + (label.bubble ? 18 / Math.max(.2, zoom || 1) : 0)));
+    var textLeft = label.align === "left" ? labelCenter.x : label.align === "right" ? labelCenter.x - textWidth : labelCenter.x - textWidth / 2;
+    if (worldX >= textLeft - 4 / Math.max(.2, zoom || 1) && worldX <= textLeft + textWidth + 4 / Math.max(.2, zoom || 1) && Math.abs(worldY - labelCenter.y) <= fontSize * .8 + 8 / Math.max(.2, zoom || 1)) {
+      return { type: "label", id: label.id, item: label };
+    }
+  }
+  // Decoration hit area follows its scaled and rotated visible bounds.
+  var decorations = state.decorations || [];
+  for (var di = decorations.length - 1; di >= 0; di--) {
+    var decoration = decorations[di], center = cellCenter(decoration.x, decoration.y);
+    var dx = worldX - center.x, dy = worldY - center.y;
+    var angle = -(Number(decoration.rotation) || 0) * Math.PI / 180;
+    var localX = dx * Math.cos(angle) - dy * Math.sin(angle);
+    var localY = dx * Math.sin(angle) + dy * Math.cos(angle);
+    var half = CELL * Math.max(.28, Math.min(1.8, Number(decoration.size) || .84)) * .56;
+    if (Math.abs(localX) <= half && Math.abs(localY) <= half) return { type: "decoration", id: decoration.id, item: decoration };
+  }
+  if (cellX >= 0 && cellX < COLS && cellY >= 0 && cellY < ROWS) {
+    var material = creativeGetTerrain(idx(cellX, cellY));
+    if (material) return { type: "terrain", id: idx(cellX, cellY), index: idx(cellX, cellY), x: cellX, y: cellY, material: material };
+  }
+  return null;
+}
+function creativeDrawSelectionOverlay() {
+  if (!creativeSelected || appMode !== "editor" || isHexMap() || !cx) return;
+  var type = creativeSelected.type, item = null, center, size, left, top, width, height;
+  cx.save();
+  cx.lineWidth = 2 / Math.max(.2, zoom || 1);
+  cx.strokeStyle = "#ffe08a";
+  cx.fillStyle = "rgba(255,224,138,.12)";
+  cx.setLineDash([5 / Math.max(.2, zoom || 1), 3 / Math.max(.2, zoom || 1)]);
+  if (type === "decoration") {
+    item = creativeFindRecord("decorations", creativeSelected.id);
+    if (item) {
+      center = cellCenter(item.x, item.y);
+      size = CELL * Math.max(.28, Math.min(1.8, Number(item.size) || .84)) * 1.18;
+      cx.translate(center.x, center.y);
+      cx.rotate((Number(item.rotation) || 0) * Math.PI / 180);
+      cx.strokeRect(-size / 2, -size / 2, size, size);
+      cx.setLineDash([]);
+      cx.fillRect(-3 / zoom, -3 / zoom, 6 / zoom, 6 / zoom);
+    }
+  } else if (type === "label") {
+    item = creativeFindRecord("labels", creativeSelected.id);
+    if (item) {
+      center = cellCenter(item.x, item.y);
+      var fontSize = Math.max(10, Math.min(40, Number(item.size) || 17)) / Math.max(.2, zoom || 1);
+      width = Math.max(CELL * .6, Math.min(CELL * 7, String(item.text || "").length * fontSize * .62 + (item.bubble ? 18 / Math.max(.2, zoom || 1) : 0)));
+      left = item.align === "left" ? center.x : item.align === "right" ? center.x - width : center.x - width / 2;
+      top = center.y - fontSize * .95;
+      cx.strokeRect(left - 5 / zoom, top - 5 / zoom, width + 10 / zoom, fontSize * 1.9 + 10 / zoom);
+    }
+  } else if (type === "light") {
+    item = creativeFindRecord("lights", creativeSelected.id);
+    if (item) {
+      center = cellCenter(item.x, item.y);
+      var radius = CELL * Math.max(1, Number(item.radius) || 5);
+      cx.beginPath(); cx.arc(center.x, center.y, radius, 0, Math.PI * 2); cx.stroke();
+      cx.setLineDash([]); cx.beginPath(); cx.arc(center.x, center.y, 5 / zoom, 0, Math.PI * 2); cx.fill();
+    }
+  } else if (type === "portal") {
+    item = creativeFindRecord("portals", creativeSelected.id);
+    if (item) {
+      var origin = cellCenter(item.x, item.y);
+      cx.strokeRect(item.x * CELL + 2 / zoom, item.y * CELL + 2 / zoom, CELL - 4 / zoom, CELL - 4 / zoom);
+      if (!item.destMapId && isFinite(Number(item.destX)) && isFinite(Number(item.destY))) {
+        var destination = cellCenter(item.destX, item.destY);
+        cx.beginPath(); cx.moveTo(origin.x, origin.y); cx.lineTo(destination.x, destination.y); cx.stroke();
+        cx.strokeRect(item.destX * CELL + 2 / zoom, item.destY * CELL + 2 / zoom, CELL - 4 / zoom, CELL - 4 / zoom);
+      }
+      var selectedPoint = creativeSelected.endpoint === "destination" && !item.destMapId ? cellCenter(item.destX, item.destY) : origin;
+      cx.setLineDash([]); cx.lineWidth = 3 / zoom; cx.beginPath(); cx.arc(selectedPoint.x, selectedPoint.y, CELL * .42, 0, Math.PI * 2); cx.stroke();
+    }
+  } else if (type === "terrain" || type === "wallCell") {
+    var cellX = Number(creativeSelected.x), cellY = Number(creativeSelected.y);
+    if (isFinite(cellX) && isFinite(cellY)) {
+      cx.fillRect(cellX * CELL + 1 / zoom, cellY * CELL + 1 / zoom, CELL - 2 / zoom, CELL - 2 / zoom);
+      cx.strokeRect(cellX * CELL + 1 / zoom, cellY * CELL + 1 / zoom, CELL - 2 / zoom, CELL - 2 / zoom);
+    }
+  } else if (type === "edge" && creativeSelected.edge) {
+    var edge = creativeSelected.edge;
+    cx.setLineDash([]); cx.lineWidth = 5 / zoom;
+    cx.beginPath();
+    if (edge.custom) {
+      cx.moveTo(edge.custom.x1, edge.custom.y1); cx.lineTo(edge.custom.x2, edge.custom.y2);
+    } else if (edge.dir === "h") {
+      cx.moveTo(edge.x * CELL, edge.yEdge * CELL); cx.lineTo((edge.x + 1) * CELL, edge.yEdge * CELL);
+    } else {
+      cx.moveTo(edge.xEdge * CELL, edge.y * CELL); cx.lineTo(edge.xEdge * CELL, (edge.y + 1) * CELL);
+    }
+    cx.stroke();
+  }
+  cx.restore();
+}
+
+function creativeSelectedCollection() {
+  if (!creativeSelected) return null;
+  if (creativeSelected.type === "decoration") return "decorations";
+  if (creativeSelected.type === "label") return "labels";
+  if (creativeSelected.type === "light") return "lights";
+  if (creativeSelected.type === "portal") return "portals";
+  return null;
 }
 function creativeDeleteSelected() {
   if (!creativeSelected) return false;
-  var collection = creativeSelected.type === "decoration" ? "decorations" : creativeSelected.type === "label" ? "labels" : "lights";
+  if (creativeSelected.type === "terrain") {
+    creativeBeginTerrainTransaction();
+    creativeSetTerrain(creativeSelected.index, null);
+    creativeCommitTransaction();
+    creativeSelected = null; save(); draw(); creativeRenderInspector(); return true;
+  }
+  var collection = creativeSelectedCollection();
+  if (!collection) return false;
   var item = creativeFindRecord(collection, creativeSelected.id);
-  if (!item) { creativeSelected = null; return false; }
+  if (!item) { creativeSelected = null; creativeRenderInspector(); return false; }
   creativeBeginTransaction();
   creativeRecordArrayChange(collection, item, item, null);
-  state[collection] = state[collection].filter(function(entry) { return entry.id !== item.id; });
+  state[collection] = state[collection].filter(function(entry) { return entry !== item && entry.id !== item.id; });
   creativeCommitTransaction();
   creativeSelected = null;
   save(); draw(); creativeRenderInspector();
@@ -587,7 +713,8 @@ function creativeRotateSelected() {
 }
 function creativeResizeSelected(delta) {
   if (!creativeSelected) return;
-  var collection = creativeSelected.type === "decoration" ? "decorations" : creativeSelected.type === "label" ? "labels" : "lights";
+  var collection = creativeSelectedCollection();
+  if (!collection || collection === "portals") return;
   var item = creativeFindRecord(collection, creativeSelected.id);
   if (!item) return;
   var before = creativeClone(item);
@@ -600,29 +727,134 @@ function creativeResizeSelected(delta) {
 }
 function creativeEditSelectedLabel() {
   if (!creativeSelected || creativeSelected.type !== "label") return;
-  var label = creativeFindRecord("labels", creativeSelected.id);
-  if (!label) return;
-  var next = appPromptMessage("msg009", "Editar texto do mapa:", label.text || "");
-  if (next == null) return;
-  creativeBeginTransaction();
-  var before = creativeClone(label);
-  label.text = String(next).trim().slice(0, 160);
-  creativeRecordArrayChange("labels", label, before, label);
-  creativeCommitTransaction(); save(); draw(); creativeRenderInspector();
+  var field = R && R.querySelector('#mp-creator-inspector [data-creator-field="text"]');
+  if (field) { field.focus(); field.select(); }
+}
+function creativeInspectorField(label, field, value, type, extra) {
+  extra = extra || {};
+  var valueAttr = type === "checkbox" ? (value ? " checked" : "") : ' value="' + esc(value == null ? "" : value) + '"';
+  var attrs = Object.keys(extra).map(function(key) { return " " + key + '="' + esc(extra[key]) + '"'; }).join("");
+  var input = '<input type="' + type + '" data-creator-field="' + field + '"' + valueAttr + attrs + '>';
+  return '<label class="mp-creator-field"><span>' + esc(label) + '</span>' + input + '</label>';
+}
+function creativeInspectorSelect(label, field, value, options) {
+  return '<label class="mp-creator-field"><span>' + esc(label) + '</span><select data-creator-field="' + field + '">' + options.map(function(option) {
+    return '<option value="' + esc(option[0]) + '"' + (String(value) === String(option[0]) ? ' selected' : '') + '>' + esc(option[1]) + '</option>';
+  }).join("") + '</select></label>';
 }
 function creativeRenderInspector() {
   if (!R) return;
   var box = R.querySelector("#mp-creator-inspector");
   if (!box) return;
-  if (!creativeSelected) { box.innerHTML = '<span class="mp-creator-muted">Selecione um objeto no mapa para editar, mover, girar ou excluir.</span>'; return; }
-  var collection = creativeSelected.type === "decoration" ? "decorations" : creativeSelected.type === "label" ? "labels" : "lights";
-  var item = creativeFindRecord(collection, creativeSelected.id);
-  if (!item) { box.innerHTML = '<span class="mp-creator-muted">Nenhum objeto selecionado.</span>'; return; }
-  var assetInfo = item.kind === "image" ? creativeFindRecord("assets", item.assetId) : null;
-  var title = creativeSelected.type === "decoration" ? assetInfo && assetInfo.name || (CREATIVE_OBJECTS[item.kind] || {}).label || "Objeto" : creativeSelected.type === "label" ? "Texto" : "Fonte de luz";
-  var editActions = creativeSelected.type === "decoration" ? '<button type="button" data-creator-action="smaller">− Tamanho</button><button type="button" data-creator-action="larger">＋ Tamanho</button><button type="button" data-creator-action="rotate">↻ Girar</button>' : creativeSelected.type === "label" ? '<button type="button" data-creator-action="smaller">− Texto</button><button type="button" data-creator-action="larger">＋ Texto</button><button type="button" data-creator-action="edit-label">✎ Editar texto</button>' : '<span>Raio: ' + (item.radius || creativeLightRadius) + ' células</span><button type="button" data-creator-action="smaller">− Raio</button><button type="button" data-creator-action="larger">＋ Raio</button>';
-  box.innerHTML = '<div class="mp-creator-selection"><strong>' + esc(title) + '</strong><span>Coluna ' + (item.x + 1) + ' · Linha ' + (item.y + 1) + '</span><div class="mp-creator-selection-actions">' + editActions + '<button type="button" class="danger" data-creator-action="delete">Excluir</button></div></div>';
+  if (!creativeSelected) { box.innerHTML = '<span class="mp-creator-muted">Clique em um elemento do cenário para abrir suas propriedades. Você poderá mover, ajustar ou excluir o item.</span>'; return; }
+  if (creativeSelected.type === "edge") {
+    var edgeVal = getEdgeVal(creativeSelected.edge), edgeMeta = getEdgeMeta(creativeSelected.edge) || {};
+    box.innerHTML = '<div class="mp-creator-selection"><strong>' + esc(edgeVal === EDGE_NONE ? "Estrutura removida" : edgeActionLabel(edgeVal, edgeMeta)) + '</strong><span>Estrutura da grade selecionada</span><div class="mp-creator-selection-actions">' + (edgeVal === EDGE_NONE ? '' : '<button type="button" data-creator-action="edit-structure">⚙ Editar propriedades</button>') + '</div></div>';
+    return;
+  }
+  if (creativeSelected.type === "wallCell") {
+    var wallMeta = state.wallMeta && state.wallMeta[creativeSelected.id] || {};
+    box.innerHTML = '<div class="mp-creator-selection"><strong>Parede de célula</strong><span>Coluna ' + (creativeSelected.x + 1) + ' · Linha ' + (creativeSelected.y + 1) + '</span><span>Material: ' + esc((OBJECT_MATERIALS[wallMeta.material] || OBJECT_MATERIALS.pedra).label) + '</span><div class="mp-creator-selection-actions"><button type="button" data-creator-action="edit-cell-wall">⚙ Editar propriedades</button></div></div>';
+    return;
+  }
+  if (creativeSelected.type === "terrain") {
+    var materialOptions = Object.keys(CREATIVE_MATERIALS).map(function(key) { return [key, CREATIVE_MATERIALS[key].label]; });
+    box.innerHTML = '<div class="mp-creator-selection"><strong>Piso / terreno</strong><span>Coluna ' + (creativeSelected.x + 1) + ' · Linha ' + (creativeSelected.y + 1) + '</span></div><div class="mp-creator-fields">' + creativeInspectorSelect("Material", "material", creativeGetTerrain(creativeSelected.index), materialOptions) + '</div><div class="mp-creator-selection-actions"><button type="button" class="danger" data-creator-action="delete">Apagar piso</button></div>';
+    return;
+  }
+  var collection = creativeSelectedCollection();
+  var item = collection && creativeFindRecord(collection, creativeSelected.id);
+  if (!item) { box.innerHTML = '<span class="mp-creator-muted">O elemento selecionado não está mais disponível.</span>'; return; }
+  var html = '', title = "Elemento do cenário", actions = '';
+  if (creativeSelected.type === "decoration") {
+    var assetInfo = item.kind === "image" ? creativeFindRecord("assets", item.assetId) : null;
+    title = assetInfo && assetInfo.name || (CREATIVE_OBJECTS[item.kind] || {}).label || "Objeto";
+    var objectOptions = Object.keys(CREATIVE_OBJECTS).map(function(key) { return [key, CREATIVE_OBJECTS[key].label]; });
+    if ((state.assets || []).length) objectOptions.push(["image", "Imagem personalizada"]);
+    html += creativeInspectorSelect("Tipo de objeto", "kind", item.kind, objectOptions);
+    if (item.kind === "image" && (state.assets || []).length) {
+      html += creativeInspectorSelect("Imagem", "assetId", item.assetId, state.assets.map(function(asset) { return [asset.id, asset.name]; }));
+    }
+    html += creativeInspectorField("Coluna", "x", item.x + 1, "number", { min: 1, max: COLS, step: 1 });
+    html += creativeInspectorField("Linha", "y", item.y + 1, "number", { min: 1, max: ROWS, step: 1 });
+    html += creativeInspectorField("Tamanho", "size", item.size, "range", { min: .28, max: 1.8, step: .04 });
+    html += creativeInspectorField("Rotação", "rotation", item.rotation || 0, "range", { min: 0, max: 359, step: 1 });
+    actions = '<button type="button" data-creator-action="rotate">↻ Girar 45°</button><button type="button" class="danger" data-creator-action="delete">Excluir objeto</button>';
+  } else if (creativeSelected.type === "label") {
+    title = "Texto / identificação";
+    html += '<label class="mp-creator-field mp-creator-field-full"><span>Texto</span><textarea data-creator-field="text" maxlength="160" rows="3">' + esc(item.text || "") + '</textarea></label>';
+    html += creativeInspectorField("Cor", "color", item.color || "#ffffff", "color");
+    html += creativeInspectorField("Tamanho da fonte", "size", item.size || 17, "range", { min: 10, max: 40, step: 1 });
+    html += creativeInspectorSelect("Alinhamento", "align", item.align || "center", [["left", "Esquerda"], ["center", "Centralizado"], ["right", "Direita"]]);
+    html += creativeInspectorField("Fundo / balão", "bubble", !!item.bubble, "checkbox");
+    html += creativeInspectorField("Negrito", "bold", item.bold !== false, "checkbox");
+    html += creativeInspectorField("Coluna", "x", item.x + 1, "number", { min: 1, max: COLS, step: 1 });
+    html += creativeInspectorField("Linha", "y", item.y + 1, "number", { min: 1, max: ROWS, step: 1 });
+    actions = '<button type="button" class="danger" data-creator-action="delete">Excluir texto</button>';
+  } else if (creativeSelected.type === "light") {
+    title = "Fonte de luz decorativa";
+    html += creativeInspectorField("Cor da luz", "color", item.color || "#ffd36a", "color");
+    html += creativeInspectorField("Raio (células)", "radius", item.radius || 5, "range", { min: 1, max: 16, step: 1 });
+    html += creativeInspectorField("Intensidade", "intensity", item.intensity || .42, "range", { min: .08, max: .85, step: .01 });
+    html += creativeInspectorField("Coluna", "x", item.x + 1, "number", { min: 1, max: COLS, step: 1 });
+    html += creativeInspectorField("Linha", "y", item.y + 1, "number", { min: 1, max: ROWS, step: 1 });
+    actions = '<button type="button" class="danger" data-creator-action="delete">Excluir luz</button>';
+  } else if (creativeSelected.type === "portal") {
+    title = "Portal de teletransporte";
+    html += creativeInspectorField("Cor do portal", "color", item.color || "#36a9e1", "color");
+    html += '<div class="mp-creator-muted">Ponto selecionado: ' + (creativeSelected.endpoint === "destination" ? "destino" : "origem") + '</div>';
+    html += creativeInspectorField("Origem · coluna", "portalX", item.x + 1, "number", { min: 1, max: COLS, step: 1 });
+    html += creativeInspectorField("Origem · linha", "portalY", item.y + 1, "number", { min: 1, max: ROWS, step: 1 });
+    if (item.destMapId) {
+      html += '<div class="mp-creator-muted">Mapa de destino: ' + esc((MAPS[item.destMapId] && MAPS[item.destMapId].nome) || item.destMapId) + '</div>';
+    } else {
+      html += creativeInspectorField("Destino · coluna", "portalDestX", Number(item.destX) + 1, "number", { min: 1, max: COLS, step: 1 });
+      html += creativeInspectorField("Destino · linha", "portalDestY", Number(item.destY) + 1, "number", { min: 1, max: ROWS, step: 1 });
+    }
+    actions = '<button type="button" class="danger" data-creator-action="delete">Excluir portal</button>';
+  }
+  box.innerHTML = '<div class="mp-creator-selection"><strong>' + esc(title) + '</strong><span>Editor do elemento selecionado</span></div><div class="mp-creator-fields">' + html + '</div><div class="mp-creator-selection-actions">' + actions + '</div>';
 }
+function creativeApplySelectedField(field) {
+  if (!creativeSelected || !field) return;
+  var key = field.getAttribute("data-creator-field"), value;
+  if (!key) return;
+  if (field.type === "checkbox") value = !!field.checked;
+  else if (field.type === "number" || field.type === "range") value = Number(field.value);
+  else value = field.value;
+  if (creativeSelected.type === "terrain") {
+    if (key !== "material" || !CREATIVE_MATERIALS[value]) return;
+    creativeBeginTerrainTransaction(); creativeSetTerrain(creativeSelected.index, value); creativeCommitTransaction();
+    creativeSelected.material = value; save(); draw(); creativeRenderInspector(); return;
+  }
+  var collection = creativeSelectedCollection();
+  if (!collection) return;
+  var item = creativeFindRecord(collection, creativeSelected.id);
+  if (!item) return;
+  var before = creativeClone(item);
+  if (key === "x" || key === "y") item[key] = Math.max(0, Math.min((key === "x" ? COLS : ROWS) - 1, Math.round(value - 1)));
+  else if (key === "portalX" && creativeSelected.type === "portal") item.x = Math.max(0, Math.min(COLS - 1, Math.round(value - 1)));
+  else if (key === "portalY" && creativeSelected.type === "portal") item.y = Math.max(0, Math.min(ROWS - 1, Math.round(value - 1)));
+  else if (key === "portalDestX" && creativeSelected.type === "portal" && !item.destMapId) item.destX = Math.max(0, Math.min(COLS - 1, Math.round(value - 1)));
+  else if (key === "portalDestY" && creativeSelected.type === "portal" && !item.destMapId) item.destY = Math.max(0, Math.min(ROWS - 1, Math.round(value - 1)));
+  else if (key === "size" && creativeSelected.type === "decoration") item.size = Math.max(.28, Math.min(1.8, value));
+  else if (key === "rotation" && creativeSelected.type === "decoration") item.rotation = ((Math.round(value) % 360) + 360) % 360;
+  else if (key === "kind" && creativeSelected.type === "decoration") {
+    if (value === "image" && (state.assets || []).length) { item.kind = "image"; item.assetId = item.assetId || state.assets[0].id; item.glyph = "▧"; }
+    else if (CREATIVE_OBJECTS[value]) { item.kind = value; item.assetId = null; item.glyph = CREATIVE_OBJECTS[value].glyph; }
+  } else if (key === "assetId" && creativeSelected.type === "decoration") { if ((state.assets || []).some(function(asset) { return asset.id === value; })) { item.kind = "image"; item.assetId = value; } }
+  else if (key === "text" && creativeSelected.type === "label") item.text = String(value).trim().slice(0, 160) || "Texto";
+  else if (key === "color" && /^#[0-9a-f]{6}$/i.test(String(value)) && ["label", "light", "portal"].indexOf(creativeSelected.type) >= 0) item.color = value;
+  else if (key === "size" && creativeSelected.type === "label") item.size = Math.max(10, Math.min(40, value));
+  else if (key === "align" && creativeSelected.type === "label" && ["left", "center", "right"].indexOf(value) >= 0) item.align = value;
+  else if ((key === "bubble" || key === "bold") && creativeSelected.type === "label") item[key] = !!value;
+  else if (key === "radius" && creativeSelected.type === "light") item.radius = Math.max(1, Math.min(16, value));
+  else if (key === "intensity" && creativeSelected.type === "light") item.intensity = Math.max(.08, Math.min(.85, value));
+  else return;
+  creativeBeginTransaction(); creativeRecordArrayChange(collection, item, before, item); creativeCommitTransaction();
+  save(); draw(); creativeRenderInspector(); creativeUpdateHistoryButtons();
+}
+
 function creativeToolButton(toolName, label, icon, hint) {
   return '<button type="button" class="mp-creator-tool" data-creator-tool="' + toolName + '" title="' + (hint || label) + '"><span class="mp-creator-tool-icon">' + icon + '</span><span>' + label + '</span></button>';
 }
@@ -633,12 +865,10 @@ function creativeInstallUi() {
   if (!main) return;
   var shell = document.createElement("div");
   shell.className = "mp-creator-ui";
-  shell.innerHTML = '<header class="mp-creator-topbar"><div class="mp-creator-brand"><span class="mp-creator-mark">✣</span><div><strong>Animalysson Studio</strong><small>EDITOR DE MAPAS</small></div></div><div class="mp-creator-map-host"></div><div class="mp-creator-top-actions"><button type="button" id="mp-new-map" title="Criar um mapa vazio com grade">＋ Novo mapa</button><button type="button" id="mp-creator-undo" title="Desfazer (Ctrl+Z)" disabled>↶</button><button type="button" id="mp-creator-redo" title="Refazer (Ctrl+Y)" disabled>↷</button><button type="button" id="mp-creator-save">⬇ Exportar</button></div></header><aside class="mp-creator-panel mp-editor-only"><div class="mp-creator-panel-head"><div><small>CONSTRUÇÃO</small><strong>Ferramentas</strong></div><span class="mp-creator-hotkey">B · R · E</span></div><div class="mp-creator-toolgrid">' +
+  shell.innerHTML = '<header class="mp-creator-topbar"><div class="mp-creator-brand"><span class="mp-creator-mark">✣</span><div><strong>Animalysson Studio</strong><small>EDITOR DE MAPAS</small></div></div><div class="mp-creator-map-host"></div><div class="mp-creator-top-actions"><button type="button" id="mp-new-map" title="Criar um mapa vazio com grade">＋ Novo mapa</button><button type="button" id="mp-creator-undo" title="Desfazer (Ctrl+Z)" disabled>↶</button><button type="button" id="mp-creator-redo" title="Refazer (Ctrl+Y)" disabled>↷</button><button type="button" id="mp-creator-save">⬇ Exportar</button></div></header><aside class="mp-creator-panel mp-editor-only"><div class="mp-creator-panel-head"><div><small>CONSTRUÇÃO</small><strong>Ferramentas</strong></div><span class="mp-creator-hotkey">V · B · E</span></div><div class="mp-creator-toolgrid">' +
     creativeToolButton("select", "Selecionar", "↖", "Selecionar e mover elementos") +
     creativeToolButton("pan", "Mover visão", "✥", "Arrastar o mapa") +
-    creativeToolButton("room", "Sala", "▱", "Arraste para criar uma sala com paredes") +
     creativeToolButton("ground", "Pincel", "🖌", "Pintar o terreno selecionado") +
-    creativeToolButton("corridor", "Corredor", "〰", "Pintar um corredor com pincel largo") +
     creativeToolButton("eraseGround", "Borracha", "⌫", "Apagar terreno") +
     creativeToolButton("wall", "Parede", "▥", "Bloquear células") +
     creativeToolButton("muro", "Muro", "━", "Desenhar muro entre dois pontos") +
@@ -677,7 +907,6 @@ function creativeInstallUi() {
     var toolButton = event.target.closest("[data-creator-tool]");
     if (toolButton) {
       var chosenTool = toolButton.getAttribute("data-creator-tool");
-      if (chosenTool === "corridor") { creativeBrushSize = 3; var range = shell.querySelector("#mp-creator-brush"); if (range) range.value = "3"; shell.querySelector("#mp-creator-brush-value").textContent = "3 × 3"; }
       setTool(chosenTool); creativeRenderInspector(); return;
     }
     var materialButton = event.target.closest("[data-material]");
@@ -692,9 +921,15 @@ function creativeInstallUi() {
       if (action === "delete") creativeDeleteSelected();
       else if (action === "rotate") creativeRotateSelected();
       else if (action === "edit-label") creativeEditSelectedLabel();
+      else if (action === "edit-structure" && creativeSelected && creativeSelected.edge) openStructureEditor(creativeSelected.edge);
+      else if (action === "edit-cell-wall" && creativeSelected) openCellWallEditor({ x: creativeSelected.x, y: creativeSelected.y });
       else if (action === "smaller") creativeResizeSelected(-1);
       else if (action === "larger") creativeResizeSelected(1);
     }
+  });
+  shell.addEventListener("change", function(event) {
+    var field = event.target.closest("[data-creator-field]");
+    if (field) creativeApplySelectedField(field);
   });
   var importImageButton = shell.querySelector("#mp-creator-import-image"), imageInput = shell.querySelector("#mp-creator-image-input");
   importImageButton.onclick = function() { imageInput.click(); };
@@ -789,7 +1024,7 @@ function creativePrepareBackgrounds() {
 }
 function creativeHandlePointerDown(event, world, cell) {
   if (appMode !== "editor" || isHexMap()) return false;
-  if (["ground", "corridor", "eraseGround"].indexOf(tool) >= 0) {
+  if (["ground", "eraseGround"].indexOf(tool) >= 0) {
     creativeBeginTerrainTransaction();
     if (event.shiftKey && tool === "ground") {
       creativeFloodFill(cell, creativeMaterial);
@@ -797,11 +1032,6 @@ function creativeHandlePointerDown(event, world, cell) {
     }
     drag = { creativeTerrain: true, material: tool === "eraseGround" ? null : creativeMaterial, lastX: -9999, lastY: -9999 };
     creativePaintBrush(cell, drag.material); drag.lastX = cell.x; drag.lastY = cell.y; draw(); return true;
-  }
-  if (tool === "room") {
-    creativeBeginTerrainTransaction();
-    drag = { creativeRoom: true, startCell: cell, currentCell: cell };
-    draw(); return true;
   }
   if (tool === "object") {
     creativeBeginTransaction();
@@ -823,13 +1053,32 @@ function creativeHandlePointerDown(event, world, cell) {
     creativeAddRecord("lights", light); creativeCommitTransaction(); creativeSelected = { type: "light", id: light.id }; save(); draw(); creativeRenderInspector(); return true;
   }
   if (tool === "select") {
-    var hit = creativeHitTest(world.x, world.y);
-    if (hit) {
-      creativeSelected = { type: hit.type, id: hit.id };
-      creativeBeginTransaction();
-      drag = { creativeMove: true, selected: creativeSelected, before: creativeClone(hit.item) };
-      creativeRenderInspector(); draw(); return true;
+    // Tokens ficam acima da decoração no desenho e continuam sendo tratados pelo VTT original.
+    if (pendingMonster) return false;
+    var tokenAtCell = cell.x >= 0 && cell.y >= 0 && cell.x < COLS && cell.y < ROWS && (state.tokens || []).some(function(token) {
+      var size = token.raio || 1;
+      return isTokenVisible(token) && cell.x >= token.x && cell.x < token.x + size && cell.y >= token.y && cell.y < token.y + size;
+    });
+    if (tokenAtCell) {
+      creativeSelected = null; creativeRenderInspector(); draw(); return false;
     }
+    var hit = creativeHitTest(world.x, world.y);
+    if (!hit) {
+      if (cell.x < 0 || cell.y < 0 || cell.x >= COLS || cell.y >= ROWS) return false;
+      var hadCreativeSelection = !!creativeSelected;
+      creativeSelected = null; creativeRenderInspector(); draw(); return hadCreativeSelection;
+    }
+    creativeSelected = { type: hit.type, id: hit.id, index: hit.index, x: hit.x, y: hit.y, material: hit.material, edge: hit.edge, endpoint: hit.endpoint };
+    creativeRenderInspector(); draw();
+    if (hit.type === "edge") { openStructureEditor(hit.edge); return true; }
+    if (hit.type === "wallCell") { openCellWallEditor({ x: hit.x, y: hit.y }); return true; }
+    if (hit.type === "decoration" || hit.type === "label" || hit.type === "light" || hit.type === "portal") {
+      creativeBeginTransaction();
+      var moveX = hit.type === "portal" && hit.endpoint === "destination" ? hit.item.destX : hit.item.x;
+      var moveY = hit.type === "portal" && hit.endpoint === "destination" ? hit.item.destY : hit.item.y;
+      drag = { creativeMove: true, selected: creativeSelected, before: creativeClone(hit.item), offsetX: cell.x - moveX, offsetY: cell.y - moveY };
+    }
+    return true;
   }
   return false;
 }
@@ -841,11 +1090,14 @@ function creativeHandlePointerMove(event, world, cell) {
     }
     return true;
   }
-  if (drag.creativeRoom) { drag.currentCell = cell; return true; }
   if (drag.creativeMove) {
-    var collection = drag.selected.type === "decoration" ? "decorations" : drag.selected.type === "label" ? "labels" : "lights";
+    var collection = drag.selected.type === "decoration" ? "decorations" : drag.selected.type === "label" ? "labels" : drag.selected.type === "light" ? "lights" : "portals";
     var item = creativeFindRecord(collection, drag.selected.id);
-    if (item && cell.x >= 0 && cell.y >= 0 && cell.x < COLS && cell.y < ROWS) { item.x = cell.x; item.y = cell.y; }
+    var targetX = cell.x - (drag.offsetX || 0), targetY = cell.y - (drag.offsetY || 0);
+    if (item && targetX >= 0 && targetY >= 0 && targetX < COLS && targetY < ROWS) {
+      if (drag.selected.type === "portal" && drag.selected.endpoint === "destination") { item.destX = targetX; item.destY = targetY; }
+      else { item.x = targetX; item.y = targetY; }
+    }
     return true;
   }
   return false;
@@ -855,12 +1107,8 @@ function creativeFinishPointerAction() {
   if (drag.creativeTerrain) {
     creativeCommitTransaction(); save(); drag = null; draw(); creativeUpdateHistoryButtons(); return true;
   }
-  if (drag.creativeRoom) {
-    creativeApplyRoom(drag.startCell, drag.currentCell || drag.startCell);
-    creativeCommitTransaction(); save(); drag = null; draw(); creativeUpdateHistoryButtons(); return true;
-  }
   if (drag.creativeMove) {
-    var collection = drag.selected.type === "decoration" ? "decorations" : drag.selected.type === "label" ? "labels" : "lights";
+    var collection = drag.selected.type === "decoration" ? "decorations" : drag.selected.type === "label" ? "labels" : drag.selected.type === "light" ? "lights" : "portals";
     var item = creativeFindRecord(collection, drag.selected.id);
     if (item) creativeRecordArrayChange(collection, item, drag.before, item);
     creativeCommitTransaction(); save(); drag = null; draw(); creativeRenderInspector(); creativeUpdateHistoryButtons(); return true;
@@ -871,7 +1119,7 @@ function creativeHandleDoubleClick(event) {
   if (appMode !== "editor" || isHexMap() || !cv) return;
   var rect = cv.getBoundingClientRect(), world = screenToWorld(event.clientX - rect.left, event.clientY - rect.top);
   var hit = creativeHitTest(world.x, world.y);
-  if (hit && hit.type === "label") { creativeSelected = { type: hit.type, id: hit.id }; creativeEditSelectedLabel(); }
+  if (hit) { creativeSelected = { type: hit.type, id: hit.id, index: hit.index, x: hit.x, y: hit.y, material: hit.material, edge: hit.edge, endpoint: hit.endpoint }; creativeRenderInspector(); draw(); }
 }
 function creativeHandleKeyboard(event) {
   if (appMode !== "editor") return false;
@@ -885,7 +1133,7 @@ function creativeHandleKeyboard(event) {
     event.preventDefault(); creativeDeleteSelected(); return true;
   }
   if (event.key === "r" || event.key === "R") { if (creativeSelected && creativeSelected.type === "decoration") { creativeRotateSelected(); return true; } }
-  var shortcuts = { b: "ground", B: "ground", e: "eraseGround", E: "eraseGround", r: "room", R: "room", t: "text", T: "text", o: "object", O: "object", l: "light", L: "light", v: "select", V: "select" };
+  var shortcuts = { b: "ground", B: "ground", e: "eraseGround", E: "eraseGround", t: "text", T: "text", o: "object", O: "object", l: "light", L: "light", v: "select", V: "select" };
   if (shortcuts[event.key]) { setTool(shortcuts[event.key]); return true; }
   return false;
 }
