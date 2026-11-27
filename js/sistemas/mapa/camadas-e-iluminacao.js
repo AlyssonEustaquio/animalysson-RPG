@@ -149,10 +149,9 @@ function creativeGetActiveTorchItem(player) {
   return active;
 }
 function creativeTorchLightRadii() {
-  return {
-    bright: CREATIVE_TORCH_BRIGHT_METERS / CREATIVE_METERS_PER_CELL,
-    dim: (CREATIVE_TORCH_BRIGHT_METERS + CREATIVE_TORCH_DIM_EXTRA_METERS) / CREATIVE_METERS_PER_CELL
-  };
+  // A tocha ocupa um único raio total de 6 células. A penumbra é um
+  // gradiente dentro desse mesmo raio, nunca um segundo raio somado.
+  return { bright: 1, dim: 6 };
 }
 function creativeFormatTorchTime(milliseconds) {
   var seconds = Math.max(0, Math.ceil(Number(milliseconds) / 1000));
@@ -781,25 +780,32 @@ function creativeCanSeeCellFromLight(x, y, px, py, radius) {
   var dx = x - px, dy = y - py;
   return dx * dx + dy * dy <= radius * radius + .5 && hasLOS(px, py, x, y);
 }
-function creativeGetCellIllumination(x, y, viewer) {
-  if (!creativeIsDarkCell(x, y)) return "daylight";
-  var best = "dark", player = viewer || (typeof currentPlayer === "function" ? currentPlayer() : null);
-  if (player && player.tipo === "player") {
-    var torch = creativeGetActiveTorchItem(player), radii = creativeTorchLightRadii();
-    if (torch && hasLOS(player.x, player.y, x, y)) {
-      var dx = x - player.x, dy = y - player.y, distance = Math.sqrt(dx * dx + dy * dy);
-      if (distance <= radii.bright + .01) best = "bright";
-      else if (distance <= radii.dim + .01) best = "dim";
-    }
+function creativeTorchIntensityAtDistance(distance) {
+  // Primeiro tile: 100%; sexto tile: 10%. A interpolação é contínua.
+  if (!Number.isFinite(distance) || distance > 6) return 0;
+  if (distance <= 1) return 1;
+  return Math.max(.1, 1 - .9 * ((distance - 1) / 5));
+}
+function creativeGetCellLightIntensity(x, y, viewer) {
+  if (!creativeIsDarkCell(x, y)) return 1;
+  var best = 0, player = viewer || (typeof currentPlayer === "function" ? currentPlayer() : null);
+  if (player && player.tipo === "player" && creativeGetActiveTorchItem(player) && hasLOS(player.x, player.y, x, y)) {
+    var dx = x - Number(player.x), dy = y - Number(player.y);
+    best = Math.max(best, creativeTorchIntensityAtDistance(Math.sqrt(dx * dx + dy * dy)));
   }
   (state && Array.isArray(state.lights) ? state.lights : []).forEach(function(light) {
     if (!light || !hasLOS(Number(light.x), Number(light.y), x, y)) return;
     var dx = x - Number(light.x), dy = y - Number(light.y), distance = Math.sqrt(dx * dx + dy * dy);
-    var brightRadius = Math.max(0, Number(light.radius) || 0), dimRadius = brightRadius * 2;
-    if (distance <= brightRadius + .01) best = "bright";
-    else if (best === "dark" && distance <= dimRadius + .01) best = "dim";
+    var radius = Math.max(0, Number(light.radius) || 0);
+    if (distance <= radius) best = Math.max(best, 1);
+    else if (radius > 0 && distance <= radius * 2) best = Math.max(best, Math.max(.1, 1 - .9 * ((distance - radius) / radius)));
   });
   return best;
+}
+function creativeGetCellIllumination(x, y, viewer) {
+  if (!creativeIsDarkCell(x, y)) return "daylight";
+  var intensity = creativeGetCellLightIntensity(x, y, viewer);
+  return intensity >= .99 ? "bright" : intensity > 0 ? "dim" : "dark";
 }
 function creativeCellVisibleToPlayer(x, y, px, py) {
   if (x < 0 || y < 0 || x >= COLS || y >= ROWS || px < 0 || py < 0) return false;
@@ -807,7 +813,7 @@ function creativeCellVisibleToPlayer(x, y, px, py) {
   if (!hasLOS(px, py, x, y)) return false;
   // Ao ar livre, a visão não tem limite artificial de distância; paredes e portas continuam bloqueando.
   // Em áreas escuras, só é possível enxergar onde uma fonte de luz alcança.
-  return creativeGetCellIllumination(x, y, currentPlayer()) !== "dark";
+  return creativeGetCellLightIntensity(x, y, currentPlayer()) > 0;
 }
 function creativeApplyLayerToolDown(event, world, cell) {
   if (tool === "transition") return creativePlaceTransitionPoint(cell);
@@ -1002,7 +1008,14 @@ drawFogAndLight = function(viewW, viewH) {
   var player = typeof currentPlayer === "function" ? currentPlayer() : null;
   var px = player ? Number(player.x) : -1, py = player ? Number(player.y) : -1;
   var bounds = visibleCellBounds(viewW, viewH);
-  for (var y = bounds.y0; y <= bounds.y1; y++) for (var x = bounds.x0; x <= bounds.x1; x++) {
+  // Culling estrito: processa somente células que intersectam o viewport atual.
+  // Não altera zoom, câmera, escala nem o enquadramento do mapa.
+  var x0 = Math.max(0, Math.floor(Number(bounds.x0) || 0));
+  var y0 = Math.max(0, Math.floor(Number(bounds.y0) || 0));
+  var x1 = Math.min(COLS - 1, Math.ceil(Number(bounds.x1) || 0));
+  var y1 = Math.min(ROWS - 1, Math.ceil(Number(bounds.y1) || 0));
+  if (x1 < x0 || y1 < y0) return;
+  for (var y = y0; y <= y1; y++) for (var x = x0; x <= x1; x++) {
     var visible = player && isCurrentlyVisible(x, y, px, py, creativeGetVisibilityRadius(player, x, y));
     if (!visible) {
       var fogged = showFog && state.fog && state.fog[idx(x, y)];
@@ -1011,9 +1024,12 @@ drawFogAndLight = function(viewW, viewH) {
       continue;
     }
     if (creativeIsDarkCell(x, y)) {
-      var illumination = creativeGetCellIllumination(x, y, player);
-      if (illumination === "dim") {
-        cx.fillStyle = "rgba(0,0,0,.38)";
+      var intensity = creativeGetCellLightIntensity(x, y, player);
+      // A escuridão é desenhada apenas no trecho visível da tela. A opacidade
+      // acompanha a intensidade da luz: 0% no primeiro tile e 90% no sexto.
+      var darkness = Math.max(0, Math.min(1, 1 - intensity));
+      if (darkness > 0) {
+        cx.fillStyle = "rgba(0,0,0," + darkness.toFixed(3) + ")";
         cx.fillRect(x * CELL, y * CELL, CELL + .5, CELL + .5);
       }
     }
