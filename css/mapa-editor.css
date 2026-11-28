@@ -548,6 +548,27 @@ html body #app.view-maps #mp-root .vtt-wrap {
   font-weight: 600;
   cursor: pointer;
 }
+#mp-root .mp-creator-advanced-controls > #mp-export.mp-creator-export-current-map {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-height: 42px;
+  box-sizing: border-box;
+  padding: 9px 12px;
+  border: 1px solid #bd9455;
+  border-radius: 8px;
+  background: linear-gradient(180deg,#75552d,#553d22);
+  color: #fff1d2;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.3;
+  text-align: center;
+  white-space: normal;
+}
+#mp-root .mp-creator-advanced-controls > #mp-export.mp-creator-export-current-map:hover {
+  border-color: #e3bd78;
+  background: linear-gradient(180deg,#8a6638,#674a29);
+  color: #fff9eb;
+}
 #mp-root .mp-creator-advanced-controls > button:hover,
 #mp-root .mp-creator-advanced-controls > button.on,
 #mp-root .mp-creator-advanced-controls > button.active {

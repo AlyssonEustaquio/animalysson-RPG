@@ -1368,7 +1368,14 @@ function creativeInstallUi() {
       var target = moveParent ? node.parentElement : node;
       if (target) host.appendChild(target);
     }
-    ["mp-world-move", "mp-world-spawn", "mp-world-portal", "mp-world-local-portal", "mp-export-catalog", "mp-tile-size-wrap", "mp-hex-wrap", "mp-speed-wrap"].forEach(function(id) { moveAdvancedControl(id, worldHost, false); });
+    ["mp-world-move", "mp-world-spawn", "mp-world-portal", "mp-world-local-portal", "mp-export", "mp-export-catalog", "mp-tile-size-wrap", "mp-hex-wrap", "mp-speed-wrap"].forEach(function(id) { moveAdvancedControl(id, worldHost, false); });
+    var saveCurrentMapButton = R.querySelector("#mp-export");
+    if (saveCurrentMapButton) {
+      saveCurrentMapButton.textContent = "⬇ Salvar dados do mapa atual";
+      saveCurrentMapButton.title = "Exporta o mapa atual em JSON ou ZIP, pronto para atualizar os arquivos correspondentes no GitHub";
+      saveCurrentMapButton.setAttribute("aria-label", "Salvar dados do mapa atual para atualizar no GitHub");
+      saveCurrentMapButton.classList.add("mp-creator-export-current-map");
+    }
     ["mp-grid", "mp-fog", "mp-light", "mp-walls-vis", "mp-secret-view", "mp-block", "mp-lr"].forEach(function(id) { moveAdvancedControl(id, viewHost, id === "mp-block" || id === "mp-lr"); });
     ["mp-reset-fog", "mp-clear-fog", "mp-zo", "mp-zi"].forEach(function(id) { moveAdvancedControl(id, viewHost, false); });
     ["mp-clear-walls", "mp-clear-edges"].forEach(function(id) { moveAdvancedControl(id, cleanupHost, false); });
