@@ -47,6 +47,7 @@ var creativeUiReady = false;
 var creativeTextureSeed = 0;
 var creativeActivePanel = "";
 var creativeAdvancedTab = "structures";
+var creativeTokenSelectionId = null;
 
 function creativeClone(value) {
   return value == null ? value : JSON.parse(JSON.stringify(value));
@@ -1051,26 +1052,184 @@ function creativeOnToolChanged(name) {
   else if (["raiseTerrain", "lowerTerrain", "interiorZone", "transition"].indexOf(name) >= 0) creativeAdvancedTab = "levels";
   if (typeof creativeUpdateContextPanels === "function") creativeUpdateContextPanels();
 }
+function creativeTokenManagerCombat() {
+  return typeof getCombat === "function" ? getCombat() : null;
+}
+function creativeTokenManagerRefresh(token) {
+  if (token) selected = token;
+  if (typeof combatRefreshUi === "function") combatRefreshUi();
+  else {
+    if (typeof save === "function") save();
+    if (typeof draw === "function") draw();
+  }
+  creativeRenderTokenPanel();
+}
+function creativeRenderTokenManager(token) {
+  var manager = R && R.querySelector("#mp-creator-token-editor");
+  if (!manager) return;
+  if (!token) {
+    manager.innerHTML = '<div class="mp-creator-token-empty">Selecione um personagem, criatura ou NPC da lista para editar PV, cura, dano e condições.</div>';
+    return;
+  }
+  var C = creativeTokenManagerCombat();
+  if (C && typeof C.preparar === "function") C.preparar(token);
+  var stats = C && typeof C.stats === "function" ? C.stats(token) : {};
+  var hpMax = Math.max(1, Number(token.hpMax) || Number(stats.pvMax) || 1);
+  var hp = Math.max(0, Math.min(hpMax, Number(token.hp == null ? hpMax : token.hp)));
+  var hpTemp = Math.max(0, Number(token.hpTemp) || 0);
+  var armor = Number(token.ca || stats.ca) || 10;
+  var conditions = C && C.CONDICOES ? C.CONDICOES : {};
+  var conditionHtml = Object.keys(conditions).map(function(id) {
+    var active = (token.condicoes || []).some(function(condition) { return condition && condition.id === id; });
+    return '<button type="button" class="mp-creator-token-condition' + (active ? ' active' : '') + '" data-token-condition="' + esc(id) + '" aria-pressed="' + (active ? 'true' : 'false') + '">' + esc(conditions[id]) + '</button>';
+  }).join("");
+  var isPlayer = token.tipo === "player" || token.heroi === true;
+  manager.innerHTML =
+    '<div class="mp-creator-token-editor-head"><div><strong>' + esc(token.nome || (isPlayer ? "Personagem" : "Criatura / NPC")) + '</strong><small>' + (isPlayer ? 'Personagem jogador' : 'Criatura / NPC') + '</small></div>' +
+    (token.morto ? '<span class="mp-creator-token-dead">Derrotado</span>' : '') + '</div>' +
+    '<div class="mp-creator-token-fields mp-creator-token-vitals">' +
+      '<label>PV atuais<input type="number" min="0" max="99999" step="1" data-token-field="hp" value="' + hp + '"></label>' +
+      '<label>PV máximos<input type="number" min="1" max="99999" step="1" data-token-field="hpMax" value="' + hpMax + '"></label>' +
+      '<button type="button" data-token-action="full-heal" title="Preencher os PV até o máximo"' + (token.morto ? ' disabled' : '') + '>Máx. PV</button>' +
+    '</div>' +
+    '<div class="mp-creator-token-fields">' +
+      '<label>PV temporários<input type="number" min="0" max="99999" step="1" data-token-field="hpTemp" value="' + hpTemp + '"></label>' +
+      '<label>Classe de armadura<input type="number" min="0" max="99" step="1" data-token-field="ca" value="' + armor + '"></label>' +
+      '<label>Exaustão (0–6)<input type="number" min="0" max="6" step="1" data-token-field="exaustao" value="' + Math.max(0, Math.min(6, Number(token.exaustao) || 0)) + '"></label>' +
+    '</div>' +
+    '<div class="mp-creator-token-fields mp-creator-token-extra-state">' +
+      '<label>Concentração<input type="text" maxlength="80" data-token-field="concentracao" value="' + esc(token.concentracao || '') + '" placeholder="Magia / efeito"></label>' +
+      '<label class="mp-creator-token-check"><input type="checkbox" data-token-field="escondido"' + (token.escondido ? ' checked' : '') + '> Escondido</label>' +
+    '</div>' +
+    '<div class="mp-creator-token-action-fields">' +
+      '<label>Cura (PV)<input type="number" min="1" max="99999" step="1" data-token-amount="heal" value="5"></label>' +
+      '<button type="button" data-token-action="heal"' + (token.morto ? ' disabled' : '') + '>＋ Aplicar cura</button>' +
+      '<label>Dano (PV)<input type="number" min="1" max="99999" step="1" data-token-amount="damage" value="5"></label>' +
+      '<button type="button" data-token-action="damage">－ Aplicar dano</button>' +
+    '</div>' +
+    '<label class="mp-creator-token-faction">Equipe / facção<select data-token-field="faccao"><option value="jogadores">Jogadores / aliados</option><option value="monstros">Monstros / inimigos</option></select></label>' +
+    '<div class="mp-creator-token-condition-wrap"><strong>Condições e status</strong><div class="mp-creator-token-conditions">' + conditionHtml + '</div></div>' +
+    '<div class="mp-creator-token-manager-actions">' +
+      (token.morto || hp <= 0 ? '<button type="button" class="primary" data-token-action="revive">♥ Reviver</button>' : '') +
+      '<button type="button" data-token-action="clear-conditions">Limpar condições</button>' +
+      '<button type="button" data-token-action="save">Salvar alterações</button>' +
+    '</div>';
+
+  var faction = manager.querySelector('[data-token-field="faccao"]');
+  if (faction) faction.value = C && typeof C.faccao === "function" ? C.faccao(token) : (token.faccao || (isPlayer ? "jogadores" : "monstros"));
+  manager.querySelectorAll("[data-token-field]").forEach(function(input) {
+    input.addEventListener("change", function() {
+      var field = input.getAttribute("data-token-field"), value = Number(input.value);
+      if (field === "faccao") token.faccao = input.value;
+      else if (field === "concentracao") token.concentracao = input.value.trim() || null;
+      else if (field === "escondido") token.escondido = !!input.checked;
+      else if (field === "hp") {
+        var nextHp = Math.max(0, Math.min(Number(token.hpMax) || hpMax, Math.round(Number.isFinite(value) ? value : 0)));
+        if (nextHp > 0 && Number(token.hp) <= 0) {
+          token.morto = false;
+          token.mortes = { s: 0, f: 0 };
+          token.estavel = false;
+          if (C && typeof C.removerCondicao === "function") C.removerCondicao(token, "inconsciente");
+          else token.condicoes = (token.condicoes || []).filter(function(condition) { return condition.id !== "inconsciente"; });
+        }
+        token.hp = nextHp;
+      }
+      else if (field === "hpMax") {
+        token.hpMax = Math.max(1, Math.round(Number.isFinite(value) ? value : hpMax));
+        token.hp = Math.min(Number(token.hp) || 0, token.hpMax);
+      } else if (field === "hpTemp") token.hpTemp = Math.max(0, Math.round(Number.isFinite(value) ? value : 0));
+      else if (field === "ca") token.ca = Math.max(0, Math.round(Number.isFinite(value) ? value : 0));
+      else if (field === "exaustao") {
+        token.exaustao = Math.max(0, Math.min(6, Math.round(Number.isFinite(value) ? value : 0)));
+        if (token.exaustao >= 6) { token.hp = 0; token.morto = true; }
+      }
+      if (token.hp > 0 && token.morto && field === "hp") token.morto = false;
+      creativeTokenManagerRefresh(token);
+    });
+  });
+  manager.querySelectorAll("[data-token-condition]").forEach(function(button) {
+    button.addEventListener("click", function() {
+      if (!C || typeof C.aplicarCondicao !== "function" || typeof C.removerCondicao !== "function") return;
+      var id = button.getAttribute("data-token-condition");
+      var active = (token.condicoes || []).some(function(condition) { return condition && condition.id === id; });
+      if (active) C.removerCondicao(token, id);
+      else C.aplicarCondicao(token, id, {});
+      creativeTokenManagerRefresh(token);
+    });
+  });
+  manager.querySelectorAll("[data-token-action]").forEach(function(button) {
+    button.addEventListener("click", function() {
+      var action = button.getAttribute("data-token-action");
+      var actionLog = [];
+      if (action === "save") { creativeTokenManagerRefresh(token); return; }
+      if (action === "full-heal") {
+        if (token.morto) return;
+        var missingHp = Math.max(0, (Number(token.hpMax) || hpMax) - (Number(token.hp) || 0));
+        if (C && typeof C.curar === "function") actionLog = C.curar(token, missingHp) || [];
+        else token.hp = Number(token.hpMax) || hpMax;
+      } else if (action === "heal" || action === "damage") {
+        var amountInput = manager.querySelector('[data-token-amount="' + action + '"]');
+        var amount = Math.max(0, Math.round(Number(amountInput && amountInput.value) || 0));
+        if (!amount) return;
+        if (action === "heal") {
+          if (token.morto) return;
+          if (C && typeof C.curar === "function") actionLog = C.curar(token, amount) || [];
+          else token.hp = Math.min(Number(token.hpMax) || hpMax, (Number(token.hp) || 0) + amount);
+        } else {
+          if (C && typeof C.aplicarDano === "function") {
+            var damageResult = C.aplicarDano(token, [{ valor: amount, tipo: null }], {});
+            actionLog = damageResult && damageResult.linhas || [];
+          } else {
+            token.hp = Math.max(0, (Number(token.hp) || 0) - amount);
+            if (!token.hp) token.morto = true;
+          }
+        }
+      } else if (action === "revive") {
+        token.morto = false;
+        token.hp = Math.max(1, Number(token.hp) || 1);
+        token.mortes = { s: 0, f: 0 };
+        token.estavel = false;
+        if (C && typeof C.removerCondicao === "function") C.removerCondicao(token, "inconsciente");
+        else token.condicoes = (token.condicoes || []).filter(function(condition) { return condition.id !== "inconsciente"; });
+      } else if (action === "clear-conditions") {
+        token.condicoes = [];
+      }
+      if (C && typeof C.registrar === "function" && actionLog.length) C.registrar(actionLog);
+      creativeTokenManagerRefresh(token);
+    });
+  });
+}
 function creativeRenderTokenPanel() {
   if (!R || !state) return;
   var host = R.querySelector("#mp-creator-token-list");
   if (!host) return;
-  var levelId = typeof creativeLevelId === "function" ? creativeLevelId() : null;
-  var tokens = (state.tokens || []).filter(function(token) {
-    return token && (!levelId || !token.layerId || token.layerId === levelId);
-  });
+  var tokens = (state.tokens || []).filter(function(token) { return !!token; });
   if (!tokens.length) {
-    host.innerHTML = '<div class="mp-creator-token-empty">Nenhum token neste andar. Abra o Bestiário para adicionar uma criatura ou NPC.</div>';
+    host.innerHTML = '<div class="mp-creator-token-empty">Nenhum personagem, criatura ou NPC neste mapa. Use o Bestiário para adicionar um token.</div>';
+    creativeRenderTokenManager(null);
     return;
+  }
+  if (!creativeTokenSelectionId || !tokens.some(function(token) { return String(token.id || "") === creativeTokenSelectionId; })) {
+    var selectedToken = tokens.find(function(token) { return token === selected; }) || tokens[0];
+    creativeTokenSelectionId = String(selectedToken.id || "");
   }
   host.innerHTML = tokens.map(function(token) {
     var id = String(token.id || "");
     var isPlayer = token.tipo === "player";
     var name = token.nome || (isPlayer ? "Personagem jogador" : token.monsterId || "Criatura");
+    var C = creativeTokenManagerCombat();
+    if (C && typeof C.preparar === "function") C.preparar(token);
     var hp = token.hp != null && token.hpMax != null ? '<small>' + esc(token.hp) + '/' + esc(token.hpMax) + ' PV</small>' : "";
-    var selectedNow = typeof selected !== "undefined" && selected === token;
-    return '<button type="button" class="mp-creator-token-row' + (selectedNow ? ' active' : '') + '" data-creator-token-select="' + esc(id) + '"><span class="mp-creator-token-avatar">' + (isPlayer ? '♟' : '♙') + '</span><span class="mp-creator-token-name"><strong>' + esc(name) + '</strong><small>' + (isPlayer ? 'Personagem jogador' : 'Criatura / NPC') + '</small></span>' + hp + '</button>';
+    var selectedNow = creativeTokenSelectionId === id;
+    var dead = token.morto || Number(token.hp) <= 0;
+    var tokenLevel = token.layerId && (state.levels || []).find(function(level) { return level && level.id === token.layerId; });
+    var levelLabel = tokenLevel && tokenLevel.name ? ' · ' + esc(tokenLevel.name) : '';
+    var lifeLabel = token.morto ? ' · Derrotado' : Number(token.hp) <= 0 ? ' · 0 PV' : '';
+    return '<button type="button" class="mp-creator-token-row' + (selectedNow ? ' active' : '') + (dead ? ' defeated' : '') + '" data-creator-token-select="' + esc(id) + '"><span class="mp-creator-token-avatar">' + (isPlayer ? '♟' : '♙') + '</span><span class="mp-creator-token-name"><strong>' + esc(name) + '</strong><small>' + (isPlayer ? 'Personagem jogador' : 'Criatura / NPC') + levelLabel + lifeLabel + '</small></span>' + hp + '</button>';
   }).join("");
+  var current = tokens.find(function(token) { return String(token.id || "") === creativeTokenSelectionId; }) || null;
+  if (current) selected = current;
+  creativeRenderTokenManager(current);
 }
 function creativeUpdateAdvancedTabs(shell) {
   shell = shell || (R && R.querySelector(".mp-creator-ui"));
@@ -1167,7 +1326,7 @@ function creativeInstallUi() {
     '<section class="mp-creator-advanced-content" data-creator-advanced-content="levels" hidden><div class="mp-creator-advanced-group"><strong>Camadas e andares</strong><div id="mp-creator-advanced-level-host"></div></div></section>' +
     '<section class="mp-creator-advanced-content" data-creator-advanced-content="settings" hidden><div class="mp-creator-advanced-group"><strong>Configurações do mapa</strong><div class="mp-creator-advanced-controls" id="mp-creator-world-controls"></div><div class="mp-creator-advanced-controls" id="mp-creator-view-controls"></div></div></section>' +
     '<section class="mp-creator-advanced-content" data-creator-advanced-content="cleanup" hidden><div class="mp-creator-advanced-group"><strong>Limpeza e redefinição</strong><div class="mp-creator-advanced-controls" id="mp-creator-cleanup-controls"></div></div></section>' +
-    '<section class="mp-creator-advanced-content" data-creator-advanced-content="tokens" hidden><div class="mp-creator-advanced-group"><strong>Tokens do mapa</strong><p class="mp-creator-muted">Adicione criaturas e NPCs pelo Bestiário. Depois escolha o token e clique no mapa para posicioná-lo.</p><div id="mp-creator-token-host"></div><div id="mp-creator-token-list" class="mp-creator-token-list"></div></div></section>' +
+    '<section class="mp-creator-advanced-content" data-creator-advanced-content="tokens" hidden><div class="mp-creator-advanced-group"><strong>Personagens e status</strong><p class="mp-creator-muted">Gerencie todos os personagens, criaturas e NPCs em todos os andares deste mapa. Selecione um da lista para ajustar PV, cura, dano, condições e outros status.</p><div id="mp-creator-token-host"></div><div id="mp-creator-token-list" class="mp-creator-token-list"></div><div id="mp-creator-token-editor" class="mp-creator-token-editor"></div></div></section>' +
     '</section>' +
     '<section class="mp-creator-section" data-creator-context="inspector" hidden><div class="mp-creator-section-title">Propriedades</div><div id="mp-creator-inspector"></div></section>' +
     '<footer class="mp-creator-footer"><span id="mp-creator-map-stats"></span></footer></aside>';
@@ -1245,26 +1404,9 @@ function creativeInstallUi() {
       var tokenRecord = (state.tokens || []).find(function(token) { return String(token.id || "") === tokenId; });
       if (tokenRecord) {
         selected = tokenRecord;
-        if (typeof updateDetailPanel === "function") updateDetailPanel();
+        creativeTokenSelectionId = String(tokenRecord.id || "");
         draw();
         creativeRenderTokenPanel();
-
-        // Um clique na lista abre diretamente o editor correspondente:
-        // ficha do personagem jogador, ficha do Bestiário para criaturas/NPCs,
-        // ou propriedades do próprio token quando ele não possui criatura vinculada.
-        if (tokenRecord.tipo === "player") {
-          if (typeof switchView === "function") {
-            switchView("character");
-          } else if (typeof openBestiary === "function") {
-            openBestiary(tokenRecord);
-          }
-        } else if (tokenRecord.monsterId && window.Bestiary && typeof window.Bestiary.edit === "function") {
-          window.Bestiary.edit(tokenRecord.monsterId, {
-            ctx: typeof bestiaryContext === "function" ? bestiaryContext(tokenRecord) : null
-          });
-        } else if (typeof openBestiary === "function") {
-          openBestiary(tokenRecord);
-        }
       }
       return;
     }
