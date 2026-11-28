@@ -180,6 +180,14 @@ function onPointerDown(e) {
       }
       selected = hit;
       if (hit) {
+        // No modo Jogador, clicar no próprio token abre a ficha/editora do personagem.
+        // No modo Editor, o clique continua selecionando o token para inspeção sem sair do mapa.
+        if (hit.tipo === "player" && appMode !== "editor") {
+          if (typeof switchView === "function") {
+            switchView("character");
+            return;
+          }
+        }
         if (appMode === "editor" && hit.tipo !== "player") {
           drag = { moveToken: hit, fromX: hit.x, fromY: hit.y };
         }

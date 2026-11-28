@@ -1248,6 +1248,23 @@ function creativeInstallUi() {
         if (typeof updateDetailPanel === "function") updateDetailPanel();
         draw();
         creativeRenderTokenPanel();
+
+        // Um clique na lista abre diretamente o editor correspondente:
+        // ficha do personagem jogador, ficha do Bestiário para criaturas/NPCs,
+        // ou propriedades do próprio token quando ele não possui criatura vinculada.
+        if (tokenRecord.tipo === "player") {
+          if (typeof switchView === "function") {
+            switchView("character");
+          } else if (typeof openBestiary === "function") {
+            openBestiary(tokenRecord);
+          }
+        } else if (tokenRecord.monsterId && window.Bestiary && typeof window.Bestiary.edit === "function") {
+          window.Bestiary.edit(tokenRecord.monsterId, {
+            ctx: typeof bestiaryContext === "function" ? bestiaryContext(tokenRecord) : null
+          });
+        } else if (typeof openBestiary === "function") {
+          openBestiary(tokenRecord);
+        }
       }
       return;
     }
