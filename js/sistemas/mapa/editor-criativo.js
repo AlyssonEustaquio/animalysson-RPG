@@ -1102,10 +1102,14 @@ function creativeRenderTokenManager(token) {
       '<label class="mp-creator-token-check"><input type="checkbox" data-token-field="escondido"' + (token.escondido ? ' checked' : '') + '> Escondido</label>' +
     '</div>' +
     '<div class="mp-creator-token-action-fields">' +
-      '<label>Cura (PV)<input type="number" min="1" max="99999" step="1" data-token-amount="heal" value="5"></label>' +
-      '<button type="button" data-token-action="heal"' + (token.morto ? ' disabled' : '') + '>＋ Aplicar cura</button>' +
-      '<label>Dano (PV)<input type="number" min="1" max="99999" step="1" data-token-amount="damage" value="5"></label>' +
-      '<button type="button" data-token-action="damage">－ Aplicar dano</button>' +
+      '<div class="mp-creator-token-action-card heal">' +
+        '<label>Cura (PV)<input type="number" min="1" max="99999" step="1" data-token-amount="heal" value="5"></label>' +
+        '<button type="button" data-token-action="heal"' + (token.morto ? ' disabled' : '') + '>＋ Aplicar cura</button>' +
+      '</div>' +
+      '<div class="mp-creator-token-action-card damage">' +
+        '<label>Dano (PV)<input type="number" min="1" max="99999" step="1" data-token-amount="damage" value="5"></label>' +
+        '<button type="button" data-token-action="damage">－ Aplicar dano</button>' +
+      '</div>' +
     '</div>' +
     '<label class="mp-creator-token-faction">Equipe / facção<select data-token-field="faccao"><option value="jogadores">Jogadores / aliados</option><option value="monstros">Monstros / inimigos</option></select></label>' +
     '<div class="mp-creator-token-condition-wrap"><strong>Condições e status</strong><div class="mp-creator-token-conditions">' + conditionHtml + '</div></div>' +
