@@ -918,10 +918,13 @@ var creativeBaseInstallUi = creativeInstallUi;
 creativeInstallUi = function() { creativeBaseInstallUi(); creativeInstallLevelUi(); };
 var creativeBaseUpdateUi = creativeUpdateUi;
 creativeUpdateUi = function() { creativeBaseUpdateUi(); creativeUpdateLevelUi(); };
-var creativeBaseRenderInspector = creativeRenderInspector;
+var creativeLevelBaseRenderInspector = creativeRenderInspector;
 creativeRenderInspector = function() {
-  if (creativeRenderLevelInspector()) return;
-  creativeBaseRenderInspector();
+  if (creativeRenderLevelInspector()) {
+    if (typeof creativeUpdateContextPanels === "function") creativeUpdateContextPanels();
+    return;
+  }
+  creativeLevelBaseRenderInspector();
   if (creativeSelected && creativeSelected.type === "terrain" && R) {
     var inspector = R.querySelector("#mp-creator-inspector");
     if (inspector) {

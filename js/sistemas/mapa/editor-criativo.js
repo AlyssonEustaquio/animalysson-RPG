@@ -991,9 +991,9 @@ function creativeRenderInspector() {
   }
   box.innerHTML = '<div class="mp-creator-selection"><strong>' + esc(title) + '</strong><span>Editor do elemento selecionado</span></div><div class="mp-creator-fields">' + html + '</div><div class="mp-creator-selection-actions">' + actions + '</div>';
 }
-var creativeBaseRenderInspector = creativeRenderInspector;
+var creativeUiBaseRenderInspector = creativeRenderInspector;
 creativeRenderInspector = function() {
-  creativeBaseRenderInspector();
+  creativeUiBaseRenderInspector();
   creativeUpdateContextPanels();
 };
 function creativeApplySelectedField(field) {
