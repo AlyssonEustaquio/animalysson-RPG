@@ -46,6 +46,7 @@ var creativeTextureCache = {};
 var creativeUiReady = false;
 var creativeTextureSeed = 0;
 var creativeActivePanel = "";
+var creativeAdvancedTab = "structures";
 
 function creativeClone(value) {
   return value == null ? value : JSON.parse(JSON.stringify(value));
@@ -1040,11 +1041,66 @@ function creativeToolButton(toolName, label, icon, hint) {
   return '<button type="button" class="mp-creator-tool" data-creator-tool="' + toolName + '" title="' + (hint || label) + '"><span class="mp-creator-tool-icon">' + icon + '</span><span>' + label + '</span></button>';
 }
 function creativeIsAdvancedToolName(name) {
-  return ["wall", "muro", "porta", "mechanism", "editStructure", "eraseedge", "raiseTerrain", "lowerTerrain", "interiorZone", "transition"].indexOf(name) >= 0;
+  return ["wall", "muro", "porta", "mechanism", "editStructure", "eraseedge", "raiseTerrain", "lowerTerrain", "interiorZone", "transition", "token"].indexOf(name) >= 0;
 }
 function creativeOnToolChanged(name) {
   creativeActivePanel = creativeIsAdvancedToolName(name) ? "advanced" : "";
+  if (name === "mechanism") creativeAdvancedTab = "mechanisms";
+  else if (name === "token") creativeAdvancedTab = "tokens";
+  else if (["wall", "muro", "porta", "editStructure", "eraseedge"].indexOf(name) >= 0) creativeAdvancedTab = "structures";
+  else if (["raiseTerrain", "lowerTerrain", "interiorZone", "transition"].indexOf(name) >= 0) creativeAdvancedTab = "levels";
   if (typeof creativeUpdateContextPanels === "function") creativeUpdateContextPanels();
+}
+function creativeRenderTokenPanel() {
+  if (!R || !state) return;
+  var host = R.querySelector("#mp-creator-token-list");
+  if (!host) return;
+  var levelId = typeof creativeLevelId === "function" ? creativeLevelId() : null;
+  var tokens = (state.tokens || []).filter(function(token) {
+    return token && (!levelId || !token.layerId || token.layerId === levelId);
+  });
+  if (!tokens.length) {
+    host.innerHTML = '<div class="mp-creator-token-empty">Nenhum token neste andar. Abra o Bestiário para adicionar uma criatura ou NPC.</div>';
+    return;
+  }
+  host.innerHTML = tokens.map(function(token) {
+    var id = String(token.id || "");
+    var isPlayer = token.tipo === "player";
+    var name = token.nome || (isPlayer ? "Personagem jogador" : token.monsterId || "Criatura");
+    var hp = token.hp != null && token.hpMax != null ? '<small>' + esc(token.hp) + '/' + esc(token.hpMax) + ' PV</small>' : "";
+    var selectedNow = typeof selected !== "undefined" && selected === token;
+    return '<button type="button" class="mp-creator-token-row' + (selectedNow ? ' active' : '') + '" data-creator-token-select="' + esc(id) + '"><span class="mp-creator-token-avatar">' + (isPlayer ? '♟' : '♙') + '</span><span class="mp-creator-token-name"><strong>' + esc(name) + '</strong><small>' + (isPlayer ? 'Personagem jogador' : 'Criatura / NPC') + '</small></span>' + hp + '</button>';
+  }).join("");
+}
+function creativeUpdateAdvancedTabs(shell) {
+  shell = shell || (R && R.querySelector(".mp-creator-ui"));
+  if (!shell) return;
+  var advancedOpen = creativeActivePanel === "advanced";
+  shell.querySelectorAll("[data-creator-advanced-tab]").forEach(function(button) {
+    var active = button.getAttribute("data-creator-advanced-tab") === creativeAdvancedTab;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", active ? "true" : "false");
+  });
+  shell.querySelectorAll("[data-creator-advanced-content]").forEach(function(panel) {
+    var key = panel.getAttribute("data-creator-advanced-content");
+    var show = advancedOpen && (
+      (key === "tools" && (creativeAdvancedTab === "structures" || creativeAdvancedTab === "mechanisms")) ||
+      key === creativeAdvancedTab
+    );
+    panel.hidden = !show;
+  });
+  var tools = shell.querySelector("#mp-tools");
+  if (tools) {
+    var filter = creativeAdvancedTab === "mechanisms" ? "mechanisms" : "structures";
+    tools.setAttribute("data-advanced-filter", filter);
+    tools.querySelectorAll("button[data-t]").forEach(function(button) {
+      var isMechanism = button.getAttribute("data-t") === "mechanism";
+      button.hidden = filter === "mechanisms" ? !isMechanism : isMechanism;
+    });
+  }
+  var title = shell.querySelector("#mp-creator-advanced-tools-title");
+  if (title) title.textContent = creativeAdvancedTab === "mechanisms" ? "Armadilhas e mecanismos" : "Estruturas";
+  if (creativeAdvancedTab === "tokens") creativeRenderTokenPanel();
 }
 function creativeUpdateContextPanels() {
   if (!R) return;
@@ -1067,6 +1123,7 @@ function creativeUpdateContextPanels() {
     advancedButton.classList.toggle("active", active.advanced);
     advancedButton.setAttribute("aria-expanded", active.advanced ? "true" : "false");
   }
+  creativeUpdateAdvancedTabs(shell);
 }
 function creativeInstallUi() {
   if (!R || R.querySelector(".mp-creator-ui")) return;
@@ -1098,9 +1155,19 @@ function creativeInstallUi() {
     '</div><button type="button" id="mp-creator-import-image" class="mp-creator-import-image">＋ Importar imagem / ícone</button><input type="file" id="mp-creator-image-input" accept="image/*" hidden><div id="mp-creator-custom-assets" class="mp-creator-custom-assets"></div></section>' +
     '<section class="mp-creator-section" data-creator-context="light" hidden><div class="mp-creator-section-title">Luz ambiente</div><p class="mp-creator-muted">Brilho visual decorativo; não altera o alcance de visão nem revela a névoa.</p><div class="mp-creator-light-controls"><label>Cor <input id="mp-creator-light-color" type="color" value="#ffd36a"></label><label>Raio <input id="mp-creator-light-radius" type="range" min="1" max="16" value="5"><output id="mp-creator-light-value">5</output></label></div></section>' +
     '<section id="mp-creator-advanced-panel" class="mp-creator-section mp-creator-advanced-panel" data-creator-context="advanced" hidden><div class="mp-creator-section-title">Ferramentas avançadas</div>' +
-    '<div class="mp-creator-advanced-group"><strong>Estruturas e mecanismos</strong><div id="mp-creator-structure-host"></div></div>' +
-    '<div class="mp-creator-advanced-group"><strong>Camadas e andares</strong><div id="mp-creator-advanced-level-host"></div></div>' +
-    '<div class="mp-creator-advanced-group"><strong>Configurações do mapa</strong><div class="mp-creator-advanced-controls" id="mp-creator-world-controls"></div><div class="mp-creator-advanced-controls" id="mp-creator-view-controls"></div><div class="mp-creator-advanced-controls" id="mp-creator-cleanup-controls"></div></div>' +
+    '<nav class="mp-creator-advanced-tabs" aria-label="Conjuntos de ferramentas avançadas">' +
+    '<button type="button" data-creator-advanced-tab="structures" aria-pressed="true">🧱 Estruturas</button>' +
+    '<button type="button" data-creator-advanced-tab="mechanisms" aria-pressed="false">⚙ Armadilhas</button>' +
+    '<button type="button" data-creator-advanced-tab="levels" aria-pressed="false">▥ Camadas</button>' +
+    '<button type="button" data-creator-advanced-tab="settings" aria-pressed="false">🎛 Configurações</button>' +
+    '<button type="button" data-creator-advanced-tab="cleanup" aria-pressed="false">🧹 Limpeza</button>' +
+    '<button type="button" data-creator-advanced-tab="tokens" aria-pressed="false">♟ Tokens</button>' +
+    '</nav>' +
+    '<section class="mp-creator-advanced-content" data-creator-advanced-content="tools"><div class="mp-creator-advanced-group"><strong id="mp-creator-advanced-tools-title">Estruturas</strong><div id="mp-creator-structure-host"></div></div></section>' +
+    '<section class="mp-creator-advanced-content" data-creator-advanced-content="levels" hidden><div class="mp-creator-advanced-group"><strong>Camadas e andares</strong><div id="mp-creator-advanced-level-host"></div></div></section>' +
+    '<section class="mp-creator-advanced-content" data-creator-advanced-content="settings" hidden><div class="mp-creator-advanced-group"><strong>Configurações do mapa</strong><div class="mp-creator-advanced-controls" id="mp-creator-world-controls"></div><div class="mp-creator-advanced-controls" id="mp-creator-view-controls"></div></div></section>' +
+    '<section class="mp-creator-advanced-content" data-creator-advanced-content="cleanup" hidden><div class="mp-creator-advanced-group"><strong>Limpeza e redefinição</strong><div class="mp-creator-advanced-controls" id="mp-creator-cleanup-controls"></div></div></section>' +
+    '<section class="mp-creator-advanced-content" data-creator-advanced-content="tokens" hidden><div class="mp-creator-advanced-group"><strong>Tokens do mapa</strong><p class="mp-creator-muted">Adicione criaturas e NPCs pelo Bestiário. Depois escolha o token e clique no mapa para posicioná-lo.</p><div id="mp-creator-token-host"></div><div id="mp-creator-token-list" class="mp-creator-token-list"></div></div></section>' +
     '</section>' +
     '<section class="mp-creator-section" data-creator-context="inspector" hidden><div class="mp-creator-section-title">Propriedades</div><div id="mp-creator-inspector"></div></section>' +
     '<footer class="mp-creator-footer"><span id="mp-creator-map-stats"></span></footer></aside>';
@@ -1127,6 +1194,14 @@ function creativeInstallUi() {
     ["mp-grid", "mp-fog", "mp-light", "mp-walls-vis", "mp-secret-view", "mp-block", "mp-lr"].forEach(function(id) { moveAdvancedControl(id, viewHost, id === "mp-block" || id === "mp-lr"); });
     ["mp-reset-fog", "mp-clear-fog", "mp-zo", "mp-zi"].forEach(function(id) { moveAdvancedControl(id, viewHost, false); });
     ["mp-clear-walls", "mp-clear-edges"].forEach(function(id) { moveAdvancedControl(id, cleanupHost, false); });
+    var bestiaryButton = R.querySelector("#mp-bestiary");
+    var tokenHost = shell.querySelector("#mp-creator-token-host");
+    if (bestiaryButton && tokenHost) {
+      bestiaryButton.classList.add("mp-creator-token-bestiary");
+      bestiaryButton.textContent = "👹 Abrir Bestiário · adicionar token";
+      bestiaryButton.setAttribute("title", "Buscar criatura ou NPC e posicionar como token no mapa");
+      tokenHost.appendChild(bestiaryButton);
+    }
   }
   // O seletor de modo integra a barra para não sobrepor os botões do editor.
   var modeSwitch = R.querySelector(".mp-mode-switch");
@@ -1157,6 +1232,25 @@ function creativeInstallUi() {
   shell.querySelector("#mp-creator-undo").onclick = creativeUndo;
   shell.querySelector("#mp-creator-redo").onclick = creativeRedo;
   shell.addEventListener("click", function(event) {
+    var advancedTabButton = event.target.closest("[data-creator-advanced-tab]");
+    if (advancedTabButton) {
+      creativeAdvancedTab = advancedTabButton.getAttribute("data-creator-advanced-tab") || "structures";
+      creativeActivePanel = "advanced";
+      creativeUpdateContextPanels();
+      return;
+    }
+    var tokenSelectButton = event.target.closest("[data-creator-token-select]");
+    if (tokenSelectButton) {
+      var tokenId = tokenSelectButton.getAttribute("data-creator-token-select");
+      var tokenRecord = (state.tokens || []).find(function(token) { return String(token.id || "") === tokenId; });
+      if (tokenRecord) {
+        selected = tokenRecord;
+        if (typeof updateDetailPanel === "function") updateDetailPanel();
+        draw();
+        creativeRenderTokenPanel();
+      }
+      return;
+    }
     var panelToggle = event.target.closest("[data-creator-panel-toggle]");
     if (panelToggle) {
       if (creativeActivePanel === "advanced") {
@@ -1223,6 +1317,7 @@ function creativeUpdateUi() {
   shell.querySelectorAll("[data-asset-id]").forEach(function(button) { button.classList.toggle("active", button.getAttribute("data-asset-id") === creativeSelectedAssetId); });
   creativeUpdateContextPanels();
   creativeRenderAssetPalette();
+  if (creativeAdvancedTab === "tokens") creativeRenderTokenPanel();
   var stats = shell.querySelector("#mp-creator-map-stats");
   if (stats && MAPINFO) stats.textContent = COLS + " × " + ROWS + " células · " + CELL + " px";
 }
