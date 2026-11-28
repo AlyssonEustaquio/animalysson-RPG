@@ -409,6 +409,7 @@ function setTool(t) {
     if (appMode !== "editor" && t !== "select") t = "select";
     if (isHexMap() && ["select", "pan", "spawn", "portal", "localPortal"].indexOf(t) < 0) t = "select";
     tool = t;
+    if (typeof creativeOnToolChanged === "function") creativeOnToolChanged(t);
     pendingStructureStart = null;
     measurePts = null;
     if (t !== "token") pendingMonster = null;

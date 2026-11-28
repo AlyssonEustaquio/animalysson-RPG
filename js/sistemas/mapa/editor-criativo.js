@@ -45,6 +45,7 @@ var creativeSelected = null;
 var creativeTextureCache = {};
 var creativeUiReady = false;
 var creativeTextureSeed = 0;
+var creativeActivePanel = "";
 
 function creativeClone(value) {
   return value == null ? value : JSON.parse(JSON.stringify(value));
@@ -990,6 +991,11 @@ function creativeRenderInspector() {
   }
   box.innerHTML = '<div class="mp-creator-selection"><strong>' + esc(title) + '</strong><span>Editor do elemento selecionado</span></div><div class="mp-creator-fields">' + html + '</div><div class="mp-creator-selection-actions">' + actions + '</div>';
 }
+var creativeBaseRenderInspector = creativeRenderInspector;
+creativeRenderInspector = function() {
+  creativeBaseRenderInspector();
+  creativeUpdateContextPanels();
+};
 function creativeApplySelectedField(field) {
   if (!creativeSelected || !field) return;
   var key = field.getAttribute("data-creator-field"), value;
@@ -1033,6 +1039,35 @@ function creativeApplySelectedField(field) {
 function creativeToolButton(toolName, label, icon, hint) {
   return '<button type="button" class="mp-creator-tool" data-creator-tool="' + toolName + '" title="' + (hint || label) + '"><span class="mp-creator-tool-icon">' + icon + '</span><span>' + label + '</span></button>';
 }
+function creativeIsAdvancedToolName(name) {
+  return ["wall", "muro", "porta", "mechanism", "editStructure", "eraseedge", "raiseTerrain", "lowerTerrain", "interiorZone", "transition"].indexOf(name) >= 0;
+}
+function creativeOnToolChanged(name) {
+  creativeActivePanel = creativeIsAdvancedToolName(name) ? "advanced" : "";
+  if (typeof creativeUpdateContextPanels === "function") creativeUpdateContextPanels();
+}
+function creativeUpdateContextPanels() {
+  if (!R) return;
+  var shell = R.querySelector(".mp-creator-ui");
+  if (!shell) return;
+  var active = {
+    ground: tool === "ground",
+    brush: tool === "ground" || tool === "eraseGround",
+    object: tool === "object",
+    light: tool === "light",
+    advanced: creativeActivePanel === "advanced",
+    inspector: !!creativeSelected
+  };
+  shell.querySelectorAll("[data-creator-context]").forEach(function(panel) {
+    var key = panel.getAttribute("data-creator-context");
+    panel.hidden = !active[key];
+  });
+  var advancedButton = shell.querySelector("[data-creator-panel-toggle=advanced]");
+  if (advancedButton) {
+    advancedButton.classList.toggle("active", active.advanced);
+    advancedButton.setAttribute("aria-expanded", active.advanced ? "true" : "false");
+  }
+}
 function creativeInstallUi() {
   if (!R || R.querySelector(".mp-creator-ui")) return;
   creativeUiReady = true;
@@ -1040,30 +1075,59 @@ function creativeInstallUi() {
   if (!main) return;
   var shell = document.createElement("div");
   shell.className = "mp-creator-ui";
+  creativeActivePanel = "";
   shell.innerHTML = '<header class="mp-creator-topbar"><div class="mp-creator-brand"><span class="mp-creator-mark">✣</span><div><strong>Animalysson Studio</strong><small>EDITOR DE MAPAS</small></div></div><div class="mp-creator-map-host"></div><div class="mp-creator-top-actions"><button type="button" id="mp-new-map" title="Criar um mapa vazio com grade">＋ Novo mapa</button><button type="button" id="mp-creator-undo" title="Desfazer (Ctrl+Z)" disabled>↶</button><button type="button" id="mp-creator-redo" title="Refazer (Ctrl+Y)" disabled>↷</button><button type="button" id="mp-creator-save">⬇ Exportar</button></div></header><aside class="mp-creator-panel mp-editor-only"><div class="mp-creator-toolgrid">' +
     creativeToolButton("select", "Selecionar", "↖", "Selecionar e mover elementos") +
     creativeToolButton("pan", "Mover visão", "✥", "Arrastar o mapa") +
     creativeToolButton("ground", "Pincel", "🖌", "Pintar o terreno selecionado") +
     creativeToolButton("eraseGround", "Borracha", "⌫", "Apagar terreno") +
-    creativeToolButton("wall", "Parede", "▥", "Bloquear células") +
-    creativeToolButton("muro", "Muro", "━", "Desenhar muro entre dois pontos") +
-    creativeToolButton("porta", "Porta", "▣", "Desenhar porta") +
-    creativeToolButton("editStructure", "Editar muro", "⚙", "Editar propriedades da estrutura") +
     creativeToolButton("object", "Objetos", "♧", "Posicionar decoração") +
     creativeToolButton("text", "Texto", "T", "Adicionar texto e identificação") +
     creativeToolButton("light", "Luz ambiente", "☼", "Adicionar brilho decorativo sem alterar a visão dos tokens") +
     creativeToolButton("reveal", "Revelar névoa", "◉", "Revelar áreas") +
     creativeToolButton("hide", "Cobrir névoa", "◌", "Cobrir áreas") +
     creativeToolButton("measure", "Medir", "↔", "Medir distâncias") +
-    '</div><section class="mp-creator-section"><div class="mp-creator-section-title">Piso e textura <span>SHIFT + clique: preencher área</span></div><div class="mp-creator-materials">' +
+    '<button type="button" class="mp-creator-tool mp-creator-panel-toggle" data-creator-panel-toggle="advanced" aria-expanded="false" aria-controls="mp-creator-advanced-panel" title="Abrir estruturas, armadilhas, andares e configurações avançadas"><span class="mp-creator-tool-icon">⚙</span><span>Avançadas</span></button>' +
+    '</div>' +
+    '<section class="mp-creator-section" data-creator-context="ground" hidden><div class="mp-creator-section-title">Piso e textura <span>SHIFT + clique: preencher área</span></div><div class="mp-creator-materials">' +
     Object.keys(CREATIVE_MATERIALS).map(function(key) { return '<button type="button" data-material="' + key + '" title="' + CREATIVE_MATERIALS[key].label + '"><i style="--material:' + CREATIVE_MATERIALS[key].color + '"></i><span>' + CREATIVE_MATERIALS[key].label + '</span></button>'; }).join("") +
-    '</div><label class="mp-creator-range">Tamanho do pincel <output id="mp-creator-brush-value">1 × 1</output><input id="mp-creator-brush" type="range" min="1" max="9" step="2" value="1"></label></section><section class="mp-creator-section"><div class="mp-creator-section-title">Objetos de cenário</div><div class="mp-creator-objects">' +
+    '</div></section>' +
+    '<section class="mp-creator-section" data-creator-context="brush" hidden><div class="mp-creator-section-title">Tamanho da ferramenta</div><label class="mp-creator-range"><output id="mp-creator-brush-value">1 × 1</output><input id="mp-creator-brush" type="range" min="1" max="9" step="2" value="1"></label></section>' +
+    '<section class="mp-creator-section" data-creator-context="object" hidden><div class="mp-creator-section-title">Objetos de cenário</div><div class="mp-creator-objects">' +
     Object.keys(CREATIVE_OBJECTS).map(function(key) { return '<button type="button" data-object-kind="' + key + '" title="' + CREATIVE_OBJECTS[key].label + '"><span>' + CREATIVE_OBJECTS[key].glyph + '</span><small>' + CREATIVE_OBJECTS[key].label + '</small></button>'; }).join("") +
-    '</div><button type="button" id="mp-creator-import-image" class="mp-creator-import-image">＋ Importar imagem / ícone</button><input type="file" id="mp-creator-image-input" accept="image/*" hidden><div id="mp-creator-custom-assets" class="mp-creator-custom-assets"></div></section><section class="mp-creator-section"><div class="mp-creator-section-title">Luz ambiente</div><p class="mp-creator-muted">Brilho visual decorativo; não altera o alcance de visão nem revela a névoa.</p><div class="mp-creator-light-controls"><label>Cor <input id="mp-creator-light-color" type="color" value="#ffd36a"></label><label>Raio <input id="mp-creator-light-radius" type="range" min="1" max="16" value="5"><output id="mp-creator-light-value">5</output></label></div></section><section class="mp-creator-section"><div class="mp-creator-section-title">Propriedades</div><div id="mp-creator-inspector"><span class="mp-creator-muted">Selecione um objeto no mapa para editar, mover, girar ou excluir.</span></div></section><footer class="mp-creator-footer"><span id="mp-creator-map-stats"></span><button type="button" id="mp-creator-more">⚙ Ferramentas avançadas</button></footer></aside>';
+    '</div><button type="button" id="mp-creator-import-image" class="mp-creator-import-image">＋ Importar imagem / ícone</button><input type="file" id="mp-creator-image-input" accept="image/*" hidden><div id="mp-creator-custom-assets" class="mp-creator-custom-assets"></div></section>' +
+    '<section class="mp-creator-section" data-creator-context="light" hidden><div class="mp-creator-section-title">Luz ambiente</div><p class="mp-creator-muted">Brilho visual decorativo; não altera o alcance de visão nem revela a névoa.</p><div class="mp-creator-light-controls"><label>Cor <input id="mp-creator-light-color" type="color" value="#ffd36a"></label><label>Raio <input id="mp-creator-light-radius" type="range" min="1" max="16" value="5"><output id="mp-creator-light-value">5</output></label></div></section>' +
+    '<section id="mp-creator-advanced-panel" class="mp-creator-section mp-creator-advanced-panel" data-creator-context="advanced" hidden><div class="mp-creator-section-title">Ferramentas avançadas</div>' +
+    '<div class="mp-creator-advanced-group"><strong>Estruturas e mecanismos</strong><div id="mp-creator-structure-host"></div></div>' +
+    '<div class="mp-creator-advanced-group"><strong>Camadas e andares</strong><div id="mp-creator-advanced-level-host"></div></div>' +
+    '<div class="mp-creator-advanced-group"><strong>Configurações do mapa</strong><div class="mp-creator-advanced-controls" id="mp-creator-world-controls"></div><div class="mp-creator-advanced-controls" id="mp-creator-view-controls"></div><div class="mp-creator-advanced-controls" id="mp-creator-cleanup-controls"></div></div>' +
+    '</section>' +
+    '<section class="mp-creator-section" data-creator-context="inspector" hidden><div class="mp-creator-section-title">Propriedades</div><div id="mp-creator-inspector"></div></section>' +
+    '<footer class="mp-creator-footer"><span id="mp-creator-map-stats"></span></footer></aside>';
   main.insertBefore(shell, main.firstChild);
   var oldMapHost = R.querySelector(".mp-creator-map-host"), mapSelector = R.querySelector(".mp-map-selector"), addMapBtn = R.querySelector("#mp-add-map");
   if (mapSelector) oldMapHost.appendChild(mapSelector);
   if (addMapBtn) shell.querySelector(".mp-creator-top-actions").insertBefore(addMapBtn, shell.querySelector("#mp-new-map"));
+  // No mapa quadrado, os controles do menu legado passam a compor a aba Avançadas.
+  // O próprio menu continua reservado às ações do jogador/inventário.
+  if (!isHexMap()) {
+    var structureHost = shell.querySelector("#mp-creator-structure-host");
+    var worldHost = shell.querySelector("#mp-creator-world-controls");
+    var viewHost = shell.querySelector("#mp-creator-view-controls");
+    var cleanupHost = shell.querySelector("#mp-creator-cleanup-controls");
+    var legacyTools = R.querySelector("#mp-tools");
+    if (legacyTools && structureHost) structureHost.appendChild(legacyTools);
+    function moveAdvancedControl(id, host, moveParent) {
+      var node = R.querySelector("#" + id);
+      if (!node || !host) return;
+      var target = moveParent ? node.parentElement : node;
+      if (target) host.appendChild(target);
+    }
+    ["mp-world-move", "mp-world-spawn", "mp-world-portal", "mp-world-local-portal", "mp-export-catalog", "mp-tile-size-wrap", "mp-hex-wrap", "mp-speed-wrap"].forEach(function(id) { moveAdvancedControl(id, worldHost, false); });
+    ["mp-grid", "mp-fog", "mp-light", "mp-walls-vis", "mp-secret-view", "mp-block", "mp-lr"].forEach(function(id) { moveAdvancedControl(id, viewHost, id === "mp-block" || id === "mp-lr"); });
+    ["mp-reset-fog", "mp-clear-fog", "mp-zo", "mp-zi"].forEach(function(id) { moveAdvancedControl(id, viewHost, false); });
+    ["mp-clear-walls", "mp-clear-edges"].forEach(function(id) { moveAdvancedControl(id, cleanupHost, false); });
+  }
   // O seletor de modo integra a barra para não sobrepor os botões do editor.
   var modeSwitch = R.querySelector(".mp-mode-switch");
   if (modeSwitch) shell.querySelector(".mp-creator-topbar").appendChild(modeSwitch);
@@ -1083,9 +1147,8 @@ function creativeInstallUi() {
       playerMenuButton.style.removeProperty(prop);
     });
   }
-  // Exportação avançada e importação continuam disponíveis no menu original.
-  // O botão Menu fica no canto superior esquerdo no modo Jogador; no Editor,
-  // o acesso às ferramentas avançadas é feito pelo botão próprio do painel.
+  // A aba Avançadas concentra os controles de edição; o botão Menu permanece
+  // dedicado ao inventário e às ações do personagem.
   shell.querySelector("#mp-creator-save").onclick = function() {
     save();
     if (MAPINFO && MAPINFO.custom) exportMapPackage(); else exportMapFile();
@@ -1093,8 +1156,18 @@ function creativeInstallUi() {
   shell.querySelector("#mp-new-map").onclick = creativeCreateBlankMap;
   shell.querySelector("#mp-creator-undo").onclick = creativeUndo;
   shell.querySelector("#mp-creator-redo").onclick = creativeRedo;
-  shell.querySelector("#mp-creator-more").onclick = function() { setMenu(true); };
   shell.addEventListener("click", function(event) {
+    var panelToggle = event.target.closest("[data-creator-panel-toggle]");
+    if (panelToggle) {
+      if (creativeActivePanel === "advanced") {
+        creativeActivePanel = "";
+        if (creativeIsAdvancedToolName(tool)) setTool("select");
+      } else {
+        creativeActivePanel = "advanced";
+        creativeUpdateUi();
+      }
+      return;
+    }
     var toolButton = event.target.closest("[data-creator-tool]");
     if (toolButton) {
       var chosenTool = toolButton.getAttribute("data-creator-tool");
@@ -1144,9 +1217,11 @@ function creativeUpdateUi() {
   var shell = R.querySelector(".mp-creator-ui");
   if (!shell) return;
   shell.querySelectorAll("[data-creator-tool]").forEach(function(button) { button.classList.toggle("active", button.getAttribute("data-creator-tool") === tool); });
+  shell.querySelectorAll("#mp-tools [data-t]").forEach(function(button) { button.classList.toggle("active", button.getAttribute("data-t") === tool); });
   shell.querySelectorAll("[data-material]").forEach(function(button) { button.classList.toggle("active", button.getAttribute("data-material") === creativeMaterial); });
   shell.querySelectorAll("[data-object-kind]").forEach(function(button) { button.classList.toggle("active", button.getAttribute("data-object-kind") === creativeObjectKind); });
   shell.querySelectorAll("[data-asset-id]").forEach(function(button) { button.classList.toggle("active", button.getAttribute("data-asset-id") === creativeSelectedAssetId); });
+  creativeUpdateContextPanels();
   creativeRenderAssetPalette();
   var stats = shell.querySelector("#mp-creator-map-stats");
   if (stats && MAPINFO) stats.textContent = COLS + " × " + ROWS + " células · " + CELL + " px";

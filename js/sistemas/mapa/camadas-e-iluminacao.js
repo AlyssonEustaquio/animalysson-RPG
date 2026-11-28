@@ -514,8 +514,8 @@ function creativeUpdateLevelUi() {
 }
 function creativeInstallLevelUi() {
   if (!R || isHexMap()) return;
-  var panel = R.querySelector(".mp-creator-panel"), toolGrid = panel && panel.querySelector(".mp-creator-toolgrid");
-  if (!panel || !toolGrid || panel.querySelector(".mp-creator-level-manager")) return;
+  var panel = R.querySelector(".mp-creator-panel"), advancedHost = panel && panel.querySelector("#mp-creator-advanced-level-host");
+  if (!panel || !advancedHost || panel.querySelector(".mp-creator-level-manager")) return;
   var section = document.createElement("section");
   section.className = "mp-creator-section mp-creator-level-manager";
   section.innerHTML = '<div class="mp-creator-section-title">Camadas e andares <span>modelo Z · criação dinâmica</span></div>' +
@@ -528,11 +528,11 @@ function creativeInstallLevelUi() {
     '<label class="mp-creator-level-label">Ambiente desta camada<select id="mp-creator-level-environment"><option value="outdoor">Exterior / luz do sol</option><option value="interior">Interior</option><option value="cavern">Caverna</option><option value="basement">Porão</option></select></label>' +
     '<label class="mp-creator-level-label">Conectar a outra camada<select id="mp-creator-transition-target"></select></label>' +
     '<small id="mp-creator-level-status" class="mp-creator-muted"></small>';
-  panel.insertBefore(section, toolGrid);
+  advancedHost.appendChild(section);
   var tools = document.createElement("div");
   tools.className = "mp-creator-level-tools";
   tools.innerHTML = '<button type="button" class="mp-creator-tool" data-creator-tool="raiseTerrain" title="Elevar terreno em um nível"><span class="mp-creator-tool-icon">⛰</span><span>Elevar</span></button><button type="button" class="mp-creator-tool" data-creator-tool="lowerTerrain" title="Abaixar terreno em um nível"><span class="mp-creator-tool-icon">▽</span><span>Abaixar</span></button><button type="button" class="mp-creator-tool" data-creator-tool="interiorZone" title="Desenhar uma área interna sem luz solar"><span class="mp-creator-tool-icon">⌂</span><span>Zona interna</span></button><button type="button" class="mp-creator-tool" data-creator-tool="transition" title="Conectar camadas por escada, rampa ou buraco"><span class="mp-creator-tool-icon">↕</span><span>Passagem</span></button>';
-  panel.insertBefore(tools, toolGrid.nextSibling);
+  advancedHost.appendChild(tools);
   section.addEventListener("change", function(event) {
     var target = event.target;
     if (target.id === "mp-creator-level-select") {
