@@ -1,8 +1,3 @@
-/*
- * Editor criativo de mapas do Animalysson RPG.
- * Camadas procedurais e objetos são armazenados no estado nativo do mapa;
- * não substituem o sistema de VTT, paredes, névoa, tokens ou combate.
- */
 var CREATIVE_MATERIALS = {
   stone: { id: 1, label: "Pedra", color: "#77736a" },
   wood: { id: 2, label: "Madeira", color: "#896044" },
@@ -45,8 +40,6 @@ var creativeSelected = null;
 var creativeTextureCache = {};
 var creativeUiReady = false;
 var creativeTextureSeed = 0;
-var creativeActivePanel = "";
-var creativeAdvancedTab = "structures";
 var creativeTokenSelectionId = null;
 
 function creativeClone(value) {
@@ -130,7 +123,6 @@ function creativeDecodeTerrain(encoded, length) {
   }
 }
 function serializeMapState(source) {
-  // Nunca serializar buffers de trabalho (Uint8Array) como objetos JSON.
   var plain = {};
   Object.keys(source || {}).forEach(function(key) {
     if (key !== "_terrainBytes" && key !== "_terrainCount") plain[key] = source[key];
@@ -201,7 +193,6 @@ function creativeCommitTransaction() {
   if (!tx.changes.length) return false;
   creativeCompactTerrainState();
   creativeHistoryUndo.push(tx);
-  // Limita memória do histórico em mapas grandes.
   if (creativeHistoryUndo.length > 8) creativeHistoryUndo.shift();
   creativeHistoryRedo = [];
   creativeUpdateHistoryButtons();
@@ -394,7 +385,6 @@ function creativeHexRgb(hex) {
   return [parseInt(value.slice(0, 2), 16) || 255, parseInt(value.slice(2, 4), 16) || 255, parseInt(value.slice(4, 6), 16) || 255];
 }
 function creativeDrawLightMarker(light, center) {
-  // Ícone permanece com tamanho constante na tela, mesmo ao aproximar ou afastar o mapa.
   var unit = 1 / Math.max(.2, zoom || 1);
   var color = /^#[0-9a-f]{6}$/i.test(light.color || "") ? light.color : "#ffd36a";
   cx.save();
@@ -407,7 +397,6 @@ function creativeDrawLightMarker(light, center) {
   cx.fill();
   cx.stroke();
 
-  // Desenha uma lâmpada vetorial, sem depender de fontes ou emojis do dispositivo.
   cx.beginPath();
   cx.moveTo(-3.1 * unit, -2.2 * unit);
   cx.quadraticCurveTo(-3.1 * unit, -6.2 * unit, 0, -6.2 * unit);
@@ -436,7 +425,6 @@ function creativeDrawLights(viewW, viewH) {
   if (!state || isHexMap() || !state.lights || !state.lights.length) return;
   var bounds = creativeSquareVisibleBounds(viewW, viewH);
   cx.save();
-  // A luz decorativa nunca revela células cobertas pela névoa de guerra.
   if (showFog && state.fog) {
     cx.beginPath();
     for (var y = bounds.y0; y <= bounds.y1; y++) for (var x = bounds.x0; x <= bounds.x1; x++) {
@@ -460,8 +448,6 @@ function creativeDrawLights(viewW, viewH) {
 function creativeDrawLightMarkers(viewW, viewH) {
   if (appMode !== "editor" || !state || isHexMap() || !state.lights || !state.lights.length) return;
   var bounds = creativeSquareVisibleBounds(viewW, viewH);
-  // Marcadores desenhados acima dos tokens e sem o recorte da névoa para
-  // que o Mestre localize as fontes de luz em qualquer ponto do mapa.
   state.lights.forEach(function(light) {
     if (!creativeCellVisible(light.x, light.y, bounds)) return;
     creativeDrawLightMarker(light, cellCenter(light.x, light.y));
@@ -655,7 +641,6 @@ function creativeFloodFill(cell, material) {
     }
   }
   if (!changedCount) return false;
-  // O preenchimento foi aplicado em bytes separados; só então troca o estado.
   creativeStoreTerrainBytes(bytes, bytes.reduce(function(sum, v) { return sum + (v ? 1 : 0); }, 0));
   state.terrain = {};
   return true;
@@ -697,7 +682,6 @@ function creativeHitStructure(worldX, worldY) {
 }
 function creativeHitTest(worldX, worldY) {
   if (!state) return null;
-  // Portals are painted above tokens and scenery, so they receive the first hit.
   var portals = state.portals || [];
   for (var pi = portals.length - 1; pi >= 0; pi--) {
     var portal = portals[pi], portalCenter = cellCenter(portal.x, portal.y);
@@ -708,13 +692,11 @@ function creativeHitTest(worldX, worldY) {
       if (Math.hypot(worldX - destinationCenter.x, worldY - destinationCenter.y) <= portalHitRadius) return { type: "portal", id: portal.id, item: portal, endpoint: "destination" };
     }
   }
-  // Decorative lights are painted above the fog and walls.
   var lights = state.lights || [];
   for (var xi = lights.length - 1; xi >= 0; xi--) {
     var light = lights[xi], lightCenter = cellCenter(light.x, light.y);
     if (Math.hypot(worldX - lightCenter.x, worldY - lightCenter.y) <= Math.max(CELL * .32, 9 / Math.max(.2, zoom || 1))) return { type: "light", id: light.id, item: light };
   }
-  // Original VTT walls and doors sit above the painted floor/decorations.
   var structure = creativeHitStructure(worldX, worldY);
   if (structure) return structure;
   var cellX = Math.floor(worldX / CELL), cellY = Math.floor(worldY / CELL);
@@ -722,7 +704,6 @@ function creativeHitTest(worldX, worldY) {
     var cellIndex = idx(cellX, cellY);
     if (state.walls && state.walls[cellIndex]) return { type: "wallCell", id: cellIndex, x: cellX, y: cellY, item: state.wallMeta && state.wallMeta[cellIndex] || null };
   }
-  // Labels are drawn above decorations, and can be selected over their full text bounds.
   var labels = state.labels || [];
   for (var li = labels.length - 1; li >= 0; li--) {
     var label = labels[li], labelCenter = cellCenter(label.x, label.y);
@@ -733,7 +714,6 @@ function creativeHitTest(worldX, worldY) {
       return { type: "label", id: label.id, item: label };
     }
   }
-  // Decoration hit area follows the actual rotated image bounds and aspect ratio.
   var decorations = state.decorations || [];
   for (var di = decorations.length - 1; di >= 0; di--) {
     var decoration = decorations[di];
@@ -1041,15 +1021,7 @@ function creativeApplySelectedField(field) {
 function creativeToolButton(toolName, label, icon, hint) {
   return '<button type="button" class="mp-creator-tool" data-creator-tool="' + toolName + '" title="' + (hint || label) + '"><span class="mp-creator-tool-icon">' + icon + '</span><span>' + label + '</span></button>';
 }
-function creativeIsAdvancedToolName(name) {
-  return ["wall", "muro", "porta", "mechanism", "editStructure", "eraseedge", "raiseTerrain", "lowerTerrain", "interiorZone", "transition", "token"].indexOf(name) >= 0;
-}
-function creativeOnToolChanged(name) {
-  creativeActivePanel = creativeIsAdvancedToolName(name) ? "advanced" : "";
-  if (name === "mechanism") creativeAdvancedTab = "mechanisms";
-  else if (name === "token") creativeAdvancedTab = "tokens";
-  else if (["wall", "muro", "porta", "editStructure", "eraseedge"].indexOf(name) >= 0) creativeAdvancedTab = "structures";
-  else if (["raiseTerrain", "lowerTerrain", "interiorZone", "transition"].indexOf(name) >= 0) creativeAdvancedTab = "levels";
+function creativeOnToolChanged() {
   if (typeof creativeUpdateContextPanels === "function") creativeUpdateContextPanels();
 }
 function creativeTokenManagerCombat() {
@@ -1250,36 +1222,6 @@ function creativeRenderTokenPanel() {
   if (current) selected = current;
   creativeRenderTokenManager(current);
 }
-function creativeUpdateAdvancedTabs(shell) {
-  shell = shell || (R && R.querySelector(".mp-creator-ui"));
-  if (!shell) return;
-  var advancedOpen = creativeActivePanel === "advanced";
-  shell.querySelectorAll("[data-creator-advanced-tab]").forEach(function(button) {
-    var active = button.getAttribute("data-creator-advanced-tab") === creativeAdvancedTab;
-    button.classList.toggle("active", active);
-    button.setAttribute("aria-pressed", active ? "true" : "false");
-  });
-  shell.querySelectorAll("[data-creator-advanced-content]").forEach(function(panel) {
-    var key = panel.getAttribute("data-creator-advanced-content");
-    var show = advancedOpen && (
-      (key === "tools" && (creativeAdvancedTab === "structures" || creativeAdvancedTab === "mechanisms")) ||
-      key === creativeAdvancedTab
-    );
-    panel.hidden = !show;
-  });
-  var tools = shell.querySelector("#mp-tools");
-  if (tools) {
-    var filter = creativeAdvancedTab === "mechanisms" ? "mechanisms" : "structures";
-    tools.setAttribute("data-advanced-filter", filter);
-    tools.querySelectorAll("button[data-t]").forEach(function(button) {
-      var isMechanism = button.getAttribute("data-t") === "mechanism";
-      button.hidden = filter === "mechanisms" ? !isMechanism : isMechanism;
-    });
-  }
-  var title = shell.querySelector("#mp-creator-advanced-tools-title");
-  if (title) title.textContent = creativeAdvancedTab === "mechanisms" ? "Armadilhas e mecanismos" : "Estruturas";
-  if (creativeAdvancedTab === "tokens") creativeRenderTokenPanel();
-}
 function creativeUpdateContextPanels() {
   if (!R) return;
   var shell = R.querySelector(".mp-creator-ui");
@@ -1289,19 +1231,12 @@ function creativeUpdateContextPanels() {
     brush: tool === "ground" || tool === "eraseGround",
     object: tool === "object",
     light: tool === "light",
-    advanced: creativeActivePanel === "advanced",
     inspector: !!creativeSelected
   };
   shell.querySelectorAll("[data-creator-context]").forEach(function(panel) {
     var key = panel.getAttribute("data-creator-context");
     panel.hidden = !active[key];
   });
-  var advancedButton = shell.querySelector("[data-creator-panel-toggle=advanced]");
-  if (advancedButton) {
-    advancedButton.classList.toggle("active", active.advanced);
-    advancedButton.setAttribute("aria-expanded", active.advanced ? "true" : "false");
-  }
-  creativeUpdateAdvancedTabs(shell);
 }
 function creativeInstallUi() {
   if (!R || R.querySelector(".mp-creator-ui")) return;
@@ -1310,8 +1245,7 @@ function creativeInstallUi() {
   if (!main) return;
   var shell = document.createElement("div");
   shell.className = "mp-creator-ui";
-  creativeActivePanel = "";
-  shell.innerHTML = '<header class="mp-creator-topbar"><div class="mp-creator-brand"><span class="mp-creator-mark">✣</span><div><strong>Animalysson Studio</strong><small>EDITOR DE MAPAS</small></div></div><div class="mp-creator-map-host"></div><div class="mp-creator-top-actions"><button type="button" id="mp-new-map" title="Criar um mapa vazio com grade">＋ Novo mapa</button><button type="button" id="mp-creator-undo" title="Desfazer (Ctrl+Z)" disabled>↶</button><button type="button" id="mp-creator-redo" title="Refazer (Ctrl+Y)" disabled>↷</button><button type="button" id="mp-creator-save">⬇ Exportar</button></div></header><aside class="mp-creator-panel mp-editor-only"><div class="mp-creator-toolgrid">' +
+  shell.innerHTML = '<header class="mp-creator-topbar"><div class="mp-creator-brand"><span class="mp-creator-mark">✣</span><div><strong>Animalysson Studio</strong><small>EDITOR DE MAPAS</small></div></div><div class="mp-creator-map-host"></div><div class="mp-creator-top-actions"><button type="button" id="mp-new-map" title="Criar um mapa vazio com grade">＋ Novo mapa</button><button type="button" id="mp-creator-undo" title="Desfazer (Ctrl+Z)" disabled>↶</button><button type="button" id="mp-creator-redo" title="Refazer (Ctrl+Y)" disabled>↷</button><button type="button" id="mp-creator-save">⬇ Exportar</button></div></header><aside class="mp-creator-panel mp-editor-only"><div class="mp-creator-toolgrid" id="mp-creator-toolgrid">' +
     creativeToolButton("select", "Selecionar", "↖", "Selecionar e mover elementos") +
     creativeToolButton("pan", "Mover visão", "✥", "Arrastar o mapa") +
     creativeToolButton("ground", "Pincel", "🖌", "Pintar o terreno selecionado") +
@@ -1322,7 +1256,7 @@ function creativeInstallUi() {
     creativeToolButton("reveal", "Revelar névoa", "◉", "Revelar áreas") +
     creativeToolButton("hide", "Cobrir névoa", "◌", "Cobrir áreas") +
     creativeToolButton("measure", "Medir", "↔", "Medir distâncias") +
-    '<button type="button" class="mp-creator-tool mp-creator-panel-toggle" data-creator-panel-toggle="advanced" aria-expanded="false" aria-controls="mp-creator-advanced-panel" title="Abrir estruturas, armadilhas, andares e configurações avançadas"><span class="mp-creator-tool-icon">⚙</span><span>Avançadas</span></button>' +
+    '<div class="mp-creator-tool-slot" id="mp-creator-structure-slot"></div><div class="mp-creator-tool-slot" id="mp-creator-level-slot"></div><div class="mp-creator-tool-slot" id="mp-creator-extra-slot"></div>' +
     '</div>' +
     '<section class="mp-creator-section" data-creator-context="ground" hidden><div class="mp-creator-section-title">Piso e textura <span>SHIFT + clique: preencher área</span></div><div class="mp-creator-materials">' +
     Object.keys(CREATIVE_MATERIALS).map(function(key) { return '<button type="button" data-material="' + key + '" title="' + CREATIVE_MATERIALS[key].label + '"><i style="--material:' + CREATIVE_MATERIALS[key].color + '"></i><span>' + CREATIVE_MATERIALS[key].label + '</span></button>'; }).join("") +
@@ -1332,43 +1266,37 @@ function creativeInstallUi() {
     Object.keys(CREATIVE_OBJECTS).map(function(key) { return '<button type="button" data-object-kind="' + key + '" title="' + CREATIVE_OBJECTS[key].label + '"><span>' + CREATIVE_OBJECTS[key].glyph + '</span><small>' + CREATIVE_OBJECTS[key].label + '</small></button>'; }).join("") +
     '</div><button type="button" id="mp-creator-import-image" class="mp-creator-import-image">＋ Importar imagem / ícone</button><input type="file" id="mp-creator-image-input" accept="image/*" hidden><div id="mp-creator-custom-assets" class="mp-creator-custom-assets"></div></section>' +
     '<section class="mp-creator-section" data-creator-context="light" hidden><div class="mp-creator-section-title">Luz ambiente</div><p class="mp-creator-muted">Brilho visual decorativo; não altera o alcance de visão nem revela a névoa.</p><div class="mp-creator-light-controls"><label>Cor <input id="mp-creator-light-color" type="color" value="#ffd36a"></label><label>Raio <input id="mp-creator-light-radius" type="range" min="1" max="16" value="5"><output id="mp-creator-light-value">5</output></label></div></section>' +
-    '<section id="mp-creator-advanced-panel" class="mp-creator-section mp-creator-advanced-panel" data-creator-context="advanced" hidden><div class="mp-creator-section-title">Ferramentas avançadas</div>' +
-    '<nav class="mp-creator-advanced-tabs" aria-label="Conjuntos de ferramentas avançadas">' +
-    '<button type="button" data-creator-advanced-tab="structures" aria-pressed="true">🧱 Estruturas</button>' +
-    '<button type="button" data-creator-advanced-tab="mechanisms" aria-pressed="false">⚙ Armadilhas</button>' +
-    '<button type="button" data-creator-advanced-tab="levels" aria-pressed="false">▥ Camadas</button>' +
-    '<button type="button" data-creator-advanced-tab="settings" aria-pressed="false">🎛 Configurações</button>' +
-    '<button type="button" data-creator-advanced-tab="cleanup" aria-pressed="false">🧹 Limpeza</button>' +
-    '<button type="button" data-creator-advanced-tab="tokens" aria-pressed="false">♟ Tokens</button>' +
-    '</nav>' +
-    '<section class="mp-creator-advanced-content" data-creator-advanced-content="tools"><div class="mp-creator-advanced-group"><strong id="mp-creator-advanced-tools-title">Estruturas</strong><div id="mp-creator-structure-host"></div></div></section>' +
-    '<section class="mp-creator-advanced-content" data-creator-advanced-content="levels" hidden><div class="mp-creator-advanced-group"><strong>Camadas e andares</strong><div id="mp-creator-advanced-level-host"></div></div></section>' +
-    '<section class="mp-creator-advanced-content" data-creator-advanced-content="settings" hidden><div class="mp-creator-advanced-group"><strong>Configurações do mapa</strong><div class="mp-creator-advanced-controls" id="mp-creator-world-controls"></div><div class="mp-creator-advanced-controls" id="mp-creator-view-controls"></div></div></section>' +
-    '<section class="mp-creator-advanced-content" data-creator-advanced-content="cleanup" hidden><div class="mp-creator-advanced-group"><strong>Limpeza e redefinição</strong><div class="mp-creator-advanced-controls" id="mp-creator-cleanup-controls"></div></div></section>' +
-    '<section class="mp-creator-advanced-content" data-creator-advanced-content="tokens" hidden><div class="mp-creator-advanced-group"><strong>Personagens e status</strong><p class="mp-creator-muted">Gerencie todos os personagens, criaturas e NPCs em todos os andares deste mapa. Selecione um da lista para ajustar PV, cura, dano, condições e outros status.</p><div id="mp-creator-token-host"></div><div id="mp-creator-token-list" class="mp-creator-token-list"></div><div id="mp-creator-token-editor" class="mp-creator-token-editor"></div></div></section>' +
-    '</section>' +
+    '<div id="mp-creator-level-host"></div>' +
+    '<section class="mp-creator-section mp-creator-map-settings"><div class="mp-creator-section-title">Configurações do mapa</div><div class="mp-creator-map-controls" id="mp-creator-map-controls"></div></section>' +
+    '<section class="mp-creator-section mp-creator-token-section"><div class="mp-creator-section-title">Personagens e status</div><p class="mp-creator-muted">Gerencie todos os personagens, criaturas e NPCs em todos os andares deste mapa. Selecione um da lista para ajustar PV, cura, dano, condições e outros status.</p><div id="mp-creator-token-list" class="mp-creator-token-list"></div><div id="mp-creator-token-editor" class="mp-creator-token-editor"></div></section>' +
     '<section class="mp-creator-section" data-creator-context="inspector" hidden><div class="mp-creator-section-title">Propriedades</div><div id="mp-creator-inspector"></div></section>' +
     '<footer class="mp-creator-footer"><span id="mp-creator-map-stats"></span></footer></aside>';
   main.insertBefore(shell, main.firstChild);
   var oldMapHost = R.querySelector(".mp-creator-map-host"), mapSelector = R.querySelector(".mp-map-selector"), addMapBtn = R.querySelector("#mp-add-map");
   if (mapSelector) oldMapHost.appendChild(mapSelector);
   if (addMapBtn) shell.querySelector(".mp-creator-top-actions").insertBefore(addMapBtn, shell.querySelector("#mp-new-map"));
-  // No mapa quadrado, os controles do menu legado passam a compor a aba Avançadas.
-  // O próprio menu continua reservado às ações do jogador/inventário.
   if (!isHexMap()) {
-    var structureHost = shell.querySelector("#mp-creator-structure-host");
-    var worldHost = shell.querySelector("#mp-creator-world-controls");
-    var viewHost = shell.querySelector("#mp-creator-view-controls");
-    var cleanupHost = shell.querySelector("#mp-creator-cleanup-controls");
+    var structureSlot = shell.querySelector("#mp-creator-structure-slot");
+    var extraSlot = shell.querySelector("#mp-creator-extra-slot");
+    var mapControls = shell.querySelector("#mp-creator-map-controls");
     var legacyTools = R.querySelector("#mp-tools");
-    if (legacyTools && structureHost) structureHost.appendChild(legacyTools);
-    function moveAdvancedControl(id, host, moveParent) {
-      var node = R.querySelector("#" + id);
-      if (!node || !host) return;
-      var target = moveParent ? node.parentElement : node;
-      if (target) host.appendChild(target);
+    if (legacyTools && structureSlot) {
+      legacyTools.querySelectorAll("button").forEach(function(button) { button.classList.add("mp-creator-tool", "mp-creator-tool-legacy"); });
+      structureSlot.appendChild(legacyTools);
     }
-    ["mp-world-move", "mp-world-spawn", "mp-world-portal", "mp-world-local-portal", "mp-export", "mp-export-catalog", "mp-tile-size-wrap", "mp-hex-wrap", "mp-speed-wrap"].forEach(function(id) { moveAdvancedControl(id, worldHost, false); });
+    function moveToolButton(id, wide) {
+      var node = R.querySelector("#" + id);
+      if (!node || !extraSlot) return;
+      node.classList.add("mp-creator-tool", "mp-creator-tool-legacy");
+      if (wide) node.classList.add("mp-creator-tool-wide");
+      extraSlot.appendChild(node);
+    }
+    function moveMapControl(id, moveParent) {
+      var node = R.querySelector("#" + id);
+      if (!node || !mapControls) return;
+      var target = moveParent ? node.parentElement : node;
+      if (target) mapControls.appendChild(target);
+    }
     var saveCurrentMapButton = R.querySelector("#mp-export");
     if (saveCurrentMapButton) {
       saveCurrentMapButton.textContent = "⬇ Salvar dados do mapa atual";
@@ -1376,24 +1304,16 @@ function creativeInstallUi() {
       saveCurrentMapButton.setAttribute("aria-label", "Salvar dados do mapa atual para atualizar no GitHub");
       saveCurrentMapButton.classList.add("mp-creator-export-current-map");
     }
-    ["mp-grid", "mp-fog", "mp-light", "mp-walls-vis", "mp-secret-view", "mp-block", "mp-lr"].forEach(function(id) { moveAdvancedControl(id, viewHost, id === "mp-block" || id === "mp-lr"); });
-    ["mp-reset-fog", "mp-clear-fog", "mp-zo", "mp-zi"].forEach(function(id) { moveAdvancedControl(id, viewHost, false); });
-    ["mp-clear-walls", "mp-clear-edges"].forEach(function(id) { moveAdvancedControl(id, cleanupHost, false); });
     var bestiaryButton = R.querySelector("#mp-bestiary");
-    var tokenHost = shell.querySelector("#mp-creator-token-host");
-    if (bestiaryButton && tokenHost) {
-      bestiaryButton.classList.add("mp-creator-token-bestiary");
+    if (bestiaryButton) {
       bestiaryButton.textContent = "👹 Abrir Bestiário · adicionar token";
       bestiaryButton.setAttribute("title", "Buscar criatura ou NPC e posicionar como token no mapa");
-      tokenHost.appendChild(bestiaryButton);
     }
+    [["mp-bestiary", true], ["mp-grid"], ["mp-fog"], ["mp-light"], ["mp-walls-vis"], ["mp-zo"], ["mp-zi"], ["mp-secret-view", true], ["mp-reset-fog"], ["mp-clear-fog"], ["mp-clear-walls", true], ["mp-clear-edges", true], ["mp-world-move", true], ["mp-world-spawn", true], ["mp-world-portal", true], ["mp-world-local-portal", true], ["mp-export-catalog", true], ["mp-export", true]].forEach(function(entry) { moveToolButton(entry[0], entry[1]); });
+    [["mp-tile-size-wrap"], ["mp-hex-wrap"], ["mp-speed-wrap"], ["mp-block", true], ["mp-lr", true]].forEach(function(entry) { moveMapControl(entry[0], entry[1]); });
   }
-  // O seletor de modo integra a barra para não sobrepor os botões do editor.
   var modeSwitch = R.querySelector(".mp-mode-switch");
   if (modeSwitch) shell.querySelector(".mp-creator-topbar").appendChild(modeSwitch);
-  // O Menu e a marca formam um único grupo de layout. Assim o Menu reserva
-  // espaço real na barra e nunca se sobrepõe ao título, mesmo com as regras
-  // antigas de posicionamento absoluto do VTT ainda carregadas.
   var playerMenuButton = R.querySelector("#mp-burger");
   var creatorBrand = shell.querySelector(".mp-creator-brand");
   var creatorTopbar = shell.querySelector(".mp-creator-topbar");
@@ -1407,8 +1327,6 @@ function creativeInstallUi() {
       playerMenuButton.style.removeProperty(prop);
     });
   }
-  // A aba Avançadas concentra os controles de edição; o botão Menu permanece
-  // dedicado ao inventário e às ações do personagem.
   shell.querySelector("#mp-creator-save").onclick = function() {
     save();
     if (MAPINFO && MAPINFO.custom) exportMapPackage(); else exportMapFile();
@@ -1417,13 +1335,6 @@ function creativeInstallUi() {
   shell.querySelector("#mp-creator-undo").onclick = creativeUndo;
   shell.querySelector("#mp-creator-redo").onclick = creativeRedo;
   shell.addEventListener("click", function(event) {
-    var advancedTabButton = event.target.closest("[data-creator-advanced-tab]");
-    if (advancedTabButton) {
-      creativeAdvancedTab = advancedTabButton.getAttribute("data-creator-advanced-tab") || "structures";
-      creativeActivePanel = "advanced";
-      creativeUpdateContextPanels();
-      return;
-    }
     var tokenSelectButton = event.target.closest("[data-creator-token-select]");
     if (tokenSelectButton) {
       var tokenId = tokenSelectButton.getAttribute("data-creator-token-select");
@@ -1433,17 +1344,6 @@ function creativeInstallUi() {
         creativeTokenSelectionId = String(tokenRecord.id || "");
         draw();
         creativeRenderTokenPanel();
-      }
-      return;
-    }
-    var panelToggle = event.target.closest("[data-creator-panel-toggle]");
-    if (panelToggle) {
-      if (creativeActivePanel === "advanced") {
-        creativeActivePanel = "";
-        if (creativeIsAdvancedToolName(tool)) setTool("select");
-      } else {
-        creativeActivePanel = "advanced";
-        creativeUpdateUi();
       }
       return;
     }
@@ -1502,7 +1402,7 @@ function creativeUpdateUi() {
   shell.querySelectorAll("[data-asset-id]").forEach(function(button) { button.classList.toggle("active", button.getAttribute("data-asset-id") === creativeSelectedAssetId); });
   creativeUpdateContextPanels();
   creativeRenderAssetPalette();
-  if (creativeAdvancedTab === "tokens") creativeRenderTokenPanel();
+  creativeRenderTokenPanel();
   var stats = shell.querySelector("#mp-creator-map-stats");
   if (stats && MAPINFO) stats.textContent = COLS + " × " + ROWS + " células · " + CELL + " px";
 }
@@ -1603,9 +1503,7 @@ function creativeHandlePointerDown(event, world, cell) {
     creativeAddRecord("lights", light); creativeCommitTransaction(); creativeSelected = { type: "light", id: light.id }; save(); draw(); creativeRenderInspector(); return true;
   }
   if (tool === "select") {
-    // A colocação de monstros mantém prioridade sobre a seleção de cenário.
     if (pendingMonster) return false;
-    // Os manipuladores da imagem selecionada são desenhados por cima do cenário e recebem o clique primeiro.
     var imageControl = creativeSelectedImageControl(world.x, world.y);
     if (imageControl) {
       var controlledImage = imageControl.item, geometry = imageControl.geometry;
@@ -1621,7 +1519,6 @@ function creativeHandlePointerDown(event, world, cell) {
       if (cv) cv.style.cursor = imageControl.mode === "rotate" ? "crosshair" : (imageControl.handle === "nw" || imageControl.handle === "se" ? "nwse-resize" : "nesw-resize");
       return true;
     }
-    // Tokens ficam acima da decoração no desenho e continuam sendo tratados pelo VTT original.
     var tokenAtCell = cell.x >= 0 && cell.y >= 0 && cell.x < COLS && cell.y < ROWS && (state.tokens || []).some(function(token) {
       var size = token.raio || 1;
       return isTokenVisible(token) && cell.x >= token.x && cell.x < token.x + size && cell.y >= token.y && cell.y < token.y + size;

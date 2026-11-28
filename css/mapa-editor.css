@@ -1,4 +1,3 @@
-/* Animalysson Studio — interface do editor criativo */
 #mp-root .mp-main { background:#171713; }
 #mp-root #mp-cv {
   position:absolute !important;
@@ -176,7 +175,6 @@
   #mp-root .mp-creator-panel { height:164px; }
   #mp-root #mp-cv { height:calc(100% - 240px) !important; }
 }
-/* O seletor de modo faz parte da barra para evitar sobreposição com os comandos. */
 #mp-root .mp-creator-topbar .mp-mode-switch {
   position:static !important; top:auto !important; right:auto !important;
   z-index:auto !important; flex:none; margin-left:4px; padding:2px; gap:2px;
@@ -205,7 +203,6 @@
 #mp-root .mp-creator-custom-asset small { width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:8px; }
 #mp-root .mp-creator-custom-asset.active { border-color:#d2a85d; background:#4b3d2b; }
 
-/* Inspector de propriedades dos elementos selecionados */
 #mp-root .mp-creator-fields {
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
@@ -245,13 +242,11 @@
   #mp-root .mp-creator-fields { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
 
-/* Miniaturas importadas: selecionar e excluir cada imagem diretamente na paleta. */
 #mp-root .mp-creator-custom-asset-wrap { position:relative;min-width:0; }
 #mp-root .mp-creator-custom-asset-wrap .mp-creator-custom-asset { width:100%;height:100%; }
 #mp-root .mp-creator-delete-asset { position:absolute;top:2px;right:2px;z-index:2;width:19px;height:19px;padding:0;border:1px solid #b86b62;border-radius:50%;background:#512b29;color:#fff2ed;font-size:15px;line-height:16px;font-weight:700;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.55); }
 #mp-root .mp-creator-delete-asset:hover { background:#8a3933;border-color:#ffd0c9; }
 
-/* Menu do Jogador integrado à mesma barra superior do Studio, sem cobrir a marca. */
 #mp-root.player-mode .mp-creator-topbar > .mp-burger {
   position:static !important;
   inset:auto !important;
@@ -294,8 +289,6 @@
   }
 }
 
-
-/* Layout responsivo em tela cheia: o cabeçalho fica fixo e o canvas ocupa todo o espaço restante. */
 html body main:has(> #app.view-maps) {
   padding: 0 !important;
   width: 100% !important;
@@ -412,8 +405,6 @@ html body #app.view-maps #mp-root .vtt-wrap {
   #mp-root .mp-drawer { top: 52px !important; }
 }
 
-
-/* Camadas, níveis, relevo e zonas internas do mapa. */
 #mp-root .mp-creator-level-manager { padding:10px 9px; border:1px solid rgba(210,169,104,.28); border-radius:9px; background:linear-gradient(145deg,rgba(68,54,37,.28),rgba(25,24,21,.62)); }
 #mp-root .mp-creator-level-manager .mp-creator-section-title { color:#e5c48d; }
 #mp-root .mp-creator-level-label { display:flex; flex-direction:column; gap:4px; margin:7px 0; color:#d8c7aa; font-size:11px; font-weight:650; }
@@ -426,9 +417,6 @@ html body #app.view-maps #mp-root .vtt-wrap {
 #mp-root .mp-creator-level-properties { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,.8fr); gap:7px; }
 #mp-root .mp-creator-level-properties label { display:flex; flex-direction:column; gap:4px; color:#d8c7aa; font-size:10px; font-weight:650; }
 #mp-root #mp-creator-level-status { display:block; min-height:28px; margin-top:7px; color:#ad9c7e; font-size:10px; line-height:1.4; }
-#mp-root .mp-creator-level-tools { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:5px; margin:0 0 9px; }
-#mp-root .mp-creator-level-tools .mp-creator-tool { min-height:34px; }
-#mp-root .mp-creator-level-tools .mp-creator-tool.active { border-color:#d1a45c; background:rgba(177,127,58,.23); color:#ffe4b5; }
 #mp-root #mp-creator-inspector [data-level-transition-field],
 #mp-root #mp-creator-inspector [data-level-zone-name],
 #mp-root #mp-creator-inspector [data-level-cell-height] { width:100%; min-height:30px; box-sizing:border-box; padding:6px 7px; border:1px solid #5b513f; border-radius:6px; background:#25241f; color:#f3ead9; }
@@ -440,23 +428,16 @@ html body #app.view-maps #mp-root .vtt-wrap {
   #mp-root .mp-creator-level-manager input { min-height:27px; }
   #mp-root .mp-creator-level-actions { margin:4px 0; }
   #mp-root .mp-creator-level-actions button { min-height:27px; }
-  #mp-root .mp-creator-level-tools { grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; }
-  #mp-root .mp-creator-level-tools .mp-creator-tool { min-height:30px; padding:4px 2px; font-size:9px; }
-  #mp-root .mp-creator-level-tools .mp-creator-tool-icon { font-size:14px; }
 }
 
-/* Camadas, níveis e fontes de luz. */
 #mp-root .mp-creator-level-manager { display:flex;flex-direction:column;gap:8px; }
 #mp-root .mp-creator-level-manager .mp-creator-torch-control { display:flex;flex-direction:column;gap:5px;padding:8px;border:1px solid rgba(210,169,104,.22);border-radius:7px;background:rgba(10,12,14,.28);color:#d8c9ad;font-size:10px; }
 #mp-root .mp-creator-level-manager .mp-creator-torch-control span { display:flex;justify-content:space-between;gap:8px;font-weight:600; }
 #mp-root .mp-creator-level-manager .mp-creator-torch-control output { color:#f2ce8c;white-space:nowrap; }
 #mp-root .mp-creator-level-manager .mp-creator-torch-control input[type=range] { width:100%;accent-color:#d2a85d; }
 #mp-root .mp-creator-level-manager .mp-creator-torch-control small { color:#aaa18f;font-size:9px;line-height:1.35; }
-#mp-root .mp-creator-level-tools { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin:7px 0; }
 #mp-root .mp-creator-level-height-field { margin-top:8px;padding-top:8px;border-top:1px solid rgba(210,169,104,.18); }
 
-
-/* Camadas dinâmicas: adicionar andares conforme o mapa cresce. */
 #mp-root .mp-creator-level-zreadout { display:flex; flex-direction:column; gap:3px; padding:8px 10px; border:1px solid rgba(210,169,104,.28); border-radius:7px; background:rgba(10,12,14,.34); }
 #mp-root .mp-creator-level-zreadout small { color:#a99a80; font-size:9px; font-weight:750; letter-spacing:.09em; }
 #mp-root .mp-creator-level-zreadout strong { color:#f1d29a; font-size:13px; }
@@ -473,110 +454,16 @@ html body #app.view-maps #mp-root .vtt-wrap {
   #mp-root .mp-creator-level-add-actions button { min-height:30px; font-size:10px; }
 }
 
-/* Painel contextual: opções aparecem somente para a ferramenta em uso. */
-#mp-root .mp-creator-section[hidden],
-#mp-root .mp-creator-advanced-panel[hidden] {
+#mp-root .mp-creator-section[hidden] {
   display: none !important;
 }
-#mp-root .mp-creator-panel-toggle.active {
-  border-color: #d2a85d;
-  background: linear-gradient(180deg,#70532e,#4d3a24);
-  color: #fff2d4;
-  box-shadow: inset 0 0 0 1px rgba(255,220,150,.13);
-}
-#mp-root .mp-creator-advanced-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-#mp-root .mp-creator-advanced-group {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  min-width: 0;
-  padding: 9px;
-  border: 1px solid rgba(225,197,150,.16);
-  border-radius: 8px;
-  background: rgba(255,255,255,.025);
-}
-#mp-root .mp-creator-advanced-group > strong {
-  color: #f0d29b;
-  font-size: 10px;
-  letter-spacing: .035em;
-  text-transform: uppercase;
-}
-#mp-root #mp-creator-structure-host #mp-tools {
-  display: grid !important;
-  grid-template-columns: repeat(2,minmax(0,1fr));
-  gap: 5px;
-  width: 100%;
-  margin: 0;
-}
-#mp-root #mp-creator-structure-host #mp-tools button {
-  min-width: 0;
-  min-height: 39px;
-  padding: 6px 7px;
-  border: 1px solid #494438;
-  border-radius: 7px;
-  background: linear-gradient(180deg,#353229,#2b2922);
-  color: #e6dcc9;
-  font-size: 10px;
-  font-weight: 650;
-  cursor: pointer;
-}
-#mp-root #mp-creator-structure-host #mp-tools button:hover,
-#mp-root #mp-creator-structure-host #mp-tools button.active {
-  border-color: #d2a85d;
-  background: #4b3a27;
-  color: #fff2d4;
-}
-#mp-root .mp-creator-advanced-controls {
+#mp-root .mp-creator-map-controls {
   display: grid;
   grid-template-columns: repeat(2,minmax(0,1fr));
   gap: 6px;
   min-width: 0;
 }
-#mp-root .mp-creator-advanced-controls > button {
-  min-width: 0;
-  min-height: 32px;
-  padding: 6px 7px;
-  border: 1px solid #514838;
-  border-radius: 6px;
-  background: #302e27;
-  color: #e8dfcf;
-  font-size: 10px;
-  font-weight: 600;
-  cursor: pointer;
-}
-#mp-root .mp-creator-advanced-controls > #mp-export.mp-creator-export-current-map {
-  grid-column: 1 / -1;
-  width: 100%;
-  min-height: 42px;
-  box-sizing: border-box;
-  padding: 9px 12px;
-  border: 1px solid #bd9455;
-  border-radius: 8px;
-  background: linear-gradient(180deg,#75552d,#553d22);
-  color: #fff1d2;
-  font-size: 12px;
-  font-weight: 750;
-  line-height: 1.3;
-  text-align: center;
-  white-space: normal;
-}
-#mp-root .mp-creator-advanced-controls > #mp-export.mp-creator-export-current-map:hover {
-  border-color: #e3bd78;
-  background: linear-gradient(180deg,#8a6638,#674a29);
-  color: #fff9eb;
-}
-#mp-root .mp-creator-advanced-controls > button:hover,
-#mp-root .mp-creator-advanced-controls > button.on,
-#mp-root .mp-creator-advanced-controls > button.active {
-  border-color: #c99a50;
-  background: #4a3b28;
-  color: #fff0d1;
-}
-#mp-root .mp-creator-advanced-controls > label {
+#mp-root .mp-creator-map-controls > label {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -589,7 +476,7 @@ html body #app.view-maps #mp-root .vtt-wrap {
   color: #d7cbb7;
   font-size: 10px;
 }
-#mp-root .mp-creator-advanced-controls > label input[type="number"] {
+#mp-root .mp-creator-map-controls > label input[type="number"] {
   width: 54px !important;
   min-width: 0;
   margin-left: auto;
@@ -599,13 +486,13 @@ html body #app.view-maps #mp-root .vtt-wrap {
   background: #25241f;
   color: #fff;
 }
-#mp-root .mp-creator-advanced-controls > label input[type="checkbox"] {
+#mp-root .mp-creator-map-controls > label input[type="checkbox"] {
   flex: none;
   accent-color: #c99a50;
 }
-#mp-root .mp-creator-advanced-controls #mp-tile-size-wrap,
-#mp-root .mp-creator-advanced-controls #mp-hex-wrap,
-#mp-root .mp-creator-advanced-controls #mp-speed-wrap {
+#mp-root .mp-creator-map-controls #mp-tile-size-wrap,
+#mp-root .mp-creator-map-controls #mp-hex-wrap,
+#mp-root .mp-creator-map-controls #mp-speed-wrap {
   grid-column: 1 / -1;
   width: auto;
   min-width: 0;
@@ -617,9 +504,9 @@ html body #app.view-maps #mp-root .vtt-wrap {
   color: #d7cbb7;
   font-size: 10px;
 }
-#mp-root .mp-creator-advanced-controls #mp-tile-size-wrap input,
-#mp-root .mp-creator-advanced-controls #mp-hex-wrap input,
-#mp-root .mp-creator-advanced-controls #mp-speed-wrap input {
+#mp-root .mp-creator-map-controls #mp-tile-size-wrap input,
+#mp-root .mp-creator-map-controls #mp-hex-wrap input,
+#mp-root .mp-creator-map-controls #mp-speed-wrap input {
   max-width: 62px;
   padding: 4px;
   border: 1px solid #5b513f;
@@ -627,156 +514,11 @@ html body #app.view-maps #mp-root .vtt-wrap {
   background: #25241f;
   color: #fff;
 }
-#mp-root .mp-creator-advanced-controls #mp-world-move,
-#mp-root .mp-creator-advanced-controls #mp-world-spawn,
-#mp-root .mp-creator-advanced-controls #mp-world-portal,
-#mp-root .mp-creator-advanced-controls #mp-world-local-portal {
-  min-height: 34px;
-  padding: 6px 7px;
-  border-radius: 6px;
-  font-size: 10px;
-}
 #mp-root .mp-creator-footer { min-height: 18px; }
 @media (max-width: 820px) {
-  #mp-root .mp-creator-advanced-panel {
-    display: flex;
-    flex-direction: column;
-    width: min(360px, calc(100vw - 24px));
-    max-width: none;
-    vertical-align: top;
-  }
-  #mp-root .mp-creator-advanced-group { padding: 7px; }
-  #mp-root .mp-creator-advanced-controls { grid-template-columns: repeat(2,minmax(105px,1fr)); }
+  #mp-root .mp-creator-map-controls { grid-template-columns: repeat(2,minmax(105px,1fr)); }
 }
 
-/* Ferramentas avançadas divididas por conjuntos independentes. */
-#mp-root .mp-creator-advanced-tabs {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
-}
-#mp-root .mp-creator-advanced-tabs button {
-  min-width: 0;
-  min-height: 36px;
-  padding: 6px 7px;
-  border: 1px solid #514838;
-  border-radius: 7px;
-  background: linear-gradient(180deg,#353229,#2b2922);
-  color: #ded5c4;
-  font-size: 10px;
-  font-weight: 650;
-  cursor: pointer;
-  text-align: left;
-}
-#mp-root .mp-creator-advanced-tabs button:hover,
-#mp-root .mp-creator-advanced-tabs button.active {
-  border-color: #d2a85d;
-  background: linear-gradient(180deg,#70532e,#4d3a24);
-  color: #fff2d4;
-}
-#mp-root .mp-creator-advanced-content[hidden],
-#mp-root #mp-tools button[hidden] {
-  display: none !important;
-}
-#mp-root .mp-creator-advanced-content:not([hidden]) {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-}
-#mp-root .mp-creator-token-bestiary {
-  display: block;
-  width: 100% !important;
-  min-height: 39px;
-  padding: 8px 10px !important;
-  border: 1px solid #9e7842;
-  border-radius: 7px;
-  background: linear-gradient(180deg,#70532e,#4d3a24);
-  color: #fff2d4;
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
-}
-#mp-root .mp-creator-token-bestiary:hover {
-  border-color: #e0ba72;
-  background: #765a34;
-}
-#mp-root .mp-creator-token-list {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  max-height: 250px;
-  overflow: auto;
-}
-#mp-root .mp-creator-token-empty {
-  padding: 9px;
-  border: 1px dashed rgba(225,197,150,.24);
-  border-radius: 7px;
-  color: #aaa18f;
-  font-size: 10px;
-  line-height: 1.45;
-}
-#mp-root .mp-creator-token-row {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  width: 100%;
-  min-width: 0;
-  padding: 6px 7px;
-  border: 1px solid #494438;
-  border-radius: 7px;
-  background: #2e2c25;
-  color: #e8dfcf;
-  text-align: left;
-  cursor: pointer;
-}
-#mp-root .mp-creator-token-row:hover,
-#mp-root .mp-creator-token-row.active {
-  border-color: #d2a85d;
-  background: #4b3a27;
-}
-#mp-root .mp-creator-token-avatar {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 27px;
-  height: 27px;
-  border-radius: 50%;
-  background: rgba(201,154,80,.18);
-  color: #f0d29b;
-  font-size: 16px;
-}
-#mp-root .mp-creator-token-name {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-width: 0;
-  gap: 2px;
-}
-#mp-root .mp-creator-token-name strong {
-  overflow: hidden;
-  color: #f2e7d2;
-  font-size: 10px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-#mp-root .mp-creator-token-name small,
-#mp-root .mp-creator-token-row > small {
-  color: #aaa18f;
-  font-size: 9px;
-}
-@media (max-width: 820px) {
-  #mp-root .mp-creator-advanced-tabs {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  #mp-root .mp-creator-advanced-tabs button {
-    min-height: 32px;
-    padding: 5px 4px;
-    font-size: 9px;
-  }
-}
-
-/* Painel de gerenciamento rápido de personagens, criaturas e NPCs. */
 #mp-root .mp-creator-token-row.defeated {
   border-color: rgba(190, 92, 82, .55);
   opacity: .78;
@@ -1037,7 +779,6 @@ html body #app.view-maps #mp-root .vtt-wrap {
   #mp-root .mp-creator-token-action-fields { grid-template-columns: minmax(0, 1fr); }
 }
 
-/* Layout reforçado do painel de status: controles separados e sem apertar textos. */
 #mp-root #mp-creator-token-editor {
   display: flex !important;
   flex-direction: column !important;
@@ -1227,3 +968,12 @@ html body #app.view-maps #mp-root .vtt-wrap {
     font-size: 11px !important;
   }
 }
+
+#mp-root .mp-creator-tool-slot,
+#mp-root .mp-creator-toolgrid #mp-tools { display:contents !important; }
+#mp-root .mp-creator-tool-legacy { font-size:10px;font-weight:600;text-align:center;white-space:normal;line-height:1.2; }
+#mp-root .mp-creator-tool-legacy.on { border-color:#d2a85d;background:linear-gradient(180deg,#70532e,#4d3a24);color:#fff2d4;box-shadow:inset 0 0 0 1px rgba(255,220,150,.13); }
+#mp-root .mp-creator-tool-wide { grid-column:1 / -1;min-height:40px; }
+#mp-root .mp-creator-toolgrid #mp-export.mp-creator-export-current-map { min-height:42px;padding:9px 12px;border:1px solid #bd9455;border-radius:8px;background:linear-gradient(180deg,#75552d,#553d22);color:#fff1d2;font-size:12px;font-weight:750; }
+#mp-root .mp-creator-toolgrid #mp-export.mp-creator-export-current-map:hover { border-color:#e3bd78;background:linear-gradient(180deg,#8a6638,#674a29);color:#fff9eb; }
+#mp-root .mp-creator-map-settings:has(.mp-creator-map-controls:empty) { display:none; }

@@ -149,8 +149,6 @@ function creativeGetActiveTorchItem(player) {
   return active;
 }
 function creativeTorchLightRadii() {
-  // A tocha ocupa um único raio total de 6 células. A penumbra é um
-  // gradiente dentro desse mesmo raio, nunca um segundo raio somado.
   return { bright: 1, dim: 6 };
 }
 function creativeFormatTorchTime(milliseconds) {
@@ -167,15 +165,12 @@ function creativeGetTokenVisionRadius(token) {
 }
 function creativeGetVisibilityRadius(token, x, y) {
   var px = x == null ? token && token.x : x, py = y == null ? token && token.y : y;
-  // Mesmo sem tocha, a visão base alcança um tile ao redor do personagem.
-  // A iluminação fraca desse alcance é aplicada em creativeGetCellLightIntensity().
   return creativeIsDarkCell(Number(px), Number(py)) ? Math.max(1, creativeGetTokenLightRadius(token)) : creativeGetTokenVisionRadius(token);
 }
 function creativeTorchRadius() {
   return creativeGetTokenLightRadius(creativePlayerTokenAnyLevel());
 }
 function creativeSetTorchRadius() {
-  // Compatibilidade com mapas antigos: o alcance agora vem do item Tocha equipado e aceso.
   lightRadius = 0;
   var player = creativePlayerTokenAnyLevel();
   if (player) player.luz = 0;
@@ -418,7 +413,6 @@ function creativeAddLevel(direction) {
   if (["outdoor", "interior", "cavern", "basement"].indexOf(environment) < 0) environment = "cavern";
   var currentZ = creativeLevelZ(active);
   var newZ = currentZ + direction;
-  // Abre espaço imediatamente acima/abaixo sem limitar quantos andares o mapa pode ter.
   (state.levels || []).forEach(function(level) {
     if (level.id === active.id) return;
     var z = creativeLevelZ(level);
@@ -474,7 +468,6 @@ function creativeSetActiveLevelEnvironment(environment) {
   if (!level || ["outdoor", "interior", "cavern", "basement"].indexOf(environment) < 0) return;
   level.environment = environment;
   if (environment === "outdoor" && state.fog && state.fog.length === COLS * ROWS) {
-    // Não revela automaticamente áreas que o Mestre já cobriu; apenas altera a luz ambiente.
   }
   creativeUpdateLevelUi(); save(); draw();
 }
@@ -514,8 +507,8 @@ function creativeUpdateLevelUi() {
 }
 function creativeInstallLevelUi() {
   if (!R || isHexMap()) return;
-  var panel = R.querySelector(".mp-creator-panel"), advancedHost = panel && panel.querySelector("#mp-creator-advanced-level-host");
-  if (!panel || !advancedHost || panel.querySelector(".mp-creator-level-manager")) return;
+  var panel = R.querySelector(".mp-creator-panel"), levelHost = panel && panel.querySelector("#mp-creator-level-host");
+  if (!panel || !levelHost || panel.querySelector(".mp-creator-level-manager")) return;
   var section = document.createElement("section");
   section.className = "mp-creator-section mp-creator-level-manager";
   section.innerHTML = '<div class="mp-creator-section-title">Camadas e andares <span>modelo Z · criação dinâmica</span></div>' +
@@ -528,11 +521,11 @@ function creativeInstallLevelUi() {
     '<label class="mp-creator-level-label">Ambiente desta camada<select id="mp-creator-level-environment"><option value="outdoor">Exterior / luz do sol</option><option value="interior">Interior</option><option value="cavern">Caverna</option><option value="basement">Porão</option></select></label>' +
     '<label class="mp-creator-level-label">Conectar a outra camada<select id="mp-creator-transition-target"></select></label>' +
     '<small id="mp-creator-level-status" class="mp-creator-muted"></small>';
-  advancedHost.appendChild(section);
+  levelHost.appendChild(section);
   var tools = document.createElement("div");
-  tools.className = "mp-creator-level-tools";
   tools.innerHTML = '<button type="button" class="mp-creator-tool" data-creator-tool="raiseTerrain" title="Elevar terreno em um nível"><span class="mp-creator-tool-icon">⛰</span><span>Elevar</span></button><button type="button" class="mp-creator-tool" data-creator-tool="lowerTerrain" title="Abaixar terreno em um nível"><span class="mp-creator-tool-icon">▽</span><span>Abaixar</span></button><button type="button" class="mp-creator-tool" data-creator-tool="interiorZone" title="Desenhar uma área interna sem luz solar"><span class="mp-creator-tool-icon">⌂</span><span>Zona interna</span></button><button type="button" class="mp-creator-tool" data-creator-tool="transition" title="Conectar camadas por escada, rampa ou buraco"><span class="mp-creator-tool-icon">↕</span><span>Passagem</span></button>';
-  advancedHost.appendChild(tools);
+  var levelSlot = panel.querySelector("#mp-creator-level-slot");
+  while (tools.firstChild && levelSlot) levelSlot.appendChild(tools.firstChild);
   section.addEventListener("change", function(event) {
     var target = event.target;
     if (target.id === "mp-creator-level-select") {
@@ -767,8 +760,6 @@ function creativeFindTransitionHit(worldX, worldY) {
   return null;
 }
 function creativeFindLightZoneBorderHit(worldX, worldY) {
-  // A zona inteira pode ser selecionada. Próximo às bordas, o gesto redimensiona;
-  // no interior, move a zona inteira.
   var zones = state.lightZones || [], tolerance = Math.max(5, 10 / Math.max(.25, zoom));
   for (var i = zones.length - 1; i >= 0; i--) {
     var zone = zones[i];
@@ -818,13 +809,11 @@ function creativeCanSeeCellFromLight(x, y, px, py, radius) {
   return dx * dx + dy * dy <= radius * radius + .5 && hasLOS(px, py, x, y);
 }
 function creativeTorchIntensityAtDistance(distance) {
-  // Primeiro tile: 100%; sexto tile: 10%. A interpolação é contínua.
   if (!Number.isFinite(distance) || distance > 6) return 0;
   if (distance <= 1) return 1;
   return Math.max(.1, 1 - .9 * ((distance - 1) / 5));
 }
 function creativeIsInsideBaseLightSquare(dx, dy) {
-  // Um tile em cada direção forma um quadrado 3x3, incluindo as diagonais.
   return Math.abs(dx) <= 1.000001 && Math.abs(dy) <= 1.000001;
 }
 function creativeGetCellLightIntensity(x, y, viewer) {
@@ -833,9 +822,6 @@ function creativeGetCellLightIntensity(x, y, viewer) {
   if (player && player.tipo === "player") {
     var baseDx = x - Number(player.x), baseDy = y - Number(player.y);
     var baseDistance = Math.sqrt(baseDx * baseDx + baseDy * baseDy);
-    // Luz ambiente base em quadrado 3x3: centro a 20% e entorno a 15%.
-    // Os tiles descobertos fora do quadrado recebem 10% (overlay de 90%).
-    // Paredes e portas fechadas continuam bloqueando a iluminação.
     if (Math.abs(baseDx) < 0.001 && Math.abs(baseDy) < 0.001) best = 0.2;
     else if (creativeIsInsideBaseLightSquare(baseDx, baseDy) && hasLOS(player.x, player.y, x, y)) best = 0.15;
     if (creativeGetActiveTorchItem(player) && hasLOS(player.x, player.y, x, y)) {
@@ -860,8 +846,6 @@ function creativeCellVisibleToPlayer(x, y, px, py) {
   if (x < 0 || y < 0 || x >= COLS || y >= ROWS || px < 0 || py < 0) return false;
   if (x === px && y === py) return true;
   if (!hasLOS(px, py, x, y)) return false;
-  // Ao ar livre, a visão não tem limite artificial de distância; paredes e portas continuam bloqueando.
-  // Em áreas escuras, só é possível enxergar onde uma fonte de luz alcança.
   return creativeGetCellLightIntensity(x, y, currentPlayer()) > 0;
 }
 function creativeApplyLayerToolDown(event, world, cell) {
@@ -1120,8 +1104,6 @@ drawFogAndLight = function(viewW, viewH) {
   var player = typeof currentPlayer === "function" ? currentPlayer() : null;
   var px = player ? Number(player.x) : -1, py = player ? Number(player.y) : -1;
   var bounds = visibleCellBounds(viewW, viewH);
-  // Culling estrito: processa somente células que intersectam o viewport atual.
-  // Não altera zoom, câmera, escala nem o enquadramento do mapa.
   var x0 = Math.max(0, Math.floor(Number(bounds.x0) || 0));
   var y0 = Math.max(0, Math.floor(Number(bounds.y0) || 0));
   var x1 = Math.min(COLS - 1, Math.ceil(Number(bounds.x1) || 0));
@@ -1137,8 +1119,6 @@ drawFogAndLight = function(viewW, viewH) {
     }
     if (creativeIsDarkCell(x, y)) {
       var intensity = creativeGetCellLightIntensity(x, y, player);
-      // A escuridão é desenhada apenas no trecho visível da tela. A opacidade
-      // acompanha a intensidade da luz: 0% no primeiro tile e 90% no sexto.
       var darkness = Math.max(0, Math.min(1, 1 - intensity));
       if (darkness > 0) {
         cx.fillStyle = "rgba(0,0,0," + darkness.toFixed(3) + ")";
@@ -1176,7 +1156,6 @@ revealAround = function(cx2, cy, radius) {
     Math.abs(Number(player.y) - Number(cy)) < 0.001 &&
     creativeIsDarkCell(Number(cx2), Number(cy)) && !creativeGetActiveTorchItem(player);
   if (!baseSquare) return creativeBaseRevealAround(cx2, cy, radius);
-  // Revela também os quatro cantos do quadrado 3x3 da visão base.
   for (var dy = -1; dy <= 1; dy++) for (var dx = -1; dx <= 1; dx++) {
     var x = cx2 + dx, y = cy + dy;
     if (x < 0 || y < 0 || x >= COLS || y >= ROWS) continue;
