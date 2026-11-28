@@ -1113,6 +1113,7 @@ function creativeRenderTokenManager(token) {
       (token.morto || hp <= 0 ? '<button type="button" class="primary" data-token-action="revive">♥ Reviver</button>' : '') +
       '<button type="button" data-token-action="clear-conditions">Limpar condições</button>' +
       '<button type="button" data-token-action="save">Salvar alterações</button>' +
+      '<button type="button" class="danger" data-token-action="remove-token" title="Remove somente este token do mapa; não apaga a ficha do personagem nem a criatura do Bestiário">🗑 Remover token</button>' +
     '</div>';
 
   var faction = manager.querySelector('[data-token-field="faccao"]');
@@ -1161,6 +1162,20 @@ function creativeRenderTokenManager(token) {
     button.addEventListener("click", function() {
       var action = button.getAttribute("data-token-action");
       var actionLog = [];
+      if (action === "remove-token") {
+        var tokenName = token.nome || (token.tipo === "player" ? "este personagem" : "esta criatura / NPC");
+        var confirmed = typeof window !== "undefined" && typeof window.confirm === "function"
+          ? window.confirm('Remover "' + tokenName + '" do mapa?\n\nA ficha do personagem e o registro do Bestiário serão mantidos.')
+          : false;
+        if (!confirmed) return;
+        state.tokens = (state.tokens || []).filter(function(candidate) { return candidate !== token; });
+        selected = null;
+        creativeTokenSelectionId = null;
+        if (typeof save === "function") save();
+        if (typeof draw === "function") draw();
+        creativeRenderTokenPanel();
+        return;
+      }
       if (action === "save") { creativeTokenManagerRefresh(token); return; }
       if (action === "full-heal") {
         if (token.morto) return;
