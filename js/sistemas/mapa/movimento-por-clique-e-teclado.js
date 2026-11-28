@@ -246,8 +246,14 @@ function keyMoveFrame(now) {
         keyMoveStep = { from, to, dur: (hexMode ? worldTravelStepDurationMs() : localStepMs()) * cells, t0: keyMoveCarry != null ? keyMoveCarry : now };
         keyMoveCarry = null;
         var combatFrom = { x: pl.x, y: pl.y };
+        pl.lastMoveFromX = combatFrom.x;
+        pl.lastMoveFromY = combatFrom.y;
         pl.x = next.x;
         pl.y = next.y;
+        if (!hexMode && typeof mechanismTriggerAt === "function") {
+          var mechanismResult = mechanismTriggerAt(next.x, next.y, combatFrom.x, combatFrom.y, pl);
+          if (mechanismResult && mechanismResult.stop) { stopKeyMove(); save(); draw(); return; }
+        }
         selected = pl;
         if (!hexMode && typeof creativeTryTraverseLayerTransition === "function" && creativeTryTraverseLayerTransition(pl)) return;
         if (!hexMode) combatAfterStep(pl, combatFrom, { x: next.x, y: next.y });

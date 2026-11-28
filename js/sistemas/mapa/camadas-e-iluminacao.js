@@ -2,7 +2,7 @@
 var CREATIVE_LEVEL_DATA_KEYS = [
   "fog", "walls", "wallMeta", "hEdges", "vEdges", "hEdgeMeta", "vEdgeMeta",
   "customEdges", "terrain", "terrainPacked", "terrainHeights", "decorations",
-  "labels", "lights", "lightZones", "portals"
+  "labels", "lights", "lightZones", "portals", "traps"
 ];
 var creativePendingTransition = null;
 var creativeLevelUiInstalled = false;
@@ -258,7 +258,7 @@ function creativeMakeEmptyLevelData(environment) {
     walls: makeGrid(0), wallMeta: makeArr(count, null),
     hEdges: makeArr(COLS * (ROWS + 1), 0), vEdges: makeArr((COLS + 1) * ROWS, 0),
     hEdgeMeta: makeArr(COLS * (ROWS + 1), null), vEdgeMeta: makeArr((COLS + 1) * ROWS, null),
-    customEdges: [], terrain: {}, terrainHeights: {}, decorations: [], labels: [], lights: [], lightZones: [], portals: []
+    customEdges: [], terrain: {}, terrainHeights: {}, decorations: [], labels: [], lights: [], lightZones: [], portals: [], traps: []
   };
 }
 function creativeCaptureLevelData(source) {
@@ -297,6 +297,7 @@ function creativeRestoreLevelData(level) {
   state.lights = Array.isArray(data.lights) ? creativeClone(data.lights) : [];
   state.lightZones = Array.isArray(data.lightZones) ? creativeClone(data.lightZones) : [];
   state.portals = Array.isArray(data.portals) ? creativeClone(data.portals) : [];
+  state.traps = Array.isArray(data.traps) ? creativeClone(data.traps) : [];
   state.terrainHeights = data.terrainHeights && typeof data.terrainHeights === "object" ? creativeClone(data.terrainHeights) : {};
   state.terrain = data.terrain && typeof data.terrain === "object" ? creativeClone(data.terrain) : {};
   if (data.terrainPacked) {
@@ -358,6 +359,8 @@ function creativeEnsureLevelState(source) {
     if (token.luz == null || !Number.isFinite(Number(token.luz))) token.luz = Math.max(0, Number(lightRadius) || 0);
     else token.luz = Math.max(0, Math.min(30, Number(token.luz)));
   });
+  if (!Array.isArray(source.traps)) source.traps = [];
+  source.traps = source.traps.filter(function(trap) { return trap && isFinite(Number(trap.x)) && isFinite(Number(trap.y)); });
   if (!Array.isArray(source.lightZones)) source.lightZones = [];
   source.lightZones = source.lightZones.filter(function(zone) {
     return zone && isFinite(Number(zone.x)) && isFinite(Number(zone.y)) && isFinite(Number(zone.w)) && isFinite(Number(zone.h));

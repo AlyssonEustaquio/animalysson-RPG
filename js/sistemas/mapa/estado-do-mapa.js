@@ -17,6 +17,7 @@ function defaultState() {
       hEdgeMeta: isHexMap() ? [] : makeArr(COLS * (ROWS + 1), null),
       vEdgeMeta: isHexMap() ? [] : makeArr((COLS + 1) * ROWS, null),
       customEdges: [],
+      traps: [],
       terrain: {},
       decorations: [],
       assets: [],
@@ -132,6 +133,14 @@ function normalizeMapState(s) {
       return !!e && [e.x1, e.y1, e.x2, e.y2].every(function(v) {
         return isFinite(Number(v));
       }) && (Number(e.x1) !== Number(e.x2) || Number(e.y1) !== Number(e.y2));
+    });
+    if (!Array.isArray(s.traps)) s.traps = [];
+    s.traps = s.traps.filter(function(t) { return t && isFinite(Number(t.x)) && isFinite(Number(t.y)); }).map(function(t) {
+      t.x = Math.max(0, Math.min(COLS - 1, Math.round(Number(t.x))));
+      t.y = Math.max(0, Math.min(ROWS - 1, Math.round(Number(t.y))));
+      if (t.active == null) t.active = true;
+      if (["step", "interact", "door"].indexOf(t.trigger) < 0) t.trigger = "step";
+      return t;
     });
     return s;
   }

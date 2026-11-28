@@ -79,6 +79,7 @@
       "js/sistemas/mapa/pincel-e-ocupacao.js",
       "js/sistemas/mapa/ponteiro-e-roda.js",
       "js/sistemas/mapa/movimento-por-clique-e-teclado.js",
+      "js/sistemas/mapa/mecanismos-e-armadilhas.js",
       "js/sistemas/mapa/ficha-e-inventario-do-jogador.js",
       "js/sistemas/mapa/armas-e-rolagens-do-jogador.js",
       "js/sistemas/mapa/acoes-do-jogador.js",

@@ -160,6 +160,7 @@ function draw() {
     if (!isHexMap() && typeof creativeDrawLightMarkers === "function") creativeDrawLightMarkers(W, H);
     if (!isHexMap() && typeof creativeDrawLevelTransitions === "function") creativeDrawLevelTransitions();
     drawLocalPortals();
+    if (!isHexMap() && typeof drawMapMechanisms === "function") drawMapMechanisms();
     if (!isHexMap() && typeof creativeDrawSelectionOverlay === "function") creativeDrawSelectionOverlay();
     if (!isHexMap()) {
       drawToolPreview();
