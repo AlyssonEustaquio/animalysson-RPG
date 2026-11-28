@@ -1097,18 +1097,18 @@ function creativeRenderTokenManager(token) {
       '<label>Classe de armadura<input type="number" min="0" max="99" step="1" data-token-field="ca" value="' + armor + '"></label>' +
       '<label>Exaustão (0–6)<input type="number" min="0" max="6" step="1" data-token-field="exaustao" value="' + Math.max(0, Math.min(6, Number(token.exaustao) || 0)) + '"></label>' +
     '</div>' +
-    '<div class="mp-creator-token-fields mp-creator-token-extra-state">' +
-      '<label>Concentração<input type="text" maxlength="80" data-token-field="concentracao" value="' + esc(token.concentracao || '') + '" placeholder="Magia / efeito"></label>' +
-      '<label class="mp-creator-token-check"><input type="checkbox" data-token-field="escondido"' + (token.escondido ? ' checked' : '') + '> Escondido</label>' +
+    '<div class="mp-creator-token-state-stack">' +
+      '<label class="mp-creator-token-concentration"><span>Concentração</span><input type="text" maxlength="80" data-token-field="concentracao" value="' + esc(token.concentracao || '') + '" placeholder="Nome da magia ou efeito"></label>' +
+      '<label class="mp-creator-token-check"><input type="checkbox" data-token-field="escondido"' + (token.escondido ? ' checked' : '') + '><span>Escondido</span><small>Marque se o token estiver escondido</small></label>' +
     '</div>' +
     '<div class="mp-creator-token-action-fields">' +
       '<div class="mp-creator-token-action-card heal">' +
-        '<label>Cura (PV)<input type="number" min="1" max="99999" step="1" data-token-amount="heal" value="5"></label>' +
-        '<button type="button" data-token-action="heal"' + (token.morto ? ' disabled' : '') + '>＋ Aplicar cura</button>' +
+        '<div class="mp-creator-token-action-heading"><strong>CURA</strong><small>Recuperar pontos de vida</small></div>' +
+        '<div class="mp-creator-token-action-controls"><input type="number" min="1" max="99999" step="1" aria-label="Quantidade de PV para curar" data-token-amount="heal" value="5"><button type="button" data-token-action="heal"' + (token.morto ? ' disabled' : '') + '>＋ Aplicar cura</button></div>' +
       '</div>' +
       '<div class="mp-creator-token-action-card damage">' +
-        '<label>Dano (PV)<input type="number" min="1" max="99999" step="1" data-token-amount="damage" value="5"></label>' +
-        '<button type="button" data-token-action="damage">－ Aplicar dano</button>' +
+        '<div class="mp-creator-token-action-heading"><strong>DANO</strong><small>Remover pontos de vida</small></div>' +
+        '<div class="mp-creator-token-action-controls"><input type="number" min="1" max="99999" step="1" aria-label="Quantidade de PV de dano" data-token-amount="damage" value="5"><button type="button" data-token-action="damage">－ Aplicar dano</button></div>' +
       '</div>' +
     '</div>' +
     '<label class="mp-creator-token-faction">Equipe / facção<select data-token-field="faccao"><option value="jogadores">Jogadores / aliados</option><option value="monstros">Monstros / inimigos</option></select></label>' +
